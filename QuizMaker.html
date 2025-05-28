@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QuizMaker</title>
+  <style>
+    /* —— Reset & Base —— */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #ecf0f1; color: #333;
+    }
+
+    /* —— Sidebar —— */
+    #sidebar {
+      width: 240px;
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    #sidebar h3 {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      letter-spacing: .5px;
+    }
+    .nav { list-style: none; margin-bottom: 20px; }
+    .nav li {
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .nav li:hover { background: #34495e; }
+    .nav li.selected {
+      background: #1abc9c;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    #newFolderName {
+      width: calc(100% - 100px);
+      padding: 6px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 4px;
+    }
+    #addFolderBtn, #addSectionBtn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #e67e22;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #addFolderBtn:hover, #addSectionBtn:hover { background: #d35400; }
+
+    /* —— Main Area & Header —— */
+    #main { flex: 1; display: flex; flex-direction: column; }
+    #header {
+      background: #1abc9c;
+      color: #fff;
+      padding: 16px 24px;
+      font-size: 1.3rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #controls {
+      display: flex;
+      gap: 10px;
+      padding: 12px 24px;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #controls button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      background: #3498db;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #controls button:hover { background: #2980b9; }
+
+    /* —— Editor & Preview —— */
+    .delete-icon {
+      display: none;
+      margin-left: 4px;
+      color: red;
+      cursor: pointer;
+    }
+    #editorArea, #quizArea { flex: 1; padding: 24px; overflow-y: auto; }
+    #editor {
+      width: 100%; height: 180px;
+      padding: 12px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      font-family: Menlo, monospace;
+      background: #fff;
+      white-space: pre-wrap;
+    }
+    #preview {
+      margin-top: 20px;
+      padding: 16px;
+      background: #fff;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      min-height: 120px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .word {
+      display: inline-block;
+      margin: 2px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: background .2s;
+      cursor: pointer;
+    }
+    .word:hover { background: #dfe6e9; }
+    .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
+    #previewBtn, #saveSectionBtn {
+      margin-top: 12px; margin-right: 8px;
+      padding: 8px 16px;
+      border: none; border-radius: 4px;
+      background: #27ae60; color: #fff;
+      cursor: pointer; transition: background .2s;
+    }
+    #previewBtn:hover, #saveSectionBtn:hover { background: #1e8449; }
+
+    /* —— Alternate Answers UI —— */
+    #altContainer {
+      margin-top: 20px; padding: 16px;
+      background: #fdfdfd;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+    }
+    #altContainer h4 { margin-bottom: 10px; font-size: 1rem; color: #2c3e50; }
+    .alt-input { width: 100%; padding: 6px; margin-bottom: 8px; border: 1px solid #7f8c8d; border-radius: 4px; }
+
+    /* —— Quiz Mode & Blanks —— */
+    #quizContent {
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 24px;
+      background: #fff;
+      border: 2px solid #bdc3c7;
+      border-radius: 4px;
+      font-size: 1.1rem;
+    }
+    .blank { position: relative; display: inline-block; margin: 0 2px; }
+    .blank::before {
+      content: attr(data-scrambled);
+      filter: blur(2px) opacity(0.6);
+      position: absolute; top: 0; left: 0;
+      font-family: Menlo, monospace;
+      font-size: 1.1rem;
+      line-height: 1em;
+      pointer-events: none;
+    }
+    .blank input {
+      position: relative; background: transparent;
+      border: none; border-bottom: 1px solid #7f8c8d;
+      font-family: Menlo, monospace; font-size: 1.1rem;
+      padding: 0; margin: 0; box-sizing: content-box;
+      min-width: 1ch;
+    }
+    .blank input:focus { outline: none; border-bottom-color: #3498db; }
+    .blank input.correct { border-bottom-color: #27ae60; }
+    .blank input.incorrect { border-bottom-color: #c0392b; }
+    #nextBtn {
+      margin-top: 20px; padding: 10px 20px;
+      border: none; border-radius: 4px;
+      background: #8e44ad; color: #fff;
+      cursor: pointer; transition: background .2s;
+    }
+    #nextBtn:hover { background: #71368a; }
+  </style>
+</head>
+<body>
+
+  <div id="sidebar">
+    <h3>Folders</h3>
+    <ul id="folders" class="nav"></ul>
+    <input id="newFolderName" placeholder="New folder name">
+    <button id="addFolderBtn">Add Folder</button>
+    <hr style="border:1px solid #34495e;opacity:.2;margin:20px 0;">
+    <h3>Questions</h3>
+    <ul id="sections" class="nav"></ul>
+    <button id="addFillBtn">+ Add Fill-In</button>
+    <button id="addLabelBtn">+ Add Label-Image</button>
+    <button id="addAcronymBtn">+ Add Acronym</button>
+    <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
+    <button id="toggleDeleteBtn">🗑️ Toggle Delete</button>
+  </div>
+
+  <div id="main">
+    <div id="header">QuizMaker</div>
+    <div id="controls">
+      <button id="editModeBtn">✏️ Edit Mode</button>
+      <button id="quizModeBtn">📝 Quiz Question</button>
+      <button id="quizAllBtn">🎮 Quiz All</button>
+    </div>
+
+    <div id="editorArea">
+      <textarea id="editor" placeholder="Paste your notes section here…"></textarea>
+      <div style="margin-top:12px;">
+        <button id="previewBtn">Preview Words</button>
+        <button id="saveSectionBtn">Save Section</button>
+      </div>
+      <div id="preview"></div>
+      <div id="labelEditor" style="display:none; position: relative;"></div>
+      <div id="altContainer" style="display:none;">
+        <h4>Alternate answers for blanks (comma-separated):</h4>
+      </div>
+    </div>
+
+    <div id="quizArea" style="display:none;">
+      <div id="quizContent"></div>
+      <button id="nextBtn">Next Section ➡️</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let data = JSON.parse(localStorage.getItem('quizData') || '{}');
+      if (!data.folders) data = { folders: [] };
+      function saveData() { localStorage.setItem('quizData', JSON.stringify(data)); }
+
+      let currentFolder = null, currentSection = null, currentHidden = new Set();
+      let waitingForImagePaste = false;
+      const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
+            newFolderName = document.getElementById('newFolderName'), addFolderBtn = document.getElementById('addFolderBtn'),
+            addFillBtn = document.getElementById('addFillBtn'),
+            addLabelBtn = document.getElementById('addLabelBtn'),
+            addAcronymBtn = document.getElementById('addAcronymBtn'),
+            labelImageInput = document.getElementById('labelImageInput'),
+            labelEditor = document.getElementById('labelEditor'),
+            editModeBtn = document.getElementById('editModeBtn'),
+            quizModeBtn = document.getElementById('quizModeBtn'),
+            quizAllBtn  = document.getElementById('quizAllBtn'),
+            editorArea = document.getElementById('editorArea'),
+            quizArea = document.getElementById('quizArea'), editorTA = document.getElementById('editor'),
+            previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
+            saveSectionBtn = document.getElementById('saveSectionBtn'), altContainer = document.getElementById('altContainer'),
+            quizContent = document.getElementById('quizContent'), nextBtn = document.getElementById('nextBtn');
+      addAcronymBtn.onclick = () => {
+        if (currentFolder === null) return alert('Select a folder first');
+        const acr = prompt('Enter acronym (e.g. AAVIATE):');
+        if (!acr) return;
+        const entries = acr.split('').map(letter => ({
+          letter,
+          answer: '',
+          extra: ''
+        }));
+        const q = { type: 'acronym', acronym: acr, entries };
+        data.folders[currentFolder].sections.push(q);
+        currentSection = data.folders[currentFolder].sections.length - 1;
+        saveData();
+        renderFolders();
+        renderSections();
+        loadSection();
+      };
+
+      function scrambleWord(len){ const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; let out=''; for(let i=0;i<len;i++) out+=letters.charAt(Math.floor(Math.random()*letters.length)); return out; }
+
+      function renderFolders(){
+        foldersUL.innerHTML='';
+        data.folders.forEach((f,i)=>{
+          let li=document.createElement('li');
+          li.textContent=f.name;
+          li.className=i===currentFolder?'selected':'';
+          li.onclick=()=>{ currentFolder=i; currentSection=null; renderFolders(); renderSections(); enterEdit(); };
+          li.ondblclick=()=>{
+            const newName = prompt('Enter new folder name:', f.name);
+            if(newName && newName.trim()){
+              data.folders[i].name = newName.trim();
+              saveData();
+              renderFolders();
+            }
+          };
+          // Delete folder button
+          const delF = document.createElement('span');
+          delF.className = 'delete-icon';
+          delF.textContent = '✖';
+          delF.style.cursor = 'pointer';
+          delF.style.color = 'red';
+          delF.onclick = evt => {
+            evt.stopPropagation();
+            if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
+              data.folders.splice(i, 1);
+              currentFolder = null;
+              saveData();
+              renderFolders();
+              renderSections();
+            }
+          };
+          li.appendChild(delF);
+          foldersUL.appendChild(li);
+        });
+      }
+      function renderSections(){
+        sectionsUL.innerHTML='';
+        if(currentFolder===null) return;
+        data.folders[currentFolder].sections.forEach((s,i)=>{
+          let li=document.createElement('li');
+          let title='';
+          if(s.type==='acronym') title = s.acronym;
+          else if(s.type==='label') {
+            const raw = s.rawText || '';
+            const firstLine = raw.split('\n')[0].trim();
+            title = firstLine || 'Label Question';
+          }
+          else /* fill */ title = (s.rawText && s.rawText.split('\n')[0]) || '(untitled)';
+          li.textContent = title;
+          li.className=i===currentSection?'selected':'';
+          li.onclick=()=>{ currentSection=i; renderSections(); loadSection(); enterEdit(); };
+          li.ondblclick=()=>{
+            const sec = data.folders[currentFolder].sections[i];
+            const currentTitle = (sec.rawText && sec.rawText.split('\n')[0]) || '(untitled)';
+            const newTitle = prompt('Enter new section title:', currentTitle);
+            if(newTitle && newTitle.trim()){
+              const rest = sec.rawText ? sec.rawText.split('\n').slice(1).join('\n') : '';
+              sec.rawText = newTitle.trim() + (rest ? '\n' + rest : '');
+              saveData();
+              renderSections();
+              if (currentSection === i) {
+                loadSection();
+              }
+            }
+          };
+          // Delete section/question button
+          const delS = document.createElement('span');
+          delS.className = 'delete-icon';
+          const delTitle = title;
+          delS.textContent = '✖';
+          delS.style.cursor = 'pointer';
+          delS.style.color = 'red';
+          delS.onclick = evt => {
+            evt.stopPropagation();
+            if (confirm(`Delete question "${delTitle}"? This cannot be undone.`)) {
+              data.folders[currentFolder].sections.splice(i, 1);
+              currentSection = null;
+              saveData();
+              renderSections();
+              // reload to clear editor if needed
+              enterEdit();
+            }
+          };
+          li.appendChild(delS);
+          sectionsUL.appendChild(li);
+        });
+      }
+
+      addFolderBtn.onclick=()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; saveData(); renderFolders(); };
+      addFillBtn.onclick=()=>{ if(currentFolder===null)return alert('Select a folder first'); let sec={ type:'fill', rawText:'', hidden:[], alts:{} }; data.folders[currentFolder].sections.push(sec); currentSection=data.folders[currentFolder].sections.length-1; saveData(); renderSections(); loadSection(); };
+
+      addLabelBtn.onclick = () => {
+        if (currentFolder === null) return alert('Select a folder first');
+        if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
+          waitingForImagePaste = true;
+          alert('Now paste the image from your clipboard.');
+        } else {
+          labelImageInput.click();
+        }
+      };
+      labelImageInput.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const q = {
+            rawText: '',
+            hidden: [],
+            alts: {},
+            type: 'label',
+            image: reader.result,
+            labels: []  // entries will have x,y,text,initialized,fontSize
+          };
+          data.folders[currentFolder].sections.push(q);
+          currentSection = data.folders[currentFolder].sections.length - 1;
+          saveData();
+          renderFolders();
+          renderSections();
+          loadSection();
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+      };
+
+      // Allow pasting an image to create a new label question
+      document.addEventListener('paste', e => {
+        if (!waitingForImagePaste) return;
+        if (currentFolder === null) return;
+        const items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (let item of items) {
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
+            const reader = new FileReader();
+            reader.onload = () => {
+              const q = {
+                rawText: '',
+                hidden: [],
+                alts: {},
+                type: 'label',
+                image: reader.result,
+                labels: []
+              };
+              data.folders[currentFolder].sections.push(q);
+              currentSection = data.folders[currentFolder].sections.length - 1;
+              saveData();
+              renderFolders();
+              renderSections();
+              loadSection();
+            };
+            reader.readAsDataURL(blob);
+            waitingForImagePaste = false;
+            e.preventDefault();
+            break;
+          }
+        }
+      });
+
+      function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
+      function loadSection(){
+        const sec = data.folders[currentFolder].sections[currentSection];
+        // Hide add-part buttons by default
+        const addPartBtnsEl = document.getElementById('addPartBtns');
+        if (addPartBtnsEl) addPartBtnsEl.style.display = 'none';
+        // Hide all main editors
+        editorTA.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
+        altContainer.style.display = 'none';
+
+        if (sec.type === 'acronym') {
+          labelEditor.style.display = 'block';
+          labelEditor.innerHTML = '<h4>' + sec.acronym + '</h4><div id="acroEditor"></div>';
+          const acroEditor = document.getElementById('acroEditor');
+          acroEditor.innerHTML = '';
+          sec.entries.forEach((e, i) => {
+            const row = document.createElement('div');
+            row.style.marginBottom = '8px';
+            row.innerHTML = `
+              <strong>${e.letter}</strong>
+              <input type="text" placeholder="Answer" id="ans${i}" value="${e.answer}">
+              <input type="text" placeholder="Extra info" id="ext${i}" value="${e.extra}">
+            `;
+            acroEditor.appendChild(row);
+            ['ans','ext'].forEach(pref => {
+              document.getElementById(pref + i).oninput = evt => {
+                if (pref === 'ans') sec.entries[i].answer = evt.target.value;
+                else sec.entries[i].extra = evt.target.value;
+                saveData();
+              };
+            });
+          });
+          return;
+        }
+
+        if (sec.type === 'label') {
+          // Label-image editor
+          labelEditor.style.display = 'block';
+          labelEditor.innerHTML = `
+            <div id="labelContainer" style="position:relative; display:inline-block; overflow:auto;">
+              <img id="labelImg" src="${sec.image}" style="display:block; user-select:none;">
+              <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>`;
+          const img = document.getElementById('labelImg');
+          const overlay = document.getElementById('labelOverlay');
+          const container = document.getElementById('labelContainer');
+          // Start with native resizing disabled
+          container.style.resize = 'none';
+          // Restore saved position
+          if (sec.imgX != null && sec.imgY != null) {
+            container.style.position = 'absolute';
+            container.style.left = sec.imgX + 'px';
+            container.style.top = sec.imgY + 'px';
+          } else {
+            container.style.position = 'relative';
+          }
+          // --- Manual resize handle on double right-click (contextmenu) ---
+          // Toggle manual resize handle on double right-click
+          let lastContextTime = 0;
+          container.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            const now = Date.now();
+            if (now - lastContextTime < 400) {
+              // Double right-click detected
+              const existing = container.querySelector('#resizeHandle');
+              if (existing) {
+                // Remove handle to disable resize
+                existing.remove();
+              } else {
+                // Create handle to enable manual resize
+                const handle = document.createElement('div');
+                handle.id = 'resizeHandle';
+                handle.style.position = 'absolute';
+                handle.style.width = '16px';
+                handle.style.height = '16px';
+                handle.style.bottom = '0';
+                handle.style.right = '0';
+                handle.style.background = '#3498db';
+                handle.style.cursor = 'se-resize';
+                handle.style.zIndex = '1000';
+                container.appendChild(handle);
+                // Mouse events for resizing
+                handle.addEventListener('mousedown', ev => {
+                  ev.preventDefault();
+                  const startX = ev.clientX;
+                  const startY = ev.clientY;
+                  const startW = container.offsetWidth;
+                  const startH = container.offsetHeight;
+                  function onMouseMove(moveEv) {
+                    container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
+                    container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
+                  }
+                  function onMouseUp() {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                    // Save dimensions
+                    sec.imgWidth = container.offsetWidth;
+                    sec.imgHeight = container.offsetHeight;
+                    saveData();
+                  }
+                  document.addEventListener('mousemove', onMouseMove);
+                  document.addEventListener('mouseup', onMouseUp);
+                });
+              }
+            }
+            lastContextTime = now;
+          });
+          // Drag to move container
+          container.addEventListener('mousedown', e => {
+            if (e.button !== 0 || e.target !== container) return; // left-click only on container
+            e.preventDefault();
+            let startX = e.clientX, startY = e.clientY;
+            let origLeft = parseInt(container.style.left) || 0;
+            let origTop = parseInt(container.style.top) || 0;
+            function onMouseMove(ev) {
+              container.style.left = origLeft + (ev.clientX - startX) + 'px';
+              container.style.top = origTop + (ev.clientY - startY) + 'px';
+            }
+            function onMouseUp() {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+              // Save position
+              sec.imgX = parseInt(container.style.left) || 0;
+              sec.imgY = parseInt(container.style.top) || 0;
+              saveData();
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          });
+          img.onload = () => {
+            if (sec.imgWidth && sec.imgHeight) {
+              container.style.width = sec.imgWidth + 'px';
+              container.style.height = sec.imgHeight + 'px';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            } else {
+              container.style.width = img.naturalWidth + 'px';
+              container.style.height = img.naturalHeight + 'px';
+            }
+          };
+          overlay.ondblclick = evt => {
+            const rect = img.getBoundingClientRect();
+            const x = evt.clientX - rect.left;
+            const y = evt.clientY - rect.top;
+            const text = prompt('Enter label text:');
+            if (text) {
+              // Default fontSize is 16px
+              sec.labels.push({ x, y, text, fontSize: 16 });
+              saveData();
+              loadSection();
+            }
+          };
+          // Render existing labels
+          sec.labels.forEach(lbl => {
+            const mark = document.createElement('div');
+            mark.textContent = lbl.text;
+            mark.style.position = 'absolute';
+            mark.style.display = 'inline-block';
+            mark.style.padding = '2px 4px';
+            mark.style.left = lbl.x + 'px';
+            mark.style.top = lbl.y + 'px';
+            mark.style.background = '#ffffff';
+            mark.style.border        = '1px solid #7f8c8d';
+            mark.style.overflow      = 'auto';
+            mark.style.whiteSpace    = 'nowrap';
+            mark.style.textOverflow  = 'ellipsis';
+            mark.style.cursor = 'move';
+            mark.style.resize = 'both';
+            // Disable text selection for label marks
+            mark.style.userSelect = 'none';
+            mark.style.webkitUserSelect = 'none';
+            mark.style.msUserSelect = 'none';
+            overlay.appendChild(mark);
+            // Apply stored dimensions and font size
+            mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
+            mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
+            mark.style.fontSize = lbl.fontSize + 'px';
+            // Store dimensions after user resizes (mouseup on mark)
+            mark.addEventListener('mouseup', () => {
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              saveData();
+            });
+            // Double-click to edit label text only
+            mark.ondblclick = evt => {
+              evt.stopPropagation();
+              evt.preventDefault();
+              const newText = prompt('Edit label text:', lbl.text);
+              if (newText !== null) {
+                lbl.text = newText;
+                mark.textContent = lbl.text;
+                // Update box to fit new text
+                lbl.w = mark.offsetWidth;
+                lbl.h = mark.offsetHeight;
+                mark.style.width = lbl.w + 'px';
+                mark.style.height = lbl.h + 'px';
+                saveData();
+              }
+            };
+            // Right-click to edit font size
+            mark.oncontextmenu = evt => {
+              evt.preventDefault();
+              evt.stopPropagation();
+              const input = prompt('Font size in px:', lbl.fontSize);
+              const newSize = parseInt(input, 10);
+              if (!isNaN(newSize) && newSize > 0) {
+                lbl.fontSize = newSize;
+                mark.style.fontSize = lbl.fontSize + 'px';
+                // Update box to fit new size
+                lbl.w = mark.offsetWidth;
+                lbl.h = mark.offsetHeight;
+                mark.style.width = lbl.w + 'px';
+                mark.style.height = lbl.h + 'px';
+                saveData();
+              }
+            };
+            // Dragging
+            mark.onmousedown = evt => {
+              evt.preventDefault();
+              let startX = evt.clientX, startY = evt.clientY;
+              const origX = lbl.x, origY = lbl.y;
+              function onMouseMove(e) {
+                lbl.x = origX + (e.clientX - startX);
+                lbl.y = origY + (e.clientY - startY);
+                mark.style.left = lbl.x + 'px';
+                mark.style.top = lbl.y + 'px';
+              }
+              function onMouseUp(e) {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+                saveData();
+              }
+              document.addEventListener('mousemove', onMouseMove);
+              document.addEventListener('mouseup', onMouseUp);
+            };
+          });
+          return;
+        }
+
+        editorTA.style.display = 'block';
+        previewDiv.style.display = 'block';
+        editorTA.value = sec.rawText;
+        previewSection();
+        // Show and refresh add-part buttons
+        if (addPartBtnsEl) {
+          addPartBtnsEl.style.display = '';
+          refreshAddPartButtons();
+        }
+      }
+      previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
+      function previewSection(){ let sec=data.folders[currentFolder].sections[currentSection]; sec.hidden=sec.hidden||[]; sec.alts=sec.alts||{}; currentHidden=new Set(sec.hidden); previewDiv.innerHTML=''; altContainer.innerHTML='<h4>Alternate answers for blanks (comma-separated):</h4>'; altContainer.style.display='block'; let tokens=editorTA.value.split(/(\s+)/); tokens.forEach((tok,i)=>{ if(!tok.trim()){ previewDiv.appendChild(document.createTextNode(tok)); } else { let span=document.createElement('span'); span.className='word'+(currentHidden.has(i)?' hidden':''); span.textContent=currentHidden.has(i)?'_'.repeat(tok.length):tok; span.onclick=()=>{ if(!tok.trim())return; currentHidden.has(i)?currentHidden.delete(i):currentHidden.add(i); sec.hidden=Array.from(currentHidden); previewSection(); }; previewDiv.appendChild(span);} }); let blankIndices=Array.from(currentHidden).sort((a,b)=>a-b); blankIndices.forEach((idx,j)=>{ let word=editorTA.value.split(/(\s+)/)[idx].trim(); let label=document.createElement('label'); label.textContent=`Blank ${j+1} (${word}): `; let ai=document.createElement('input'); ai.className='alt-input'; ai.placeholder='alt1, alt2, …'; ai.value=(sec.alts[idx]||[]).join(', '); ai.oninput=()=>{ sec.alts[idx]=ai.value.split(',').map(s=>s.trim()).filter(s=>s); saveData(); }; altContainer.appendChild(label); altContainer.appendChild(ai); }); }
+      saveSectionBtn.onclick = () => {
+        if (!ensureSelection()) return;
+        const sec = data.folders[currentFolder].sections[currentSection];
+        // Only update rawText for non-label questions
+        if (sec.type !== 'label') {
+          sec.rawText = editorTA.value;
+        }
+        sec.hidden = Array.from(currentHidden);
+        saveData();
+        renderSections();
+        alert('Section saved ✔️');
+      };
+
+
+      editModeBtn.onclick=enterEdit;
+
+      function enterEdit(){ editorArea.style.display='block'; quizArea.style.display='none'; }
+      function enterQuiz(){ if(!ensureSelection())return; editorArea.style.display='none'; quizArea.style.display='block'; startQuiz(); }
+      let quizOrder=[], quizPos=0;
+      function startQuiz(){ quizOrder=data.folders[currentFolder].sections.map((_,i)=>i); quizPos=0; showQuiz(); }
+
+      function enterQuizQuestion(){
+        if(!ensureSelection()) return;
+        editorArea.style.display='none';
+        quizArea.style.display='block';
+        quizOrder = [currentSection];
+        quizPos = 0;
+        showQuiz();
+      }
+      quizModeBtn.onclick = enterQuizQuestion;
+      quizAllBtn .onclick = enterQuiz;
+
+      function showQuiz(){
+        quizContent.innerHTML = '';
+        let sec = data.folders[currentFolder].sections[quizOrder[quizPos]];
+        // Display question title
+        let title = '';
+        if (sec.type === 'acronym') {
+          title = sec.acronym;
+        } else if (sec.type === 'label') {
+          const raw = sec.rawText || '';
+          title = raw.split('\n')[0].trim() || 'Label Question';
+        } else {
+          // fill-in
+          const raw = sec.rawText || '';
+          title = raw.split('\n')[0].trim() || '(untitled)';
+        }
+        const titleEl = document.createElement('div');
+        titleEl.style.fontSize = '1.2rem';
+        titleEl.style.fontWeight = 'bold';
+        titleEl.style.marginBottom = '12px';
+        titleEl.textContent = title;
+        quizContent.appendChild(titleEl);
+        if (sec.type === 'acronym') {
+          quizContent.innerHTML = '<h4>' + sec.acronym + '</h4>';
+          sec.entries.forEach((e, i) => {
+            const div = document.createElement('div');
+            div.style.margin = '8px 0';
+            div.innerHTML = `
+              <strong>${e.letter}:</strong>
+              <input type="text" placeholder="Answer" id="qans${i}" style="width: 120px">
+            `;
+            quizContent.appendChild(div);
+            const inp = document.getElementById('qans' + i);
+            inp.oninput = () => {
+              const ok = inp.value.trim().toLowerCase() === e.answer.trim().toLowerCase();
+              inp.classList.toggle('correct', ok);
+              inp.classList.toggle('incorrect', !ok);
+            };
+          });
+          return;
+        }
+        if (sec.type === 'label') {
+          quizContent.innerHTML = '';
+          const wrapper = document.createElement('div');
+          wrapper.style.position = 'relative';
+          const img = document.createElement('img');
+          img.src = sec.image;
+          if (sec.imgWidth) {
+            img.style.width = sec.imgWidth + 'px';
+            img.style.height = 'auto';
+          } else {
+            img.style.maxWidth = '100%';
+          }
+          wrapper.appendChild(img);
+          // Render blurred text
+          sec.labels.forEach(lbl => {
+            const span = document.createElement('span');
+            span.textContent = lbl.text;
+            span.style.position = 'absolute';
+            span.style.left = lbl.x + 'px';
+            span.style.top = lbl.y + 'px';
+            span.style.width = lbl.w + 'px';
+            span.style.height = lbl.h + 'px';
+            span.style.display = 'block';
+            span.style.color = 'transparent';
+            span.style.textShadow = '0 0 5px #000';
+            wrapper.appendChild(span);
+            // Create inline input
+            const inp = document.createElement('input');
+            inp.type = 'text';
+            inp.style.position = 'absolute';
+            inp.style.left = lbl.x + 'px';
+            inp.style.top = lbl.y + 'px';
+            inp.style.width = lbl.w + 'px';
+            inp.style.height = lbl.h + 'px';
+            inp.style.border = '1px solid #7f8c8d';
+            inp.style.background = '#ffffff';
+            inp.style.fontFamily = 'Menlo, monospace';
+            inp.style.fontSize = lbl.fontSize + 'px';
+            inp.oninput = () => {
+              const val = inp.value.trim().toLowerCase();
+              const ok = val === lbl.text.trim().toLowerCase();
+              inp.classList.toggle('correct', ok);
+              inp.classList.toggle('incorrect', !ok);
+              inp.style.borderColor = ok ? '#27ae60' : '#c0392b';
+              // Outline wrapper green if all label inputs are correct
+              const inputs = Array.from(wrapper.querySelectorAll('input'));
+              if (inputs.length && inputs.every(i => i.classList.contains('correct'))) {
+                wrapper.style.outline = '2px solid #27ae60';
+              } else {
+                wrapper.style.outline = '';
+              }
+            };
+            wrapper.appendChild(inp);
+          });
+          quizContent.appendChild(wrapper);
+          return;
+        }
+        // existing fill-in logic follows
+        quizContent.style.borderColor = '';
+        let tokens=sec.rawText.split(/(\s+)/);
+        tokens.forEach((tok,i)=>{
+          if(sec.hidden.includes(i)){
+            let answers=[tok.trim(),...(sec.alts[i]||[])];
+            let wrapper=document.createElement('span');
+            wrapper.className='blank';
+            const blankLen = tok.trim().length || 1;
+            wrapper.setAttribute('data-scrambled', '_'.repeat(blankLen));
+            let inp=document.createElement('input');
+            inp.className='blank-input';
+            inp.style.width = `${blankLen}ch`;
+            // New keydown handler: Space = next if correct, Tab = previous
+            inp.addEventListener('keydown', e => {
+              const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+              const idx = inputs.indexOf(inp);
+              if (e.key === ' ') {
+                e.preventDefault();
+                if (inp.classList.contains('correct') && idx < inputs.length - 1) {
+                  inputs[idx + 1].focus();
+                }
+              }
+              if (e.key === 'Tab') {
+                e.preventDefault();
+                if (idx > 0) {
+                  inputs[idx - 1].focus();
+                }
+              }
+            });
+            // Simplified input handler: just correctness, outline if all correct
+            inp.oninput = () => {
+              const val = inp.value.trim().toLowerCase();
+              const ok = answers.some(a => a.toLowerCase() === val);
+              inp.classList.toggle('correct', ok);
+              inp.classList.toggle('incorrect', !ok);
+              // If all blanks correct, turn border green
+              const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+              if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+                quizContent.style.borderColor = '#27ae60';
+              }
+            };
+            wrapper.appendChild(inp);
+            quizContent.appendChild(wrapper);
+          } else {
+            quizContent.appendChild(document.createTextNode(tok));
+          }
+        });
+      }
+      nextBtn.onclick=()=>{ if(quizPos<quizOrder.length-1){ quizPos++; showQuiz(); } else{ alert('🎉 All done!'); enterEdit(); } };
+
+      renderFolders(); renderSections(); enterEdit();
+
+      // --- Toggle Delete Button logic ---
+      const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
+      let deleteMode = false;
+      toggleDeleteBtn.onclick = () => {
+        deleteMode = !deleteMode;
+        document.querySelectorAll('.delete-icon').forEach(el =>
+          el.style.display = deleteMode ? 'inline' : 'none'
+        );
+        toggleDeleteBtn.textContent = deleteMode ? '❌ Exit Delete' : '🗑️ Toggle Delete';
+      };
+    });
+  </script>
+</body>
+</html>
