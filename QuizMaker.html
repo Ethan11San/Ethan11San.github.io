@@ -227,10 +227,53 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      let data = JSON.parse(localStorage.getItem('quizData') || '{}');
-      if (!data.folders) data = { folders: [] };
-      function saveData() { localStorage.setItem('quizData', JSON.stringify(data)); }
+      
+      // Load data from external JSON, with localStorage fallback
+    // ——— Data loading / initialization ———
+    // Start with a sane default
+    let data = { folders: [] };
 
+    // Persist into localStorage as before
+    function saveData() {
+      localStorage.setItem('quizData', JSON.stringify(data));
+    }
+
+    // After data is loaded, wire up the UI
+    function initialize() {
+      renderFolders();
+      renderSections();
+      enterEdit();
+    }
+
+    // First try to fetch data.json; on failure, fall back to localStorage
+    fetch('data.json')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('data.json not found');
+        }
+        return response.json();
+      })
+      .then(json => {
+        data = json;
+        if (!data.folders) data.folders = [];
+        initialize();
+      })
+      .catch(err => {
+        console.warn('Could not load data.json, using localStorage:', err);
+        const stored = localStorage.getItem('quizData');
+        if (stored) {
+          try {
+            data = JSON.parse(stored);
+          } catch {
+            data = { folders: [] };
+          }
+        }
+        if (!data.folders) data.folders = [];
+        initialize();
+      });
+
+    // ——— End of data loading block ———
+      
       let currentFolder = null, currentSection = null, currentHidden = new Set();
       let waitingForImagePaste = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
@@ -857,7 +900,7 @@
       }
       nextBtn.onclick=()=>{ if(quizPos<quizOrder.length-1){ quizPos++; showQuiz(); } else{ alert('🎉 All done!'); enterEdit(); } };
 
-      renderFolders(); renderSections(); enterEdit();
+      renderFolders();
 
       // --- Toggle Delete Button logic ---
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
