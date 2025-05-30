@@ -151,6 +151,43 @@
       border: 2px solid #bdc3c7;
       border-radius: 4px;
       font-size: 1.1rem;
+      line-height: 1.5;
+    }
+
+    /* —— Enlarged Text & Inputs for Edit and Quiz Modes —— */
+    #editor {
+      font-size: 1.2rem;
+    }
+    #labelEditor input, #acroEditor input {
+      font-size: 1.2rem;
+      padding: 6px;
+    }
+    #quizArea, #quizContent {
+      font-size: 1.2rem;
+    }
+    #quizContent input {
+      font-size: 1.2rem;
+      padding: 6px;
+    }
+    /* —— Fill-In Quiz Font & Size —— */
+    #quizContent .blank input {
+      font-size: 1rem;
+      font-family: Arial, sans-serif;
+    }
+    #quizContent .blank {
+      font-family: Arial, sans-serif;
+    }
+    /* —— Acronym Quiz Font & Width —— */
+    #quizContent input[type="text"] {
+      font-family: Arial, sans-serif;
+      min-width: 12ch;
+    }
+    /* Grading full border for correct inputs */
+    input.correct {
+      border: 2px solid #27ae60 !important;
+    }
+    input.incorrect {
+      border: 2px solid #c0392b !important;
     }
     .blank { position: relative; display: inline-block; margin: 0 2px; }
     .blank::before {
@@ -226,52 +263,29 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      
-      // Load data from external JSON, with localStorage fallback
-    // ——— Data loading / initialization ———
-    // Start with a sane default
-    let data = { folders: [] };
+    document.addEventListener('DOMContentLoaded', async () => {
+      let data;
+      try {
+        const resp = await fetch('quizData.json');
+        data = await resp.json();
+      } catch (err) {
+        data = JSON.parse(localStorage.getItem('quizData') || '{}');
+      }
+      if (!data.folders) data = { folders: [] };
+      function saveData() {
+        // Persist to localStorage for runtime fallback
+        localStorage.setItem('quizData', JSON.stringify(data));
+        // Trigger download of updated JSON for GitHub use
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'quizData.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
 
-    // Persist into localStorage as before
-    function saveData() {
-      localStorage.setItem('quizData', JSON.stringify(data));
-    }
-
-    // After data is loaded, wire up the UI
-    function initialize() {
-    }
-
-    // First try to fetch data.json; on failure, fall back to localStorage
-    fetch('data.json')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('data.json not found');
-        }
-        return response.json();
-      })
-      .then(json => {
-        data = json;
-        if (!data.folders) data.folders = [];
-        initialize();
-      })
-      .catch(err => {
-        console.warn('Could not load data.json, using localStorage:', err);
-        const stored = localStorage.getItem('quizData');
-        if (stored) {
-          try {
-            data = JSON.parse(stored);
-          } catch {
-            data = { folders: [] };
-          }
-        }
-        if (!data.folders) data.folders = [];
-        initialize();
-      });
-
-    // ——— End of data loading block ———
-      
-      let currentFolder = null, currentSection = null, currentHidden = new Set();
+      let currentFolder = null, currentSection = null;
       let waitingForImagePaste = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
             newFolderName = document.getElementById('newFolderName'), addFolderBtn = document.getElementById('addFolderBtn'),
@@ -306,12 +320,26 @@
         loadSection();
       };
 
-      function scrambleWord(len){ const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; let out=''; for(let i=0;i<len;i++) out+=letters.charAt(Math.floor(Math.random()*letters.length)); return out; }
 
       function renderFolders(){
         foldersUL.innerHTML='';
         data.folders.forEach((f,i)=>{
           let li=document.createElement('li');
+          // Enable drag-and-drop reordering for folders
+          li.draggable = true;
+          li.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          li.addEventListener('dragover', e => e.preventDefault());
+          li.addEventListener('drop', e => {
+            e.preventDefault();
+            const from = Number(e.dataTransfer.getData('text/plain'));
+            const moved = data.folders.splice(from, 1)[0];
+            data.folders.splice(i, 0, moved);
+            saveData();
+            renderFolders();
+            renderSections();
+          });
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
           li.onclick=()=>{ currentFolder=i; currentSection=null; renderFolders(); renderSections(); enterEdit(); };
@@ -348,29 +376,45 @@
         if(currentFolder===null) return;
         data.folders[currentFolder].sections.forEach((s,i)=>{
           let li=document.createElement('li');
+          // Enable drag-and-drop reordering for questions
+          li.draggable = true;
+          li.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', i);
+          });
+          li.addEventListener('dragover', e => e.preventDefault());
+          li.addEventListener('drop', e => {
+            e.preventDefault();
+            const from = Number(e.dataTransfer.getData('text/plain'));
+            const secs = data.folders[currentFolder].sections;
+            const moved = secs.splice(from, 1)[0];
+            secs.splice(i, 0, moved);
+            saveData();
+            renderSections();
+          });
           let title='';
           if(s.type==='acronym') title = s.acronym;
           else if(s.type==='label') {
             const raw = s.rawText || '';
-            const firstLine = raw.split('\n')[0].trim();
-            title = firstLine || 'Label Question';
+            const defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
+            title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
-          else /* fill */ title = (s.rawText && s.rawText.split('\n')[0]) || '(untitled)';
+          else { // fill
+            const defaultTitle = (s.rawText && s.rawText.split('\n')[0].trim()) || '(untitled)';
+            title = s.title && s.title.trim() ? s.title : defaultTitle;
+          }
           li.textContent = title;
           li.className=i===currentSection?'selected':'';
           li.onclick=()=>{ currentSection=i; renderSections(); loadSection(); enterEdit(); };
           li.ondblclick=()=>{
             const sec = data.folders[currentFolder].sections[i];
-            const currentTitle = (sec.rawText && sec.rawText.split('\n')[0]) || '(untitled)';
+            const defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
+            const currentTitle = sec.title && sec.title.trim() ? sec.title : defaultTitle;
             const newTitle = prompt('Enter new section title:', currentTitle);
-            if(newTitle && newTitle.trim()){
-              const rest = sec.rawText ? sec.rawText.split('\n').slice(1).join('\n') : '';
-              sec.rawText = newTitle.trim() + (rest ? '\n' + rest : '');
+            if (newTitle !== null) {
+              sec.title = newTitle.trim();
               saveData();
               renderSections();
-              if (currentSection === i) {
-                loadSection();
-              }
+              // No need to reload editor/rawText
             }
           };
           // Delete section/question button
@@ -397,7 +441,7 @@
       }
 
       addFolderBtn.onclick=()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; saveData(); renderFolders(); };
-      addFillBtn.onclick=()=>{ if(currentFolder===null)return alert('Select a folder first'); let sec={ type:'fill', rawText:'', hidden:[], alts:{} }; data.folders[currentFolder].sections.push(sec); currentSection=data.folders[currentFolder].sections.length-1; saveData(); renderSections(); loadSection(); };
+      addFillBtn.onclick=()=>{ if(currentFolder===null)return alert('Select a folder first'); let sec={ type:'fill', title:'', rawText:'', hidden:[], alts:{} }; data.folders[currentFolder].sections.push(sec); currentSection=data.folders[currentFolder].sections.length-1; saveData(); renderSections(); loadSection(); };
 
       addLabelBtn.onclick = () => {
         if (currentFolder === null) return alert('Select a folder first');
@@ -469,9 +513,6 @@
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
-        // Hide add-part buttons by default
-        const addPartBtnsEl = document.getElementById('addPartBtns');
-        if (addPartBtnsEl) addPartBtnsEl.style.display = 'none';
         // Hide all main editors
         editorTA.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
@@ -709,14 +750,92 @@
         previewDiv.style.display = 'block';
         editorTA.value = sec.rawText;
         previewSection();
-        // Show and refresh add-part buttons
-        if (addPartBtnsEl) {
-          addPartBtnsEl.style.display = '';
-          refreshAddPartButtons();
-        }
       }
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
-      function previewSection(){ let sec=data.folders[currentFolder].sections[currentSection]; sec.hidden=sec.hidden||[]; sec.alts=sec.alts||{}; currentHidden=new Set(sec.hidden); previewDiv.innerHTML=''; altContainer.innerHTML='<h4>Alternate answers for blanks (comma-separated):</h4>'; altContainer.style.display='block'; let tokens=editorTA.value.split(/(\s+)/); tokens.forEach((tok,i)=>{ if(!tok.trim()){ previewDiv.appendChild(document.createTextNode(tok)); } else { let span=document.createElement('span'); span.className='word'+(currentHidden.has(i)?' hidden':''); span.textContent=currentHidden.has(i)?'_'.repeat(tok.length):tok; span.onclick=()=>{ if(!tok.trim())return; currentHidden.has(i)?currentHidden.delete(i):currentHidden.add(i); sec.hidden=Array.from(currentHidden); previewSection(); }; previewDiv.appendChild(span);} }); let blankIndices=Array.from(currentHidden).sort((a,b)=>a-b); blankIndices.forEach((idx,j)=>{ let word=editorTA.value.split(/(\s+)/)[idx].trim(); let label=document.createElement('label'); label.textContent=`Blank ${j+1} (${word}): `; let ai=document.createElement('input'); ai.className='alt-input'; ai.placeholder='alt1, alt2, …'; ai.value=(sec.alts[idx]||[]).join(', '); ai.oninput=()=>{ sec.alts[idx]=ai.value.split(',').map(s=>s.trim()).filter(s=>s); saveData(); }; altContainer.appendChild(label); altContainer.appendChild(ai); }); }
+      // Normalize sec.hidden entries to objects { word, occ }
+      function getHiddenEntries(sec, tokens) {
+        // Build occurrence counts array
+        const counts = {};
+        const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
+        // If numeric indices, transform to objects
+        const objs = entries.map(entry => {
+          if (typeof entry === 'number') {
+            const word = tokens[entry].trim();
+            // count occurrences up to index
+            let occ = 0;
+            for (let i = 0; i <= entry; i++) {
+              if (tokens[i].trim() === word) occ++;
+            }
+            return { word, occ };
+          }
+          return entry; // assume already { word, occ }
+        });
+        return objs;
+      }
+
+      function previewSection() {
+        let sec = data.folders[currentFolder].sections[currentSection];
+        const tokens = editorTA.value.split(/(\s+)/);
+        sec.hidden = sec.hidden||[];
+        sec.alts = sec.alts||{};
+        // Map hidden entries to objects
+        const hiddenEntries = getHiddenEntries(sec, tokens);
+        let counts = {};
+        previewDiv.innerHTML = '';
+        altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
+        altContainer.style.display = 'block';
+        tokens.forEach((tok, i) => {
+          if (!tok.trim()) {
+            previewDiv.appendChild(document.createTextNode(tok));
+          } else {
+            const w = tok.trim();
+            counts[w] = (counts[w] || 0) + 1;
+            const occ = counts[w];
+            const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+            let span = document.createElement('span');
+            span.className = 'word' + (isHidden ? ' hidden' : '');
+            span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+            span.onclick = () => {
+              if (!tok.trim()) return;
+              // Toggle hidden for this word occurrence
+              const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+              if (idx >= 0) hiddenEntries.splice(idx, 1);
+              else hiddenEntries.push({ word: w, occ });
+              sec.hidden = hiddenEntries;
+              saveData();
+              previewSection();
+            };
+            previewDiv.appendChild(span);
+          }
+        });
+        // Build alt inputs for each blank (in order of occurrence in tokens)
+        // Rebuild counts for correct ordering
+        let altCounts = {};
+        counts = {};
+        tokens.forEach((tok, i) => {
+          if (!tok.trim()) return;
+          const w = tok.trim();
+          counts[w] = (counts[w] || 0) + 1;
+          const occ = counts[w];
+          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+          if (isHidden) {
+            const key = `${w}_${occ}`;
+            let label = document.createElement('label');
+            label.textContent = `Blank (${w}, #${occ}): `;
+            let ai = document.createElement('input');
+            ai.className = 'alt-input';
+            ai.placeholder = 'alt1, alt2, …';
+            let answers = [w, ...(sec.alts[key]||[])];
+            ai.value = (sec.alts[key]||[]).join(', ');
+            ai.oninput = () => {
+              sec.alts[key] = ai.value.split(',').map(s=>s.trim()).filter(s=>s);
+              saveData();
+            };
+            altContainer.appendChild(label);
+            altContainer.appendChild(ai);
+          }
+        });
+      }
       saveSectionBtn.onclick = () => {
         if (!ensureSelection()) return;
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -724,7 +843,7 @@
         if (sec.type !== 'label') {
           sec.rawText = editorTA.value;
         }
-        sec.hidden = Array.from(currentHidden);
+        // sec.hidden is already updated in previewSection's click handler
         saveData();
         renderSections();
         alert('Section saved ✔️');
@@ -733,8 +852,20 @@
 
       editModeBtn.onclick=enterEdit;
 
-      function enterEdit(){ editorArea.style.display='block'; quizArea.style.display='none'; }
-      function enterQuiz(){ if(!ensureSelection())return; editorArea.style.display='none'; quizArea.style.display='block'; startQuiz(); }
+      function enterEdit(){
+        editorArea.style.display = 'block';
+        quizArea.style.display = 'none';
+        renderSections();
+      }
+      function enterQuiz(){
+        if (currentFolder === null) {
+          alert('Select a folder first');
+          return;
+        }
+        editorArea.style.display = 'none';
+        quizArea.style.display = 'block';
+        startQuiz();
+      }
       let quizOrder=[], quizPos=0;
       function startQuiz(){ quizOrder=data.folders[currentFolder].sections.map((_,i)=>i); quizPos=0; showQuiz(); }
 
@@ -750,20 +881,21 @@
       quizAllBtn .onclick = enterQuiz;
 
       function showQuiz(){
+        // Highlight current section in left panel
+        currentSection = quizOrder[quizPos];
+        renderSections();
         quizContent.innerHTML = '';
         let sec = data.folders[currentFolder].sections[quizOrder[quizPos]];
-        // Display question title
-        let title = '';
-        if (sec.type === 'acronym') {
-          title = sec.acronym;
-        } else if (sec.type === 'label') {
+        // Compute title logic for all types
+        let defaultTitle = '';
+        if (sec.type === 'acronym') defaultTitle = sec.acronym;
+        else if (sec.type === 'label') {
           const raw = sec.rawText || '';
-          title = raw.split('\n')[0].trim() || 'Label Question';
-        } else {
-          // fill-in
-          const raw = sec.rawText || '';
-          title = raw.split('\n')[0].trim() || '(untitled)';
+          defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
+        } else { // fill
+          defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
         }
+        const title = sec.title && sec.title.trim() ? sec.title : defaultTitle;
         const titleEl = document.createElement('div');
         titleEl.style.fontSize = '1.2rem';
         titleEl.style.fontWeight = 'bold';
@@ -774,18 +906,34 @@
           quizContent.innerHTML = '<h4>' + sec.acronym + '</h4>';
           sec.entries.forEach((e, i) => {
             const div = document.createElement('div');
-            div.style.margin = '8px 0';
-            div.innerHTML = `
-              <strong>${e.letter}:</strong>
-              <input type="text" placeholder="Answer" id="qans${i}" style="width: 120px">
-            `;
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.margin = '4px 0';
+            // Build inputs array
+            let html = `<strong style="margin-right:4px">${e.letter}:</strong>
+              <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px">`;
+            if (e.extra && e.extra.trim()) {
+              html += `<input type="text" placeholder="Extra info" id="qext${i}" style="margin-left:4px; padding:4px">`;
+            }
+            div.innerHTML = html;
             quizContent.appendChild(div);
             const inp = document.getElementById('qans' + i);
+            inp.style.width = `${Math.max((e.answer||'').length+2,12)}ch`;
             inp.oninput = () => {
               const ok = inp.value.trim().toLowerCase() === e.answer.trim().toLowerCase();
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
             };
+            let extInp = null;
+            if (e.extra && e.extra.trim()) {
+              extInp = document.getElementById('qext' + i);
+              extInp.style.width = `${Math.max((e.extra||'').length+2,12)}ch`;
+              extInp.oninput = () => {
+                const okX = extInp.value.trim().toLowerCase() === e.extra.trim().toLowerCase();
+                extInp.classList.toggle('correct', okX);
+                extInp.classList.toggle('incorrect', !okX);
+              };
+            }
           });
           return;
         }
@@ -849,16 +997,46 @@
         // existing fill-in logic follows
         quizContent.style.borderColor = '';
         let tokens=sec.rawText.split(/(\s+)/);
-        tokens.forEach((tok,i)=>{
-          if(sec.hidden.includes(i)){
-            let answers=[tok.trim(),...(sec.alts[i]||[])];
-            let wrapper=document.createElement('span');
-            wrapper.className='blank';
-            const blankLen = tok.trim().length || 1;
-            wrapper.setAttribute('data-scrambled', '_'.repeat(blankLen));
-            let inp=document.createElement('input');
-            inp.className='blank-input';
-            inp.style.width = `${blankLen}ch`;
+        // New logic for word/occurrence blanks
+        // Build hiddenEntries and alternate answers mapping
+        const tokensArr = sec.rawText.split(/(\s+)/);
+        const hiddenEntries = getHiddenEntries(sec, tokensArr);
+        let counts = {};
+        tokensArr.forEach((tok, i) => {
+          if (!tok.trim()) {
+            quizContent.appendChild(document.createTextNode(tok));
+            return;
+          }
+          const w = tok.trim();
+          counts[w] = (counts[w] || 0) + 1;
+          const occ = counts[w];
+          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+          if (isHidden) {
+            const key = `${w}_${occ}`;
+            let answers = [w, ...(sec.alts[key]||[])];
+            let wrapper = document.createElement('span');
+            wrapper.className = 'blank';
+            // Always size based on uppercase text width with extra room
+            const blankText = w.toUpperCase();
+            wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
+            let inp = document.createElement('input');
+            inp.className = 'blank-input';
+            // Match quiz section font
+            const qcStyle = window.getComputedStyle(quizContent);
+            inp.style.fontFamily = qcStyle.fontFamily;
+            inp.style.fontSize = qcStyle.fontSize;
+            inp.style.padding = '0 2px';
+            inp.style.boxSizing = 'content-box';
+            // Measure text width using hidden span
+            const measurer = document.createElement('span');
+            measurer.style.visibility = 'hidden';
+            measurer.style.position = 'absolute';
+            measurer.style.whiteSpace = 'pre';
+            measurer.style.font = `${qcStyle.fontSize} ${qcStyle.fontFamily}`;
+            measurer.textContent = blankText;
+            document.body.appendChild(measurer);
+            inp.style.width = (measurer.offsetWidth + 4) + 'px';
+            document.body.removeChild(measurer);
             // New keydown handler: Space = next if correct, Tab = previous
             inp.addEventListener('keydown', e => {
               const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
@@ -897,7 +1075,7 @@
       }
       nextBtn.onclick=()=>{ if(quizPos<quizOrder.length-1){ quizPos++; showQuiz(); } else{ alert('🎉 All done!'); enterEdit(); } };
 
-      renderFolders();
+      renderFolders(); renderSections(); enterEdit();
 
       // --- Toggle Delete Button logic ---
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
