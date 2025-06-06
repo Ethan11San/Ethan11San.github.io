@@ -165,10 +165,6 @@
     #quizArea, #quizContent {
       font-size: 1.2rem;
     }
-    #quizContent input {
-      font-size: 1.2rem;
-      padding: 6px;
-    }
     /* —— Fill-In Quiz Font & Size —— */
     #quizContent .blank input {
       font-size: 1rem;
@@ -273,16 +269,8 @@
       }
       if (!data.folders) data = { folders: [] };
       function saveData() {
-        // Persist to localStorage for runtime fallback
+        // Persist data to localStorage only
         localStorage.setItem('quizData', JSON.stringify(data));
-        // Trigger download of updated JSON for GitHub use
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'quizData.json';
-        a.click();
-        URL.revokeObjectURL(url);
       }
 
       let currentFolder = null, currentSection = null;
@@ -648,6 +636,7 @@
             }
           };
           overlay.ondblclick = evt => {
+            if (evt.metaKey) return;
             const rect = img.getBoundingClientRect();
             const x = evt.clientX - rect.left;
             const y = evt.clientY - rect.top;
@@ -684,6 +673,7 @@
             mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
             mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
             mark.style.fontSize = lbl.fontSize + 'px';
+            mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
             // Store dimensions after user resizes (mouseup on mark)
             mark.addEventListener('mouseup', () => {
               lbl.w = mark.offsetWidth;
@@ -723,8 +713,9 @@
                 saveData();
               }
             };
-            // Dragging
+            // Dragging: only allow left-click drag (button === 0)
             mark.onmousedown = evt => {
+              if (evt.button !== 0) return; // only drag on left-click
               evt.preventDefault();
               let startX = evt.clientX, startY = evt.clientY;
               const origX = lbl.x, origY = lbl.y;
@@ -742,6 +733,158 @@
               document.addEventListener('mousemove', onMouseMove);
               document.addEventListener('mouseup', onMouseUp);
             };
+          });
+          // Create or clear the SVG overlay for arrows
+          let svgOverlay = overlay.querySelector('svg');
+          if (!svgOverlay) {
+            svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+            overlay.appendChild(svgOverlay);
+          } else {
+            // Clear existing children for redraw
+            while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
+          }
+          // --- Render saved arrows as SVG lines with arrowheads ---
+          if (sec.arrows) {
+            sec.arrows.forEach((a, idx) => {
+              // Compute angle, arrowLength, and arrowWidth first
+              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+              const arrowLength = a.width * 5;
+              const arrowWidth = a.width * 4;
+              // Compute end point for the line (base of arrowhead)
+              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+              // Create line from (x1,y1) to (lineEndX,lineEndY)
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', a.x1);
+              line.setAttribute('y1', a.y1);
+              line.setAttribute('x2', lineEndX);
+              line.setAttribute('y2', lineEndY);
+              line.setAttribute('stroke', a.color);
+              line.setAttribute('stroke-width', a.width);
+              line.setAttribute('pointer-events', 'all');
+              svgOverlay.appendChild(line);
+              // Now draw arrowhead triangle with tip at (a.x2,a.y2)
+              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+              const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+              polygon.setAttribute('points', points);
+              polygon.setAttribute('fill', a.color);
+              polygon.setAttribute('pointer-events', 'all');
+              svgOverlay.appendChild(polygon);
+              // Context menu and dblclick handlers unchanged...
+              [line, polygon].forEach(el => {
+                el.addEventListener('contextmenu', evt => {
+                  if (!evt.metaKey) return;
+                  evt.preventDefault();
+                  if (confirm('Delete this arrow?')) {
+                    sec.arrows.splice(idx, 1);
+                    saveData();
+                    loadSection();
+                    return;
+                  }
+                });
+                el.addEventListener('dblclick', evt => {
+                  if (!evt.metaKey) return;
+                  evt.preventDefault();
+                  const existingPopup = document.getElementById('arrowEditPopup');
+                  if (existingPopup) existingPopup.remove();
+                  const popup = document.createElement('div');
+                  popup.id = 'arrowEditPopup';
+                  popup.style.position = 'absolute';
+                  const overlayRect = overlay.getBoundingClientRect();
+                  const tipClientX = overlayRect.left + a.x2;
+                  const tipClientY = overlayRect.top + a.y2;
+                  popup.style.left = `${tipClientX}px`;
+                  popup.style.top = `${tipClientY}px`;
+                  popup.style.transform = 'translate(-50%, -100%)';
+                  popup.style.transformOrigin = 'bottom center';
+                  popup.style.background = '#fff';
+                  popup.style.border = '1px solid #7f8c8d';
+                  popup.style.borderRadius = '4px';
+                  popup.style.padding = '8px';
+                  popup.style.zIndex = '10000';
+                  popup.innerHTML = `
+                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                      Color: <input type="color" id="arrowColorPicker" value="${a.color}">
+                    </label>
+                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                      Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
+                    </label>
+                    <div style="text-align:right;">
+                      <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
+                      <button id="arrowCancelBtn">Cancel</button>
+                    </div>
+                  `;
+                  popup.addEventListener('dblclick', evt2 => {
+                    evt2.stopPropagation();
+                  });
+                  overlay.appendChild(popup);
+                  document.getElementById('arrowSaveBtn').onclick = () => {
+                    const colorVal = document.getElementById('arrowColorPicker').value;
+                    const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
+                    if (colorVal && !isNaN(widthVal) && widthVal > 0) {
+                      sec.arrows[idx].color = colorVal;
+                      sec.arrows[idx].width = widthVal;
+                      saveData();
+                      loadSection();
+                    }
+                  };
+                  document.getElementById('arrowCancelBtn').onclick = () => {
+                    popup.remove();
+                  };
+                });
+              });
+            });
+          }
+          // --- Ctrl-click and drag to draw a new arrow ---
+          let drawing = false;
+          let startX = 0, startY = 0;
+          let tempLine = null;
+          overlay.addEventListener('mousedown', evt => {
+            if (!evt.metaKey || evt.button !== 0) return;
+            const rect = img.getBoundingClientRect();
+            startX = evt.clientX - rect.left;
+            startY = evt.clientY - rect.top;
+            drawing = true;
+            // Create temporary line
+            tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            tempLine.setAttribute('x1', startX);
+            tempLine.setAttribute('y1', startY);
+            tempLine.setAttribute('x2', startX);
+            tempLine.setAttribute('y2', startY);
+            tempLine.setAttribute('stroke', '#e74c3c');
+            tempLine.setAttribute('stroke-width', '2');
+            svgOverlay.appendChild(tempLine);
+            evt.preventDefault();
+          });
+          overlay.addEventListener('mousemove', evt => {
+            if (!drawing) return;
+            const rect = img.getBoundingClientRect();
+            const currX = evt.clientX - rect.left;
+            const currY = evt.clientY - rect.top;
+            tempLine.setAttribute('x2', currX);
+            tempLine.setAttribute('y2', currY);
+          });
+          document.addEventListener('mouseup', evt => {
+            if (!drawing) return;
+            drawing = false;
+            const rect = img.getBoundingClientRect();
+            const endX = evt.clientX - rect.left;
+            const endY = evt.clientY - rect.top;
+            // Remove temporary line
+            svgOverlay.removeChild(tempLine);
+            tempLine = null;
+            // Only save if end differs from start (to prevent zero-length arrows)
+            if (endX !== startX || endY !== startY) {
+              if (!sec.arrows) sec.arrows = [];
+              sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
+              saveData();
+              loadSection();
+            }
           });
           return;
         }
@@ -950,20 +1093,50 @@
             img.style.maxWidth = '100%';
           }
           wrapper.appendChild(img);
-          // Render blurred text
+
+          // Create SVG overlay for arrows
+          const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svgOverlay.style.position = 'absolute';
+          svgOverlay.style.top = '0';
+          svgOverlay.style.left = '0';
+          svgOverlay.style.width = '100%';
+          svgOverlay.style.height = '100%';
+          svgOverlay.style.pointerEvents = 'none';
+          wrapper.appendChild(svgOverlay);
+
+          // Draw saved arrows
+          if (sec.arrows) {
+            sec.arrows.forEach(a => {
+              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+              const arrowLength = a.width * 5;
+              const arrowWidth = a.width * 4;
+              // Compute line endpoint at base of arrowhead
+              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+              // Create line element
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', a.x1);
+              line.setAttribute('y1', a.y1);
+              line.setAttribute('x2', lineEndX);
+              line.setAttribute('y2', lineEndY);
+              line.setAttribute('stroke', a.color);
+              line.setAttribute('stroke-width', a.width);
+              svgOverlay.appendChild(line);
+              // Compute arrowhead points
+              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+              const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+              polygon.setAttribute('points', points);
+              polygon.setAttribute('fill', a.color);
+              svgOverlay.appendChild(polygon);
+            });
+          }
+
+          // Render inline inputs
           sec.labels.forEach(lbl => {
-            const span = document.createElement('span');
-            span.textContent = lbl.text;
-            span.style.position = 'absolute';
-            span.style.left = lbl.x + 'px';
-            span.style.top = lbl.y + 'px';
-            span.style.width = lbl.w + 'px';
-            span.style.height = lbl.h + 'px';
-            span.style.display = 'block';
-            span.style.color = 'transparent';
-            span.style.textShadow = '0 0 5px #000';
-            wrapper.appendChild(span);
-            // Create inline input
             const inp = document.createElement('input');
             inp.type = 'text';
             inp.style.position = 'absolute';
@@ -973,24 +1146,28 @@
             inp.style.height = lbl.h + 'px';
             inp.style.border = '1px solid #7f8c8d';
             inp.style.background = '#ffffff';
-            inp.style.fontFamily = 'Menlo, monospace';
+            inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
             inp.style.fontSize = lbl.fontSize + 'px';
+            inp.style.padding = '0';
+            inp.style.boxSizing = 'border-box';
+            inp.style.minWidth = '0';
+            inp.style.borderRadius = '2px';
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = val === lbl.text.trim().toLowerCase();
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
               inp.style.borderColor = ok ? '#27ae60' : '#c0392b';
-              // Outline wrapper green if all label inputs are correct
               const inputs = Array.from(wrapper.querySelectorAll('input'));
               if (inputs.length && inputs.every(i => i.classList.contains('correct'))) {
-                wrapper.style.outline = '2px solid #27ae60';
+                img.style.outline = '2px solid #27ae60';
               } else {
-                wrapper.style.outline = '';
+                img.style.outline = '';
               }
             };
             wrapper.appendChild(inp);
           });
+
           quizContent.appendChild(wrapper);
           return;
         }
