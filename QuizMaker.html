@@ -144,7 +144,24 @@
       border-radius: 4px;
     }
     #altContainer h4 { margin-bottom: 10px; font-size: 1rem; color: #2c3e50; }
-    .alt-input { width: 100%; padding: 6px; margin-bottom: 8px; border: 1px solid #7f8c8d; border-radius: 4px; }
+    .alt-input {
+      width: 120px;             /* fixed small width */
+      padding: 2px 4px;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      border: 1px solid #7f8c8d;
+      border-radius: 4px;
+    }
+
+    /* Override the generic #labelEditor input rule so alternate‑answer boxes stay compact */
+    #labelEditor .alt-input {
+      width: 120px;
+      padding: 2px 4px;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+    }
+
+    #labelDefinitions h4 { font-size: 1.1rem; margin-bottom: 4px; }
 
     /* —— Quiz Mode & Blanks —— */
     #quizContent {
@@ -182,6 +199,20 @@
       font-family: Arial, sans-serif;
       min-width: 12ch;
     }
+
+    /* Definition wrapper styling and drag-and-drop container */
+    .definition-list {
+      display: flex;
+      flex-direction: column;
+    }
+    .definition-wrapper {
+      border: 1px solid #bdc3c7;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      background: #fff;
+      cursor: move;
+    }
     /* Grading full border for correct inputs */
     input.correct {
       border: 2px solid #27ae60 !important;
@@ -191,13 +222,7 @@
     }
     .blank { position: relative; display: inline-block; margin: 0 2px; }
     .blank::before {
-      content: attr(data-scrambled);
-      filter: blur(2px) opacity(0.6);
-      position: absolute; top: 0; left: 0;
-      font-family: Menlo, monospace;
-      font-size: 1.1rem;
-      line-height: 1em;
-      pointer-events: none;
+      content: '';
     }
     .blank input {
       position: relative; background: transparent;
@@ -216,6 +241,19 @@
       cursor: pointer; transition: background .2s;
     }
     #nextBtn:hover { background: #71368a; }
+    #hintBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #8e44ad;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #hintBtn:hover {
+      background: #71368a;
+    }
   </style>
 </head>
 <body>
@@ -259,20 +297,58 @@
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
       <button id="nextBtn">Next Section ➡️</button>
+      <button id="hintBtn">Hint</button>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      let isQuizMode = true;  // start in quiz mode by default
-      let data;
-      try {
-        const resp = await fetch('quizData.json');
-        data = await resp.json();
-      } catch (err) {
-        data = JSON.parse(localStorage.getItem('quizData') || '{}');
+      // Function to position definitions container and add button absolutely below the image container
+      function updateDefPosition() {
+        const cont = document.getElementById('labelContainer');
+        const addBtn = document.getElementById('addDefinitionBtn');
+        const defCont = document.getElementById('labelDefinitions');
+        if (cont && addBtn && defCont) {
+          const parent = document.getElementById('labelEditor');
+          parent.style.position = 'relative';
+          const topOffset = cont.offsetTop + cont.offsetHeight + 10;
+          // Position the Add Definition button
+          addBtn.style.position = 'absolute';
+          addBtn.style.top = topOffset + 'px';
+          addBtn.style.left = cont.offsetLeft + 'px';
+          // Make definitions span the rest of the editor width
+          defCont.style.width = (parent.clientWidth - cont.offsetLeft) + 'px';
+          // Position the definitions container below the button
+          defCont.style.position = 'absolute';
+          defCont.style.top = (topOffset + addBtn.offsetHeight + 10) + 'px';
+          defCont.style.left = cont.offsetLeft + 'px';
+        }
       }
-      if (!data.folders) data = { folders: [] };
+      let isQuizMode = true;  // start in quiz mode by default
+      let lastHintTarget = null;  // track last focused blank for hint
+      let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
+      // ----- Load persistent data -----
+      let data = null;
+
+      // ① Try pulling quizData.json (if you’ve exported previously)
+      try {
+        const resp = await fetch('quizData.json', { cache: 'no-store' });
+        if (resp.ok) {
+          const txt = (await resp.text()).trim();
+          if (txt) data = JSON.parse(txt);
+        }
+      } catch (_) {
+        /* ignore fetch/parse errors – we’ll fall back below */
+      }
+
+      // ② If JSON file absent or empty, fall back to localStorage
+      const ls = JSON.parse(localStorage.getItem('quizData') || '{}');
+      if (!data || !data.folders || !data.folders.length) {
+        data = ls.folders ? ls : { folders: [] };
+      }
+
+      // ③ Ensure schema keys exist
+      if (!data.folders) data.folders = [];
       function saveData() {
         // Persist data to localStorage only
         localStorage.setItem('quizData', JSON.stringify(data));
@@ -280,6 +356,7 @@
 
       let currentFolder = null, currentSection = null;
       let waitingForImagePaste = false;
+      let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
             newFolderName = document.getElementById('newFolderName'), addFolderBtn = document.getElementById('addFolderBtn'),
             addFillBtn = document.getElementById('addFillBtn'),
@@ -342,7 +419,34 @@
           });
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
-          li.onclick=()=>{ currentFolder=i; currentSection=null; renderFolders(); renderSections(); enterEdit(); };
+          li.onclick = () => {
+            currentFolder = i;
+            // Default to first section in the newly selected folder
+            if (data.folders[i].sections && data.folders[i].sections.length > 0) {
+              currentSection = 0;
+            } else {
+              currentSection = null;
+            }
+            renderFolders();
+            renderSections();
+            // If in quiz mode, handle empty folders
+            if (isQuizMode) {
+              if (currentSection !== null) {
+                enterQuizQuestion();
+              } else {
+                // No questions in folder: show placeholder in quiz area
+                editorArea.style.display = 'none';
+                quizArea.style.display = 'block';
+                quizContent.innerHTML = '<p style="color:#7f8c8d;font-style:italic;">No questions in this folder.</p>';
+              }
+            } else {
+              // Otherwise, default to edit mode for that section
+              enterEdit();
+              if (currentSection !== null) {
+                loadSection();
+              }
+            }
+          };
           li.ondblclick=()=>{
             const newName = prompt('Enter new folder name:', f.name);
             if(newName && newName.trim()){
@@ -357,6 +461,7 @@
           delF.textContent = '✖';
           delF.style.cursor = 'pointer';
           delF.style.color = 'red';
+          delF.style.display = deleteMode ? 'inline' : 'none';
           delF.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
@@ -433,6 +538,7 @@
           delS.textContent = '✖';
           delS.style.cursor = 'pointer';
           delS.style.color = 'red';
+          delS.style.display = deleteMode ? 'inline' : 'none';
           delS.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete question "${delTitle}"? This cannot be undone.`)) {
@@ -559,6 +665,112 @@
               <img id="labelImg" src="${sec.image}" style="display:block; user-select:none;">
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
+
+          // -- Definitions UI Start --
+          const addDefBtn = document.createElement('button');
+          addDefBtn.id = 'addDefinitionBtn';
+          addDefBtn.textContent = 'Add Definition';
+          addDefBtn.style.display = 'block';
+          // margin removed, now positioned absolutely by updateDefPosition
+          addDefBtn.style.padding = '6px 12px';
+          addDefBtn.style.border = 'none';
+          addDefBtn.style.borderRadius = '4px';
+          addDefBtn.style.background = '#2980b9';
+          addDefBtn.style.color = '#fff';
+          addDefBtn.style.cursor = 'pointer';
+          addDefBtn.addEventListener('click', () => {
+            isAddingDefinition = true;
+            addDefBtn.textContent = 'Click a label to define';
+          });
+          labelEditor.appendChild(addDefBtn);
+
+          const defContainer = document.createElement('div');
+          defContainer.id = 'labelDefinitions';
+          defContainer.className = 'definition-list';
+          // marginTop removed, now positioned absolutely by updateDefPosition
+          defContainer.style.padding = '12px';
+          defContainer.style.border = '1px solid #bdc3c7';
+          defContainer.style.background = '#fff';
+          labelEditor.appendChild(defContainer);
+          // Initial position of definitions
+          updateDefPosition();
+
+          // Render existing definitions with full mini‑fill functionality
+          sec.definitions = sec.definitions || [];
+          sec.definitions.forEach((def, dIndex) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'definition-wrapper';
+            wrapper.draggable = true;
+            // Drag-and-drop handlers to reorder definitions
+            wrapper.addEventListener('dragstart', e => {
+              e.dataTransfer.setData('text/plain', dIndex);
+            });
+            wrapper.addEventListener('dragover', e => e.preventDefault());
+            wrapper.addEventListener('drop', e => {
+              e.preventDefault();
+              const from = Number(e.dataTransfer.getData('text/plain'));
+              const to = dIndex;
+              const moved = sec.definitions.splice(from, 1)[0];
+              sec.definitions.splice(to, 0, moved);
+              saveData();
+              loadSection();
+            });
+
+            // —— title row + delete button ——
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+
+            // Prefix the definition title with its number
+            const h4 = document.createElement('h4');
+            h4.textContent = (dIndex + 1) + '. ' + def.labelText;
+            h4.style.fontSize = '1.1rem';
+            h4.style.flex = '1';
+            row.appendChild(h4);
+
+            const del = document.createElement('span');
+            del.textContent = '✖';
+            del.style.cursor = 'pointer';
+            del.style.color  = 'red';
+            del.onclick = evt => {
+              evt.stopPropagation();
+              if (confirm('Delete this definition?')) {
+                sec.definitions.splice(dIndex, 1);
+                saveData();
+                loadSection();
+              }
+            };
+            row.appendChild(del);
+            wrapper.appendChild(row);
+
+            // —— textarea for raw text ——
+            const ta = document.createElement('textarea');
+            ta.style.width = '100%';
+            ta.style.minHeight = '60px';
+            ta.style.fontSize = '1.1rem';   // bigger, matches main editor
+            ta.value = def.rawText;
+
+            // containers for live preview + alternates
+            const prevDiv = document.createElement('div');
+            prevDiv.style.marginTop = '8px';
+            const altDiv  = document.createElement('div');
+            altDiv.style.marginTop  = '12px';
+
+            ta.oninput = () => {
+              def.rawText = ta.value;
+              saveData();
+              buildDefinitionPreview(def, prevDiv, altDiv);
+            };
+
+            wrapper.appendChild(ta);
+            wrapper.appendChild(prevDiv);
+            wrapper.appendChild(altDiv);
+
+            // initial render
+            buildDefinitionPreview(def, prevDiv, altDiv);
+
+            defContainer.appendChild(wrapper);
+          });
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
@@ -607,14 +819,21 @@
                   function onMouseMove(moveEv) {
                     container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
                     container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
+                    // Ensure the image scales to fit the container rather than being cropped
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
                   }
                   function onMouseUp() {
+                    // Ensure the image scales to fit the container rather than being cropped (final sizing)
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                     // Save dimensions
                     sec.imgWidth = container.offsetWidth;
                     sec.imgHeight = container.offsetHeight;
                     saveData();
+                    updateDefPosition();
                   }
                   document.addEventListener('mousemove', onMouseMove);
                   document.addEventListener('mouseup', onMouseUp);
@@ -641,6 +860,7 @@
               sec.imgX = parseInt(container.style.left) || 0;
               sec.imgY = parseInt(container.style.top) || 0;
               saveData();
+              updateDefPosition();
             }
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
@@ -655,6 +875,7 @@
               container.style.width = img.naturalWidth + 'px';
               container.style.height = img.naturalHeight + 'px';
             }
+            updateDefPosition();
           };
           overlay.ondblclick = evt => {
             if (evt.metaKey) return;
@@ -689,6 +910,47 @@
             mark.style.userSelect = 'none';
             mark.style.webkitUserSelect = 'none';
             mark.style.msUserSelect = 'none';
+            // —— Number badge if this label has a definition ——
+            let defIdx = -1;
+            if (sec.definitions && sec.definitions.length) {
+              defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
+            }
+            if (defIdx >= 0) {
+              const num = document.createElement('span');
+              num.textContent = defIdx + 1;
+              num.style.position = 'absolute';
+              num.style.left = '-18px';
+              num.style.top = '0';
+              num.style.width = '16px';
+              num.style.height = '16px';
+              num.style.borderRadius = '50%';
+              num.style.background = '#1abc9c';
+              num.style.color = '#fff';
+              num.style.fontSize = '10px';
+              num.style.display = 'flex';
+              num.style.alignItems = 'center';
+              num.style.justifyContent = 'center';
+              num.style.pointerEvents = 'none';
+              mark.appendChild(num);
+            }
+            // --- Definition mode click handler ---
+            mark.addEventListener('click', evt => {
+              if (!isAddingDefinition) return;
+              evt.stopPropagation();
+              // Initialize definitions array
+              sec.definitions = sec.definitions || [];
+              // Add a new definition entry with this label text
+              sec.definitions.push({
+                labelText: lbl.text,
+                rawText: '',
+                hidden: [],
+                alts: {}
+              });
+              saveData();
+              isAddingDefinition = false;
+              addDefBtn.textContent = 'Add Definition';
+              loadSection();
+            });
             overlay.appendChild(mark);
             // Apply stored dimensions and font size
             mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
@@ -770,8 +1032,8 @@
             sec.arrows.forEach((a, idx) => {
               // Compute angle, arrowLength, and arrowWidth first
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-              const arrowLength = a.width * 5;
-              const arrowWidth = a.width * 4;
+              const arrowLength = a.width * 3;
+              const arrowWidth = a.width * 2;
               // Compute end point for the line (base of arrowhead)
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
@@ -817,10 +1079,12 @@
                   popup.id = 'arrowEditPopup';
                   popup.style.position = 'absolute';
                   const overlayRect = overlay.getBoundingClientRect();
-                  const tipClientX = overlayRect.left + a.x2;
-                  const tipClientY = overlayRect.top + a.y2;
-                  popup.style.left = `${tipClientX}px`;
-                  popup.style.top = `${tipClientY}px`;
+                  const fixedLeft = overlayRect.left + 50;
+                  const fixedTop = overlayRect.top + 50;
+                  popup.style.left = `${fixedLeft}px`;
+                  popup.style.top = `${fixedTop}px`;
+                  // Ensure popup is always visible on screen
+                  // (Removed legacy code referencing tipClientX/tipClientY)
                   popup.style.transform = 'translate(-50%, -100%)';
                   popup.style.transformOrigin = 'bottom center';
                   popup.style.background = '#fff';
@@ -1000,6 +1264,67 @@
             altContainer.appendChild(ai);
           }
         });
+
+      }
+
+      // —— Helper: build preview & alternate‑answer UI for a single definition ——
+      function buildDefinitionPreview(defObj, previewDiv, altDiv) {
+        const tokens = (defObj.rawText || '').split(/(\s+)/);
+        defObj.hidden = defObj.hidden || [];
+        defObj.alts   = defObj.alts   || {};
+
+        const hiddenEntries = getHiddenEntries(defObj, tokens);
+        previewDiv.innerHTML = '';
+        altDiv.innerHTML     = '<h4>Alternate answers (comma‑separated):</h4>';
+
+        // clickable words
+        let counts = {};
+        tokens.forEach(tok => {
+          if (!tok.trim()) { previewDiv.appendChild(document.createTextNode(tok)); return; }
+          const w = tok.trim();
+          counts[w] = (counts[w] || 0) + 1;
+          const occ = counts[w];
+          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+
+          const span = document.createElement('span');
+          span.className = 'word' + (isHidden ? ' hidden' : '');
+          span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+          span.onclick = () => {
+            const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+            (idx >= 0)
+              ? hiddenEntries.splice(idx, 1)
+              : hiddenEntries.push({ word: w, occ });
+            defObj.hidden = hiddenEntries;
+            saveData();
+            buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
+          };
+          previewDiv.appendChild(span);
+        });
+
+        // alternate‑answer inputs
+        counts = {};
+        tokens.forEach(tok => {
+          if (!tok.trim()) return;
+          const w = tok.trim();
+          counts[w] = (counts[w] || 0) + 1;
+          const occ = counts[w];
+          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+          if (!isHidden) return;
+
+          const key = `${w}_${occ}`;
+          const label = document.createElement('label');
+          label.textContent = `Blank (${w} #${occ}): `;
+          const ai = document.createElement('input');
+          ai.className  = 'alt-input';
+          ai.placeholder = 'alt1, alt2 …';
+          ai.value      = (defObj.alts[key] || []).join(', ');
+          ai.oninput = () => {
+            defObj.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
+            saveData();
+          };
+          altDiv.appendChild(label);
+          altDiv.appendChild(ai);
+        });
       }
       saveSectionBtn.onclick = () => {
         if (!ensureSelection()) return;
@@ -1143,8 +1468,8 @@
           if (sec.arrows) {
             sec.arrows.forEach(a => {
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-              const arrowLength = a.width * 5;
-              const arrowWidth = a.width * 4;
+              const arrowLength = a.width * 3;
+              const arrowWidth = a.width * 2;
               // Compute line endpoint at base of arrowhead
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
@@ -1170,15 +1495,19 @@
             });
           }
 
+          // Map labelText → { el: titleElement, idx }
+          const titleMap = {};
           // Render inline inputs
           sec.labels.forEach(lbl => {
             const inp = document.createElement('input');
+            inp.classList.add('blank-input');
+            inp.setAttribute('data-answer', JSON.stringify([lbl.text]));
+            inp.dataset.label = "1";          // mark as picture‑label blank
             inp.type = 'text';
             inp.style.position = 'absolute';
             inp.style.left = lbl.x + 'px';
             inp.style.top = lbl.y + 'px';
-            inp.style.width = lbl.w + 'px';
-            inp.style.height = lbl.h + 'px';
+            // border, bg, font, etc.
             inp.style.border = '1px solid #7f8c8d';
             inp.style.background = '#ffffff';
             inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -1187,23 +1516,188 @@
             inp.style.boxSizing = 'border-box';
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
+            // record focus so Hint button targets the last‑selected box
+            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            // size width/height to match the saved label size, or fallback to measured width
+            const measSpan = document.createElement('span');
+            measSpan.style.visibility = 'hidden';
+            measSpan.style.position   = 'absolute';
+            measSpan.style.whiteSpace = 'pre';
+            measSpan.style.fontFamily = inp.style.fontFamily;
+            measSpan.style.fontSize   = inp.style.fontSize;
+            measSpan.textContent = lbl.text.toUpperCase();
+            document.body.appendChild(measSpan);
+            const calcW = lbl.w ? lbl.w : (measSpan.offsetWidth + 4);
+            inp.style.width  = calcW + 'px';
+            document.body.removeChild(measSpan);
+            inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = val === lbl.text.trim().toLowerCase();
-              inp.classList.toggle('correct', ok);
-              inp.classList.toggle('incorrect', !ok);
-              inp.style.borderColor = ok ? '#27ae60' : '#c0392b';
-              const inputs = Array.from(wrapper.querySelectorAll('input'));
-              if (inputs.length && inputs.every(i => i.classList.contains('correct'))) {
+
+              if (ok) {
+                // Replace the input with the revealed label text
+                const txt = document.createElement('span');
+                txt.textContent = lbl.text;
+                txt.style.position = 'absolute';
+                txt.style.left = lbl.x + 'px';
+                txt.style.top  = lbl.y + 'px';
+                txt.style.fontSize   = lbl.fontSize + 'px';
+                txt.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+                txt.style.background = '#ffffff';
+                txt.style.border     = '1px solid #27ae60';
+                txt.style.padding    = '0 2px';
+                txt.style.borderRadius = '2px';
+                if (lbl.w) txt.style.width  = lbl.w + 'px';
+                if (lbl.h) txt.style.height = lbl.h + 'px';
+                txt.style.display = 'inline-block';
+                wrapper.appendChild(txt);
+                inp.remove();               // get rid of the input box
+                // Auto‑focus the next remaining picture‑label blank
+                setTimeout(() => {
+                  const next = wrapper.querySelector('input[data-label="1"]');
+                  if (next) next.focus();
+                }, 0);
+
+                // Reveal corresponding definition title now that this label is correct
+                const entry = titleMap[lbl.text];
+                if (entry && !entry.revealed) {
+                  entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
+                  entry.revealed = true;
+                }
+              } else {
+                // keep feedback colours while user is typing
+                inp.classList.remove('correct');
+                inp.classList.add('incorrect');
+                inp.style.borderColor = '#c0392b';
+              }
+
+              // Re‑evaluate overall correctness outline
+              const remainingInputs = Array.from(wrapper.querySelectorAll('input'));
+              if (remainingInputs.length === 0) {
                 img.style.outline = '2px solid #27ae60';
               } else {
                 img.style.outline = '';
               }
             };
             wrapper.appendChild(inp);
+            // Number badge that matches the definition list
+            let defIdx = -1;
+            if (sec.definitions && sec.definitions.length) {
+              defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
+            }
+            if (defIdx >= 0) {
+              const badge = document.createElement('div');
+              badge.textContent = defIdx + 1;
+              badge.style.position = 'absolute';
+              badge.style.left = (lbl.x - 18) + 'px';
+              badge.style.top = lbl.y + 'px';
+              badge.style.width = '16px';
+              badge.style.height = '16px';
+              badge.style.borderRadius = '50%';
+              badge.style.background = '#1abc9c';
+              badge.style.color = '#fff';
+              badge.style.fontSize = '10px';
+              badge.style.display = 'flex';
+              badge.style.alignItems = 'center';
+              badge.style.justifyContent = 'center';
+              badge.style.pointerEvents = 'none';
+              wrapper.appendChild(badge);
+            }
           });
 
           quizContent.appendChild(wrapper);
+          // ---- Render mini‑fill definitions under the image ----
+          if (sec.definitions && sec.definitions.length) {
+            const defsHdr = document.createElement('h4');
+            defsHdr.textContent = 'Definitions';
+            defsHdr.style.marginTop = '20px';
+            quizContent.appendChild(defsHdr);
+
+            sec.definitions.forEach((def, dIndex) => {
+              // Prefix each definition with its number – label name stays hidden until solved
+              const para = document.createElement('p');
+              para.style.marginBottom = '12px';
+              const title = document.createElement('strong');
+              title.textContent = (dIndex + 1) + '. ';
+              para.appendChild(title);
+              // Register this definition's title for reveal
+              titleMap[def.labelText] = { el: title, idx: dIndex };
+              const tokens = (def.rawText || '').split(/(\s+)/);
+              const hiddenEntries = getHiddenEntries(def, tokens);
+              let counts = {};
+              tokens.forEach(tok => {
+                if (!tok.trim()) {
+                  para.appendChild(document.createTextNode(tok));
+                  return;
+                }
+                const w = tok.trim();
+                counts[w] = (counts[w] || 0) + 1;
+                const occ = counts[w];
+                const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+
+                if (!isHidden) {
+                  para.appendChild(document.createTextNode(tok));
+                  return;
+                }
+
+                const key = `${w}_${occ}`;
+                const answers = [w, ...(def.alts[key] || [])];
+
+                const span = document.createElement('span');
+                span.className = 'blank';
+                const inp = document.createElement('input');
+                inp.className = 'blank-input';
+                inp.setAttribute('data-answer', JSON.stringify(answers));
+                // Track focus for definition blanks too
+                inp.addEventListener('focus', () => { lastHintTarget = inp; });
+                // keep track of blanks for this definition
+                if (!para._inputs) para._inputs = [];
+                para._inputs.push(inp);
+                // Match font family & size to regular fill‑in blanks
+                const qcStyle = window.getComputedStyle(quizContent);
+                inp.style.fontFamily = qcStyle.fontFamily;
+                inp.style.fontSize   = qcStyle.fontSize;
+                inp.style.padding    = '0 2px';
+                // Space → next blank (if correct); Tab → previous blank  — same as normal fill‑ins
+                inp.addEventListener('keydown', e => {
+                  const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                  const idx = inputs.indexOf(inp);
+                  if (e.key === ' ') {
+                    e.preventDefault();
+                    if (inp.classList.contains('correct') && idx < inputs.length - 1) {
+                      inputs[idx + 1].focus();
+                    }
+                  }
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (idx > 0) inputs[idx - 1].focus();
+                  }
+                });
+
+                // width sizing identical to regular fill‑ins
+                const meas = document.createElement('span');
+                meas.style.visibility = 'hidden';
+                meas.style.position   = 'absolute';
+                meas.style.whiteSpace = 'pre';
+                meas.textContent = w.toUpperCase();
+                document.body.appendChild(meas);
+                inp.style.width = meas.offsetWidth + 4 + 'px';
+                document.body.removeChild(meas);
+
+                inp.oninput = () => {
+                  const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
+                  inp.classList.toggle('correct', ok);
+                  inp.classList.toggle('incorrect', !ok);
+                  // (Reveal-on-all-blanks logic removed)
+                };
+
+                span.appendChild(inp);
+                para.appendChild(span);
+              });
+              quizContent.appendChild(para);
+            });
+          }
           return;
         }
         // existing fill-in logic follows
@@ -1233,6 +1727,9 @@
             wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
             let inp = document.createElement('input');
             inp.className = 'blank-input';
+            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            // store correct answers for hint feature
+            inp.setAttribute('data-answer', JSON.stringify(answers));
             // Match quiz section font
             const qcStyle = window.getComputedStyle(quizContent);
             inp.style.fontFamily = qcStyle.fontFamily;
@@ -1285,7 +1782,76 @@
           }
         });
       }
-      nextBtn.onclick=()=>{ if(quizPos<quizOrder.length-1){ quizPos++; showQuiz(); } else{ alert('🎉 All done!'); enterEdit(); } };
+      nextBtn.onclick = () => {
+        const secs = data.folders[currentFolder].sections;
+        const total = secs.length;
+        // If in Quiz All mode sequence, advance within that sequence first
+        if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
+          quizPos++;
+          showQuiz();
+          return;
+        }
+        // Otherwise, move to the next section by index
+        if (currentSection < total - 1) {
+          currentSection++;
+          renderSections();
+          enterQuizQuestion();
+        } else {
+          alert('🎉 All done!');
+          enterEdit();
+        }
+      };
+      // --- Hint button logic ---
+      const hintBtn = document.getElementById('hintBtn');
+      hintBtn.onclick = () => {
+        // Determine target: last focused blank, then active focus, then first incomplete
+        let target = null;
+        if (lastHintTarget && lastHintTarget.dataset.answer) {
+          target = lastHintTarget;
+        } else {
+          const active = document.activeElement;
+          if (active && active.classList.contains('blank-input') && active.dataset.answer) {
+            target = active;
+          } else {
+            const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+            target = inputs.find(i => !i.classList.contains('correct')) || null;
+          }
+        }
+        if (target && target.dataset.answer) {
+          const answers = JSON.parse(target.getAttribute('data-answer'));
+          const correct = answers[0] || '';
+          target.value = correct;
+
+          if (!target.dataset.label) {
+            // Regular blank – use normal correctness logic
+            target.dispatchEvent(new Event('input'));
+          } else {
+            // Picture‑label blank: show temporarily, don’t trigger permanent reveal
+            target.classList.add('correct');
+            // size to fit if user previously shrank
+            target.style.width = correct.length + 1 + 'ch';
+          }
+
+          target.focus();
+          setTimeout(() => {
+            // Clear only if user hasn’t typed something else
+            if (target.value.trim().toLowerCase() === correct.toLowerCase()) {
+              target.value = '';
+              target.classList.remove('correct');
+            }
+            target.focus();
+          }, 2000);
+        }
+      };
+
+      // —— Keyboard shortcut: ⌘‑G (Command+G) triggers Hint ——
+      document.addEventListener('keydown', evt => {
+        // Fire only when the Command (Meta) key is held, no Ctrl/Shift/Alt, and key is lowercase 'g'
+        if (evt.metaKey && !evt.ctrlKey && !evt.shiftKey && !evt.altKey && evt.key === 'g') {
+          evt.preventDefault();
+          hintBtn.click();
+        }
+      });
 
       renderFolders();
       renderSections();
@@ -1293,7 +1859,7 @@
 
       // --- Toggle Delete Button logic ---
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
-      let deleteMode = false;
+      // deleteMode already declared above
       toggleDeleteBtn.onclick = () => {
         deleteMode = !deleteMode;
         document.querySelectorAll('.delete-icon').forEach(el =>
