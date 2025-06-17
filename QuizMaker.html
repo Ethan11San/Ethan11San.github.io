@@ -363,6 +363,7 @@
 
       // Helper: fetch existing file SHA from GitHub
       async function getGitHubFileSha() {
+        console.log('Fetching SHA for', GITHUB_PATH);
         const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
         const resp = await fetch(url, {
           headers: {
@@ -379,22 +380,27 @@
       async function uploadQuizData(data) {
         const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
         const sha = await getGitHubFileSha();
+        console.log('Obtained SHA:', sha);
         const content = btoa(JSON.stringify(data, null, 2));
+        const bodyObj = {
+          message: 'Update quizData.json via QuizMaker',
+          content: content,
+          sha: sha,
+          branch: "main"
+        };
+        console.log('Uploading quizData.json to GitHub:', { message: bodyObj.message, sha: bodyObj.sha });
         const resp = await fetch(url, {
           method: 'PUT',
           headers: {
             Authorization: `token ${GITHUB_TOKEN}`,
             Accept: 'application/vnd.github.v3+json'
           },
-          body: JSON.stringify({
-            message: 'Update quizData.json via QuizMaker',
-            content: content,
-            sha: sha
-          })
+          body: JSON.stringify(bodyObj)
         });
-        if (!resp.ok) {
-          const err = await resp.json();
-          console.error('GitHub upload failed:', err.message);
+        if (resp.ok) {
+          console.log('GitHub upload successful');
+        } else {
+          console.error('GitHub upload failed', await resp.text());
         }
       }
 
