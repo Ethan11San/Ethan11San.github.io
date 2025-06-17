@@ -361,13 +361,18 @@
       const GITHUB_REPO  = 'Ethan11San.github.io';
       const GITHUB_PATH  = 'quizData.json';
 
+      // Unicode‑safe Base64 encoding
+      function toBase64(str) {
+        return btoa(unescape(encodeURIComponent(str)));
+      }
+
       // Helper: fetch existing file SHA from GitHub
       async function getGitHubFileSha() {
         console.log('Fetching SHA for', GITHUB_PATH);
         const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
         const resp = await fetch(url, {
           headers: {
-            Authorization: `token ${GITHUB_TOKEN}`,
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
             Accept: 'application/vnd.github.v3+json'
           }
         });
@@ -381,7 +386,7 @@
         const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
         const sha = await getGitHubFileSha();
         console.log('Obtained SHA:', sha);
-        const content = btoa(JSON.stringify(data, null, 2));
+        const content = toBase64(JSON.stringify(data, null, 2));
         const bodyObj = {
           message: 'Update quizData.json via QuizMaker',
           content: content,
@@ -392,7 +397,7 @@
         const resp = await fetch(url, {
           method: 'PUT',
           headers: {
-            Authorization: `token ${GITHUB_TOKEN}`,
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
             Accept: 'application/vnd.github.v3+json'
           },
           body: JSON.stringify(bodyObj)
