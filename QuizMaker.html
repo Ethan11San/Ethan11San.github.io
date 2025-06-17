@@ -303,6 +303,10 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
+      // Warn if served via file:// since GitHub API requires HTTP/HTTPS origin for CORS
+      if (window.location.protocol === 'file:') {
+        alert('⚠️ QuizMaker must be served over HTTP/HTTPS (e.g. GitHub Pages or a local web server) to enable GitHub syncing.');
+      }
       // Function to position definitions container and add button absolutely below the image container
       function updateDefPosition() {
         const cont = document.getElementById('labelContainer');
@@ -371,6 +375,9 @@
         console.log('Fetching SHA for', GITHUB_PATH);
         const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
         const resp = await fetch(url, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'omit',
           headers: {
             Authorization: `Bearer ${GITHUB_TOKEN}`,
             Accept: 'application/vnd.github.v3+json'
@@ -396,6 +403,8 @@
         console.log('Uploading quizData.json to GitHub:', { message: bodyObj.message, sha: bodyObj.sha });
         const resp = await fetch(url, {
           method: 'PUT',
+          mode: 'cors',
+          credentials: 'omit',
           headers: {
             Authorization: `Bearer ${GITHUB_TOKEN}`,
             Accept: 'application/vnd.github.v3+json'
