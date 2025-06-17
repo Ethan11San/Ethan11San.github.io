@@ -349,9 +349,55 @@
 
       // ③ Ensure schema keys exist
       if (!data.folders) data.folders = [];
+
+      // ——— GitHub persistence configuration ———
+      const GITHUB_TOKEN = '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';
+      const GITHUB_OWNER = 'Ethan11San';
+      const GITHUB_REPO  = 'Ethan11San.github.io';
+      const GITHUB_PATH  = 'quizData.json';
+
+      // Helper: fetch existing file SHA from GitHub
+      async function getGitHubFileSha() {
+        const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+        const resp = await fetch(url, {
+          headers: {
+            Authorization: `token ${GITHUB_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json'
+          }
+        });
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        return data.sha;
+      }
+
+      // Helper: upload updated quizData.json to GitHub
+      async function uploadQuizData(data) {
+        const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+        const sha = await getGitHubFileSha();
+        const content = btoa(JSON.stringify(data, null, 2));
+        const resp = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${GITHUB_TOKEN}`,
+            Accept: 'application/vnd.github.v3+json'
+          },
+          body: JSON.stringify({
+            message: 'Update quizData.json via QuizMaker',
+            content: content,
+            sha: sha
+          })
+        });
+        if (!resp.ok) {
+          const err = await resp.json();
+          console.error('GitHub upload failed:', err.message);
+        }
+      }
+
       function saveData() {
-        // Persist data to localStorage only
+        // Persist data to localStorage
         localStorage.setItem('quizData', JSON.stringify(data));
+        // Persist data to GitHub
+        uploadQuizData(data).catch(err => console.error(err));
       }
 
       let currentFolder = null, currentSection = null;
