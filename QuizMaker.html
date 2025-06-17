@@ -327,28 +327,33 @@
       let isQuizMode = true;  // start in quiz mode by default
       let lastHintTarget = null;  // track last focused blank for hint
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
-      // ----- Load persistent data -----
+      // ----- Load persistent data: prefer localStorage, then GitHub Pages file -----
       let data = null;
-
-      // ① Try pulling quizData.json (if you’ve exported previously)
-      try {
-        const resp = await fetch('quizData.json', { cache: 'no-store' });
-        if (resp.ok) {
-          const txt = (await resp.text()).trim();
-          if (txt) data = JSON.parse(txt);
+      // 1. Try localStorage
+      const stored = localStorage.getItem('quizData');
+      if (stored) {
+        try {
+          data = JSON.parse(stored);
+        } catch (e) {
+          console.error('Failed to parse localStorage quizData:', e);
         }
-      } catch (_) {
-        /* ignore fetch/parse errors – we’ll fall back below */
       }
-
-      // ② If JSON file absent or empty, fall back to localStorage
-      const ls = JSON.parse(localStorage.getItem('quizData') || '{}');
-      if (!data || !data.folders || !data.folders.length) {
-        data = ls.folders ? ls : { folders: [] };
+      // 2. If no valid localStorage, fetch static file
+      if (!data) {
+        try {
+          const resp = await fetch('quizData.json', { cache: 'no-store' });
+          if (resp.ok) {
+            const text = (await resp.text()).trim();
+            if (text) data = JSON.parse(text);
+          }
+        } catch (e) {
+          console.error('Error fetching quizData.json:', e);
+        }
       }
-
-      // ③ Ensure schema keys exist
-      if (!data.folders) data.folders = [];
+      // 3. Ensure data has the right shape
+      if (!data || !data.folders) {
+        data = { folders: [] };
+      }
 
       // ——— GitHub persistence configuration ———
       const GITHUB_TOKEN = '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';
