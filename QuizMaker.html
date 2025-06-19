@@ -422,23 +422,34 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
-      // ----- Load persistent data from Flask API -----
+      // ----- Load persistent data, with static fallback -----
       let data;
+      let staticMode = false;
       try {
+        // Attempt API fetch
         const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
         if (resp.ok) {
           data = await resp.json();
         } else {
-          console.warn('Failed to load quiz data, status', resp.status);
+          throw new Error('API response not OK: ' + resp.status);
+        }
+      } catch (apiErr) {
+        console.warn('API unavailable, falling back to static quizData.json', apiErr);
+        staticMode = true;
+        try {
+          const resp2 = await fetch('./quizData.json', { cache: 'no-store' });
+          data = resp2.ok ? await resp2.json() : { folders: [] };
+        } catch (staticErr) {
+          console.error('Error loading static quizData.json:', staticErr);
           data = { folders: [] };
         }
-      } catch (e) {
-        console.error('Error fetching quiz data:', e);
-        alert('Error fetching quiz data. Starting with an empty set.');
-        data = { folders: [] };
       }
       // Initialize currentFolder/Section based on loaded data...
       function saveData() {
+        if (staticMode) {
+          console.warn('Static mode: changes will not be saved to server.');
+          return;
+        }
         fetch('http://localhost:5001/api/quizData', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
