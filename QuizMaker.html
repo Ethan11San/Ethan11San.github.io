@@ -1,9 +1,28 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>QuizMaker</title>
+  <link rel="icon" href="data:,">
   <style>
+    /* Slim, subtle scrollbar for the questions list */
+    #sectionsContainer {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,0,0,0.3) transparent;
+    }
+    #sectionsContainer::-webkit-scrollbar {
+      width: 6px;
+    }
+    #sectionsContainer::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    #sectionsContainer::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.3);
+      border-radius: 3px;
+    }
+    #sectionsContainer::-webkit-scrollbar-thumb:hover {
+      background-color: rgba(0,0,0,0.5);
+    }
     /* —— Reset & Base —— */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -18,8 +37,32 @@
       background: #2c3e50;
       color: #ecf0f1;
       padding: 20px;
-      overflow-y: auto;
     }
+    /* QuestionControls button accents */
+    #addFillBtn { border-left: 4px solid #1abc9c; }
+    #addLabelBtn { border-left: 4px solid #e67e22; }
+    #addAcronymBtn { border-left: 4px solid #8e44ad; }
+    #toggleDeleteBtn { border-left: 4px solid #c0392b; }
+
+    /* QuestionControls buttons base styling */
+    #questionControls button {
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      border-radius: 4px;
+      background: #fff;
+      color: #2c3e50;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #questionControls button:hover {
+      background: #ecf0f1;
+    }
+
+    /* Mode switch button accents */
+    #editModeBtn { border-left: 4px solid #1abc9c; }
+    #quizModeBtn { border-left: 4px solid #8e44ad; }
+    #quizAllBtn { border-left: 4px solid #e67e22; }
     #sidebar h3 {
       margin-bottom: 10px;
       font-size: 1.1rem;
@@ -33,11 +76,36 @@
       cursor: pointer;
       transition: background .2s;
     }
+    /* Question type accents */
+    .nav li.type-fill {
+      border-left: 4px solid #1abc9c;
+      padding-left: 8px;
+    }
+    .nav li.type-diagram {
+      border-left: 4px solid #e67e22;
+      padding-left: 8px;
+    }
+    .nav li.type-acronym {
+      border-left: 4px solid #8e44ad;
+      padding-left: 8px;
+    }
     .nav li:hover { background: #34495e; }
+
+    /* Dynamic selected background based on question type */
     .nav li.selected {
+      font-weight: bold;
+    }
+    .nav li.type-fill.selected {
       background: #1abc9c;
       color: #2c3e50;
-      font-weight: bold;
+    }
+    .nav li.type-diagram.selected {
+      background: #e67e22;
+      color: #2c3e50;
+    }
+    .nav li.type-acronym.selected {
+      background: #8e44ad;
+      color: #fff;
     }
     #newFolderName {
       width: calc(100% - 100px);
@@ -128,11 +196,15 @@
     .word:hover { background: #dfe6e9; }
     .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
     #previewBtn, #saveSectionBtn {
-      margin-top: 12px; margin-right: 8px;
+      margin-top: 12px;
+      margin-right: 8px;
       padding: 8px 16px;
-      border: none; border-radius: 4px;
-      background: #27ae60; color: #fff;
-      cursor: pointer; transition: background .2s;
+      border: none;
+      border-radius: 4px;
+      background: #1abc9c;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
     }
     #previewBtn:hover, #saveSectionBtn:hover { background: #1e8449; }
 
@@ -148,6 +220,7 @@
       width: 120px;             /* fixed small width */
       padding: 2px 4px;
       margin-bottom: 4px;
+      margin-right: 8px;
       font-size: 0.8rem;
       border: 1px solid #7f8c8d;
       border-radius: 4px;
@@ -158,6 +231,7 @@
       width: 120px;
       padding: 2px 4px;
       margin-bottom: 4px;
+      margin-right: 8px;
       font-size: 0.8rem;
     }
 
@@ -258,19 +332,36 @@
 </head>
 <body>
 
-  <div id="sidebar">
+
+  <div id="sidebar" style="display:flex; flex-direction:column; height:100vh;">
     <h3>Folders</h3>
     <ul id="folders" class="nav"></ul>
     <input id="newFolderName" placeholder="New folder name">
     <button id="addFolderBtn">Add Folder</button>
     <hr style="border:1px solid #34495e;opacity:.2;margin:20px 0;">
     <h3>Questions</h3>
-    <ul id="sections" class="nav"></ul>
-    <button id="addFillBtn">+ Add Fill-In</button>
-    <button id="addLabelBtn">+ Add Label-Image</button>
-    <button id="addAcronymBtn">+ Add Acronym</button>
-    <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
-    <button id="toggleDeleteBtn">🗑️ Toggle Delete</button>
+    <div style="position: relative; margin-bottom: 8px;">
+      <input type="text" id="sectionSearch"
+             placeholder="Search questions..."
+             style="width: calc(100% - 30px);
+                    padding: 6px;
+                    border: none;
+                    border-radius: 4px;">
+      <span id="clearSearchBtn"
+            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                   cursor: pointer; font-size: 14px; display: none; color: #ecf0f1;">✖</span>
+    </div>
+    <!-- Scrollable questions list -->
+    <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
+      <ul id="sections" class="nav"></ul>
+    </div>
+    <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+      <button id="addFillBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Fill-In</button>
+      <button id="addLabelBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Diagram</button>
+      <button id="addAcronymBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Acronym</button>
+      <button id="toggleDeleteBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">🗑️ Delete</button>
+      <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
+    </div>
   </div>
 
   <div id="main">
@@ -278,7 +369,7 @@
     <div id="controls">
       <button id="editModeBtn">✏️ Edit Mode</button>
       <button id="quizModeBtn">📝 Quiz Question</button>
-      <button id="quizAllBtn">🎮 Quiz All</button>
+      <button id="quizAllBtn">🎲 Random Quiz</button>
     </div>
 
     <div id="editorArea">
@@ -302,11 +393,9 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      // Warn if served via file:// since GitHub API requires HTTP/HTTPS origin for CORS
-      if (window.location.protocol === 'file:') {
-        alert('⚠️ QuizMaker must be served over HTTP/HTTPS (e.g. GitHub Pages or a local web server) to enable GitHub syncing.');
-      }
+    (async () => {
+      try {
+      // IndexedDB and persistent storage logic removed.
       // Function to position definitions container and add button absolutely below the image container
       function updateDefPosition() {
         const cont = document.getElementById('labelContainer');
@@ -328,107 +417,47 @@
           defCont.style.left = cont.offsetLeft + 'px';
         }
       }
-      let isQuizMode = true;  // start in quiz mode by default
+      let isQuizMode = true;   // start in quiz mode by default
       let lastHintTarget = null;  // track last focused blank for hint
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
-      // ----- Load persistent data: prefer localStorage, then GitHub Pages file -----
-      let data = null;
-      // 1. Try localStorage
-      const stored = localStorage.getItem('quizData');
-      if (stored) {
-        try {
-          data = JSON.parse(stored);
-        } catch (e) {
-          console.error('Failed to parse localStorage quizData:', e);
+      let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
+      let lastSectionOrder = null;
+      // ----- Load persistent data from Flask API -----
+      let data;
+      try {
+        const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
+        if (resp.ok) {
+          data = await resp.json();
+        } else {
+          console.warn('Failed to load quiz data, status', resp.status);
+          data = { folders: [] };
         }
-      }
-      // 2. If no valid localStorage, fetch static file
-      if (!data) {
-        try {
-          const resp = await fetch('quizData.json', { cache: 'no-store' });
-          if (resp.ok) {
-            const text = (await resp.text()).trim();
-            if (text) data = JSON.parse(text);
-          }
-        } catch (e) {
-          console.error('Error fetching quizData.json:', e);
-        }
-      }
-      // 3. Ensure data has the right shape
-      if (!data || !data.folders) {
+      } catch (e) {
+        console.error('Error fetching quiz data:', e);
+        alert('Error fetching quiz data. Starting with an empty set.');
         data = { folders: [] };
       }
-
-      // ——— GitHub persistence configuration ———
-      const GITHUB_TOKEN = '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';
-      const GITHUB_OWNER = 'Ethan11San';
-      const GITHUB_REPO  = 'Ethan11San.github.io';
-      const GITHUB_PATH  = 'quizData.json';
-
-      // Unicode‑safe Base64 encoding
-      function toBase64(str) {
-        return btoa(unescape(encodeURIComponent(str)));
-      }
-
-      // Helper: fetch existing file SHA from GitHub
-      async function getGitHubFileSha() {
-        console.log('Fetching SHA for', GITHUB_PATH);
-        const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-        const resp = await fetch(url, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: `Bearer ${GITHUB_TOKEN}`,
-            Accept: 'application/vnd.github.v3+json'
-          }
-        });
-        if (!resp.ok) return null;
-        const data = await resp.json();
-        return data.sha;
-      }
-
-      // Helper: upload updated quizData.json to GitHub
-      async function uploadQuizData(data) {
-        const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-        const sha = await getGitHubFileSha();
-        console.log('Obtained SHA:', sha);
-        const content = toBase64(JSON.stringify(data, null, 2));
-        const bodyObj = {
-          message: 'Update quizData.json via QuizMaker',
-          content: content,
-          sha: sha,
-          branch: "main"
-        };
-        console.log('Uploading quizData.json to GitHub:', { message: bodyObj.message, sha: bodyObj.sha });
-        const resp = await fetch(url, {
-          method: 'PUT',
-          mode: 'cors',
-          credentials: 'omit',
-          headers: {
-            Authorization: `Bearer ${GITHUB_TOKEN}`,
-            Accept: 'application/vnd.github.v3+json'
-          },
-          body: JSON.stringify(bodyObj)
-        });
-        if (resp.ok) {
-          console.log('GitHub upload successful');
-        } else {
-          console.error('GitHub upload failed', await resp.text());
-        }
-      }
-
+      // Initialize currentFolder/Section based on loaded data...
       function saveData() {
-        // Persist data to localStorage
-        localStorage.setItem('quizData', JSON.stringify(data));
-        // Persist data to GitHub
-        uploadQuizData(data).catch(err => console.error(err));
+        fetch('http://localhost:5001/api/quizData', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        .then(resp => {
+          if (!resp.ok) throw new Error('Status ' + resp.status);
+        })
+        .catch(err => {
+          console.error('Error saving quiz data:', err);
+          alert('Error saving quiz data: ' + err.message);
+        });
       }
 
       let currentFolder = null, currentSection = null;
       let waitingForImagePaste = false;
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
+            sectionSearch = document.getElementById('sectionSearch'),
             newFolderName = document.getElementById('newFolderName'), addFolderBtn = document.getElementById('addFolderBtn'),
             addFillBtn = document.getElementById('addFillBtn'),
             addLabelBtn = document.getElementById('addLabelBtn'),
@@ -443,6 +472,27 @@
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), nextBtn = document.getElementById('nextBtn');
+      const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
+      const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+      // —— Initial UI render using migrated or loaded data ——
+      if (data.folders.length > 0) {
+        currentFolder = 0;
+        currentSection = data.folders[0].sections.length > 0 ? 0 : null;
+      } else {
+        currentFolder = null;
+        currentSection = null;
+      }
+      renderFolders();
+      renderSections(lastSectionOrder);
+      if (currentSection !== null) {
+        if (isQuizMode) {
+          enterQuizQuestion();
+        } else {
+          enterEdit();
+          loadSection();
+        }
+      }
 
       // --- Auto-resize editor textarea with content up to its max height ---
       function adjustEditorHeight() {
@@ -464,7 +514,8 @@
         currentSection = data.folders[currentFolder].sections.length - 1;
         saveData();
         renderFolders();
-        renderSections();
+        renderSections(lastSectionOrder);
+        enterEdit();
         loadSection();
       };
 
@@ -486,7 +537,7 @@
             data.folders.splice(i, 0, moved);
             saveData();
             renderFolders();
-            renderSections();
+            renderSections(lastSectionOrder);
           });
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
@@ -499,7 +550,7 @@
               currentSection = null;
             }
             renderFolders();
-            renderSections();
+            renderSections(lastSectionOrder);
             // If in quiz mode, handle empty folders
             if (isQuizMode) {
               if (currentSection !== null) {
@@ -536,22 +587,43 @@
           delF.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
+              // Remove the folder
               data.folders.splice(i, 1);
-              currentFolder = null;
+              // Adjust currentFolder
+              if (data.folders.length > 0) {
+                const newIdx = i < data.folders.length ? i : data.folders.length - 1;
+                currentFolder = newIdx;
+                const secs = data.folders[currentFolder].sections;
+                currentSection = secs.length > 0 ? 0 : null;
+              } else {
+                currentFolder = null;
+                currentSection = null;
+              }
               saveData();
               renderFolders();
-              renderSections();
+              renderSections(lastSectionOrder);
+              enterEdit();
+              if (currentSection !== null) loadSection();
             }
           };
           li.appendChild(delF);
           foldersUL.appendChild(li);
         });
       }
-      function renderSections(){
-        sectionsUL.innerHTML='';
-        if(currentFolder===null) return;
-        data.folders[currentFolder].sections.forEach((s,i)=>{
+      function renderSections(order){
+        sectionsUL.innerHTML = '';
+        if (currentFolder === null) return;
+        const indices = order || data.folders[currentFolder].sections.map((_,i) => i);
+        indices.forEach(index => {
+          const s = data.folders[currentFolder].sections[index];
+          const i = index;
           let li=document.createElement('li');
+          // Add a subtle left-border color to indicate question type
+          li.classList.remove('type-fill', 'type-diagram', 'type-acronym');
+          // Default to fill for missing or other types
+          if (s.type === 'label')       li.classList.add('type-diagram');
+          else if (s.type === 'acronym') li.classList.add('type-acronym');
+          else                            li.classList.add('type-fill');
           // Enable drag-and-drop reordering for questions
           li.draggable = true;
           li.addEventListener('dragstart', e => {
@@ -565,7 +637,7 @@
             const moved = secs.splice(from, 1)[0];
             secs.splice(i, 0, moved);
             saveData();
-            renderSections();
+            renderSections(lastSectionOrder);
           });
           let title='';
           if(s.type==='acronym') title = s.acronym;
@@ -579,10 +651,12 @@
             title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
           li.textContent = title;
-          li.className=i===currentSection?'selected':'';
+          // Only toggle the 'selected' class, preserving type-* classes
+          if (i === currentSection) li.classList.add('selected');
+          else li.classList.remove('selected');
           li.onclick = () => {
             currentSection = i;
-            renderSections();
+            renderSections(lastSectionOrder);
             if (isQuizMode) {
               enterQuizQuestion();   // show quiz for this section
             } else {
@@ -598,7 +672,9 @@
             if (newTitle !== null) {
               sec.title = newTitle.trim();
               saveData();
-              renderSections();
+              renderSections(lastSectionOrder);
+              enterEdit();
+              loadSection();
               // No need to reload editor/rawText
             }
           };
@@ -613,12 +689,19 @@
           delS.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete question "${delTitle}"? This cannot be undone.`)) {
+              // Remove the section
               data.folders[currentFolder].sections.splice(i, 1);
-              currentSection = null;
+              // Adjust currentSection
+              const secs = data.folders[currentFolder].sections;
+              if (secs.length > 0) {
+                currentSection = i < secs.length ? i : secs.length - 1;
+              } else {
+                currentSection = null;
+              }
               saveData();
-              renderSections();
-              // reload to clear editor if needed
+              renderSections(lastSectionOrder);
               enterEdit();
+              if (currentSection !== null) loadSection();
             }
           };
           li.appendChild(delS);
@@ -626,11 +709,80 @@
         });
       }
 
-      addFolderBtn.onclick=()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; saveData(); renderFolders(); };
-      addFillBtn.onclick=()=>{ if(currentFolder===null)return alert('Select a folder first'); let sec={ type:'fill', title:'', rawText:'', hidden:[], alts:{} }; data.folders[currentFolder].sections.push(sec); currentSection=data.folders[currentFolder].sections.length-1; saveData(); renderSections(); loadSection(); };
+      // Filter and reorder sections based on search input
+      function filterSections() {
+        const terms = sectionSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        lastSectionOrder = null;
+        if (!terms.length) {
+          renderSections(lastSectionOrder);
+          return;
+        }
+        const secs = data.folders[currentFolder].sections;
+        const group1 = [], group2 = [], group3 = [];
+        secs.forEach((s, idx) => {
+          // Determine title and body text
+          const defaultTitle = s.title?.trim() ||
+            ((s.rawText||'').split('\n')[0].trim()) ||
+            s.acronym ||
+            '(untitled)';
+          const title = defaultTitle.toLowerCase();
+          let body = '';
+          if (s.type === 'fill') body = s.rawText || '';
+          else if (s.type === 'label')
+            body = (s.rawText||'') + ' ' +
+              (s.definitions||[]).map(d=>d.rawText||'').join(' ');
+          else if (s.type === 'acronym') body = s.acronym;
+          body = body.toLowerCase();
+          const inTitleAll = terms.every(t => title.includes(t));
+          const inBodyAny = terms.some(t => body.includes(t));
+          if (inTitleAll) group1.push(idx);
+          else if (inBodyAny) group2.push(idx);
+          else group3.push(idx);
+        });
+        lastSectionOrder = [...group1, ...group2];
+        renderSections(lastSectionOrder);
+      }
+      sectionSearch.oninput = () => {
+        filterSections();
+        clearSearchBtn.style.display = sectionSearch.value ? 'inline' : 'none';
+      };
+      clearSearchBtn.onclick = () => {
+        sectionSearch.value = '';
+        filterSections();
+        clearSearchBtn.style.display = 'none';
+      };
 
-      addLabelBtn.onclick = () => {
+      // Toggle delete icons in folder and question lists
+      toggleDeleteBtn.onclick = () => {
+        deleteMode = !deleteMode;
+        renderFolders();
+        renderSections(lastSectionOrder);
+      };
+
+      addFolderBtn.onclick=async()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; await saveData(); renderFolders(); };
+      addFillBtn.onclick=async()=>{
+        if(currentFolder===null)return alert('Select a folder first');
+        let sec={ type:'fill', title:'', rawText:'', hidden:[], alts:{} };
+        data.folders[currentFolder].sections.push(sec);
+        currentSection=data.folders[currentFolder].sections.length-1;
+        await saveData();
+        renderSections(lastSectionOrder);
+        enterEdit();
+        loadSection();
+      };
+
+      addLabelBtn.onclick = async () => {
         if (currentFolder === null) return alert('Select a folder first');
+        // Create placeholder label question immediately
+        const q = { type:'label', rawText:'', hidden:[], alts:{}, image:'', labels:[], definitions:[], arrows:[] };
+        data.folders[currentFolder].sections.push(q);
+        currentSection = data.folders[currentFolder].sections.length - 1;
+        await saveData();
+        renderFolders();
+        renderSections(lastSectionOrder);
+        enterEdit();
+        loadSection();
+        // Now prompt user for image input
         if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
           waitingForImagePaste = true;
           alert('Now paste the image from your clipboard.');
@@ -638,32 +790,25 @@
           labelImageInput.click();
         }
       };
-      labelImageInput.onchange = e => {
+      labelImageInput.onchange = async e => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => {
-          const q = {
-            rawText: '',
-            hidden: [],
-            alts: {},
-            type: 'label',
-            image: reader.result,
-            labels: []  // entries will have x,y,text,initialized,fontSize
-          };
-          data.folders[currentFolder].sections.push(q);
-          currentSection = data.folders[currentFolder].sections.length - 1;
-          saveData();
+        reader.onload = async () => {
+          const sec = data.folders[currentFolder].sections[currentSection];
+          sec.image = reader.result;
+          await saveData();
           renderFolders();
-          renderSections();
+          renderSections(lastSectionOrder);
+          enterEdit();
           loadSection();
         };
         reader.readAsDataURL(file);
         e.target.value = '';
       };
 
-      // Allow pasting an image to create a new label question
-      document.addEventListener('paste', e => {
+      // Allow pasting an image to update the current label question
+      document.addEventListener('paste', async e => {
         if (!waitingForImagePaste) return;
         if (currentFolder === null) return;
         const items = e.clipboardData && e.clipboardData.items;
@@ -672,20 +817,13 @@
           if (item.type.indexOf('image') !== -1) {
             const blob = item.getAsFile();
             const reader = new FileReader();
-            reader.onload = () => {
-              const q = {
-                rawText: '',
-                hidden: [],
-                alts: {},
-                type: 'label',
-                image: reader.result,
-                labels: []
-              };
-              data.folders[currentFolder].sections.push(q);
-              currentSection = data.folders[currentFolder].sections.length - 1;
-              saveData();
+            reader.onload = async () => {
+              const sec = data.folders[currentFolder].sections[currentSection];
+              sec.image = reader.result;
+              await saveData();
               renderFolders();
-              renderSections();
+              renderSections(lastSectionOrder);
+              enterEdit();
               loadSection();
             };
             reader.readAsDataURL(blob);
@@ -699,6 +837,19 @@
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
+        // Update header to show current section title
+        let titleText = '';
+        if (sec.type === 'acronym') {
+          titleText = sec.acronym;
+        } else if (sec.type === 'label') {
+          const raw = sec.rawText || '';
+          const defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
+          titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
+        } else {
+          const defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
+          titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
+        }
+        document.getElementById('header').textContent = titleText;
         // Hide all main editors
         editorTA.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
@@ -774,6 +925,11 @@
             wrapper.draggable = true;
             // Drag-and-drop handlers to reorder definitions
             wrapper.addEventListener('dragstart', e => {
+              // If user is dragging inside the textarea, let them select text instead of moving the wrapper
+              if (e.target.tagName.toLowerCase() === 'textarea') {
+                e.preventDefault();
+                return;
+              }
               e.dataTransfer.setData('text/plain', dIndex);
             });
             wrapper.addEventListener('dragover', e => e.preventDefault());
@@ -818,8 +974,13 @@
             const ta = document.createElement('textarea');
             ta.style.width = '100%';
             ta.style.minHeight = '60px';
+            ta.style.height = 'auto';
+            ta.style.overflow = 'hidden';
             ta.style.fontSize = '1.1rem';   // bigger, matches main editor
             ta.value = def.rawText;
+            // Disable wrapper drag while interacting with textarea
+            ta.addEventListener('mousedown', () => { wrapper.draggable = false; });
+            ta.addEventListener('mouseup',   () => { wrapper.draggable = true; });
 
             // containers for live preview + alternates
             const prevDiv = document.createElement('div');
@@ -827,11 +988,18 @@
             const altDiv  = document.createElement('div');
             altDiv.style.marginTop  = '12px';
 
-            ta.oninput = () => {
+            // Auto-resize as you type
+            function adjustDefHeight() {
+              ta.style.height = 'auto';
+              ta.style.height = ta.scrollHeight + 'px';
+            }
+            ta.addEventListener('input', () => {
+              adjustDefHeight();
               def.rawText = ta.value;
               saveData();
               buildDefinitionPreview(def, prevDiv, altDiv);
-            };
+            });
+            adjustDefHeight();
 
             wrapper.appendChild(ta);
             wrapper.appendChild(prevDiv);
@@ -845,6 +1013,10 @@
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
+          // Ensure definitions follow container resizing
+          if (window.ResizeObserver) {
+            new ResizeObserver(updateDefPosition).observe(container);
+          }
           // Start with native resizing disabled
           container.style.resize = 'none';
           // Restore saved position
@@ -1142,56 +1314,60 @@
                   }
                 });
                 el.addEventListener('dblclick', evt => {
-                  if (!evt.metaKey) return;
-                  evt.preventDefault();
-                  const existingPopup = document.getElementById('arrowEditPopup');
-                  if (existingPopup) existingPopup.remove();
-                  const popup = document.createElement('div');
-                  popup.id = 'arrowEditPopup';
-                  popup.style.position = 'absolute';
-                  const overlayRect = overlay.getBoundingClientRect();
-                  const fixedLeft = overlayRect.left + 50;
-                  const fixedTop = overlayRect.top + 50;
-                  popup.style.left = `${fixedLeft}px`;
-                  popup.style.top = `${fixedTop}px`;
-                  // Ensure popup is always visible on screen
-                  // (Removed legacy code referencing tipClientX/tipClientY)
-                  popup.style.transform = 'translate(-50%, -100%)';
-                  popup.style.transformOrigin = 'bottom center';
-                  popup.style.background = '#fff';
-                  popup.style.border = '1px solid #7f8c8d';
-                  popup.style.borderRadius = '4px';
-                  popup.style.padding = '8px';
-                  popup.style.zIndex = '10000';
-                  popup.innerHTML = `
-                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                      Color: <input type="color" id="arrowColorPicker" value="${a.color}">
-                    </label>
-                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                      Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
-                    </label>
-                    <div style="text-align:right;">
-                      <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
-                      <button id="arrowCancelBtn">Cancel</button>
-                    </div>
-                  `;
-                  popup.addEventListener('dblclick', evt2 => {
-                    evt2.stopPropagation();
-                  });
-                  overlay.appendChild(popup);
-                  document.getElementById('arrowSaveBtn').onclick = () => {
-                    const colorVal = document.getElementById('arrowColorPicker').value;
-                    const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
-                    if (colorVal && !isNaN(widthVal) && widthVal > 0) {
-                      sec.arrows[idx].color = colorVal;
-                      sec.arrows[idx].width = widthVal;
-                      saveData();
-                      loadSection();
-                    }
-                  };
-                  document.getElementById('arrowCancelBtn').onclick = () => {
-                    popup.remove();
-                  };
+                  try {
+                    if (!evt.metaKey) return;
+                    evt.preventDefault();
+                    const existingPopup = document.getElementById('arrowEditPopup');
+                    if (existingPopup) existingPopup.remove();
+                    const popup = document.createElement('div');
+                    popup.id = 'arrowEditPopup';
+                    popup.style.position = 'absolute';
+                    const overlayRect = overlay.getBoundingClientRect();
+                    const fixedLeft = overlayRect.left + 50;
+                    const fixedTop = overlayRect.top + 50;
+                    popup.style.left = `${fixedLeft}px`;
+                    popup.style.top = `${fixedTop}px`;
+                    // Ensure popup is always visible on screen
+                    // (Removed legacy code referencing tipClientX/tipClientY)
+                    popup.style.transform = 'translate(-50%, -100%)';
+                    popup.style.transformOrigin = 'bottom center';
+                    popup.style.background = '#fff';
+                    popup.style.border = '1px solid #7f8c8d';
+                    popup.style.borderRadius = '4px';
+                    popup.style.padding = '8px';
+                    popup.style.zIndex = '10000';
+                    popup.innerHTML = `
+                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                        Color: <input type="color" id="arrowColorPicker" value="${a.color}">
+                      </label>
+                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                        Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
+                      </label>
+                      <div style="text-align:right;">
+                        <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
+                        <button id="arrowCancelBtn">Cancel</button>
+                      </div>
+                    `;
+                    popup.addEventListener('dblclick', evt2 => {
+                      evt2.stopPropagation();
+                    });
+                    overlay.appendChild(popup);
+                    document.getElementById('arrowSaveBtn').onclick = () => {
+                      const colorVal = document.getElementById('arrowColorPicker').value;
+                      const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
+                      if (colorVal && !isNaN(widthVal) && widthVal > 0) {
+                        sec.arrows[idx].color = colorVal;
+                        sec.arrows[idx].width = widthVal;
+                        saveData();
+                        loadSection();
+                      }
+                    };
+                    document.getElementById('arrowCancelBtn').onclick = () => {
+                      popup.remove();
+                    };
+                  } catch (err) {
+                    console.error('Arrow popup handler error:', err);
+                  }
                 });
               });
             });
@@ -1250,6 +1426,13 @@
         editorTA.value = sec.rawText;
         adjustEditorHeight();
         previewSection();
+        // Auto-save and live preview for fill-in questions
+        editorTA.oninput = () => {
+          adjustEditorHeight();
+          sec.rawText = editorTA.value;
+          saveData();
+          previewSection();
+        };
       }
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
       // Normalize sec.hidden entries to objects { word, occ }
@@ -1286,7 +1469,16 @@
         altContainer.style.display = 'block';
         tokens.forEach((tok, i) => {
           if (!tok.trim()) {
-            previewDiv.appendChild(document.createTextNode(tok));
+            // Preserve newline breaks
+            if (tok.includes('\n')) {
+              const lines = tok.split('\n');
+              lines.forEach((ln, idx) => {
+                if (ln) previewDiv.appendChild(document.createTextNode(ln));
+                if (idx < lines.length - 1) previewDiv.appendChild(document.createElement('br'));
+              });
+            } else {
+              previewDiv.appendChild(document.createTextNode(tok));
+            }
           } else {
             const w = tok.trim();
             counts[w] = (counts[w] || 0) + 1;
@@ -1321,7 +1513,7 @@
           if (isHidden) {
             const key = `${w}_${occ}`;
             let label = document.createElement('label');
-            label.textContent = `Blank (${w}, #${occ}): `;
+            label.textContent = `${w} #${occ}: `;
             let ai = document.createElement('input');
             ai.className = 'alt-input';
             ai.placeholder = 'alt1, alt2, …';
@@ -1351,7 +1543,19 @@
         // clickable words
         let counts = {};
         tokens.forEach(tok => {
-          if (!tok.trim()) { previewDiv.appendChild(document.createTextNode(tok)); return; }
+          if (!tok.trim()) {
+            // Preserve newlines
+            if (tok.includes('\n')) {
+              const lines = tok.split('\n');
+              lines.forEach((ln, idx) => {
+                if (ln) previewDiv.appendChild(document.createTextNode(ln));
+                if (idx < lines.length - 1) previewDiv.appendChild(document.createElement('br'));
+              });
+            } else {
+              previewDiv.appendChild(document.createTextNode(tok));
+            }
+            return;
+          }
           const w = tok.trim();
           counts[w] = (counts[w] || 0) + 1;
           const occ = counts[w];
@@ -1384,7 +1588,7 @@
 
           const key = `${w}_${occ}`;
           const label = document.createElement('label');
-          label.textContent = `Blank (${w} #${occ}): `;
+          label.textContent = `${w} #${occ}: `;
           const ai = document.createElement('input');
           ai.className  = 'alt-input';
           ai.placeholder = 'alt1, alt2 …';
@@ -1397,7 +1601,7 @@
           altDiv.appendChild(ai);
         });
       }
-      saveSectionBtn.onclick = () => {
+      saveSectionBtn.onclick = async () => {
         if (!ensureSelection()) return;
         const sec = data.folders[currentFolder].sections[currentSection];
         // Only update rawText for non-label questions
@@ -1405,8 +1609,9 @@
           sec.rawText = editorTA.value;
         }
         // sec.hidden is already updated in previewSection's click handler
-        saveData();
-        renderSections();
+        await saveData();
+        renderSections(lastSectionOrder);
+        loadSection();
         alert('Section saved ✔️');
       };
 
@@ -1421,7 +1626,7 @@
       function enterEdit(){
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
-        renderSections();
+        renderSections(lastSectionOrder);
       }
       function enterQuiz(){
         if (currentFolder === null) {
@@ -1432,8 +1637,22 @@
         quizArea.style.display = 'block';
         startQuiz();
       }
-      let quizOrder=[], quizPos=0;
-      function startQuiz(){ quizOrder=data.folders[currentFolder].sections.map((_,i)=>i); quizPos=0; showQuiz(); }
+
+      // Starts a random-order quiz across all sections in the current folder
+      function enterRandomQuiz() {
+        if (currentFolder === null) {
+          alert('Select a folder first');
+          return;
+        }
+        editorArea.style.display = 'none';
+        quizArea.style.display = 'block';
+        // Build and shuffle order of question indices
+        quizOrder = data.folders[currentFolder].sections
+          .map((_, i) => i)
+          .sort(() => Math.random() - 0.5);
+        quizPos = 0;
+        showQuiz();
+      }
 
       function enterQuizQuestion(){
         if(!ensureSelection()) return;
@@ -1452,12 +1671,12 @@
           enterQuiz();
         }
       };
-      quizAllBtn .onclick = enterQuiz;
+      quizAllBtn .onclick = enterRandomQuiz;
 
       function showQuiz(){
         // Highlight current section in left panel
         currentSection = quizOrder[quizPos];
-        renderSections();
+        renderSections(lastSectionOrder);
         quizContent.innerHTML = '';
         let sec = data.folders[currentFolder].sections[quizOrder[quizPos]];
         // Compute title logic for all types
@@ -1470,6 +1689,8 @@
           defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
         }
         const title = sec.title && sec.title.trim() ? sec.title : defaultTitle;
+        // Update the main header to match the quiz question's title
+        document.getElementById('header').textContent = title;
         const titleEl = document.createElement('div');
         titleEl.style.fontSize = '1.2rem';
         titleEl.style.fontWeight = 'bold';
@@ -1910,35 +2131,15 @@
               target.value = '';
               target.classList.remove('correct');
             }
-            target.focus();
-          }, 2000);
+          }, 1000);
         }
       };
 
-      // —— Keyboard shortcut: ⌘‑G (Command+G) triggers Hint ——
-      document.addEventListener('keydown', evt => {
-        // Fire only when the Command (Meta) key is held, no Ctrl/Shift/Alt, and key is lowercase 'g'
-        if (evt.metaKey && !evt.ctrlKey && !evt.shiftKey && !evt.altKey && evt.key === 'g') {
-          evt.preventDefault();
-          hintBtn.click();
-        }
-      });
-
-      renderFolders();
-      renderSections();
-      enterEdit();  // default to edit mode on load
-
-      // --- Toggle Delete Button logic ---
-      const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
-      // deleteMode already declared above
-      toggleDeleteBtn.onclick = () => {
-        deleteMode = !deleteMode;
-        document.querySelectorAll('.delete-icon').forEach(el =>
-          el.style.display = deleteMode ? 'inline' : 'none'
-        );
-        toggleDeleteBtn.textContent = deleteMode ? '❌ Exit Delete' : '🗑️ Toggle Delete';
-      };
-    });
+    } catch (err) {
+      console.error(err);
+      alert('Unhandled error: ' + err.message);
+    }
+  })();
   </script>
 </body>
 </html>
