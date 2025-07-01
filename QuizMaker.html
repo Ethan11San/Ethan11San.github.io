@@ -4,7 +4,15 @@
   <meta charset="UTF-8">
   <title>QuizMaker</title>
   <link rel="icon" href="data:,">
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <style>
+    /* Ensure formatted spans do not disrupt line spacing */
+    #editor span {
+      display: inline;
+      line-height: normal;
+      vertical-align: baseline;
+    }
     /* Slim, subtle scrollbar for the questions list */
     #sectionsContainer {
       scrollbar-width: thin;
@@ -155,6 +163,24 @@
     #controls button:hover { background: #2980b9; }
 
     /* —— Editor & Preview —— */
+    #formatToolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      padding: 4px;
+      margin-bottom: 12px;
+    }
+    #formatToolbar button {
+      font-weight:bold;
+      padding:4px 8px;
+      cursor:pointer;
+    }
+    #formatToolbar select, #formatToolbar input[type="color"] {
+      cursor:pointer;
+    }
     .delete-icon {
       display: none;
       margin-left: 4px;
@@ -165,9 +191,9 @@
     #editor {
       width: 100%;
       height: auto;
-      max-height: 360px;
+      max-height: none;
       min-height: 180px;
-      overflow-y: auto;
+      overflow-y: hidden;
       padding: 12px;
       border: 1px solid #bdc3c7;
       border-radius: 4px;
@@ -185,8 +211,16 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+    /* Custom preview line class to control vertical spacing */
+    .preview-line {
+      margin: 0 0 6px 0;
+      display: block;
+      line-height: 1.4;
+    }
     .word {
-      display: inline-block;
+      display: inline;
+      white-space: pre-wrap;
+      word-break: break-word;
       margin: 2px;
       padding: 4px 6px;
       border-radius: 4px;
@@ -262,8 +296,9 @@
     }
     /* —— Fill-In Quiz Font & Size —— */
     #quizContent .blank input {
-      font-size: 1rem;
-      font-family: Arial, sans-serif;
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0 2px;
     }
     #quizContent .blank {
       font-family: Arial, sans-serif;
@@ -271,7 +306,7 @@
     /* —— Acronym Quiz Font & Width —— */
     #quizContent input[type="text"] {
       font-family: Arial, sans-serif;
-      min-width: 12ch;
+      min-width: 0ch;
     }
 
     /* Definition wrapper styling and drag-and-drop container */
@@ -328,6 +363,48 @@
     #hintBtn:hover {
       background: #71368a;
     }
+
+    /* Enforce pixel sizes for Quill size picker */
+    .ql-size-8px  { font-size: 8px !important; }
+    .ql-size-10px { font-size: 10px !important; }
+    .ql-size-12px { font-size: 12px !important; }
+    .ql-size-14px { font-size: 14px !important; }
+    .ql-size-16px { font-size: 16px !important; }
+    .ql-size-18px { font-size: 18px !important; }
+    .ql-size-20px { font-size: 20px !important; }
+    .ql-size-24px { font-size: 24px !important; }
+    .ql-size-28px { font-size: 28px !important; }
+    .ql-size-32px { font-size: 32px !important; }
+
+
+    /* Ensure bullets and indentation render everywhere */
+    .ql-editor ul.ql-list.ql-bullet,
+    #preview     ul.ql-list.ql-bullet,
+    #quizContent ul.ql-list.ql-bullet {
+      list-style: disc;
+      padding-left: 2em;
+      margin: 0.5em 0;
+    }
+
+    /* Remove custom diamonds from preview/quiz so default bullets appear */
+    #preview     ul.ql-list.ql-bullet li::before,
+    #quizContent ul.ql-list.ql-bullet li::before {
+      content: none;
+    }
+
+    /* Fallback: indent any unordered list in quiz content */
+    #quizContent ul {
+      list-style-type: disc;
+      list-style-position: outside;
+      margin-left: 1.5em; /* indent bullet + text */
+      padding-left: 0;    /* prevent double indent */
+    }
+
+    /* Remove custom diamonds from preview/quiz so default bullets appear */
+    #preview     ul.ql-list.ql-bullet li::before,
+    #quizContent ul.ql-list.ql-bullet li::before {
+      content: none;
+    }
   </style>
 </head>
 <body>
@@ -373,7 +450,28 @@
     </div>
 
     <div id="editorArea">
-      <textarea id="editor" placeholder="Paste your notes section here…"></textarea>
+      <div id="toolbar">
+        <select class="ql-size">
+          <option value="" selected>Normal</option>
+          <option value="8px">8px</option>
+          <option value="10px">10px</option>
+          <option value="12px">12px</option>
+          <option value="14px">14px</option>
+          <option value="16px">16px</option>
+          <option value="18px">18px</option>
+          <option value="20px">20px</option>
+          <option value="24px">24px</option>
+          <option value="28px">28px</option>
+          <option value="32px">32px</option>
+        </select>
+        <button class="ql-bold"></button>
+        <button class="ql-italic"></button>
+        <button class="ql-underline"></button>
+        <button class="ql-undo">↺</button>
+        <button class="ql-redo">↻</button>
+        <button class="ql-list" value="bullet"></button>
+      </div>
+      <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
         <button id="previewBtn">Preview Words</button>
         <button id="saveSectionBtn">Save Section</button>
@@ -395,8 +493,8 @@
   <script>
     (async () => {
       try {
-      
-      
+      // IndexedDB and persistent storage logic removed.
+      // Function to position definitions container and add button absolutely below the image container
       function updateDefPosition() {
         const cont = document.getElementById('labelContainer');
         const addBtn = document.getElementById('addDefinitionBtn');
@@ -405,28 +503,28 @@
           const parent = document.getElementById('labelEditor');
           parent.style.position = 'relative';
           const topOffset = cont.offsetTop + cont.offsetHeight + 10;
-          
+          // Position the Add Definition button
           addBtn.style.position = 'absolute';
           addBtn.style.top = topOffset + 'px';
           addBtn.style.left = cont.offsetLeft + 'px';
-          
+          // Make definitions span the rest of the editor width
           defCont.style.width = (parent.clientWidth - cont.offsetLeft) + 'px';
-          
+          // Position the definitions container below the button
           defCont.style.position = 'absolute';
           defCont.style.top = (topOffset + addBtn.offsetHeight + 10) + 'px';
           defCont.style.left = cont.offsetLeft + 'px';
         }
       }
-      let isQuizMode = true;   
-      let lastHintTarget = null;  
-      let deleteMode = false;     
-      let quizOrder = [], quizPos = 0;  
+      let isQuizMode = true;   // start in quiz mode by default
+      let lastHintTarget = null;  // track last focused blank for hint
+      let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
+      let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
-      
+      // ----- Load persistent data, with static fallback -----
       let data;
       let staticMode = false;
       try {
-        
+        // Attempt API fetch
         const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
         if (resp.ok) {
           data = await resp.json();
@@ -444,7 +542,7 @@
           data = { folders: [] };
         }
       }
-      
+      // Initialize currentFolder/Section based on loaded data...
       function saveData() {
         if (staticMode) {
           console.warn('Static mode: changes will not be saved to server.');
@@ -479,14 +577,58 @@
             quizModeBtn = document.getElementById('quizModeBtn'),
             quizAllBtn  = document.getElementById('quizAllBtn'),
             editorArea = document.getElementById('editorArea'),
-            quizArea = document.getElementById('quizArea'), editorTA = document.getElementById('editor'),
+            quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), nextBtn = document.getElementById('nextBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
+      const editorDiv = document.getElementById('editor');
+      // Whitelist pixel sizes for Quill's size format
+      const Size = Quill.import('formats/size');
+      Size.whitelist = ['8px','10px','12px','14px','16px','18px','20px','24px','28px','32px'];
+      Quill.register(Size, true);
+      const quill = new Quill('#editor', {
+        modules: {
+          toolbar: '#toolbar',
+          history: { delay: 1000, maxStack: 100, userOnly: true }
+        },
+        theme: 'snow'
+      });
+      // Auto‑expand the editor height to fit its content
+      function adjustEditorHeight() {
+        const root      = quill.root;             // editable area (ql-editor)
+        const container = document.getElementById('editor'); // outer div
 
-      
+        // Reset to auto so we can measure natural height
+        root.style.height      = 'auto';
+        container.style.height = 'auto';
+
+        // Set both elements to the new scrollHeight
+        const extra = 12; // add breathing room below last line
+        const newH = (root.scrollHeight + extra) + 'px';
+        root.style.height      = newH;
+        container.style.height = newH;
+      }
+      adjustEditorHeight();           // initial sizing
+      quill.on('text-change', adjustEditorHeight);
+      // Attach undo/redo handlers
+      const toolbarModule = quill.getModule('toolbar');
+      toolbarModule.addHandler('undo', () => quill.history.undo());
+      toolbarModule.addHandler('redo', () => quill.history.redo());
+      // Also bind click for undo/redo in custom toolbar
+      document.querySelector('#toolbar .ql-undo').addEventListener('click', () => quill.history.undo());
+      document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
+      quill.on('text-change', () => {
+        if (!ensureSelection()) return;
+        const sec = data.folders[currentFolder].sections[currentSection];
+        sec.rawHtml = quill.root.innerHTML;
+        saveData();
+        // Auto-update the Preview Words area
+        previewSection();
+      });
+
+      // —— Initial UI render using migrated or loaded data ——
       if (data.folders.length > 0) {
         currentFolder = 0;
         currentSection = data.folders[0].sections.length > 0 ? 0 : null;
@@ -505,12 +647,12 @@
         }
       }
 
-      
-      function adjustEditorHeight() {
-        editorTA.style.height = 'auto';
-        editorTA.style.height = editorTA.scrollHeight + 'px';
-      }
-      editorTA.addEventListener('input', adjustEditorHeight);
+      // --- Auto-resize editor textarea with content up to its max height ---
+      // function adjustEditorHeight() {
+      //   editorTA.style.height = 'auto';
+      //   editorTA.style.height = editorTA.scrollHeight + 'px';
+      // }
+      // if (editorTA) editorTA.addEventListener('input', adjustEditorHeight);
       addAcronymBtn.onclick = () => {
         if (currentFolder === null) return alert('Select a folder first');
         const acr = prompt('Enter acronym (e.g. AAVIATE):');
@@ -535,7 +677,7 @@
         foldersUL.innerHTML='';
         data.folders.forEach((f,i)=>{
           let li=document.createElement('li');
-          
+          // Enable drag-and-drop reordering for folders
           li.draggable = true;
           li.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', i);
@@ -573,7 +715,7 @@
                 quizContent.innerHTML = '<p style="color:#7f8c8d;font-style:italic;">No questions in this folder.</p>';
               }
             } else {
-              
+              // Otherwise, default to edit mode for that section
               enterEdit();
               if (currentSection !== null) {
                 loadSection();
@@ -588,7 +730,7 @@
               renderFolders();
             }
           };
-          
+          // Delete folder button
           const delF = document.createElement('span');
           delF.className = 'delete-icon';
           delF.textContent = '✖';
@@ -598,9 +740,9 @@
           delF.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
-              
+              // Remove the folder
               data.folders.splice(i, 1);
-              
+              // Adjust currentFolder
               if (data.folders.length > 0) {
                 const newIdx = i < data.folders.length ? i : data.folders.length - 1;
                 currentFolder = newIdx;
@@ -629,13 +771,13 @@
           const s = data.folders[currentFolder].sections[index];
           const i = index;
           let li=document.createElement('li');
-          
+          // Add a subtle left-border color to indicate question type
           li.classList.remove('type-fill', 'type-diagram', 'type-acronym');
-          
+          // Default to fill for missing or other types
           if (s.type === 'label')       li.classList.add('type-diagram');
           else if (s.type === 'acronym') li.classList.add('type-acronym');
           else                            li.classList.add('type-fill');
-          
+          // Enable drag-and-drop reordering for questions
           li.draggable = true;
           li.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', i);
@@ -657,22 +799,22 @@
             const defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
             title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
-          else { 
+          else { // fill
             const defaultTitle = (s.rawText && s.rawText.split('\n')[0].trim()) || '(untitled)';
             title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
           li.textContent = title;
-          
+          // Only toggle the 'selected' class, preserving type-* classes
           if (i === currentSection) li.classList.add('selected');
           else li.classList.remove('selected');
           li.onclick = () => {
             currentSection = i;
             renderSections(lastSectionOrder);
             if (isQuizMode) {
-              enterQuizQuestion();   
+              enterQuizQuestion();   // show quiz for this section
             } else {
               loadSection();
-              enterEdit();           
+              enterEdit();           // show editor
             }
           };
           li.ondblclick=()=>{
@@ -686,10 +828,10 @@
               renderSections(lastSectionOrder);
               enterEdit();
               loadSection();
-              
+              // No need to reload editor/rawText
             }
           };
-          
+          // Delete section/question button
           const delS = document.createElement('span');
           delS.className = 'delete-icon';
           const delTitle = title;
@@ -700,9 +842,9 @@
           delS.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete question "${delTitle}"? This cannot be undone.`)) {
-              
+              // Remove the section
               data.folders[currentFolder].sections.splice(i, 1);
-              
+              // Adjust currentSection
               const secs = data.folders[currentFolder].sections;
               if (secs.length > 0) {
                 currentSection = i < secs.length ? i : secs.length - 1;
@@ -720,7 +862,7 @@
         });
       }
 
-      
+      // Filter and reorder sections based on search input
       function filterSections() {
         const terms = sectionSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
         lastSectionOrder = null;
@@ -731,7 +873,7 @@
         const secs = data.folders[currentFolder].sections;
         const group1 = [], group2 = [], group3 = [];
         secs.forEach((s, idx) => {
-          
+          // Determine title and body text
           const defaultTitle = s.title?.trim() ||
             ((s.rawText||'').split('\n')[0].trim()) ||
             s.acronym ||
@@ -763,7 +905,7 @@
         clearSearchBtn.style.display = 'none';
       };
 
-      
+      // Toggle delete icons in folder and question lists
       toggleDeleteBtn.onclick = () => {
         deleteMode = !deleteMode;
         renderFolders();
@@ -773,7 +915,9 @@
       addFolderBtn.onclick=async()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; await saveData(); renderFolders(); };
       addFillBtn.onclick=async()=>{
         if(currentFolder===null)return alert('Select a folder first');
-        let sec={ type:'fill', title:'', rawText:'', hidden:[], alts:{} };
+        const fillTitle = prompt('Enter question title:');
+        if (fillTitle === null) return;
+        let sec={ type:'fill', title: fillTitle.trim(), rawText:'', hidden:[], alts:{} };
         data.folders[currentFolder].sections.push(sec);
         currentSection=data.folders[currentFolder].sections.length-1;
         await saveData();
@@ -784,8 +928,10 @@
 
       addLabelBtn.onclick = async () => {
         if (currentFolder === null) return alert('Select a folder first');
-        
-        const q = { type:'label', rawText:'', hidden:[], alts:{}, image:'', labels:[], definitions:[], arrows:[] };
+        const labelTitle = prompt('Enter question title:');
+        if (labelTitle === null) return;
+        // Create placeholder label question immediately
+        const q = { type:'label', title: labelTitle.trim(), rawText:'', hidden:[], alts:{}, image:'', labels:[], definitions:[], arrows:[] };
         data.folders[currentFolder].sections.push(q);
         currentSection = data.folders[currentFolder].sections.length - 1;
         await saveData();
@@ -846,9 +992,10 @@
       });
 
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
+      // Quill will override this function below after Quill is initialized.
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
-        
+        // Update header to show current section title
         let titleText = '';
         if (sec.type === 'acronym') {
           titleText = sec.acronym;
@@ -861,22 +1008,29 @@
           titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
         }
         document.getElementById('header').textContent = titleText;
-        
-        editorTA.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
+        // Hide all main editors
+        if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
 
         if (sec.type === 'acronym') {
           labelEditor.style.display = 'block';
-          labelEditor.innerHTML = '<h4>' + sec.acronym + '</h4><div id="acroEditor"></div>';
+          labelEditor.innerHTML = '<h4 style="font-size:1.5rem; margin-bottom:0.75rem;">' + sec.acronym + '</h4><div id="acroEditor"></div>';
+          // (rest unchanged)
+          // ...acronym editor code...
+          const baseCh = 12;
+          const answerLengths = sec.entries.map(e => (e.answer||'').length + 2);
+          const maxAnswerCh = Math.max(baseCh, ...answerLengths);
+          const extraLengths = sec.entries.map(e => (e.extra||'').length + 2);
+          const maxExtraCh = Math.max(baseCh, ...extraLengths);
           const acroEditor = document.getElementById('acroEditor');
           acroEditor.innerHTML = '';
           sec.entries.forEach((e, i) => {
             const row = document.createElement('div');
             row.style.marginBottom = '8px';
             row.innerHTML = `
-              <strong>${e.letter}</strong>
-              <input type="text" placeholder="Answer" id="ans${i}" value="${e.answer}">
-              <input type="text" placeholder="Extra info" id="ext${i}" value="${e.extra}">
+              <strong style="display:inline-block; width:1.5em; text-align:center; margin-right:0.75em; font-size:1.2rem; line-height:1.2;">${e.letter}:</strong>
+              <input type="text" placeholder="Answer" id="ans${i}" value="${e.answer}" style="font-size:1.2rem; line-height:1.2; padding:4px; width:${maxAnswerCh}ch;">
+              <input type="text" placeholder="Extra info" id="ext${i}" value="${e.extra}" style="font-size:1.2rem; line-height:1.2; padding:4px; margin-left:0.75em; width:${maxExtraCh}ch;">
             `;
             acroEditor.appendChild(row);
             ['ans','ext'].forEach(pref => {
@@ -889,22 +1043,22 @@
           });
           return;
         }
-
         if (sec.type === 'label') {
-          
+          // (unchanged label editor code)
+          // ...label editor code...
           labelEditor.style.display = 'block';
           labelEditor.innerHTML = `
             <div id="labelContainer" style="position:relative; display:inline-block; overflow:auto;">
               <img id="labelImg" src="${sec.image}" style="display:block; user-select:none;">
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
-
-          
+          // (rest unchanged)
+          // ...rest of label editor code...
+          // -- Definitions UI Start --
           const addDefBtn = document.createElement('button');
           addDefBtn.id = 'addDefinitionBtn';
           addDefBtn.textContent = 'Add Definition';
           addDefBtn.style.display = 'block';
-          
           addDefBtn.style.padding = '6px 12px';
           addDefBtn.style.border = 'none';
           addDefBtn.style.borderRadius = '4px';
@@ -916,27 +1070,22 @@
             addDefBtn.textContent = 'Click a label to define';
           });
           labelEditor.appendChild(addDefBtn);
-
           const defContainer = document.createElement('div');
           defContainer.id = 'labelDefinitions';
           defContainer.className = 'definition-list';
-          
           defContainer.style.padding = '12px';
           defContainer.style.border = '1px solid #bdc3c7';
           defContainer.style.background = '#fff';
           labelEditor.appendChild(defContainer);
-          
           updateDefPosition();
-
-          
+          // Render existing definitions with full mini‑fill functionality
           sec.definitions = sec.definitions || [];
           sec.definitions.forEach((def, dIndex) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'definition-wrapper';
             wrapper.draggable = true;
-            
+            // Drag-and-drop handlers to reorder definitions
             wrapper.addEventListener('dragstart', e => {
-              
               if (e.target.tagName.toLowerCase() === 'textarea') {
                 e.preventDefault();
                 return;
@@ -953,19 +1102,15 @@
               saveData();
               loadSection();
             });
-
-            
+            // —— title row + delete button ——
             const row = document.createElement('div');
             row.style.display = 'flex';
             row.style.alignItems = 'center';
-
-            
             const h4 = document.createElement('h4');
             h4.textContent = (dIndex + 1) + '. ' + def.labelText;
             h4.style.fontSize = '1.1rem';
             h4.style.flex = '1';
             row.appendChild(h4);
-
             const del = document.createElement('span');
             del.textContent = '✖';
             del.style.cursor = 'pointer';
@@ -980,26 +1125,19 @@
             };
             row.appendChild(del);
             wrapper.appendChild(row);
-
-            
             const ta = document.createElement('textarea');
             ta.style.width = '100%';
             ta.style.minHeight = '60px';
             ta.style.height = 'auto';
             ta.style.overflow = 'hidden';
-            ta.style.fontSize = '1.1rem';   
+            ta.style.fontSize = '1.1rem';
             ta.value = def.rawText;
-            
             ta.addEventListener('mousedown', () => { wrapper.draggable = false; });
             ta.addEventListener('mouseup',   () => { wrapper.draggable = true; });
-
-            
             const prevDiv = document.createElement('div');
             prevDiv.style.marginTop = '8px';
             const altDiv  = document.createElement('div');
             altDiv.style.marginTop  = '12px';
-
-            
             function adjustDefHeight() {
               ta.style.height = 'auto';
               ta.style.height = ta.scrollHeight + 'px';
@@ -1011,26 +1149,20 @@
               buildDefinitionPreview(def, prevDiv, altDiv);
             });
             adjustDefHeight();
-
             wrapper.appendChild(ta);
             wrapper.appendChild(prevDiv);
             wrapper.appendChild(altDiv);
-
-            
             buildDefinitionPreview(def, prevDiv, altDiv);
-
             defContainer.appendChild(wrapper);
           });
+          // (rest unchanged, image/label/arrow logic)
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
-          
           if (window.ResizeObserver) {
             new ResizeObserver(updateDefPosition).observe(container);
           }
-          
           container.style.resize = 'none';
-          
           if (sec.imgX != null && sec.imgY != null) {
             container.style.position = 'absolute';
             container.style.left = sec.imgX + 'px';
@@ -1038,20 +1170,15 @@
           } else {
             container.style.position = 'relative';
           }
-          
-          
           let lastContextTime = 0;
           container.addEventListener('contextmenu', e => {
             e.preventDefault();
             const now = Date.now();
             if (now - lastContextTime < 400) {
-              
               const existing = container.querySelector('#resizeHandle');
               if (existing) {
-                
                 existing.remove();
               } else {
-                
                 const handle = document.createElement('div');
                 handle.id = 'resizeHandle';
                 handle.style.position = 'absolute';
@@ -1063,7 +1190,6 @@
                 handle.style.cursor = 'se-resize';
                 handle.style.zIndex = '1000';
                 container.appendChild(handle);
-                
                 handle.addEventListener('mousedown', ev => {
                   ev.preventDefault();
                   const startX = ev.clientX;
@@ -1073,17 +1199,14 @@
                   function onMouseMove(moveEv) {
                     container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
                     container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
-                    
                     img.style.width = '100%';
                     img.style.height = 'auto';
                   }
                   function onMouseUp() {
-                    
                     img.style.width = '100%';
                     img.style.height = 'auto';
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
-                    
                     sec.imgWidth = container.offsetWidth;
                     sec.imgHeight = container.offsetHeight;
                     saveData();
@@ -1096,9 +1219,8 @@
             }
             lastContextTime = now;
           });
-          
           container.addEventListener('mousedown', e => {
-            if (e.button !== 0 || e.target !== container) return; 
+            if (e.button !== 0 || e.target !== container) return;
             e.preventDefault();
             let startX = e.clientX, startY = e.clientY;
             let origLeft = parseInt(container.style.left) || 0;
@@ -1110,7 +1232,6 @@
             function onMouseUp() {
               document.removeEventListener('mousemove', onMouseMove);
               document.removeEventListener('mouseup', onMouseUp);
-              
               sec.imgX = parseInt(container.style.left) || 0;
               sec.imgY = parseInt(container.style.top) || 0;
               saveData();
@@ -1138,13 +1259,11 @@
             const y = evt.clientY - rect.top;
             const text = prompt('Enter label text:');
             if (text) {
-              
               sec.labels.push({ x, y, text, fontSize: 16 });
               saveData();
               loadSection();
             }
           };
-          
           sec.labels.forEach(lbl => {
             const mark = document.createElement('div');
             mark.textContent = lbl.text;
@@ -1160,11 +1279,9 @@
             mark.style.textOverflow  = 'ellipsis';
             mark.style.cursor = 'move';
             mark.style.resize = 'both';
-            
             mark.style.userSelect = 'none';
             mark.style.webkitUserSelect = 'none';
             mark.style.msUserSelect = 'none';
-            
             let defIdx = -1;
             if (sec.definitions && sec.definitions.length) {
               defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
@@ -1187,13 +1304,10 @@
               num.style.pointerEvents = 'none';
               mark.appendChild(num);
             }
-            
             mark.addEventListener('click', evt => {
               if (!isAddingDefinition) return;
               evt.stopPropagation();
-              
               sec.definitions = sec.definitions || [];
-              
               sec.definitions.push({
                 labelText: lbl.text,
                 rawText: '',
@@ -1206,18 +1320,15 @@
               loadSection();
             });
             overlay.appendChild(mark);
-            
             mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
             mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
             mark.style.fontSize = lbl.fontSize + 'px';
             mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-            
             mark.addEventListener('mouseup', () => {
               lbl.w = mark.offsetWidth;
               lbl.h = mark.offsetHeight;
               saveData();
             });
-            
             mark.ondblclick = evt => {
               evt.stopPropagation();
               evt.preventDefault();
@@ -1225,7 +1336,6 @@
               if (newText !== null) {
                 lbl.text = newText;
                 mark.textContent = lbl.text;
-                
                 lbl.w = mark.offsetWidth;
                 lbl.h = mark.offsetHeight;
                 mark.style.width = lbl.w + 'px';
@@ -1233,7 +1343,6 @@
                 saveData();
               }
             };
-            
             mark.oncontextmenu = evt => {
               evt.preventDefault();
               evt.stopPropagation();
@@ -1242,7 +1351,6 @@
               if (!isNaN(newSize) && newSize > 0) {
                 lbl.fontSize = newSize;
                 mark.style.fontSize = lbl.fontSize + 'px';
-                
                 lbl.w = mark.offsetWidth;
                 lbl.h = mark.offsetHeight;
                 mark.style.width = lbl.w + 'px';
@@ -1250,9 +1358,8 @@
                 saveData();
               }
             };
-            
             mark.onmousedown = evt => {
-              if (evt.button !== 0) return; 
+              if (evt.button !== 0) return;
               evt.preventDefault();
               let startX = evt.clientX, startY = evt.clientY;
               const origX = lbl.x, origY = lbl.y;
@@ -1271,27 +1378,21 @@
               document.addEventListener('mouseup', onMouseUp);
             };
           });
-          
           let svgOverlay = overlay.querySelector('svg');
           if (!svgOverlay) {
             svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
             overlay.appendChild(svgOverlay);
           } else {
-            
             while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
           }
-          
           if (sec.arrows) {
             sec.arrows.forEach((a, idx) => {
-              
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
               const arrowLength = a.width * 3;
               const arrowWidth = a.width * 2;
-              
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              
               const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
               line.setAttribute('x1', a.x1);
               line.setAttribute('y1', a.y1);
@@ -1301,7 +1402,6 @@
               line.setAttribute('stroke-width', a.width);
               line.setAttribute('pointer-events', 'all');
               svgOverlay.appendChild(line);
-              
               const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
               const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
               const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
@@ -1312,7 +1412,6 @@
               polygon.setAttribute('fill', a.color);
               polygon.setAttribute('pointer-events', 'all');
               svgOverlay.appendChild(polygon);
-              
               [line, polygon].forEach(el => {
                 el.addEventListener('contextmenu', evt => {
                   if (!evt.metaKey) return;
@@ -1338,8 +1437,6 @@
                     const fixedTop = overlayRect.top + 50;
                     popup.style.left = `${fixedLeft}px`;
                     popup.style.top = `${fixedTop}px`;
-                    
-                    
                     popup.style.transform = 'translate(-50%, -100%)';
                     popup.style.transformOrigin = 'bottom center';
                     popup.style.background = '#fff';
@@ -1383,7 +1480,6 @@
               });
             });
           }
-          
           let drawing = false;
           let startX = 0, startY = 0;
           let tempLine = null;
@@ -1393,7 +1489,6 @@
             startX = evt.clientX - rect.left;
             startY = evt.clientY - rect.top;
             drawing = true;
-            
             tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             tempLine.setAttribute('x1', startX);
             tempLine.setAttribute('y1', startY);
@@ -1418,10 +1513,8 @@
             const rect = img.getBoundingClientRect();
             const endX = evt.clientX - rect.left;
             const endY = evt.clientY - rect.top;
-            
             svgOverlay.removeChild(tempLine);
             tempLine = null;
-            
             if (endX !== startX || endY !== startY) {
               if (!sec.arrows) sec.arrows = [];
               sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
@@ -1431,117 +1524,266 @@
           });
           return;
         }
-
-        editorTA.style.display = 'block';
-        previewDiv.style.display = 'block';
-        editorTA.value = sec.rawText;
-        adjustEditorHeight();
+        // Reset Quill history *before* loading new content
+        quill.history.clear();
+        const html = sec.rawHtml || sec.rawText || '';
+        // Load the HTML silently so it does not create an undo entry
+        quill.setContents(quill.clipboard.convert(html), 'silent');
+        adjustEditorHeight();  // ensure editor resizes for existing content
+        // Run a second resize on next tick so Quill gets a chance to lay out its HTML
+        setTimeout(() => requestAnimationFrame(adjustEditorHeight), 0);
         previewSection();
-        
-        editorTA.oninput = () => {
-          adjustEditorHeight();
-          sec.rawText = editorTA.value;
+        // Migrate old sections using rawText into rawHtml for new formatting features
+        if (!sec.rawHtml && sec.rawText) {
+          sec.rawHtml = quill.root.innerHTML;
           saveData();
-          previewSection();
-        };
+        }
+        if (editorDiv) editorDiv.style.display = 'block';
+        previewDiv.style.display = 'block';
+        // The Quill version of loadSection will override the editor loading.
       }
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
-      
+      // Normalize sec.hidden entries to objects { word, occ }
       function getHiddenEntries(sec, tokens) {
-        
+        // Build occurrence counts array
         const counts = {};
         const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
-        
+        // If numeric indices, transform to objects
         const objs = entries.map(entry => {
           if (typeof entry === 'number') {
             const word = tokens[entry].trim();
-            
+            // count occurrences up to index
             let occ = 0;
             for (let i = 0; i <= entry; i++) {
               if (tokens[i].trim() === word) occ++;
             }
             return { word, occ };
           }
-          return entry; 
+          return entry; // assume already { word, occ }
         });
         return objs;
       }
 
       function previewSection() {
-        let sec = data.folders[currentFolder].sections[currentSection];
-        const tokens = editorTA.value.split(/(\s+)/);
-        sec.hidden = sec.hidden||[];
-        sec.alts = sec.alts||{};
-        
-        const hiddenEntries = getHiddenEntries(sec, tokens);
-        let counts = {};
+        const sec = data.folders[currentFolder].sections[currentSection];
+        // Use rawHtml if present, otherwise convert rawText to HTML with paragraphs
+        const text = sec.rawHtml
+          ? (new DOMParser().parseFromString(sec.rawHtml, 'text/html')).body.innerHTML
+          : (sec.rawText || '').split('\n').map(line => `<p>${line}</p>`).join('');
+        // Now render the preview preserving <p> and <br> structure
         previewDiv.innerHTML = '';
-        altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
-        altContainer.style.display = 'block';
-        tokens.forEach((tok, i) => {
-          if (!tok.trim()) {
-            
-            if (tok.includes('\n')) {
-              const lines = tok.split('\n');
-              lines.forEach((ln, idx) => {
-                if (ln) previewDiv.appendChild(document.createTextNode(ln));
-                if (idx < lines.length - 1) previewDiv.appendChild(document.createElement('br'));
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+
+        let counts = {};
+        sec.hidden = sec.hidden || [];
+        sec.alts = sec.alts || {};
+        // Helper to get hidden entries for a flat list of tokens
+        function getHiddenEntriesForTokens(tokens) {
+          return getHiddenEntries(sec, tokens);
+        }
+
+        // Collect all tokens for hidden word occurrence counting
+        let allTokens = [];
+        tempDiv.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            // Split text by whitespace for tokens
+            allTokens.push(...node.textContent.split(/(\s+)/));
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'P' || node.tagName === 'DIV') {
+              node.childNodes.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                  allTokens.push(...child.textContent.split(/(\s+)/));
+                } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
+                  allTokens.push('\n');
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                  allTokens.push(...(child.innerText||'').split(/(\s+)/));
+                }
+              });
+              allTokens.push('\n');
+            } else if (node.tagName === 'BR') {
+              allTokens.push('\n');
+            } else if (node.tagName === 'UL') {
+              // Add tokens from each list item, skipping the leading bullet glyph
+              node.childNodes.forEach(liNode => {
+                if (liNode.nodeType !== Node.ELEMENT_NODE || liNode.tagName !== 'LI') return;
+                const toks = (liNode.innerText || '').split(/(\s+)/);
+                toks.forEach(t => {
+                  const trimmed = t.trim();
+                  if (!trimmed || trimmed === '•') return;
+                  allTokens.push(t);
+                });
               });
             } else {
-              previewDiv.appendChild(document.createTextNode(tok));
+              allTokens.push(...(node.innerText||'').split(/(\s+)/));
             }
-          } else {
-            const w = tok.trim();
-            counts[w] = (counts[w] || 0) + 1;
-            const occ = counts[w];
-            const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-            let span = document.createElement('span');
-            span.className = 'word' + (isHidden ? ' hidden' : '');
-            span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-            span.onclick = () => {
-              if (!tok.trim()) return;
-              
-              const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-              if (idx >= 0) hiddenEntries.splice(idx, 1);
-              else hiddenEntries.push({ word: w, occ });
-              sec.hidden = hiddenEntries;
-              saveData();
-              previewSection();
-            };
-            previewDiv.appendChild(span);
           }
         });
-        
-        
+        // Remove empty tokens
+        allTokens = allTokens.filter(t => t.length > 0);
+        const hiddenEntries = getHiddenEntries(sec, allTokens);
+        // We'll use a running count per word for the preview rendering
+        let globalCounts = {};
+
+        tempDiv.childNodes.forEach(node => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            // Render text node tokens
+            const tokens = node.textContent.split(/(\s+)/);
+            tokens.forEach(tok => {
+              if (!tok.trim()) {
+                previewDiv.appendChild(document.createTextNode(tok));
+              } else {
+                const w = tok.trim();
+                globalCounts[w] = (globalCounts[w] || 0) + 1;
+                const occ = globalCounts[w];
+                const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                const span = document.createElement('span');
+                span.className = 'word' + (isHidden ? ' hidden' : '');
+                span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                span.onclick = () => {
+                  const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                  if (idx >= 0) hiddenEntries.splice(idx, 1);
+                  else hiddenEntries.push({ word: w, occ });
+                  sec.hidden = hiddenEntries;
+                  saveData();
+                  previewSection();
+                };
+                previewDiv.appendChild(span);
+              }
+            });
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'UL') {
+              // Flatten each list item into its own preview line with a bullet
+              node.childNodes.forEach(liNode => {
+                if (liNode.nodeType !== Node.ELEMENT_NODE || liNode.tagName !== 'LI') return;
+
+                const line = document.createElement('p');
+                line.className = 'preview-line';
+
+                // Actual bullet character
+                const bulletSpan = document.createElement('span');
+                bulletSpan.textContent = '• ';
+                line.appendChild(bulletSpan);
+
+                const liTokens = (liNode.innerText || '').split(/(\s+)/);
+                liTokens.forEach(tok => {
+                  if (!tok.trim()) {
+                    line.appendChild(document.createTextNode(tok));
+                  } else {
+                    const w = tok.trim();
+                    globalCounts[w] = (globalCounts[w] || 0) + 1;
+                    const occ = globalCounts[w];
+                    const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+
+                    const span = document.createElement('span');
+                    span.className = 'word' + (isHidden ? ' hidden' : '');
+                    span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                    span.onclick = () => {
+                      const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                      if (idx >= 0) hiddenEntries.splice(idx, 1);
+                      else hiddenEntries.push({ word: w, occ });
+                      sec.hidden = hiddenEntries;
+                      saveData();
+                      previewSection();
+                    };
+                    line.appendChild(span);
+                  }
+                });
+
+                previewDiv.appendChild(line);
+              });
+            } else if (node.tagName === 'P' || node.tagName === 'DIV') {
+              const para = document.createElement('p');
+              para.className = 'preview-line';
+              node.childNodes.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                  // Render tokens in text node
+                  const tokens = child.textContent.split(/(\s+)/);
+                  tokens.forEach(tok => {
+                    if (!tok.trim()) {
+                      para.appendChild(document.createTextNode(tok));
+                    } else {
+                      const w = tok.trim();
+                      globalCounts[w] = (globalCounts[w] || 0) + 1;
+                      const occ = globalCounts[w];
+                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                      const span = document.createElement('span');
+                      span.className = 'word' + (isHidden ? ' hidden' : '');
+                      span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                      span.onclick = () => {
+                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                        if (idx >= 0) hiddenEntries.splice(idx, 1);
+                        else hiddenEntries.push({ word: w, occ });
+                        sec.hidden = hiddenEntries;
+                        saveData();
+                        previewSection();
+                      };
+                      para.appendChild(span);
+                    }
+                  });
+                } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
+                  para.appendChild(document.createElement('br'));
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                  // For inline elements: render as text
+                  const tokens = (child.innerText||'').split(/(\s+)/);
+                  tokens.forEach(tok => {
+                    if (!tok.trim()) {
+                      para.appendChild(document.createTextNode(tok));
+                    } else {
+                      const w = tok.trim();
+                      globalCounts[w] = (globalCounts[w] || 0) + 1;
+                      const occ = globalCounts[w];
+                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                      const span = document.createElement('span');
+                      span.className = 'word' + (isHidden ? ' hidden' : '');
+                      span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                      span.onclick = () => {
+                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                        if (idx >= 0) hiddenEntries.splice(idx, 1);
+                        else hiddenEntries.push({ word: w, occ });
+                        sec.hidden = hiddenEntries;
+                        saveData();
+                        previewSection();
+                      };
+                      para.appendChild(span);
+                    }
+                  });
+                }
+              });
+              previewDiv.appendChild(para);
+              // Do not add <br> after each block, as spacing is handled by .preview-line
+            } else if (node.tagName === 'BR') {
+              previewDiv.appendChild(document.createElement('br'));
+            }
+          }
+        });
+
+        // Build alternate-answer inputs for hidden words
+        altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
+        altContainer.style.display = 'block';
+        // For each unique hidden entry (by word+occurrence), show input
         let altCounts = {};
-        counts = {};
-        tokens.forEach((tok, i) => {
-          if (!tok.trim()) return;
-          const w = tok.trim();
-          counts[w] = (counts[w] || 0) + 1;
-          const occ = counts[w];
-          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-          if (isHidden) {
-            const key = `${w}_${occ}`;
-            let label = document.createElement('label');
-            label.textContent = `${w} #${occ}: `;
-            let ai = document.createElement('input');
+        hiddenEntries.forEach(({ word, occ }) => {
+          altCounts[word] = (altCounts[word] || 0) + 1;
+          if (altCounts[word] === occ) {
+            const key = `${word}_${occ}`;
+            const label = document.createElement('label');
+            label.textContent = `${word} #${occ}: `;
+            const ai = document.createElement('input');
             ai.className = 'alt-input';
             ai.placeholder = 'alt1, alt2, …';
-            let answers = [w, ...(sec.alts[key]||[])];
-            ai.value = (sec.alts[key]||[]).join(', ');
+            ai.value = (sec.alts[key] || []).join(', ');
             ai.oninput = () => {
-              sec.alts[key] = ai.value.split(',').map(s=>s.trim()).filter(s=>s);
+              sec.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
               saveData();
             };
             altContainer.appendChild(label);
             altContainer.appendChild(ai);
           }
         });
-
       }
 
-      
+      // —— Helper: build preview & alternate‑answer UI for a single definition ——
       function buildDefinitionPreview(defObj, previewDiv, altDiv) {
         const tokens = (defObj.rawText || '').split(/(\s+)/);
         defObj.hidden = defObj.hidden || [];
@@ -1582,12 +1824,12 @@
               : hiddenEntries.push({ word: w, occ });
             defObj.hidden = hiddenEntries;
             saveData();
-            buildDefinitionPreview(defObj, previewDiv, altDiv); 
+            buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
           };
           previewDiv.appendChild(span);
         });
 
-        
+        // alternate‑answer inputs
         counts = {};
         tokens.forEach(tok => {
           if (!tok.trim()) return;
@@ -1614,12 +1856,13 @@
       }
       saveSectionBtn.onclick = async () => {
         if (!ensureSelection()) return;
+        // For fill-in, rawHtml is already updated live on input.
+        // Only update rawText for non-label if needed (for legacy support)
         const sec = data.folders[currentFolder].sections[currentSection];
-        
-        if (sec.type !== 'label') {
-          sec.rawText = editorTA.value;
+        if (sec.type !== 'label' && !sec.rawHtml) {
+          sec.rawText = editorDiv.innerText || '';
         }
-        
+        // sec.hidden is already updated in previewSection's click handler
         await saveData();
         renderSections(lastSectionOrder);
         loadSection();
@@ -1630,7 +1873,7 @@
       editModeBtn.onclick = () => {
         isQuizMode = false;
         enterEdit();
-        
+        // Reload the current section in edit mode if one is selected
         if (currentSection !== null) loadSection();
       };
 
@@ -1649,7 +1892,7 @@
         startQuiz();
       }
 
-      
+      // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
         if (currentFolder === null) {
           alert('Select a folder first');
@@ -1657,7 +1900,7 @@
         }
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
-        
+        // Build and shuffle order of question indices
         quizOrder = data.folders[currentFolder].sections
           .map((_, i) => i)
           .sort(() => Math.random() - 0.5);
@@ -1675,7 +1918,7 @@
       }
       quizModeBtn.onclick = () => {
         isQuizMode = true;
-        
+        // Show quiz for the currently selected section
         if (currentSection !== null) {
           enterQuizQuestion();
         } else {
@@ -1684,47 +1927,191 @@
       };
       quizAllBtn .onclick = enterRandomQuiz;
 
-      function showQuiz(){
-        
+      function wrapQuizBlanks(container, hiddenEntries) {
+        // Filter out invalid hidden entries (word/occ not present in text)
+        const sec = data.folders[currentFolder].sections[currentSection];
+        const raw = (sec.rawText || '').toLowerCase();
+        sec.hidden = (sec.hidden || []).filter(({ word, occ }) => {
+          const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
+          const isValid = occ < allMatches.length;
+          if (!isValid && sec.alts) {
+            delete sec.alts[`${word}_${occ}`];
+          }
+          return isValid;
+        });
+        // DEBUG: Log the input hiddenEntries at the start
+        console.log('wrapQuizBlanks called with:', hiddenEntries);
+        hiddenEntries.forEach(({ word, occ }) => {
+          let count = 0;
+          const matches = [];
+          const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (node.parentElement.closest('.quiz-title-word')) continue;
+            // Build a regex that matches the word with optional trailing punctuation
+            const escaped = word.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+            const startsWordChar = /\w/.test(word[0]);
+            const endsWordChar   = /\w/.test(word[word.length - 1]);
+            let pattern = escaped;
+            if (startsWordChar) pattern = '\\b' + pattern;
+            if (endsWordChar)   pattern = pattern + '\\b';
+            const regex = new RegExp(pattern, 'gi');
+            let match;
+            while ((match = regex.exec(node.textContent)) !== null) {
+              // DEBUG: Log each matched node and match index
+              console.log(`Found match in node:`, node.textContent, 'at index', match.index);
+              matches.push({ node, index: match.index, length: match[0].length });
+            }
+          }
+
+          const targetMatch = matches[occ - 1];
+          // DEBUG: Log the target match for this word/occurrence
+          console.log('Target match:', targetMatch);
+          if (targetMatch) {
+            const { node, index, length } = targetMatch;
+            const before = node.textContent.slice(0, index);
+            const target = node.textContent.slice(index, index + length);
+            const after = node.textContent.slice(index + length);
+
+            const span = document.createElement('span');
+            span.className = 'blank';
+            span.dataset.word = target;
+            span.dataset.occ = occ;
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'quiz-input';
+            // Removed fixed em width here
+
+            span.appendChild(input);
+
+            const parent = node.parentNode;
+            parent.insertBefore(document.createTextNode(before), node);
+            parent.insertBefore(span, node);
+            parent.insertBefore(document.createTextNode(after), node);
+            parent.removeChild(node);
+          }
+        });
+      }
+
+      function showQuiz() {
+        // Advance to the correct section
         currentSection = quizOrder[quizPos];
-        renderSections(lastSectionOrder);
+        // Now load that section’s data
+        let sec = data.folders[currentFolder].sections[currentSection];
+        // Insert consistent title at top of quizContent
+        const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
+        const titleElem = document.createElement('h3');
+        titleElem.innerHTML = titleText
+          .split(/\s+/)
+          .map(w => `<span class="quiz-title-word">${w}</span>`)
+          .join(' ');
+        titleElem.style.marginBottom = '16px';
         quizContent.innerHTML = '';
-        let sec = data.folders[currentFolder].sections[quizOrder[quizPos]];
-        // Compute title logic for all types
-        let defaultTitle = '';
-        if (sec.type === 'acronym') defaultTitle = sec.acronym;
-        else if (sec.type === 'label') {
-          const raw = sec.rawText || '';
-          defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
-        } else { 
-          defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
+        quizContent.appendChild(titleElem);
+        console.log(`Entering showQuiz for quizPos=${quizPos}`, sec, 'hidden entries:', sec.hidden);
+        // Highlight current section in left panel
+        renderSections(lastSectionOrder);
+
+        if (sec.type === 'fill') {
+          // quizContent already cleared and title appended above
+          // Now append the fill content
+          quizContent.innerHTML = '';
+          quizContent.appendChild(titleElem);
+          quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
+          wrapQuizBlanks(quizContent, sec.hidden || []);
+          // --- Improved blank sizing using text width measurement ---
+          // Create a hidden span for measuring text width
+          const measure = document.createElement('span');
+          Object.assign(measure.style, {
+            position: 'absolute',
+            visibility: 'hidden',
+            whiteSpace: 'pre',
+            left: '-9999px',
+            top: '-9999px',
+          });
+          document.body.appendChild(measure);
+          quizContent.querySelectorAll('.blank').forEach(wrapper => {
+            const input = wrapper.querySelector('input');
+            const word = wrapper.dataset.word || '';
+            // Ensure measure span uses the same font metrics
+            const computeFont = () => {
+              measure.style.font = window.getComputedStyle(input).font;
+            };
+            computeFont();
+            // Function to resize input based on value
+            const resize = val => {
+              measure.textContent = val;
+              const extra = 6; // slight padding so the box isn't too tight
+              input.style.width = (measure.getBoundingClientRect().width + extra) + 'px';
+            };
+            // Initial sizing
+            resize(word);
+            // Resize and grade on each keystroke
+            input.addEventListener('input', () => {
+              computeFont();
+              resize(input.value || wrapper.dataset.word);
+            });
+          });
+          // Attach grading on blur to all blanks
+          quizContent.querySelectorAll('.blank input').forEach(input => {
+            input.addEventListener('input', () => {
+              const enteredRaw   = input.value.trim();
+              const correctWord  = input.parentElement.dataset.word;
+              const occ          = input.parentElement.dataset.occ;
+              const section      = data.folders[currentFolder].sections[currentSection];
+              const altKey       = `${correctWord}_${occ}`;
+              const alts         = section.alts[altKey] || [];
+
+              // Helper – strip punctuation, ignore case, keep only letters & digits
+              const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+              const enteredNorm  = normalize(enteredRaw);
+              const correctNorm  = normalize(correctWord);
+              const isCorrect    = enteredNorm === correctNorm ||
+                                   alts.some(a => normalize(a) === enteredNorm);
+
+              if (enteredRaw.length === 0) {
+                input.classList.remove('correct', 'incorrect');
+              } else if (isCorrect) {
+                input.classList.add('correct');
+                input.classList.remove('incorrect');
+              } else {
+                input.classList.add('incorrect');
+                input.classList.remove('correct');
+              }
+            });
+          });
+          return;
         }
-        const title = sec.title && sec.title.trim() ? sec.title : defaultTitle;
-        
-        document.getElementById('header').textContent = title;
-        const titleEl = document.createElement('div');
-        titleEl.style.fontSize = '1.2rem';
-        titleEl.style.fontWeight = 'bold';
-        titleEl.style.marginBottom = '12px';
-        titleEl.textContent = title;
-        quizContent.appendChild(titleEl);
+        // Compute title logic for all types (already done above)
+        // Update the main header to match the quiz question's title
+        document.getElementById('header').textContent = titleText;
         if (sec.type === 'acronym') {
-          quizContent.innerHTML = '<h4>' + sec.acronym + '</h4>';
+          quizContent.innerHTML = '';
+          quizContent.appendChild(titleElem);
+          quizContent.innerHTML += '<h4 style="font-size:1.5rem; margin-bottom:0.75rem;">' + sec.acronym + '</h4>';
+          // Compute uniform widths for acronym inputs based on base and longest answer/extra
+          const baseCh = 12;
+          const answerLengths = sec.entries.map(e => (e.answer||'').length + 2);
+          const maxAnswerCh = Math.max(baseCh, ...answerLengths);
+          const extraLengths = sec.entries.map(e => (e.extra||'').length + 2);
+          const maxExtraCh = Math.max(baseCh, ...extraLengths);
           sec.entries.forEach((e, i) => {
             const div = document.createElement('div');
             div.style.display = 'flex';
             div.style.alignItems = 'center';
             div.style.margin = '4px 0';
-            
-            let html = `<strong style="margin-right:4px">${e.letter}:</strong>
-              <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px">`;
+            // Build inputs array
+            let html = `<strong style="display:inline-block; width:1.5em; text-align:center; margin-right:0.75em; font-size:1.2rem; line-height:1.2;">${e.letter}:</strong>
+              <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px; font-size:1.2rem; line-height:1.2;">`;
             if (e.extra && e.extra.trim()) {
-              html += `<input type="text" placeholder="Extra info" id="qext${i}" style="margin-left:4px; padding:4px">`;
+              html += `<input type="text" placeholder="Extra info" id="qext${i}" style="margin-left:8px; padding:4px; font-size:1.2rem; line-height:1.2;">`;
             }
             div.innerHTML = html;
             quizContent.appendChild(div);
             const inp = document.getElementById('qans' + i);
-            inp.style.width = `${Math.max((e.answer||'').length+2,12)}ch`;
+            inp.style.width = maxAnswerCh + 'ch';
             inp.oninput = () => {
               const ok = inp.value.trim().toLowerCase() === e.answer.trim().toLowerCase();
               inp.classList.toggle('correct', ok);
@@ -1733,7 +2120,7 @@
             let extInp = null;
             if (e.extra && e.extra.trim()) {
               extInp = document.getElementById('qext' + i);
-              extInp.style.width = `${Math.max((e.extra||'').length+2,12)}ch`;
+              extInp.style.width = maxExtraCh + 'ch';
               extInp.oninput = () => {
                 const okX = extInp.value.trim().toLowerCase() === e.extra.trim().toLowerCase();
                 extInp.classList.toggle('correct', okX);
@@ -1745,6 +2132,7 @@
         }
         if (sec.type === 'label') {
           quizContent.innerHTML = '';
+          quizContent.appendChild(titleElem);
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
           const img = document.createElement('img');
@@ -1757,7 +2145,7 @@
           }
           wrapper.appendChild(img);
 
-          
+          // Create SVG overlay for arrows
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svgOverlay.style.position = 'absolute';
           svgOverlay.style.top = '0';
@@ -1767,16 +2155,16 @@
           svgOverlay.style.pointerEvents = 'none';
           wrapper.appendChild(svgOverlay);
 
-          
+          // Draw saved arrows
           if (sec.arrows) {
             sec.arrows.forEach(a => {
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
               const arrowLength = a.width * 3;
               const arrowWidth = a.width * 2;
-              
+              // Compute line endpoint at base of arrowhead
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              
+              // Create line element
               const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
               line.setAttribute('x1', a.x1);
               line.setAttribute('y1', a.y1);
@@ -1785,7 +2173,7 @@
               line.setAttribute('stroke', a.color);
               line.setAttribute('stroke-width', a.width);
               svgOverlay.appendChild(line);
-              
+              // Compute arrowhead points
               const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
               const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
               const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
@@ -1798,19 +2186,19 @@
             });
           }
 
-          
+          // Map labelText → { el: titleElement, idx }
           const titleMap = {};
-          
+          // Render inline inputs
           sec.labels.forEach(lbl => {
             const inp = document.createElement('input');
             inp.classList.add('blank-input');
             inp.setAttribute('data-answer', JSON.stringify([lbl.text]));
-            inp.dataset.label = "1";          
+            inp.dataset.label = "1";          // mark as picture‑label blank
             inp.type = 'text';
             inp.style.position = 'absolute';
             inp.style.left = lbl.x + 'px';
             inp.style.top = lbl.y + 'px';
-            
+            // border, bg, font, etc.
             inp.style.border = '1px solid #7f8c8d';
             inp.style.background = '#ffffff';
             inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -1819,9 +2207,9 @@
             inp.style.boxSizing = 'border-box';
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
-            
+            // record focus so Hint button targets the last‑selected box
             inp.addEventListener('focus', () => { lastHintTarget = inp; });
-            
+            // size width/height to match the saved label size, or fallback to measured width
             const measSpan = document.createElement('span');
             measSpan.style.visibility = 'hidden';
             measSpan.style.position   = 'absolute';
@@ -1839,7 +2227,7 @@
               const ok = val === lbl.text.trim().toLowerCase();
 
               if (ok) {
-                
+                // Replace the input with the revealed label text
                 const txt = document.createElement('span');
                 txt.textContent = lbl.text;
                 txt.style.position = 'absolute';
@@ -1855,27 +2243,27 @@
                 if (lbl.h) txt.style.height = lbl.h + 'px';
                 txt.style.display = 'inline-block';
                 wrapper.appendChild(txt);
-                inp.remove();               
-                
+                inp.remove();               // get rid of the input box
+                // Auto‑focus the next remaining picture‑label blank
                 setTimeout(() => {
                   const next = wrapper.querySelector('input[data-label="1"]');
                   if (next) next.focus();
                 }, 0);
 
-                
+                // Reveal corresponding definition title now that this label is correct
                 const entry = titleMap[lbl.text];
                 if (entry && !entry.revealed) {
                   entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
                   entry.revealed = true;
                 }
               } else {
-                
+                // keep feedback colours while user is typing
                 inp.classList.remove('correct');
                 inp.classList.add('incorrect');
                 inp.style.borderColor = '#c0392b';
               }
 
-              
+              // Re‑evaluate overall correctness outline
               const remainingInputs = Array.from(wrapper.querySelectorAll('input'));
               if (remainingInputs.length === 0) {
                 img.style.outline = '2px solid #27ae60';
@@ -1910,7 +2298,7 @@
           });
 
           quizContent.appendChild(wrapper);
-          
+          // ---- Render mini‑fill definitions under the image ----
           if (sec.definitions && sec.definitions.length) {
             const defsHdr = document.createElement('h4');
             defsHdr.textContent = 'Definitions';
@@ -1918,13 +2306,13 @@
             quizContent.appendChild(defsHdr);
 
             sec.definitions.forEach((def, dIndex) => {
-              
+              // Prefix each definition with its number – label name stays hidden until solved
               const para = document.createElement('p');
               para.style.marginBottom = '12px';
               const title = document.createElement('strong');
               title.textContent = (dIndex + 1) + '. ';
               para.appendChild(title);
-              
+              // Register this definition's title for reveal
               titleMap[def.labelText] = { el: title, idx: dIndex };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
@@ -1952,17 +2340,17 @@
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
-                
+                // Track focus for definition blanks too
                 inp.addEventListener('focus', () => { lastHintTarget = inp; });
-                
+                // keep track of blanks for this definition
                 if (!para._inputs) para._inputs = [];
                 para._inputs.push(inp);
-                
+                // Match font family & size to regular fill‑in blanks
                 const qcStyle = window.getComputedStyle(quizContent);
                 inp.style.fontFamily = qcStyle.fontFamily;
                 inp.style.fontSize   = qcStyle.fontSize;
                 inp.style.padding    = '0 2px';
-                
+                // Space → next blank (if correct); Tab → previous blank  — same as normal fill‑ins
                 inp.addEventListener('keydown', e => {
                   const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   const idx = inputs.indexOf(inp);
@@ -1978,7 +2366,7 @@
                   }
                 });
 
-                
+                // width sizing identical to regular fill‑ins
                 const meas = document.createElement('span');
                 meas.style.visibility = 'hidden';
                 meas.style.position   = 'absolute';
@@ -1992,7 +2380,7 @@
                   const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-                  
+                  // (Reveal-on-all-blanks logic removed)
                 };
 
                 span.appendChild(inp);
@@ -2003,7 +2391,7 @@
           }
           return;
         }
-        
+        // existing fill-in logic follows
         quizContent.style.borderColor = '';
         let tokens=sec.rawText.split(/(\s+)/);
         // New logic for word/occurrence blanks
@@ -2025,21 +2413,21 @@
             let answers = [w, ...(sec.alts[key]||[])];
             let wrapper = document.createElement('span');
             wrapper.className = 'blank';
-            
+            // Always size based on uppercase text width with extra room
             const blankText = w.toUpperCase();
             wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
             let inp = document.createElement('input');
             inp.className = 'blank-input';
             inp.addEventListener('focus', () => { lastHintTarget = inp; });
-            
+            // store correct answers for hint feature
             inp.setAttribute('data-answer', JSON.stringify(answers));
-            
+            // Match quiz section font
             const qcStyle = window.getComputedStyle(quizContent);
             inp.style.fontFamily = qcStyle.fontFamily;
             inp.style.fontSize = qcStyle.fontSize;
             inp.style.padding = '0 2px';
             inp.style.boxSizing = 'content-box';
-            
+            // Measure text width using hidden span
             const measurer = document.createElement('span');
             measurer.style.visibility = 'hidden';
             measurer.style.position = 'absolute';
@@ -2049,7 +2437,7 @@
             document.body.appendChild(measurer);
             inp.style.width = (measurer.offsetWidth + 4) + 'px';
             document.body.removeChild(measurer);
-            
+            // New keydown handler: Space = next if correct, Tab = previous
             inp.addEventListener('keydown', e => {
               const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               const idx = inputs.indexOf(inp);
@@ -2066,13 +2454,13 @@
                 }
               }
             });
-            
+            // Simplified input handler: just correctness, outline if all correct
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = answers.some(a => a.toLowerCase() === val);
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
-              
+              // If all blanks correct, turn border green
               const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                 quizContent.style.borderColor = '#27ae60';
@@ -2088,13 +2476,13 @@
       nextBtn.onclick = () => {
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
-        
+        // If in Quiz All mode sequence, advance within that sequence first
         if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
           quizPos++;
           showQuiz();
           return;
         }
-        
+        // Otherwise, move to the next section by index
         if (currentSection < total - 1) {
           currentSection++;
           renderSections();
@@ -2104,10 +2492,10 @@
           enterEdit();
         }
       };
-      
+      // --- Hint button logic ---
       const hintBtn = document.getElementById('hintBtn');
       hintBtn.onclick = () => {
-        
+        // Determine target: last focused blank, then active focus, then first incomplete
         let target = null;
         if (lastHintTarget && lastHintTarget.dataset.answer) {
           target = lastHintTarget;
@@ -2129,15 +2517,15 @@
             // Regular blank – use normal correctness logic
             target.dispatchEvent(new Event('input'));
           } else {
-            
+            // Picture‑label blank: show temporarily, don’t trigger permanent reveal
             target.classList.add('correct');
-            
+            // size to fit if user previously shrank
             target.style.width = correct.length + 1 + 'ch';
           }
 
           target.focus();
           setTimeout(() => {
-            
+            // Clear only if user hasn’t typed something else
             if (target.value.trim().toLowerCase() === correct.toLowerCase()) {
               target.value = '';
               target.classList.remove('correct');
@@ -2154,3 +2542,35 @@
   </script>
 </body>
 </html>
+  </script>
+  <script>
+    // --- Quill Integration ---
+    // Initialize Quill after DOM is ready
+    const quill = new Quill('#editor', {
+      modules: { toolbar: '#quillToolbar' },
+      theme: 'snow'
+    });
+    // Helper to load HTML into Quill
+    function loadQuillContent(html) {
+      quill.root.innerHTML = html || '';
+    }
+    // Save HTML and plain text on text change
+    quill.on('text-change', () => {
+      if (typeof currentFolder !== 'undefined' && typeof currentSection !== 'undefined' && currentFolder !== null && currentSection !== null) {
+        const sec = data.folders[currentFolder].sections[currentSection];
+        sec.rawHtml = quill.root.innerHTML;
+        sec.rawText = quill.getText();
+        saveData();
+        previewSection();
+      }
+    });
+    // Patch loadSection to use Quill for fill-in editor
+    const originalLoadSection = loadSection;
+    loadSection = function() {
+      originalLoadSection();
+      const sec = data.folders[currentFolder].sections[currentSection];
+      if (sec.type !== 'label' && sec.type !== 'acronym') {
+        loadQuillContent(sec.rawHtml || sec.rawText);
+      }
+    };
+  </script>
