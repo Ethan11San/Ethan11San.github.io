@@ -2068,14 +2068,12 @@
             const regex = new RegExp(pattern, 'gi');
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
-              // DEBUG: Log each matched node and match index
               
               matches.push({ node, index: match.index, length: match[0].length });
             }
           }
 
           const targetMatch = matches[occ - 1];
-          // DEBUG: Log the target match for this word/occurrence
           
           if (targetMatch) {
             const { node, index, length } = targetMatch;
