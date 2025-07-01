@@ -364,6 +364,11 @@
       background: #71368a;
     }
 
+    #progressStatus {
+      text-align: center;
+      font-size: 1rem;
+    }
+
     /* Enforce pixel sizes for Quill size picker */
     .ql-size-8px  { font-size: 8px !important; }
     .ql-size-10px { font-size: 10px !important; }
@@ -458,6 +463,8 @@
       <button id="quizAllBtn">🎲 Random Quiz</button>
     </div>
 
+    <div id="progressStatus" style="display:none; margin:8px 24px; font-weight:bold;"></div>
+
     <div id="editorArea">
       <div id="toolbar">
         <select class="ql-size">
@@ -529,6 +536,24 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
+      const quizProgress = {};  // per-folder random quiz progress
+
+      function updateProgressIndicator() {
+        const stat = document.getElementById('progressStatus');
+        const prog = quizProgress[currentFolder];
+        if (!prog || !isQuizMode || quizOrder.length <= 1) {
+          stat.style.display = 'none';
+          return;
+        }
+        stat.textContent = `Progress: ${prog.completed.size} / ${prog.total}`;
+        stat.style.display = 'block';
+      }
+
+      function questionCompleted() {
+        const inputs = Array.from(document.querySelectorAll('#quizContent input[type="text"]'));
+        if (!inputs.length) return true;
+        return inputs.every(inp => inp.classList.contains('correct'));
+      }
       // ----- Load persistent data, with static fallback -----
       let data;
       let staticMode = false;
@@ -1915,6 +1940,7 @@
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
         renderSections(lastSectionOrder);
+        updateProgressIndicator();
       }
       function enterQuiz(){
         if (currentFolder === null) {
@@ -1924,6 +1950,7 @@
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
         startQuiz();
+        updateProgressIndicator();
       }
 
       // Starts a random-order quiz across all sections in the current folder
@@ -1934,11 +1961,24 @@
         }
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
-        // Build and shuffle order of question indices
+        const total = data.folders[currentFolder].sections.length;
+        if (!quizProgress[currentFolder]) {
+          quizProgress[currentFolder] = { completed: new Set(), total };
+        } else {
+          quizProgress[currentFolder].total = total;
+        }
+        const done = quizProgress[currentFolder].completed;
         quizOrder = data.folders[currentFolder].sections
           .map((_, i) => i)
+          .filter(i => !done.has(i))
           .sort(() => Math.random() - 0.5);
+        if (quizOrder.length === 0) {
+          alert('All questions in this section already complete!');
+          updateProgressIndicator();
+          return;
+        }
         quizPos = 0;
+        updateProgressIndicator();
         showQuiz();
       }
 
@@ -1948,6 +1988,7 @@
         quizArea.style.display='block';
         quizOrder = [currentSection];
         quizPos = 0;
+        updateProgressIndicator();
         showQuiz();
       }
       quizModeBtn.onclick = () => {
@@ -2037,6 +2078,7 @@
         currentSection = quizOrder[quizPos];
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
+        updateProgressIndicator();
         // Insert consistent title at top of quizContent
         const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
         const titleElem = document.createElement('h3');
@@ -2514,10 +2556,20 @@
       nextBtn.onclick = () => {
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
+        if (quizOrder.length > 1 && questionCompleted()) {
+          const prog = quizProgress[currentFolder];
+          if (prog) {
+            prog.completed.add(currentSection);
+            if (prog.completed.size === prog.total) {
+              alert('🎉 Section complete!');
+            }
+          }
+        }
         // If in Quiz All mode sequence, advance within that sequence first
         if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
           quizPos++;
           showQuiz();
+          updateProgressIndicator();
           return;
         }
         // Otherwise, move to the next section by index
@@ -2529,6 +2581,7 @@
           alert('🎉 All done!');
           enterEdit();
         }
+        updateProgressIndicator();
       };
       // --- Hint button logic ---
       const hintBtn = document.getElementById('hintBtn');
@@ -2578,9 +2631,6 @@
     }
   })();
   </script>
-</body>
-</html>
-  </script>
   <script>
     // --- Quill Integration ---
     // Initialize Quill after DOM is ready
@@ -2612,3 +2662,5 @@
       }
     };
   </script>
+</body>
+</html>
