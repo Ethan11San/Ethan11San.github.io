@@ -2018,7 +2018,7 @@
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
         const raw = (sec.rawText || '').toLowerCase();
-        sec.hidden = (sec.hidden || []).filter(({ word, occ }) => {
+        const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
@@ -2026,9 +2026,8 @@
           }
           return isValid;
         });
-        // DEBUG: Log the input hiddenEntries at the start
-        
-        hiddenEntries.forEach(({ word, occ }) => {
+
+        validEntries.forEach(({ word, occ }) => {
           
           const matches = [];
           const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
