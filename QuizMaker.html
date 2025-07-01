@@ -2018,11 +2018,13 @@
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
 
-        let rawText = sec.rawText || '';
-        if (!rawText && sec.rawHtml) {
+        let rawText = '';
+        if (sec.rawHtml) {
           const tmp = document.createElement('div');
           tmp.innerHTML = sec.rawHtml;
           rawText = tmp.innerText || '';
+        } else {
+          rawText = sec.rawText || '';
         }
         const raw = rawText.toLowerCase();
 
