@@ -2026,8 +2026,6 @@
         }
         const raw = rawText.toLowerCase();
 
-        const raw = (sec.rawText || '').toLowerCase();
-
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
           const isValid = occ <= allMatches.length;
@@ -2120,7 +2118,9 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
-          wrapQuizBlanks(quizContent, sec.hidden || []);
+          const tokensArr = (sec.rawText || '').split(/(\s+)/);
+          const hiddenEntries = getHiddenEntries(sec, tokensArr);
+          wrapQuizBlanks(quizContent, hiddenEntries);
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
           const measure = document.createElement('span');
