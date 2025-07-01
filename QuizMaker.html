@@ -2032,6 +2032,7 @@
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const esc = escapeRegex(word.toLowerCase());
+
           const startsWordChar = /\w/.test(word[0]);
           const endsWordChar   = /\w/.test(word[word.length - 1]);
           let pattern = esc;
@@ -2039,6 +2040,9 @@
           if (endsWordChar)   pattern = `${pattern}\\b`;
           const regex = new RegExp(pattern, 'g');
           const allMatches = [...raw.matchAll(regex)];
+
+          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
@@ -2130,7 +2134,9 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
-          wrapQuizBlanks(quizContent, sec.hidden || []);
+          const tokensArr = (sec.rawText || '').split(/(\s+)/);
+          const hiddenEntries = getHiddenEntries(sec, tokensArr);
+          wrapQuizBlanks(quizContent, hiddenEntries);
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
           const measure = document.createElement('span');
