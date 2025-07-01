@@ -364,6 +364,11 @@
       background: #71368a;
     }
 
+    #progressStatus {
+      text-align: center;
+      font-size: 1rem;
+    }
+
     /* Enforce pixel sizes for Quill size picker */
     .ql-size-8px  { font-size: 8px !important; }
     .ql-size-10px { font-size: 10px !important; }
@@ -377,19 +382,12 @@
     .ql-size-32px { font-size: 32px !important; }
 
 
-    /* Ensure bullets and indentation render everywhere */
-    .ql-editor ul.ql-list.ql-bullet,
+    /* Ensure bullets render properly across views */
     #preview     ul.ql-list.ql-bullet,
-    #quizContent ul.ql-list.ql-bullet {
-      list-style: disc;
+    #quizContent ul.ql-list.ql-bullet,
+    .ql-editor  ul.ql-list.ql-bullet {
       padding-left: 2em;
       margin: 0.5em 0;
-    }
-
-    /* Remove custom diamonds from preview/quiz so default bullets appear */
-    #preview     ul.ql-list.ql-bullet li::before,
-    #quizContent ul.ql-list.ql-bullet li::before {
-      content: none;
     }
 
     /* Fallback: indent any unordered list in quiz content */
@@ -398,12 +396,6 @@
       list-style-position: outside;
       margin-left: 1.5em; /* indent bullet + text */
       padding-left: 0;    /* prevent double indent */
-    }
-
-    /* Remove custom diamonds from preview/quiz so default bullets appear */
-    #preview     ul.ql-list.ql-bullet li::before,
-    #quizContent ul.ql-list.ql-bullet li::before {
-      content: none;
     }
   </style>
 </head>
@@ -448,6 +440,8 @@
       <button id="quizModeBtn">📝 Quiz Question</button>
       <button id="quizAllBtn">🎲 Random Quiz</button>
     </div>
+
+    <div id="progressStatus" style="display:none; margin:8px 24px; font-weight:bold;"></div>
 
     <div id="editorArea">
       <div id="toolbar">
@@ -520,6 +514,24 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
+      const quizProgress = {};  // per-folder random quiz progress
+
+      function updateProgressIndicator() {
+        const stat = document.getElementById('progressStatus');
+        const prog = quizProgress[currentFolder];
+        if (!prog || !isQuizMode || quizOrder.length <= 1) {
+          stat.style.display = 'none';
+          return;
+        }
+        stat.textContent = `Progress: ${prog.completed.size} / ${prog.total}`;
+        stat.style.display = 'block';
+      }
+
+      function questionCompleted() {
+        const inputs = Array.from(document.querySelectorAll('#quizContent input[type="text"]'));
+        if (!inputs.length) return true;
+        return inputs.every(inp => inp.classList.contains('correct'));
+      }
       // ----- Load persistent data, with static fallback -----
       let data;
       let staticMode = false;
@@ -1545,23 +1557,48 @@
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
       // Normalize sec.hidden entries to objects { word, occ }
       function getHiddenEntries(sec, tokens) {
-        // Build occurrence counts array
-        const counts = {};
         const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
-        // If numeric indices, transform to objects
-        const objs = entries.map(entry => {
-          if (typeof entry === 'number') {
-            const word = tokens[entry].trim();
-            // count occurrences up to index
-            let occ = 0;
-            for (let i = 0; i <= entry; i++) {
-              if (tokens[i].trim() === word) occ++;
-            }
-            return { word, occ };
-          }
-          return entry; // assume already { word, occ }
+        const wordCounts = {};
+        tokens.forEach(t => {
+          const w = t.trim();
+          if (w) wordCounts[w] = (wordCounts[w] || 0) + 1;
         });
-        return objs;
+
+        const cleaned = [];
+        entries.forEach(entry => {
+          let obj = null;
+          if (typeof entry === 'number') {
+            if (entry >= 0 && entry < tokens.length) {
+              const word = tokens[entry].trim();
+              let occ = 0;
+              for (let i = 0; i <= entry; i++) {
+                if (tokens[i].trim() === word) occ++;
+              }
+              obj = { word, occ };
+            }
+          } else if (entry && typeof entry.word === 'string' && Number.isInteger(entry.occ)) {
+            obj = entry;
+          }
+          if (!obj) return;
+          const count = wordCounts[obj.word] || 0;
+          if (obj.occ <= count) {
+            cleaned.push(obj);
+          } else if (sec.alts) {
+            delete sec.alts[`${obj.word}_${obj.occ}`];
+          }
+        });
+
+        const seen = new Set();
+        const result = [];
+        cleaned.forEach(o => {
+          const key = `${o.word}_${o.occ}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(o);
+          }
+        });
+        sec.hidden = result;
+        return result;
       }
 
       function previewSection() {
@@ -1881,6 +1918,7 @@
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
         renderSections(lastSectionOrder);
+        updateProgressIndicator();
       }
       function enterQuiz(){
         if (currentFolder === null) {
@@ -1890,6 +1928,7 @@
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
         startQuiz();
+        updateProgressIndicator();
       }
 
       // Starts a random-order quiz across all sections in the current folder
@@ -1900,11 +1939,24 @@
         }
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
-        // Build and shuffle order of question indices
+        const total = data.folders[currentFolder].sections.length;
+        if (!quizProgress[currentFolder]) {
+          quizProgress[currentFolder] = { completed: new Set(), total };
+        } else {
+          quizProgress[currentFolder].total = total;
+        }
+        const done = quizProgress[currentFolder].completed;
         quizOrder = data.folders[currentFolder].sections
           .map((_, i) => i)
+          .filter(i => !done.has(i))
           .sort(() => Math.random() - 0.5);
+        if (quizOrder.length === 0) {
+          alert('All questions in this section already complete!');
+          updateProgressIndicator();
+          return;
+        }
         quizPos = 0;
+        updateProgressIndicator();
         showQuiz();
       }
 
@@ -1914,6 +1966,7 @@
         quizArea.style.display='block';
         quizOrder = [currentSection];
         quizPos = 0;
+        updateProgressIndicator();
         showQuiz();
       }
       quizModeBtn.onclick = () => {
@@ -1930,19 +1983,21 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
-        const raw = (sec.rawText || '').toLowerCase();
+        const rawText = sec.rawHtml
+          ? new DOMParser().parseFromString(sec.rawHtml, 'text/html').body.innerText
+          : (sec.rawText || '');
+        const raw = rawText.toLowerCase();
         sec.hidden = (sec.hidden || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
-          const isValid = occ < allMatches.length;
+          const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
           return isValid;
         });
-        // DEBUG: Log the input hiddenEntries at the start
-        console.log('wrapQuizBlanks called with:', hiddenEntries);
+
         hiddenEntries.forEach(({ word, occ }) => {
-          let count = 0;
+          
           const matches = [];
           const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
           while (walker.nextNode()) {
@@ -1958,15 +2013,12 @@
             const regex = new RegExp(pattern, 'gi');
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
-              // DEBUG: Log each matched node and match index
-              console.log(`Found match in node:`, node.textContent, 'at index', match.index);
               matches.push({ node, index: match.index, length: match[0].length });
             }
           }
 
           const targetMatch = matches[occ - 1];
-          // DEBUG: Log the target match for this word/occurrence
-          console.log('Target match:', targetMatch);
+          
           if (targetMatch) {
             const { node, index, length } = targetMatch;
             const before = node.textContent.slice(0, index);
@@ -1980,7 +2032,11 @@
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'quiz-input';
+            input.className = 'blank-input';
+            const altKey = `${word}_${occ}`;
+            const answers = [word, ...(sec.alts[altKey] || [])];
+            input.setAttribute('data-answer', JSON.stringify(answers));
+            input.addEventListener('focus', () => { lastHintTarget = input; });
             // Removed fixed em width here
 
             span.appendChild(input);
@@ -1999,6 +2055,7 @@
         currentSection = quizOrder[quizPos];
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
+        updateProgressIndicator();
         // Insert consistent title at top of quizContent
         const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
         const titleElem = document.createElement('h3');
@@ -2009,7 +2066,7 @@
         titleElem.style.marginBottom = '16px';
         quizContent.innerHTML = '';
         quizContent.appendChild(titleElem);
-        console.log(`Entering showQuiz for quizPos=${quizPos}`, sec, 'hidden entries:', sec.hidden);
+        
         // Highlight current section in left panel
         renderSections(lastSectionOrder);
 
@@ -2476,10 +2533,20 @@
       nextBtn.onclick = () => {
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
+        if (quizOrder.length > 1 && questionCompleted()) {
+          const prog = quizProgress[currentFolder];
+          if (prog) {
+            prog.completed.add(currentSection);
+            if (prog.completed.size === prog.total) {
+              alert('🎉 Section complete!');
+            }
+          }
+        }
         // If in Quiz All mode sequence, advance within that sequence first
         if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
           quizPos++;
           showQuiz();
+          updateProgressIndicator();
           return;
         }
         // Otherwise, move to the next section by index
@@ -2491,6 +2558,7 @@
           alert('🎉 All done!');
           enterEdit();
         }
+        updateProgressIndicator();
       };
       // --- Hint button logic ---
       const hintBtn = document.getElementById('hintBtn');
@@ -2540,9 +2608,6 @@
     }
   })();
   </script>
-</body>
-</html>
-  </script>
   <script>
     // --- Quill Integration ---
     // Initialize Quill after DOM is ready
@@ -2574,3 +2639,5 @@
       }
     };
   </script>
+</body>
+</html>
