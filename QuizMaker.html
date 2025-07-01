@@ -671,7 +671,14 @@
       document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
       quill.on('text-change', () => {
         if (!ensureSelection()) return;
+
         syncCurrentSection();
+
+        const sec = data.folders[currentFolder].sections[currentSection];
+        sec.rawHtml = quill.root.innerHTML;
+        sec.rawText = quill.getText();
+        saveData();
+
         // Auto-update the Preview Words area
         previewSection();
       });
@@ -2039,13 +2046,27 @@
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const esc = escapeRegex(word.toLowerCase());
+
           const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
+
+          const startsWordChar = /\w/.test(word[0]);
+          const endsWordChar   = /\w/.test(word[word.length - 1]);
+          let pattern = esc;
+          if (startsWordChar) pattern = `\\b${pattern}`;
+          if (endsWordChar)   pattern = `${pattern}\\b`;
+          const regex = new RegExp(pattern, 'g');
+
+          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
+
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
           return isValid;
         });
+        sec.hidden = validEntries;
 
         validEntries.forEach(({ word, occ }) => {
           
@@ -2130,7 +2151,9 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
-          wrapQuizBlanks(quizContent, sec.hidden || []);
+          const tokensArr = (sec.rawText || '').split(/(\s+)/);
+          const hiddenEntries = getHiddenEntries(sec, tokensArr);
+          wrapQuizBlanks(quizContent, hiddenEntries);
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
           const measure = document.createElement('span');
