@@ -403,6 +403,14 @@
       left: -1em;
     }
 
+    /* Diamond icon in toolbar bullet button */
+    #toolbar .ql-list[value="bullet"] svg { display: none; }
+    #toolbar .ql-list[value="bullet"]::after {
+      content: "\25C6";
+      font-size: 16px;
+      line-height: 18px;
+    }
+
     /* Fallback: indent any unordered list in quiz content */
     #quizContent ul {
       list-style-type: disc;
