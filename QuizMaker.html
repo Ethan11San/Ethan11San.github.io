@@ -666,6 +666,7 @@
         if (!ensureSelection()) return;
         const sec = data.folders[currentFolder].sections[currentSection];
         sec.rawHtml = quill.root.innerHTML;
+        sec.rawText = quill.getText();
         saveData();
         // Auto-update the Preview Words area
         previewSection();
@@ -2017,25 +2018,34 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
+        const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        let rawText = sec.rawText || '';
-        if (!rawText && sec.rawHtml) {
+        let rawText = '';
+        if (sec.rawHtml) {
           const tmp = document.createElement('div');
           tmp.innerHTML = sec.rawHtml;
           rawText = tmp.innerText || '';
+        } else {
+          rawText = sec.rawText || '';
         }
         const raw = rawText.toLowerCase();
 
-        const raw = (sec.rawText || '').toLowerCase();
-
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
-          const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
+          const esc = escapeRegex(word.toLowerCase());
+          const startsWordChar = /\w/.test(word[0]);
+          const endsWordChar   = /\w/.test(word[word.length - 1]);
+          let pattern = esc;
+          if (startsWordChar) pattern = `\\b${pattern}`;
+          if (endsWordChar)   pattern = `${pattern}\\b`;
+          const regex = new RegExp(pattern, 'g');
+          const allMatches = [...raw.matchAll(regex)];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
           return isValid;
         });
+        sec.hidden = validEntries;
 
         validEntries.forEach(({ word, occ }) => {
           
@@ -2651,37 +2661,6 @@
       alert('Unhandled error: ' + err.message);
     }
   })();
-  </script>
-  <script>
-    // --- Quill Integration ---
-    // Initialize Quill after DOM is ready
-    const quill = new Quill('#editor', {
-      modules: { toolbar: '#quillToolbar' },
-      theme: 'snow'
-    });
-    // Helper to load HTML into Quill
-    function loadQuillContent(html) {
-      quill.root.innerHTML = html || '';
-    }
-    // Save HTML and plain text on text change
-    quill.on('text-change', () => {
-      if (typeof currentFolder !== 'undefined' && typeof currentSection !== 'undefined' && currentFolder !== null && currentSection !== null) {
-        const sec = data.folders[currentFolder].sections[currentSection];
-        sec.rawHtml = quill.root.innerHTML;
-        sec.rawText = quill.getText();
-        saveData();
-        previewSection();
-      }
-    });
-    // Patch loadSection to use Quill for fill-in editor
-    const originalLoadSection = loadSection;
-    loadSection = function() {
-      originalLoadSection();
-      const sec = data.folders[currentFolder].sections[currentSection];
-      if (sec.type !== 'label' && sec.type !== 'acronym') {
-        loadQuillContent(sec.rawHtml || sec.rawText);
-      }
-    };
   </script>
 </body>
 </html>
