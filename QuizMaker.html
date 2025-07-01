@@ -463,7 +463,12 @@
       <button id="quizAllBtn">🎲 Random Quiz</button>
     </div>
 
-    <div id="progressStatus" style="display:none; margin:8px 24px; font-weight:bold;"></div>
+    <div id="progressStatus" style="display:none; margin:8px 24px;">
+      <div id="progressText" style="font-weight:bold;"></div>
+      <div id="progressBarContainer" style="height:8px; background:#ccc; border-radius:4px; margin-top:4px;">
+        <div id="progressBar" style="height:100%; width:0; background:#1abc9c; border-radius:4px;"></div>
+      </div>
+    </div>
 
     <div id="editorArea">
       <div id="toolbar">
@@ -539,14 +544,18 @@
       const quizProgress = {};  // per-folder random quiz progress
 
       function updateProgressIndicator() {
-        const stat = document.getElementById('progressStatus');
+        const cont = document.getElementById('progressStatus');
+        const text = document.getElementById('progressText');
+        const bar  = document.getElementById('progressBar');
         const prog = quizProgress[currentFolder];
         if (!prog || !isQuizMode || quizOrder.length <= 1) {
-          stat.style.display = 'none';
+          cont.style.display = 'none';
           return;
         }
-        stat.textContent = `Progress: ${prog.completed.size} / ${prog.total}`;
-        stat.style.display = 'block';
+        cont.style.display = 'block';
+        text.textContent = `Progress: ${prog.completed.size} / ${prog.total}`;
+        const percent = prog.total ? (prog.completed.size / prog.total) * 100 : 0;
+        bar.style.width = percent + '%';
       }
 
       function questionCompleted() {
@@ -1933,7 +1942,10 @@
         isQuizMode = false;
         enterEdit();
         // Reload the current section in edit mode if one is selected
-        if (currentSection !== null) loadSection();
+        if (currentSection !== null) {
+          loadSection();
+          previewSection();
+        }
       };
 
       function enterEdit(){
@@ -2005,8 +2017,14 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
-        const raw = (sec.rawText || '').toLowerCase();
-        sec.hidden = (sec.hidden || []).filter(({ word, occ }) => {
+        let rawText = sec.rawText || '';
+        if (!rawText && sec.rawHtml) {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = sec.rawHtml;
+          rawText = tmp.innerText || '';
+        }
+        const raw = rawText.toLowerCase();
+        const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
@@ -2014,9 +2032,8 @@
           }
           return isValid;
         });
-        // DEBUG: Log the input hiddenEntries at the start
-        
-        hiddenEntries.forEach(({ word, occ }) => {
+
+        validEntries.forEach(({ word, occ }) => {
           
           const matches = [];
           const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
