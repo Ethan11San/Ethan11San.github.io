@@ -1545,23 +1545,48 @@
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
       // Normalize sec.hidden entries to objects { word, occ }
       function getHiddenEntries(sec, tokens) {
-        // Build occurrence counts array
-        const counts = {};
         const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
-        // If numeric indices, transform to objects
-        const objs = entries.map(entry => {
-          if (typeof entry === 'number') {
-            const word = tokens[entry].trim();
-            // count occurrences up to index
-            let occ = 0;
-            for (let i = 0; i <= entry; i++) {
-              if (tokens[i].trim() === word) occ++;
-            }
-            return { word, occ };
-          }
-          return entry; // assume already { word, occ }
+        const wordCounts = {};
+        tokens.forEach(t => {
+          const w = t.trim();
+          if (w) wordCounts[w] = (wordCounts[w] || 0) + 1;
         });
-        return objs;
+
+        const cleaned = [];
+        entries.forEach(entry => {
+          let obj = null;
+          if (typeof entry === 'number') {
+            if (entry >= 0 && entry < tokens.length) {
+              const word = tokens[entry].trim();
+              let occ = 0;
+              for (let i = 0; i <= entry; i++) {
+                if (tokens[i].trim() === word) occ++;
+              }
+              obj = { word, occ };
+            }
+          } else if (entry && typeof entry.word === 'string' && Number.isInteger(entry.occ)) {
+            obj = entry;
+          }
+          if (!obj) return;
+          const count = wordCounts[obj.word] || 0;
+          if (obj.occ <= count) {
+            cleaned.push(obj);
+          } else if (sec.alts) {
+            delete sec.alts[`${obj.word}_${obj.occ}`];
+          }
+        });
+
+        const seen = new Set();
+        const result = [];
+        cleaned.forEach(o => {
+          const key = `${o.word}_${o.occ}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            result.push(o);
+          }
+        });
+        sec.hidden = result;
+        return result;
       }
 
       function previewSection() {
@@ -1933,16 +1958,16 @@
         const raw = (sec.rawText || '').toLowerCase();
         sec.hidden = (sec.hidden || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
-          const isValid = occ < allMatches.length;
+          const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
           return isValid;
         });
         // DEBUG: Log the input hiddenEntries at the start
-        console.log('wrapQuizBlanks called with:', hiddenEntries);
+        
         hiddenEntries.forEach(({ word, occ }) => {
-          let count = 0;
+          
           const matches = [];
           const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
           while (walker.nextNode()) {
@@ -1959,14 +1984,14 @@
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
               // DEBUG: Log each matched node and match index
-              console.log(`Found match in node:`, node.textContent, 'at index', match.index);
+              
               matches.push({ node, index: match.index, length: match[0].length });
             }
           }
 
           const targetMatch = matches[occ - 1];
           // DEBUG: Log the target match for this word/occurrence
-          console.log('Target match:', targetMatch);
+          
           if (targetMatch) {
             const { node, index, length } = targetMatch;
             const before = node.textContent.slice(0, index);
@@ -1980,7 +2005,11 @@
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.className = 'quiz-input';
+            input.className = 'blank-input';
+            const altKey = `${word}_${occ}`;
+            const answers = [word, ...(sec.alts[altKey] || [])];
+            input.setAttribute('data-answer', JSON.stringify(answers));
+            input.addEventListener('focus', () => { lastHintTarget = input; });
             // Removed fixed em width here
 
             span.appendChild(input);
@@ -2009,7 +2038,7 @@
         titleElem.style.marginBottom = '16px';
         quizContent.innerHTML = '';
         quizContent.appendChild(titleElem);
-        console.log(`Entering showQuiz for quizPos=${quizPos}`, sec, 'hidden entries:', sec.hidden);
+        
         // Highlight current section in left panel
         renderSections(lastSectionOrder);
 
