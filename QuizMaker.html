@@ -395,8 +395,8 @@
   <script>
     (async () => {
       try {
-      // IndexedDB and persistent storage logic removed.
-      // Function to position definitions container and add button absolutely below the image container
+      
+      
       function updateDefPosition() {
         const cont = document.getElementById('labelContainer');
         const addBtn = document.getElementById('addDefinitionBtn');
@@ -405,28 +405,28 @@
           const parent = document.getElementById('labelEditor');
           parent.style.position = 'relative';
           const topOffset = cont.offsetTop + cont.offsetHeight + 10;
-          // Position the Add Definition button
+          
           addBtn.style.position = 'absolute';
           addBtn.style.top = topOffset + 'px';
           addBtn.style.left = cont.offsetLeft + 'px';
-          // Make definitions span the rest of the editor width
+          
           defCont.style.width = (parent.clientWidth - cont.offsetLeft) + 'px';
-          // Position the definitions container below the button
+          
           defCont.style.position = 'absolute';
           defCont.style.top = (topOffset + addBtn.offsetHeight + 10) + 'px';
           defCont.style.left = cont.offsetLeft + 'px';
         }
       }
-      let isQuizMode = true;   // start in quiz mode by default
-      let lastHintTarget = null;  // track last focused blank for hint
-      let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
-      let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
+      let isQuizMode = true;   
+      let lastHintTarget = null;  
+      let deleteMode = false;     
+      let quizOrder = [], quizPos = 0;  
       let lastSectionOrder = null;
-      // ----- Load persistent data, with static fallback -----
+      
       let data;
       let staticMode = false;
       try {
-        // Attempt API fetch
+        
         const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
         if (resp.ok) {
           data = await resp.json();
@@ -444,7 +444,7 @@
           data = { folders: [] };
         }
       }
-      // Initialize currentFolder/Section based on loaded data...
+      
       function saveData() {
         if (staticMode) {
           console.warn('Static mode: changes will not be saved to server.');
@@ -486,7 +486,7 @@
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-      // —— Initial UI render using migrated or loaded data ——
+      
       if (data.folders.length > 0) {
         currentFolder = 0;
         currentSection = data.folders[0].sections.length > 0 ? 0 : null;
@@ -505,7 +505,7 @@
         }
       }
 
-      // --- Auto-resize editor textarea with content up to its max height ---
+      
       function adjustEditorHeight() {
         editorTA.style.height = 'auto';
         editorTA.style.height = editorTA.scrollHeight + 'px';
@@ -535,7 +535,7 @@
         foldersUL.innerHTML='';
         data.folders.forEach((f,i)=>{
           let li=document.createElement('li');
-          // Enable drag-and-drop reordering for folders
+          
           li.draggable = true;
           li.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', i);
@@ -573,7 +573,7 @@
                 quizContent.innerHTML = '<p style="color:#7f8c8d;font-style:italic;">No questions in this folder.</p>';
               }
             } else {
-              // Otherwise, default to edit mode for that section
+              
               enterEdit();
               if (currentSection !== null) {
                 loadSection();
@@ -588,7 +588,7 @@
               renderFolders();
             }
           };
-          // Delete folder button
+          
           const delF = document.createElement('span');
           delF.className = 'delete-icon';
           delF.textContent = '✖';
@@ -598,9 +598,9 @@
           delF.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
-              // Remove the folder
+              
               data.folders.splice(i, 1);
-              // Adjust currentFolder
+              
               if (data.folders.length > 0) {
                 const newIdx = i < data.folders.length ? i : data.folders.length - 1;
                 currentFolder = newIdx;
@@ -629,13 +629,13 @@
           const s = data.folders[currentFolder].sections[index];
           const i = index;
           let li=document.createElement('li');
-          // Add a subtle left-border color to indicate question type
+          
           li.classList.remove('type-fill', 'type-diagram', 'type-acronym');
-          // Default to fill for missing or other types
+          
           if (s.type === 'label')       li.classList.add('type-diagram');
           else if (s.type === 'acronym') li.classList.add('type-acronym');
           else                            li.classList.add('type-fill');
-          // Enable drag-and-drop reordering for questions
+          
           li.draggable = true;
           li.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', i);
@@ -657,22 +657,22 @@
             const defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
             title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
-          else { // fill
+          else { 
             const defaultTitle = (s.rawText && s.rawText.split('\n')[0].trim()) || '(untitled)';
             title = s.title && s.title.trim() ? s.title : defaultTitle;
           }
           li.textContent = title;
-          // Only toggle the 'selected' class, preserving type-* classes
+          
           if (i === currentSection) li.classList.add('selected');
           else li.classList.remove('selected');
           li.onclick = () => {
             currentSection = i;
             renderSections(lastSectionOrder);
             if (isQuizMode) {
-              enterQuizQuestion();   // show quiz for this section
+              enterQuizQuestion();   
             } else {
               loadSection();
-              enterEdit();           // show editor
+              enterEdit();           
             }
           };
           li.ondblclick=()=>{
@@ -686,10 +686,10 @@
               renderSections(lastSectionOrder);
               enterEdit();
               loadSection();
-              // No need to reload editor/rawText
+              
             }
           };
-          // Delete section/question button
+          
           const delS = document.createElement('span');
           delS.className = 'delete-icon';
           const delTitle = title;
@@ -700,9 +700,9 @@
           delS.onclick = evt => {
             evt.stopPropagation();
             if (confirm(`Delete question "${delTitle}"? This cannot be undone.`)) {
-              // Remove the section
+              
               data.folders[currentFolder].sections.splice(i, 1);
-              // Adjust currentSection
+              
               const secs = data.folders[currentFolder].sections;
               if (secs.length > 0) {
                 currentSection = i < secs.length ? i : secs.length - 1;
@@ -720,7 +720,7 @@
         });
       }
 
-      // Filter and reorder sections based on search input
+      
       function filterSections() {
         const terms = sectionSearch.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
         lastSectionOrder = null;
@@ -731,7 +731,7 @@
         const secs = data.folders[currentFolder].sections;
         const group1 = [], group2 = [], group3 = [];
         secs.forEach((s, idx) => {
-          // Determine title and body text
+          
           const defaultTitle = s.title?.trim() ||
             ((s.rawText||'').split('\n')[0].trim()) ||
             s.acronym ||
@@ -763,7 +763,7 @@
         clearSearchBtn.style.display = 'none';
       };
 
-      // Toggle delete icons in folder and question lists
+      
       toggleDeleteBtn.onclick = () => {
         deleteMode = !deleteMode;
         renderFolders();
@@ -784,7 +784,7 @@
 
       addLabelBtn.onclick = async () => {
         if (currentFolder === null) return alert('Select a folder first');
-        // Create placeholder label question immediately
+        
         const q = { type:'label', rawText:'', hidden:[], alts:{}, image:'', labels:[], definitions:[], arrows:[] };
         data.folders[currentFolder].sections.push(q);
         currentSection = data.folders[currentFolder].sections.length - 1;
@@ -848,7 +848,7 @@
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
-        // Update header to show current section title
+        
         let titleText = '';
         if (sec.type === 'acronym') {
           titleText = sec.acronym;
@@ -861,7 +861,7 @@
           titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
         }
         document.getElementById('header').textContent = titleText;
-        // Hide all main editors
+        
         editorTA.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
 
@@ -891,7 +891,7 @@
         }
 
         if (sec.type === 'label') {
-          // Label-image editor
+          
           labelEditor.style.display = 'block';
           labelEditor.innerHTML = `
             <div id="labelContainer" style="position:relative; display:inline-block; overflow:auto;">
@@ -899,12 +899,12 @@
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
 
-          // -- Definitions UI Start --
+          
           const addDefBtn = document.createElement('button');
           addDefBtn.id = 'addDefinitionBtn';
           addDefBtn.textContent = 'Add Definition';
           addDefBtn.style.display = 'block';
-          // margin removed, now positioned absolutely by updateDefPosition
+          
           addDefBtn.style.padding = '6px 12px';
           addDefBtn.style.border = 'none';
           addDefBtn.style.borderRadius = '4px';
@@ -920,23 +920,23 @@
           const defContainer = document.createElement('div');
           defContainer.id = 'labelDefinitions';
           defContainer.className = 'definition-list';
-          // marginTop removed, now positioned absolutely by updateDefPosition
+          
           defContainer.style.padding = '12px';
           defContainer.style.border = '1px solid #bdc3c7';
           defContainer.style.background = '#fff';
           labelEditor.appendChild(defContainer);
-          // Initial position of definitions
+          
           updateDefPosition();
 
-          // Render existing definitions with full mini‑fill functionality
+          
           sec.definitions = sec.definitions || [];
           sec.definitions.forEach((def, dIndex) => {
             const wrapper = document.createElement('div');
             wrapper.className = 'definition-wrapper';
             wrapper.draggable = true;
-            // Drag-and-drop handlers to reorder definitions
+            
             wrapper.addEventListener('dragstart', e => {
-              // If user is dragging inside the textarea, let them select text instead of moving the wrapper
+              
               if (e.target.tagName.toLowerCase() === 'textarea') {
                 e.preventDefault();
                 return;
@@ -954,12 +954,12 @@
               loadSection();
             });
 
-            // —— title row + delete button ——
+            
             const row = document.createElement('div');
             row.style.display = 'flex';
             row.style.alignItems = 'center';
 
-            // Prefix the definition title with its number
+            
             const h4 = document.createElement('h4');
             h4.textContent = (dIndex + 1) + '. ' + def.labelText;
             h4.style.fontSize = '1.1rem';
@@ -981,25 +981,25 @@
             row.appendChild(del);
             wrapper.appendChild(row);
 
-            // —— textarea for raw text ——
+            
             const ta = document.createElement('textarea');
             ta.style.width = '100%';
             ta.style.minHeight = '60px';
             ta.style.height = 'auto';
             ta.style.overflow = 'hidden';
-            ta.style.fontSize = '1.1rem';   // bigger, matches main editor
+            ta.style.fontSize = '1.1rem';   
             ta.value = def.rawText;
-            // Disable wrapper drag while interacting with textarea
+            
             ta.addEventListener('mousedown', () => { wrapper.draggable = false; });
             ta.addEventListener('mouseup',   () => { wrapper.draggable = true; });
 
-            // containers for live preview + alternates
+            
             const prevDiv = document.createElement('div');
             prevDiv.style.marginTop = '8px';
             const altDiv  = document.createElement('div');
             altDiv.style.marginTop  = '12px';
 
-            // Auto-resize as you type
+            
             function adjustDefHeight() {
               ta.style.height = 'auto';
               ta.style.height = ta.scrollHeight + 'px';
@@ -1016,7 +1016,7 @@
             wrapper.appendChild(prevDiv);
             wrapper.appendChild(altDiv);
 
-            // initial render
+            
             buildDefinitionPreview(def, prevDiv, altDiv);
 
             defContainer.appendChild(wrapper);
@@ -1024,13 +1024,13 @@
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
-          // Ensure definitions follow container resizing
+          
           if (window.ResizeObserver) {
             new ResizeObserver(updateDefPosition).observe(container);
           }
-          // Start with native resizing disabled
+          
           container.style.resize = 'none';
-          // Restore saved position
+          
           if (sec.imgX != null && sec.imgY != null) {
             container.style.position = 'absolute';
             container.style.left = sec.imgX + 'px';
@@ -1038,20 +1038,20 @@
           } else {
             container.style.position = 'relative';
           }
-          // --- Manual resize handle on double right-click (contextmenu) ---
-          // Toggle manual resize handle on double right-click
+          
+          
           let lastContextTime = 0;
           container.addEventListener('contextmenu', e => {
             e.preventDefault();
             const now = Date.now();
             if (now - lastContextTime < 400) {
-              // Double right-click detected
+              
               const existing = container.querySelector('#resizeHandle');
               if (existing) {
-                // Remove handle to disable resize
+                
                 existing.remove();
               } else {
-                // Create handle to enable manual resize
+                
                 const handle = document.createElement('div');
                 handle.id = 'resizeHandle';
                 handle.style.position = 'absolute';
@@ -1063,7 +1063,7 @@
                 handle.style.cursor = 'se-resize';
                 handle.style.zIndex = '1000';
                 container.appendChild(handle);
-                // Mouse events for resizing
+                
                 handle.addEventListener('mousedown', ev => {
                   ev.preventDefault();
                   const startX = ev.clientX;
@@ -1073,17 +1073,17 @@
                   function onMouseMove(moveEv) {
                     container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
                     container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
-                    // Ensure the image scales to fit the container rather than being cropped
+                    
                     img.style.width = '100%';
                     img.style.height = 'auto';
                   }
                   function onMouseUp() {
-                    // Ensure the image scales to fit the container rather than being cropped (final sizing)
+                    
                     img.style.width = '100%';
                     img.style.height = 'auto';
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
-                    // Save dimensions
+                    
                     sec.imgWidth = container.offsetWidth;
                     sec.imgHeight = container.offsetHeight;
                     saveData();
@@ -1096,9 +1096,9 @@
             }
             lastContextTime = now;
           });
-          // Drag to move container
+          
           container.addEventListener('mousedown', e => {
-            if (e.button !== 0 || e.target !== container) return; // left-click only on container
+            if (e.button !== 0 || e.target !== container) return; 
             e.preventDefault();
             let startX = e.clientX, startY = e.clientY;
             let origLeft = parseInt(container.style.left) || 0;
@@ -1110,7 +1110,7 @@
             function onMouseUp() {
               document.removeEventListener('mousemove', onMouseMove);
               document.removeEventListener('mouseup', onMouseUp);
-              // Save position
+              
               sec.imgX = parseInt(container.style.left) || 0;
               sec.imgY = parseInt(container.style.top) || 0;
               saveData();
@@ -1138,13 +1138,13 @@
             const y = evt.clientY - rect.top;
             const text = prompt('Enter label text:');
             if (text) {
-              // Default fontSize is 16px
+              
               sec.labels.push({ x, y, text, fontSize: 16 });
               saveData();
               loadSection();
             }
           };
-          // Render existing labels
+          
           sec.labels.forEach(lbl => {
             const mark = document.createElement('div');
             mark.textContent = lbl.text;
@@ -1160,11 +1160,11 @@
             mark.style.textOverflow  = 'ellipsis';
             mark.style.cursor = 'move';
             mark.style.resize = 'both';
-            // Disable text selection for label marks
+            
             mark.style.userSelect = 'none';
             mark.style.webkitUserSelect = 'none';
             mark.style.msUserSelect = 'none';
-            // —— Number badge if this label has a definition ——
+            
             let defIdx = -1;
             if (sec.definitions && sec.definitions.length) {
               defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
@@ -1187,13 +1187,13 @@
               num.style.pointerEvents = 'none';
               mark.appendChild(num);
             }
-            // --- Definition mode click handler ---
+            
             mark.addEventListener('click', evt => {
               if (!isAddingDefinition) return;
               evt.stopPropagation();
-              // Initialize definitions array
+              
               sec.definitions = sec.definitions || [];
-              // Add a new definition entry with this label text
+              
               sec.definitions.push({
                 labelText: lbl.text,
                 rawText: '',
@@ -1206,18 +1206,18 @@
               loadSection();
             });
             overlay.appendChild(mark);
-            // Apply stored dimensions and font size
+            
             mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
             mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
             mark.style.fontSize = lbl.fontSize + 'px';
             mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-            // Store dimensions after user resizes (mouseup on mark)
+            
             mark.addEventListener('mouseup', () => {
               lbl.w = mark.offsetWidth;
               lbl.h = mark.offsetHeight;
               saveData();
             });
-            // Double-click to edit label text only
+            
             mark.ondblclick = evt => {
               evt.stopPropagation();
               evt.preventDefault();
@@ -1225,7 +1225,7 @@
               if (newText !== null) {
                 lbl.text = newText;
                 mark.textContent = lbl.text;
-                // Update box to fit new text
+                
                 lbl.w = mark.offsetWidth;
                 lbl.h = mark.offsetHeight;
                 mark.style.width = lbl.w + 'px';
@@ -1233,7 +1233,7 @@
                 saveData();
               }
             };
-            // Right-click to edit font size
+            
             mark.oncontextmenu = evt => {
               evt.preventDefault();
               evt.stopPropagation();
@@ -1242,7 +1242,7 @@
               if (!isNaN(newSize) && newSize > 0) {
                 lbl.fontSize = newSize;
                 mark.style.fontSize = lbl.fontSize + 'px';
-                // Update box to fit new size
+                
                 lbl.w = mark.offsetWidth;
                 lbl.h = mark.offsetHeight;
                 mark.style.width = lbl.w + 'px';
@@ -1250,9 +1250,9 @@
                 saveData();
               }
             };
-            // Dragging: only allow left-click drag (button === 0)
+            
             mark.onmousedown = evt => {
-              if (evt.button !== 0) return; // only drag on left-click
+              if (evt.button !== 0) return; 
               evt.preventDefault();
               let startX = evt.clientX, startY = evt.clientY;
               const origX = lbl.x, origY = lbl.y;
@@ -1271,27 +1271,27 @@
               document.addEventListener('mouseup', onMouseUp);
             };
           });
-          // Create or clear the SVG overlay for arrows
+          
           let svgOverlay = overlay.querySelector('svg');
           if (!svgOverlay) {
             svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
             overlay.appendChild(svgOverlay);
           } else {
-            // Clear existing children for redraw
+            
             while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
           }
-          // --- Render saved arrows as SVG lines with arrowheads ---
+          
           if (sec.arrows) {
             sec.arrows.forEach((a, idx) => {
-              // Compute angle, arrowLength, and arrowWidth first
+              
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
               const arrowLength = a.width * 3;
               const arrowWidth = a.width * 2;
-              // Compute end point for the line (base of arrowhead)
+              
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              // Create line from (x1,y1) to (lineEndX,lineEndY)
+              
               const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
               line.setAttribute('x1', a.x1);
               line.setAttribute('y1', a.y1);
@@ -1301,7 +1301,7 @@
               line.setAttribute('stroke-width', a.width);
               line.setAttribute('pointer-events', 'all');
               svgOverlay.appendChild(line);
-              // Now draw arrowhead triangle with tip at (a.x2,a.y2)
+              
               const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
               const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
               const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
@@ -1312,7 +1312,7 @@
               polygon.setAttribute('fill', a.color);
               polygon.setAttribute('pointer-events', 'all');
               svgOverlay.appendChild(polygon);
-              // Context menu and dblclick handlers unchanged...
+              
               [line, polygon].forEach(el => {
                 el.addEventListener('contextmenu', evt => {
                   if (!evt.metaKey) return;
@@ -1338,8 +1338,8 @@
                     const fixedTop = overlayRect.top + 50;
                     popup.style.left = `${fixedLeft}px`;
                     popup.style.top = `${fixedTop}px`;
-                    // Ensure popup is always visible on screen
-                    // (Removed legacy code referencing tipClientX/tipClientY)
+                    
+                    
                     popup.style.transform = 'translate(-50%, -100%)';
                     popup.style.transformOrigin = 'bottom center';
                     popup.style.background = '#fff';
@@ -1383,7 +1383,7 @@
               });
             });
           }
-          // --- Ctrl-click and drag to draw a new arrow ---
+          
           let drawing = false;
           let startX = 0, startY = 0;
           let tempLine = null;
@@ -1393,7 +1393,7 @@
             startX = evt.clientX - rect.left;
             startY = evt.clientY - rect.top;
             drawing = true;
-            // Create temporary line
+            
             tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             tempLine.setAttribute('x1', startX);
             tempLine.setAttribute('y1', startY);
@@ -1418,10 +1418,10 @@
             const rect = img.getBoundingClientRect();
             const endX = evt.clientX - rect.left;
             const endY = evt.clientY - rect.top;
-            // Remove temporary line
+            
             svgOverlay.removeChild(tempLine);
             tempLine = null;
-            // Only save if end differs from start (to prevent zero-length arrows)
+            
             if (endX !== startX || endY !== startY) {
               if (!sec.arrows) sec.arrows = [];
               sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
@@ -1437,7 +1437,7 @@
         editorTA.value = sec.rawText;
         adjustEditorHeight();
         previewSection();
-        // Auto-save and live preview for fill-in questions
+        
         editorTA.oninput = () => {
           adjustEditorHeight();
           sec.rawText = editorTA.value;
@@ -1446,23 +1446,23 @@
         };
       }
       previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
-      // Normalize sec.hidden entries to objects { word, occ }
+      
       function getHiddenEntries(sec, tokens) {
-        // Build occurrence counts array
+        
         const counts = {};
         const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
-        // If numeric indices, transform to objects
+        
         const objs = entries.map(entry => {
           if (typeof entry === 'number') {
             const word = tokens[entry].trim();
-            // count occurrences up to index
+            
             let occ = 0;
             for (let i = 0; i <= entry; i++) {
               if (tokens[i].trim() === word) occ++;
             }
             return { word, occ };
           }
-          return entry; // assume already { word, occ }
+          return entry; 
         });
         return objs;
       }
@@ -1472,7 +1472,7 @@
         const tokens = editorTA.value.split(/(\s+)/);
         sec.hidden = sec.hidden||[];
         sec.alts = sec.alts||{};
-        // Map hidden entries to objects
+        
         const hiddenEntries = getHiddenEntries(sec, tokens);
         let counts = {};
         previewDiv.innerHTML = '';
@@ -1480,7 +1480,7 @@
         altContainer.style.display = 'block';
         tokens.forEach((tok, i) => {
           if (!tok.trim()) {
-            // Preserve newline breaks
+            
             if (tok.includes('\n')) {
               const lines = tok.split('\n');
               lines.forEach((ln, idx) => {
@@ -1500,7 +1500,7 @@
             span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
             span.onclick = () => {
               if (!tok.trim()) return;
-              // Toggle hidden for this word occurrence
+              
               const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
               if (idx >= 0) hiddenEntries.splice(idx, 1);
               else hiddenEntries.push({ word: w, occ });
@@ -1511,8 +1511,8 @@
             previewDiv.appendChild(span);
           }
         });
-        // Build alt inputs for each blank (in order of occurrence in tokens)
-        // Rebuild counts for correct ordering
+        
+        
         let altCounts = {};
         counts = {};
         tokens.forEach((tok, i) => {
@@ -1541,7 +1541,7 @@
 
       }
 
-      // —— Helper: build preview & alternate‑answer UI for a single definition ——
+      
       function buildDefinitionPreview(defObj, previewDiv, altDiv) {
         const tokens = (defObj.rawText || '').split(/(\s+)/);
         defObj.hidden = defObj.hidden || [];
@@ -1582,12 +1582,12 @@
               : hiddenEntries.push({ word: w, occ });
             defObj.hidden = hiddenEntries;
             saveData();
-            buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
+            buildDefinitionPreview(defObj, previewDiv, altDiv); 
           };
           previewDiv.appendChild(span);
         });
 
-        // alternate‑answer inputs
+        
         counts = {};
         tokens.forEach(tok => {
           if (!tok.trim()) return;
@@ -1615,11 +1615,11 @@
       saveSectionBtn.onclick = async () => {
         if (!ensureSelection()) return;
         const sec = data.folders[currentFolder].sections[currentSection];
-        // Only update rawText for non-label questions
+        
         if (sec.type !== 'label') {
           sec.rawText = editorTA.value;
         }
-        // sec.hidden is already updated in previewSection's click handler
+        
         await saveData();
         renderSections(lastSectionOrder);
         loadSection();
@@ -1630,7 +1630,7 @@
       editModeBtn.onclick = () => {
         isQuizMode = false;
         enterEdit();
-        // Reload the current section in edit mode if one is selected
+        
         if (currentSection !== null) loadSection();
       };
 
@@ -1649,7 +1649,7 @@
         startQuiz();
       }
 
-      // Starts a random-order quiz across all sections in the current folder
+      
       function enterRandomQuiz() {
         if (currentFolder === null) {
           alert('Select a folder first');
@@ -1657,7 +1657,7 @@
         }
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
-        // Build and shuffle order of question indices
+        
         quizOrder = data.folders[currentFolder].sections
           .map((_, i) => i)
           .sort(() => Math.random() - 0.5);
@@ -1675,7 +1675,7 @@
       }
       quizModeBtn.onclick = () => {
         isQuizMode = true;
-        // Show quiz for the currently selected section
+        
         if (currentSection !== null) {
           enterQuizQuestion();
         } else {
@@ -1685,7 +1685,7 @@
       quizAllBtn .onclick = enterRandomQuiz;
 
       function showQuiz(){
-        // Highlight current section in left panel
+        
         currentSection = quizOrder[quizPos];
         renderSections(lastSectionOrder);
         quizContent.innerHTML = '';
@@ -1696,11 +1696,11 @@
         else if (sec.type === 'label') {
           const raw = sec.rawText || '';
           defaultTitle = raw.split('\n')[0].trim() || 'Label Question';
-        } else { // fill
+        } else { 
           defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
         }
         const title = sec.title && sec.title.trim() ? sec.title : defaultTitle;
-        // Update the main header to match the quiz question's title
+        
         document.getElementById('header').textContent = title;
         const titleEl = document.createElement('div');
         titleEl.style.fontSize = '1.2rem';
@@ -1715,7 +1715,7 @@
             div.style.display = 'flex';
             div.style.alignItems = 'center';
             div.style.margin = '4px 0';
-            // Build inputs array
+            
             let html = `<strong style="margin-right:4px">${e.letter}:</strong>
               <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px">`;
             if (e.extra && e.extra.trim()) {
@@ -1757,7 +1757,7 @@
           }
           wrapper.appendChild(img);
 
-          // Create SVG overlay for arrows
+          
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svgOverlay.style.position = 'absolute';
           svgOverlay.style.top = '0';
@@ -1767,16 +1767,16 @@
           svgOverlay.style.pointerEvents = 'none';
           wrapper.appendChild(svgOverlay);
 
-          // Draw saved arrows
+          
           if (sec.arrows) {
             sec.arrows.forEach(a => {
               const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
               const arrowLength = a.width * 3;
               const arrowWidth = a.width * 2;
-              // Compute line endpoint at base of arrowhead
+              
               const lineEndX = a.x2 - arrowLength * Math.cos(angle);
               const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              // Create line element
+              
               const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
               line.setAttribute('x1', a.x1);
               line.setAttribute('y1', a.y1);
@@ -1785,7 +1785,7 @@
               line.setAttribute('stroke', a.color);
               line.setAttribute('stroke-width', a.width);
               svgOverlay.appendChild(line);
-              // Compute arrowhead points
+              
               const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
               const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
               const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
@@ -1798,19 +1798,19 @@
             });
           }
 
-          // Map labelText → { el: titleElement, idx }
+          
           const titleMap = {};
-          // Render inline inputs
+          
           sec.labels.forEach(lbl => {
             const inp = document.createElement('input');
             inp.classList.add('blank-input');
             inp.setAttribute('data-answer', JSON.stringify([lbl.text]));
-            inp.dataset.label = "1";          // mark as picture‑label blank
+            inp.dataset.label = "1";          
             inp.type = 'text';
             inp.style.position = 'absolute';
             inp.style.left = lbl.x + 'px';
             inp.style.top = lbl.y + 'px';
-            // border, bg, font, etc.
+            
             inp.style.border = '1px solid #7f8c8d';
             inp.style.background = '#ffffff';
             inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
@@ -1819,9 +1819,9 @@
             inp.style.boxSizing = 'border-box';
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
-            // record focus so Hint button targets the last‑selected box
+            
             inp.addEventListener('focus', () => { lastHintTarget = inp; });
-            // size width/height to match the saved label size, or fallback to measured width
+            
             const measSpan = document.createElement('span');
             measSpan.style.visibility = 'hidden';
             measSpan.style.position   = 'absolute';
@@ -1839,7 +1839,7 @@
               const ok = val === lbl.text.trim().toLowerCase();
 
               if (ok) {
-                // Replace the input with the revealed label text
+                
                 const txt = document.createElement('span');
                 txt.textContent = lbl.text;
                 txt.style.position = 'absolute';
@@ -1855,27 +1855,27 @@
                 if (lbl.h) txt.style.height = lbl.h + 'px';
                 txt.style.display = 'inline-block';
                 wrapper.appendChild(txt);
-                inp.remove();               // get rid of the input box
-                // Auto‑focus the next remaining picture‑label blank
+                inp.remove();               
+                
                 setTimeout(() => {
                   const next = wrapper.querySelector('input[data-label="1"]');
                   if (next) next.focus();
                 }, 0);
 
-                // Reveal corresponding definition title now that this label is correct
+                
                 const entry = titleMap[lbl.text];
                 if (entry && !entry.revealed) {
                   entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
                   entry.revealed = true;
                 }
               } else {
-                // keep feedback colours while user is typing
+                
                 inp.classList.remove('correct');
                 inp.classList.add('incorrect');
                 inp.style.borderColor = '#c0392b';
               }
 
-              // Re‑evaluate overall correctness outline
+              
               const remainingInputs = Array.from(wrapper.querySelectorAll('input'));
               if (remainingInputs.length === 0) {
                 img.style.outline = '2px solid #27ae60';
@@ -1910,7 +1910,7 @@
           });
 
           quizContent.appendChild(wrapper);
-          // ---- Render mini‑fill definitions under the image ----
+          
           if (sec.definitions && sec.definitions.length) {
             const defsHdr = document.createElement('h4');
             defsHdr.textContent = 'Definitions';
@@ -1918,13 +1918,13 @@
             quizContent.appendChild(defsHdr);
 
             sec.definitions.forEach((def, dIndex) => {
-              // Prefix each definition with its number – label name stays hidden until solved
+              
               const para = document.createElement('p');
               para.style.marginBottom = '12px';
               const title = document.createElement('strong');
               title.textContent = (dIndex + 1) + '. ';
               para.appendChild(title);
-              // Register this definition's title for reveal
+              
               titleMap[def.labelText] = { el: title, idx: dIndex };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
@@ -1952,17 +1952,17 @@
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
-                // Track focus for definition blanks too
+                
                 inp.addEventListener('focus', () => { lastHintTarget = inp; });
-                // keep track of blanks for this definition
+                
                 if (!para._inputs) para._inputs = [];
                 para._inputs.push(inp);
-                // Match font family & size to regular fill‑in blanks
+                
                 const qcStyle = window.getComputedStyle(quizContent);
                 inp.style.fontFamily = qcStyle.fontFamily;
                 inp.style.fontSize   = qcStyle.fontSize;
                 inp.style.padding    = '0 2px';
-                // Space → next blank (if correct); Tab → previous blank  — same as normal fill‑ins
+                
                 inp.addEventListener('keydown', e => {
                   const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   const idx = inputs.indexOf(inp);
@@ -1978,7 +1978,7 @@
                   }
                 });
 
-                // width sizing identical to regular fill‑ins
+                
                 const meas = document.createElement('span');
                 meas.style.visibility = 'hidden';
                 meas.style.position   = 'absolute';
@@ -1992,7 +1992,7 @@
                   const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-                  // (Reveal-on-all-blanks logic removed)
+                  
                 };
 
                 span.appendChild(inp);
@@ -2003,7 +2003,7 @@
           }
           return;
         }
-        // existing fill-in logic follows
+        
         quizContent.style.borderColor = '';
         let tokens=sec.rawText.split(/(\s+)/);
         // New logic for word/occurrence blanks
@@ -2025,21 +2025,21 @@
             let answers = [w, ...(sec.alts[key]||[])];
             let wrapper = document.createElement('span');
             wrapper.className = 'blank';
-            // Always size based on uppercase text width with extra room
+            
             const blankText = w.toUpperCase();
             wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
             let inp = document.createElement('input');
             inp.className = 'blank-input';
             inp.addEventListener('focus', () => { lastHintTarget = inp; });
-            // store correct answers for hint feature
+            
             inp.setAttribute('data-answer', JSON.stringify(answers));
-            // Match quiz section font
+            
             const qcStyle = window.getComputedStyle(quizContent);
             inp.style.fontFamily = qcStyle.fontFamily;
             inp.style.fontSize = qcStyle.fontSize;
             inp.style.padding = '0 2px';
             inp.style.boxSizing = 'content-box';
-            // Measure text width using hidden span
+            
             const measurer = document.createElement('span');
             measurer.style.visibility = 'hidden';
             measurer.style.position = 'absolute';
@@ -2049,7 +2049,7 @@
             document.body.appendChild(measurer);
             inp.style.width = (measurer.offsetWidth + 4) + 'px';
             document.body.removeChild(measurer);
-            // New keydown handler: Space = next if correct, Tab = previous
+            
             inp.addEventListener('keydown', e => {
               const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               const idx = inputs.indexOf(inp);
@@ -2066,13 +2066,13 @@
                 }
               }
             });
-            // Simplified input handler: just correctness, outline if all correct
+            
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = answers.some(a => a.toLowerCase() === val);
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
-              // If all blanks correct, turn border green
+              
               const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                 quizContent.style.borderColor = '#27ae60';
@@ -2088,13 +2088,13 @@
       nextBtn.onclick = () => {
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
-        // If in Quiz All mode sequence, advance within that sequence first
+        
         if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
           quizPos++;
           showQuiz();
           return;
         }
-        // Otherwise, move to the next section by index
+        
         if (currentSection < total - 1) {
           currentSection++;
           renderSections();
@@ -2104,10 +2104,10 @@
           enterEdit();
         }
       };
-      // --- Hint button logic ---
+      
       const hintBtn = document.getElementById('hintBtn');
       hintBtn.onclick = () => {
-        // Determine target: last focused blank, then active focus, then first incomplete
+        
         let target = null;
         if (lastHintTarget && lastHintTarget.dataset.answer) {
           target = lastHintTarget;
@@ -2129,15 +2129,15 @@
             // Regular blank – use normal correctness logic
             target.dispatchEvent(new Event('input'));
           } else {
-            // Picture‑label blank: show temporarily, don’t trigger permanent reveal
+            
             target.classList.add('correct');
-            // size to fit if user previously shrank
+            
             target.style.width = correct.length + 1 + 'ch';
           }
 
           target.focus();
           setTimeout(() => {
-            // Clear only if user hasn’t typed something else
+            
             if (target.value.trim().toLowerCase() === correct.toLowerCase()) {
               target.value = '';
               target.classList.remove('correct');
