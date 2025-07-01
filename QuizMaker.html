@@ -377,16 +377,31 @@
     .ql-size-32px { font-size: 32px !important; }
 
 
-    /* Ensure bullets and indentation render everywhere */
-    .ql-editor ul.ql-list.ql-bullet,
+    /* Ensure bullets render properly across views */
     #preview     ul.ql-list.ql-bullet,
-    #quizContent ul.ql-list.ql-bullet {
-      list-style: disc;
+    #quizContent ul.ql-list.ql-bullet,
+    .ql-editor  ul.ql-list.ql-bullet {
       padding-left: 2em;
       margin: 0.5em 0;
     }
 
-    /* Remove custom diamonds from preview/quiz so default bullets appear */
+    /* Show diamonds instead of discs when editing */
+    .ql-editor ul.ql-list.ql-bullet {
+      list-style: none;
+    }
+    .ql-editor ul.ql-list.ql-bullet li { position: relative; }
+    .ql-editor ul.ql-list.ql-bullet li::before {
+      content: "\25C6"; /* diamond */
+      position: absolute;
+      left: -1em;
+    }
+
+    /* Preview/quiz should keep default bullets */
+    #preview     ul.ql-list.ql-bullet,
+    #quizContent ul.ql-list.ql-bullet {
+      list-style: disc;
+    }
+    /* Remove the editor diamonds in non-edit views */
     #preview     ul.ql-list.ql-bullet li::before,
     #quizContent ul.ql-list.ql-bullet li::before {
       content: none;
@@ -398,12 +413,6 @@
       list-style-position: outside;
       margin-left: 1.5em; /* indent bullet + text */
       padding-left: 0;    /* prevent double indent */
-    }
-
-    /* Remove custom diamonds from preview/quiz so default bullets appear */
-    #preview     ul.ql-list.ql-bullet li::before,
-    #quizContent ul.ql-list.ql-bullet li::before {
-      content: none;
     }
   </style>
 </head>
