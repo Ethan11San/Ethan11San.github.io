@@ -659,15 +659,26 @@
       const toolbarModule = quill.getModule('toolbar');
       toolbarModule.addHandler('undo', () => quill.history.undo());
       toolbarModule.addHandler('redo', () => quill.history.redo());
+      function syncCurrentSection(){
+        if (currentFolder===null || currentSection===null) return;
+        const sec = data.folders[currentFolder].sections[currentSection];
+        sec.rawHtml = quill.root.innerHTML;
+        sec.rawText = quill.getText();
+        saveData();
+      }
       // Also bind click for undo/redo in custom toolbar
       document.querySelector('#toolbar .ql-undo').addEventListener('click', () => quill.history.undo());
       document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
       quill.on('text-change', () => {
         if (!ensureSelection()) return;
+
+        syncCurrentSection();
+
         const sec = data.folders[currentFolder].sections[currentSection];
         sec.rawHtml = quill.root.innerHTML;
         sec.rawText = quill.getText();
         saveData();
+
         // Auto-update the Preview Words area
         previewSection();
       });
@@ -1956,6 +1967,7 @@
         updateProgressIndicator();
       }
       function enterQuiz(){
+          syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -1968,6 +1980,7 @@
 
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
+          syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -2005,6 +2018,7 @@
         showQuiz();
       }
       quizModeBtn.onclick = () => {
+        syncCurrentSection();
         isQuizMode = true;
         // Show quiz for the currently selected section
         if (currentSection !== null) {
@@ -2033,15 +2047,18 @@
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const esc = escapeRegex(word.toLowerCase());
 
+          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
+
           const startsWordChar = /\w/.test(word[0]);
           const endsWordChar   = /\w/.test(word[word.length - 1]);
           let pattern = esc;
           if (startsWordChar) pattern = `\\b${pattern}`;
           if (endsWordChar)   pattern = `${pattern}\\b`;
           const regex = new RegExp(pattern, 'g');
-          const allMatches = [...raw.matchAll(regex)];
 
           const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
 
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
