@@ -2017,6 +2017,7 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
+
         let rawText = sec.rawText || '';
         if (!rawText && sec.rawHtml) {
           const tmp = document.createElement('div');
@@ -2024,6 +2025,9 @@
           rawText = tmp.innerText || '';
         }
         const raw = rawText.toLowerCase();
+
+        const raw = (sec.rawText || '').toLowerCase();
+
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
           const isValid = occ <= allMatches.length;
