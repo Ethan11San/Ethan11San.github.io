@@ -385,21 +385,40 @@
     .ql-size-32px { font-size: 32px !important; }
 
 
-    /* Use default bullet styling in all views */
+    /* Diamond bullets everywhere */
     .ql-editor ul.ql-list.ql-bullet,
     #preview     ul.ql-list.ql-bullet,
     #quizContent ul.ql-list.ql-bullet {
-      list-style: disc;
+      list-style: none;
       padding-left: 2em;
       margin: 0.5em 0;
+    }
+    .ql-editor ul.ql-list.ql-bullet li,
+    #preview     ul.ql-list.ql-bullet li,
+    #quizContent ul.ql-list.ql-bullet li {
+      position: relative;
+    }
+    .ql-editor ul.ql-list.ql-bullet li::before,
+    #preview     ul.ql-list.ql-bullet li::before,
+    #quizContent ul.ql-list.ql-bullet li::before {
+      content: "\25C6";
+      position: absolute;
+      left: -1em;
     }
 
     /* Ensure normal indentation inside quiz content */
     #quizContent ul {
-      list-style: disc;
+      list-style: none;
       list-style-position: outside;
       margin-left: 1.5em;
       padding-left: 0;
+    }
+
+    /* Diamond icon on Quill bullet button */
+    #toolbar button.ql-list[value="bullet"] svg { display: none; }
+    #toolbar button.ql-list[value="bullet"]::after {
+      content: "\25C6";
+      font-size: 14px;
     }
   </style>
 </head>
@@ -2599,7 +2618,7 @@
     // --- Quill Integration ---
     // Initialize Quill after DOM is ready
     const quill = new Quill('#editor', {
-      modules: { toolbar: '#quillToolbar' },
+      modules: { toolbar: '#toolbar' },
       theme: 'snow'
     });
     // Helper to load HTML into Quill
