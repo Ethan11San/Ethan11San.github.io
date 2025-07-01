@@ -2032,13 +2032,24 @@
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const esc = escapeRegex(word.toLowerCase());
+
+          const startsWordChar = /\w/.test(word[0]);
+          const endsWordChar   = /\w/.test(word[word.length - 1]);
+          let pattern = esc;
+          if (startsWordChar) pattern = `\\b${pattern}`;
+          if (endsWordChar)   pattern = `${pattern}\\b`;
+          const regex = new RegExp(pattern, 'g');
+          const allMatches = [...raw.matchAll(regex)];
+
           const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
+
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
           return isValid;
         });
+        sec.hidden = validEntries;
 
         validEntries.forEach(({ word, occ }) => {
           
