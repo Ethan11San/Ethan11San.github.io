@@ -2018,18 +2018,25 @@
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
 
-        let rawText = sec.rawText || '';
-        if (!rawText && sec.rawHtml) {
+        let rawText = '';
+        if (sec.rawHtml) {
           const tmp = document.createElement('div');
           tmp.innerHTML = sec.rawHtml;
           rawText = tmp.innerText || '';
+        } else {
+          rawText = sec.rawText || '';
         }
-        const raw = rawText.toLowerCase();
-
-        const raw = (sec.rawText || '').toLowerCase();
+        const rawLower = rawText.toLowerCase();
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
-          const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
+          const wordLower = word.toLowerCase();
+          const escaped = wordLower.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+          const startsWordChar = /\w/.test(wordLower[0]);
+          const endsWordChar   = /\w/.test(wordLower[wordLower.length - 1]);
+          let pattern = escaped;
+          if (startsWordChar) pattern = '\\b' + pattern;
+          if (endsWordChar)   pattern = pattern + '\\b';
+          const allMatches = [...rawLower.matchAll(new RegExp(pattern, 'g'))];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
