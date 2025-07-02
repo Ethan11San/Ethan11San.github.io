@@ -659,14 +659,19 @@
       const toolbarModule = quill.getModule('toolbar');
       toolbarModule.addHandler('undo', () => quill.history.undo());
       toolbarModule.addHandler('redo', () => quill.history.redo());
+      function syncCurrentSection(){
+        if (currentFolder===null || currentSection===null) return;
+        const sec = data.folders[currentFolder].sections[currentSection];
+        sec.rawHtml = quill.root.innerHTML;
+        sec.rawText = quill.getText();
+        saveData();
+      }
       // Also bind click for undo/redo in custom toolbar
       document.querySelector('#toolbar .ql-undo').addEventListener('click', () => quill.history.undo());
       document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
       quill.on('text-change', () => {
         if (!ensureSelection()) return;
-        const sec = data.folders[currentFolder].sections[currentSection];
-        sec.rawHtml = quill.root.innerHTML;
-        saveData();
+        syncCurrentSection();
         // Auto-update the Preview Words area
         previewSection();
       });
@@ -738,6 +743,8 @@
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
           li.onclick = () => {
+            // Save any edits in the currently open section before switching folders
+            syncCurrentSection();
             currentFolder = i;
             // Default to first section in the newly selected folder
             if (data.folders[i].sections && data.folders[i].sections.length > 0) {
@@ -851,6 +858,8 @@
           if (i === currentSection) li.classList.add('selected');
           else li.classList.remove('selected');
           li.onclick = () => {
+            // Persist changes in the previously selected section
+            syncCurrentSection();
             currentSection = i;
             renderSections(lastSectionOrder);
             if (isQuizMode) {
@@ -1955,6 +1964,7 @@
         updateProgressIndicator();
       }
       function enterQuiz(){
+          syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -1967,6 +1977,7 @@
 
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
+          syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -2004,6 +2015,7 @@
         showQuiz();
       }
       quizModeBtn.onclick = () => {
+        syncCurrentSection();
         isQuizMode = true;
         // Show quiz for the currently selected section
         if (currentSection !== null) {
@@ -2017,19 +2029,21 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
+        const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        let rawText = sec.rawText || '';
-        if (!rawText && sec.rawHtml) {
+        let rawText = '';
+        if (sec.rawHtml) {
           const tmp = document.createElement('div');
           tmp.innerHTML = sec.rawHtml;
           rawText = tmp.innerText || '';
+        } else {
+          rawText = sec.rawText || '';
         }
         const raw = rawText.toLowerCase();
 
-        const raw = (sec.rawText || '').toLowerCase();
-
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
-          const allMatches = [...raw.matchAll(new RegExp(`\\b${word.toLowerCase()}\\b`, 'g'))];
+          const esc = escapeRegex(word.toLowerCase());
+          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
@@ -2054,14 +2068,12 @@
             const regex = new RegExp(pattern, 'gi');
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
-              // DEBUG: Log each matched node and match index
               
               matches.push({ node, index: match.index, length: match[0].length });
             }
           }
 
           const targetMatch = matches[occ - 1];
-          // DEBUG: Log the target match for this word/occurrence
           
           if (targetMatch) {
             const { node, index, length } = targetMatch;
@@ -2651,37 +2663,6 @@
       alert('Unhandled error: ' + err.message);
     }
   })();
-  </script>
-  <script>
-    // --- Quill Integration ---
-    // Initialize Quill after DOM is ready
-    const quill = new Quill('#editor', {
-      modules: { toolbar: '#quillToolbar' },
-      theme: 'snow'
-    });
-    // Helper to load HTML into Quill
-    function loadQuillContent(html) {
-      quill.root.innerHTML = html || '';
-    }
-    // Save HTML and plain text on text change
-    quill.on('text-change', () => {
-      if (typeof currentFolder !== 'undefined' && typeof currentSection !== 'undefined' && currentFolder !== null && currentSection !== null) {
-        const sec = data.folders[currentFolder].sections[currentSection];
-        sec.rawHtml = quill.root.innerHTML;
-        sec.rawText = quill.getText();
-        saveData();
-        previewSection();
-      }
-    });
-    // Patch loadSection to use Quill for fill-in editor
-    const originalLoadSection = loadSection;
-    loadSection = function() {
-      originalLoadSection();
-      const sec = data.folders[currentFolder].sections[currentSection];
-      if (sec.type !== 'label' && sec.type !== 'acronym') {
-        loadQuillContent(sec.rawHtml || sec.rawText);
-      }
-    };
   </script>
 </body>
 </html>
