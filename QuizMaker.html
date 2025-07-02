@@ -564,6 +564,7 @@
         return inputs.every(inp => inp.classList.contains('correct'));
       }
       // ----- Load persistent data, with static fallback -----
+      const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
       let staticMode = false;
       try {
@@ -575,14 +576,22 @@
           throw new Error('API response not OK: ' + resp.status);
         }
       } catch (apiErr) {
-        console.warn('API unavailable, falling back to static quizData.json', apiErr);
+        console.warn('API unavailable, falling back to quizData.json', apiErr);
         staticMode = true;
         try {
           const resp2 = await fetch('./quizData.json', { cache: 'no-store' });
-          data = resp2.ok ? await resp2.json() : { folders: [] };
+          if (!resp2.ok) throw new Error('Static file response not OK');
+          data = await resp2.json();
         } catch (staticErr) {
-          console.error('Error loading static quizData.json:', staticErr);
-          data = { folders: [] };
+          console.warn('Local quizData.json unavailable, attempting GitHub raw', staticErr);
+          try {
+            const resp3 = await fetch(GITHUB_JSON_URL, { cache: 'no-store' });
+            if (!resp3.ok) throw new Error('GitHub raw response not OK');
+            data = await resp3.json();
+          } catch (githubErr) {
+            console.error('Error loading quiz data from GitHub:', githubErr);
+            data = { folders: [] };
+          }
         }
       }
       // Initialize currentFolder/Section based on loaded data...
@@ -2048,20 +2057,13 @@
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
           const esc = escapeRegex(word.toLowerCase());
-
-          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
-
-
           const startsWordChar = /\w/.test(word[0]);
           const endsWordChar   = /\w/.test(word[word.length - 1]);
           let pattern = esc;
           if (startsWordChar) pattern = `\\b${pattern}`;
           if (endsWordChar)   pattern = `${pattern}\\b`;
           const regex = new RegExp(pattern, 'g');
-
-          const allMatches = [...raw.matchAll(new RegExp(`\\b${esc}\\b`, 'g'))];
-
-
+          const allMatches = [...raw.matchAll(regex)];
           const isValid = occ <= allMatches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
