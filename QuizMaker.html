@@ -751,6 +751,7 @@
           li.className=i===currentFolder?'selected':'';
           li.onclick = () => {
             currentFolder = i;
+            lastSectionOrder = null; // reset any prior search/order when switching folders
             // Default to first section in the newly selected folder
             if (data.folders[i].sections && data.folders[i].sections.length > 0) {
               currentSection = 0;
@@ -809,6 +810,7 @@
               }
               saveData();
               renderFolders();
+              lastSectionOrder = null; // reset ordering after folder deletion
               renderSections(lastSectionOrder);
               enterEdit();
               if (currentSection !== null) loadSection();
