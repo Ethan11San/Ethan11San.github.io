@@ -1,0 +1,3 @@
+# Ignore local environment variables and Node modules
+quiz-server/.env
+quiz-server/node_modules/
