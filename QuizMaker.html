@@ -1672,6 +1672,50 @@
         return result;
       }
 
+      // Extract tokens from a section's rawHtml/rawText the same way the preview
+      // builder does, so blank occurrence counts stay consistent across modes
+      function extractTokens(sec) {
+        if (sec.rawHtml) {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = sec.rawHtml;
+          let toks = [];
+          tmp.childNodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              toks.push(...node.textContent.split(/(\s+)/));
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              if (node.tagName === 'P' || node.tagName === 'DIV') {
+                node.childNodes.forEach(child => {
+                  if (child.nodeType === Node.TEXT_NODE) {
+                    toks.push(...child.textContent.split(/(\s+)/));
+                  } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
+                    toks.push('\n');
+                  } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    toks.push(...(child.innerText || '').split(/(\s+)/));
+                  }
+                });
+                toks.push('\n');
+              } else if (node.tagName === 'BR') {
+                toks.push('\n');
+              } else if (node.tagName === 'UL') {
+                node.childNodes.forEach(li => {
+                  if (li.nodeType !== Node.ELEMENT_NODE || li.tagName !== 'LI') return;
+                  const liTokens = (li.innerText || '').split(/(\s+)/);
+                  liTokens.forEach(t => {
+                    const trimmed = t.trim();
+                    if (!trimmed || trimmed === '•') return;
+                    toks.push(t);
+                  });
+                });
+              } else {
+                toks.push(...(node.innerText || '').split(/(\s+)/));
+              }
+            }
+          });
+          return toks.filter(t => t.length > 0);
+        }
+        return (sec.rawText || '').split(/(\s+)/).filter(t => t.length > 0);
+      }
+
       function previewSection() {
         const sec = data.folders[currentFolder].sections[currentSection];
         // Use rawHtml if present, otherwise convert rawText to HTML with paragraphs
@@ -2191,7 +2235,7 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
-          const tokensArr = (sec.rawText || '').split(/(\s+)/);
+          const tokensArr = extractTokens(sec);
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
           wrapQuizBlanks(quizContent, hiddenEntries);
           // --- Improved blank sizing using text width measurement ---
@@ -2604,10 +2648,8 @@
         }
         // existing fill-in logic follows
         quizContent.style.borderColor = '';
-        let tokens=sec.rawText.split(/(\s+)/);
-        // New logic for word/occurrence blanks
-        // Build hiddenEntries and alternate answers mapping
-        const tokensArr = sec.rawText.split(/(\s+)/);
+        // Use the same tokenization approach as the preview
+        const tokensArr = extractTokens(sec);
         const hiddenEntries = getHiddenEntries(sec, tokensArr);
         let counts = {};
         tokensArr.forEach((tok, i) => {
