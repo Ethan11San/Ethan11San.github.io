@@ -2202,13 +2202,13 @@
             };
             // Initial sizing
             resize(word);
-            // Resize and grade on each keystroke
+            // Resize on each keystroke
             input.addEventListener('input', () => {
               computeFont();
               resize(input.value || wrapper.dataset.word);
             });
           });
-          // Attach grading on blur to all blanks
+          // Attach grading and navigation to all blanks
           quizContent.querySelectorAll('.blank input').forEach(input => {
             input.addEventListener('input', () => {
               const enteredRaw   = input.value.trim();
@@ -2218,13 +2218,11 @@
               const altKey       = `${correctWord}_${occ}`;
               const alts         = section.alts[altKey] || [];
 
-              // Helper – strip punctuation, ignore case, keep only letters & digits
               const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-              const enteredNorm  = normalize(enteredRaw);
-              const correctNorm  = normalize(correctWord);
-              const isCorrect    = enteredNorm === correctNorm ||
-                                   alts.some(a => normalize(a) === enteredNorm);
+              const enteredNorm = normalize(enteredRaw);
+              const correctNorm = normalize(correctWord);
+              const isCorrect   = enteredNorm === correctNorm ||
+                                  alts.some(a => normalize(a) === enteredNorm);
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
@@ -2234,6 +2232,32 @@
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
+              }
+
+              const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
+              if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+                quizContent.style.borderColor = '#27ae60';
+                markQuestionCompleted();
+              } else {
+                quizContent.style.borderColor = '';
+              }
+            });
+
+            input.addEventListener('keydown', e => {
+              const inputs = Array.from(quizContent.querySelectorAll('.blank input'));
+              const idx = inputs.indexOf(input);
+              if (e.key === ' ') {
+                e.preventDefault();
+                if (input.classList.contains('correct') && idx < inputs.length - 1) {
+                  inputs[idx + 1].focus();
+                }
+              }
+              if (e.key === 'Backspace' && input.selectionStart === 0 && input.selectionEnd === 0 && input.value === '' && idx > 0) {
+                e.preventDefault();
+                const prev = inputs[idx - 1];
+                prev.focus();
+                const len = prev.value.length;
+                prev.setSelectionRange(len, len);
               }
             });
           });
