@@ -542,7 +542,8 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
-      const quizProgress = {};  // per-folder random quiz progress
+      // Track progress and random order per folder
+      const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
 
       function updateProgressIndicator() {
         const cont = document.getElementById('progressStatus');
@@ -2016,22 +2017,33 @@
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
         const total = data.folders[currentFolder].sections.length;
-        if (!quizProgress[currentFolder]) {
-          quizProgress[currentFolder] = { completed: new Set(), total };
+        let prog = quizProgress[currentFolder];
+        if (!prog) {
+          prog = quizProgress[currentFolder] = { completed: new Set(), total, order: null, pos: 0 };
         } else {
-          quizProgress[currentFolder].total = total;
+          prog.total = total;
         }
-        const done = quizProgress[currentFolder].completed;
-        quizOrder = data.folders[currentFolder].sections
-          .map((_, i) => i)
-          .filter(i => !done.has(i))
-          .sort(() => Math.random() - 0.5);
-        if (quizOrder.length === 0) {
-          alert('All questions in this section already complete!');
-          updateProgressIndicator();
-          return;
+
+        if (prog.order && prog.order.length && prog.pos < prog.order.length) {
+          quizOrder = prog.order;
+          quizPos   = prog.pos;
+        } else {
+          const done = prog.completed;
+          const order = data.folders[currentFolder].sections
+            .map((_, i) => i)
+            .filter(i => !done.has(i))
+            .sort(() => Math.random() - 0.5);
+          if (order.length === 0) {
+            alert('All questions in this section already complete!');
+            updateProgressIndicator();
+            return;
+          }
+          prog.order = order;
+          prog.pos   = 0;
+          quizOrder   = order;
+          quizPos     = 0;
         }
-        quizPos = 0;
+
         updateProgressIndicator();
         showQuiz();
       }
@@ -2089,7 +2101,12 @@
         });
         sec.hidden = validEntries;
 
-        validEntries.forEach(({ word, occ }) => {
+        const sortedEntries = validEntries.slice().sort((a, b) => {
+          if (a.word === b.word) return b.occ - a.occ;
+          return 0;
+        });
+
+        sortedEntries.forEach(({ word, occ }) => {
           
           const matches = [];
           const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
@@ -2149,6 +2166,8 @@
       function showQuiz() {
         // Advance to the correct section
         currentSection = quizOrder[quizPos];
+        const prog = quizProgress[currentFolder];
+        if (prog) prog.pos = quizPos;
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         updateProgressIndicator();
@@ -2687,6 +2706,8 @@
         // If in Quiz All mode sequence, advance within that sequence first
         if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
           quizPos++;
+          const prog = quizProgress[currentFolder];
+          if (prog) prog.pos = quizPos;
           showQuiz();
           updateProgressIndicator();
           return;
@@ -2706,6 +2727,8 @@
         const secs = data.folders[currentFolder].sections;
         if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
           quizPos--;
+          const prog = quizProgress[currentFolder];
+          if (prog) prog.pos = quizPos;
           showQuiz();
           updateProgressIndicator();
           return;
