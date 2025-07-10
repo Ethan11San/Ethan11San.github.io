@@ -1978,7 +1978,7 @@
         updateProgressIndicator();
       }
       function enterQuiz(){
-          syncCurrentSection();
+          if(!isQuizMode) syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -1991,7 +1991,7 @@
 
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
-          syncCurrentSection();
+          if(!isQuizMode) syncCurrentSection();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -2029,7 +2029,7 @@
         showQuiz();
       }
       quizModeBtn.onclick = () => {
-        syncCurrentSection();
+        if(!isQuizMode) syncCurrentSection();
         isQuizMode = true;
         // Show quiz for the currently selected section
         if (currentSection !== null) {
