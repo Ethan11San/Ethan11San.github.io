@@ -564,6 +564,20 @@
         if (!inputs.length) return true;
         return inputs.every(inp => inp.classList.contains('correct'));
       }
+
+      function markQuestionCompleted() {
+        let prog = quizProgress[currentFolder];
+        if (!prog) {
+          const total = data.folders[currentFolder].sections.length;
+          prog = quizProgress[currentFolder] = { completed: new Set(), total };
+        } else {
+          prog.total = data.folders[currentFolder].sections.length;
+        }
+        if (!prog.completed.has(currentSection)) {
+          prog.completed.add(currentSection);
+        }
+        updateProgressIndicator();
+      }
       // ----- Load persistent data, with static fallback -----
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
@@ -2491,7 +2505,7 @@
                 inp.style.fontFamily = qcStyle.fontFamily;
                 inp.style.fontSize   = qcStyle.fontSize;
                 inp.style.padding    = '0 2px';
-                // Space → next blank (if correct); Tab → previous blank  — same as normal fill‑ins
+                // Space → next blank (if correct); Tab → previous; Backspace at start → previous
                 inp.addEventListener('keydown', e => {
                   const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   const idx = inputs.indexOf(inp);
@@ -2504,6 +2518,13 @@
                   if (e.key === 'Tab') {
                     e.preventDefault();
                     if (idx > 0) inputs[idx - 1].focus();
+                  }
+                  if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                    e.preventDefault();
+                    const prev = inputs[idx - 1];
+                    prev.focus();
+                    const len = prev.value.length;
+                    prev.setSelectionRange(len, len);
                   }
                 });
 
@@ -2521,7 +2542,13 @@
                   const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-                  // (Reveal-on-all-blanks logic removed)
+                  const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                  if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+                    quizContent.style.borderColor = '#27ae60';
+                    markQuestionCompleted();
+                  } else {
+                    quizContent.style.borderColor = '';
+                  }
                 };
 
                 span.appendChild(inp);
@@ -2578,7 +2605,7 @@
             document.body.appendChild(measurer);
             inp.style.width = (measurer.offsetWidth + 4) + 'px';
             document.body.removeChild(measurer);
-            // New keydown handler: Space = next if correct, Tab = previous
+            // Space → next (if correct); Tab → previous; Backspace at start → previous
             inp.addEventListener('keydown', e => {
               const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               const idx = inputs.indexOf(inp);
@@ -2594,6 +2621,13 @@
                   inputs[idx - 1].focus();
                 }
               }
+              if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                e.preventDefault();
+                const prev = inputs[idx - 1];
+                prev.focus();
+                const len = prev.value.length;
+                prev.setSelectionRange(len, len);
+              }
             });
             // Simplified input handler: just correctness, outline if all correct
             inp.oninput = () => {
@@ -2601,10 +2635,12 @@
               const ok = answers.some(a => a.toLowerCase() === val);
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
-              // If all blanks correct, turn border green
               const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                 quizContent.style.borderColor = '#27ae60';
+                markQuestionCompleted();
+              } else {
+                quizContent.style.borderColor = '';
               }
             };
             wrapper.appendChild(inp);
@@ -2618,12 +2654,10 @@
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
         if (quizOrder.length > 1 && questionCompleted()) {
+          markQuestionCompleted();
           const prog = quizProgress[currentFolder];
-          if (prog) {
-            prog.completed.add(currentSection);
-            if (prog.completed.size === prog.total) {
-              alert('🎉 Section complete!');
-            }
+          if (prog && prog.completed.size === prog.total) {
+            alert('🎉 Section complete!');
           }
         }
         // If in Quiz All mode sequence, advance within that sequence first
