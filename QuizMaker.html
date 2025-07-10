@@ -343,13 +343,13 @@
     .blank input:focus { outline: none; border-bottom-color: #3498db; }
     .blank input.correct { border-bottom-color: #27ae60; }
     .blank input.incorrect { border-bottom-color: #c0392b; }
-    #nextBtn {
+    #nextBtn, #backBtn {
       margin-top: 20px; padding: 10px 20px;
       border: none; border-radius: 4px;
       background: #8e44ad; color: #fff;
       cursor: pointer; transition: background .2s;
     }
-    #nextBtn:hover { background: #71368a; }
+    #nextBtn:hover, #backBtn:hover { background: #71368a; }
     #hintBtn {
       margin-top: 20px;
       padding: 10px 20px;
@@ -506,6 +506,7 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
+      <button id="backBtn">⬅️ Back</button>
       <button id="nextBtn">Next Section ➡️</button>
       <button id="hintBtn">Hint</button>
     </div>
@@ -632,7 +633,7 @@
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), nextBtn = document.getElementById('nextBtn');
+            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
@@ -679,6 +680,7 @@
       document.querySelector('#toolbar .ql-undo').addEventListener('click', () => quill.history.undo());
       document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
       quill.on('text-change', () => {
+        if (isQuizMode) return;
         if (!ensureSelection()) return;
 
         syncCurrentSection();
@@ -1992,6 +1994,7 @@
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
           if(!isQuizMode) syncCurrentSection();
+        isQuizMode = true;
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -2638,6 +2641,26 @@
         } else {
           alert('🎉 All done!');
           enterEdit();
+        }
+        updateProgressIndicator();
+      };
+      backBtn.onclick = () => {
+        const secs = data.folders[currentFolder].sections;
+        if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
+          quizPos--;
+          showQuiz();
+          updateProgressIndicator();
+          return;
+        }
+        if (currentSection > 0) {
+          currentSection--;
+          renderSections();
+          if (isQuizMode) {
+            enterQuizQuestion();
+          } else {
+            loadSection();
+            previewSection();
+          }
         }
         updateProgressIndicator();
       };
