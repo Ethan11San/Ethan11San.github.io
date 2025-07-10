@@ -2116,28 +2116,13 @@
       function wrapQuizBlanks(container, hiddenEntries) {
         // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
-        const escapeRegex = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        let rawText = '';
-        if (sec.rawHtml) {
-          const tmp = document.createElement('div');
-          tmp.innerHTML = sec.rawHtml;
-          rawText = tmp.innerText || '';
-        } else {
-          rawText = sec.rawText || '';
-        }
-        const raw = rawText.toLowerCase();
+        // Tokenize the section text exactly like previewSection/extractTokens
+        const tokens = extractTokens(sec).map(t => t.trim()).filter(Boolean);
 
         const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
-          const esc = escapeRegex(word.toLowerCase());
-          const startsWordChar = /\w/.test(word[0]);
-          const endsWordChar   = /\w/.test(word[word.length - 1]);
-          let pattern = esc;
-          if (startsWordChar) pattern = `\\b${pattern}`;
-          if (endsWordChar)   pattern = `${pattern}\\b`;
-          const regex = new RegExp(pattern, 'g');
-          const allMatches = [...raw.matchAll(regex)];
-          const isValid = occ <= allMatches.length;
+          const matches = tokens.filter(t => t === word);
+          const isValid = occ <= matches.length;
           if (!isValid && sec.alts) {
             delete sec.alts[`${word}_${occ}`];
           }
