@@ -564,6 +564,20 @@
         if (!inputs.length) return true;
         return inputs.every(inp => inp.classList.contains('correct'));
       }
+
+      function markQuestionCompleted() {
+        let prog = quizProgress[currentFolder];
+        if (!prog) {
+          const total = data.folders[currentFolder].sections.length;
+          prog = quizProgress[currentFolder] = { completed: new Set(), total };
+        } else {
+          prog.total = data.folders[currentFolder].sections.length;
+        }
+        if (!prog.completed.has(currentSection)) {
+          prog.completed.add(currentSection);
+        }
+        updateProgressIndicator();
+      }
       // ----- Load persistent data, with static fallback -----
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
@@ -2245,29 +2259,54 @@
             div.style.margin = '4px 0';
             // Build inputs array
             let html = `<strong style="display:inline-block; width:1.5em; text-align:center; margin-right:0.75em; font-size:1.2rem; line-height:1.2;">${e.letter}:</strong>
-              <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px; font-size:1.2rem; line-height:1.2;">`;
+              <input type="text" placeholder="Answer" id="qans${i}" class="blank-input" data-answer="${e.answer}" style="padding:4px; font-size:1.2rem; line-height:1.2;">`;
             if (e.extra && e.extra.trim()) {
-              html += `<input type="text" placeholder="Extra info" id="qext${i}" style="margin-left:8px; padding:4px; font-size:1.2rem; line-height:1.2;">`;
+              html += `<input type="text" placeholder="Extra info" id="qext${i}" class="blank-input" data-answer="${e.extra}" style="margin-left:8px; padding:4px; font-size:1.2rem; line-height:1.2;">`;
             }
             div.innerHTML = html;
             quizContent.appendChild(div);
             const inp = document.getElementById('qans' + i);
             inp.style.width = maxAnswerCh + 'ch';
-            inp.oninput = () => {
-              const ok = inp.value.trim().toLowerCase() === e.answer.trim().toLowerCase();
-              inp.classList.toggle('correct', ok);
-              inp.classList.toggle('incorrect', !ok);
-            };
             let extInp = null;
             if (e.extra && e.extra.trim()) {
               extInp = document.getElementById('qext' + i);
               extInp.style.width = maxExtraCh + 'ch';
-              extInp.oninput = () => {
-                const okX = extInp.value.trim().toLowerCase() === e.extra.trim().toLowerCase();
-                extInp.classList.toggle('correct', okX);
-                extInp.classList.toggle('incorrect', !okX);
-              };
             }
+            [inp, extInp].forEach(el => {
+              if (!el) return;
+              el.addEventListener('keydown', ev => {
+                const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                const idx = inputs.indexOf(el);
+                if (ev.key === ' ') {
+                  ev.preventDefault();
+                  if (el.classList.contains('correct') && idx < inputs.length - 1) inputs[idx + 1].focus();
+                }
+                if (ev.key === 'Tab') {
+                  ev.preventDefault();
+                  if (idx > 0) inputs[idx - 1].focus();
+                }
+                if (ev.key === 'Backspace' && el.selectionStart === 0 && el.selectionEnd === 0 && el.value === '' && idx > 0) {
+                  ev.preventDefault();
+                  const prev = inputs[idx - 1];
+                  prev.focus();
+                  const len = prev.value.length;
+                  prev.setSelectionRange(len, len);
+                }
+              });
+
+              el.oninput = () => {
+                const ok = el.value.trim().toLowerCase() === (el.dataset.answer || '').trim().toLowerCase();
+                el.classList.toggle('correct', ok);
+                el.classList.toggle('incorrect', !ok);
+                const all = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                if (all.length === 0 || all.every(i => i.classList.contains('correct'))) {
+                  quizContent.style.borderColor = '#27ae60';
+                  markQuestionCompleted();
+                } else {
+                  quizContent.style.borderColor = '';
+                }
+              };
+            });
           });
           return;
         }
@@ -2404,12 +2443,12 @@
                 inp.style.borderColor = '#c0392b';
               }
 
-              // Re‑evaluate overall correctness outline
-              const remainingInputs = Array.from(wrapper.querySelectorAll('input'));
-              if (remainingInputs.length === 0) {
-                img.style.outline = '2px solid #27ae60';
+              const allInputs = Array.from(quizContent.querySelectorAll("input.blank-input"));
+              if (allInputs.length === 0 || allInputs.every(i => i.classList.contains("correct"))) {
+                quizContent.style.borderColor = "#27ae60";
+                markQuestionCompleted();
               } else {
-                img.style.outline = '';
+                quizContent.style.borderColor = "";
               }
             };
             wrapper.appendChild(inp);
@@ -2491,7 +2530,7 @@
                 inp.style.fontFamily = qcStyle.fontFamily;
                 inp.style.fontSize   = qcStyle.fontSize;
                 inp.style.padding    = '0 2px';
-                // Space → next blank (if correct); Tab → previous blank  — same as normal fill‑ins
+                // Space → next blank (if correct); Tab → previous; Backspace at start → previous
                 inp.addEventListener('keydown', e => {
                   const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   const idx = inputs.indexOf(inp);
@@ -2504,6 +2543,13 @@
                   if (e.key === 'Tab') {
                     e.preventDefault();
                     if (idx > 0) inputs[idx - 1].focus();
+                  }
+                  if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                    e.preventDefault();
+                    const prev = inputs[idx - 1];
+                    prev.focus();
+                    const len = prev.value.length;
+                    prev.setSelectionRange(len, len);
                   }
                 });
 
@@ -2521,7 +2567,13 @@
                   const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-                  // (Reveal-on-all-blanks logic removed)
+                  const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                  if (allInputs.length === 0 || allInputs.every(i => i.classList.contains('correct'))) {
+                    quizContent.style.borderColor = '#27ae60';
+                    markQuestionCompleted();
+                  } else {
+                    quizContent.style.borderColor = '';
+                  }
                 };
 
                 span.appendChild(inp);
@@ -2578,7 +2630,7 @@
             document.body.appendChild(measurer);
             inp.style.width = (measurer.offsetWidth + 4) + 'px';
             document.body.removeChild(measurer);
-            // New keydown handler: Space = next if correct, Tab = previous
+            // Space → next (if correct); Tab → previous; Backspace at start → previous
             inp.addEventListener('keydown', e => {
               const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
               const idx = inputs.indexOf(inp);
@@ -2594,6 +2646,13 @@
                   inputs[idx - 1].focus();
                 }
               }
+              if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                e.preventDefault();
+                const prev = inputs[idx - 1];
+                prev.focus();
+                const len = prev.value.length;
+                prev.setSelectionRange(len, len);
+              }
             });
             // Simplified input handler: just correctness, outline if all correct
             inp.oninput = () => {
@@ -2601,10 +2660,12 @@
               const ok = answers.some(a => a.toLowerCase() === val);
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
-              // If all blanks correct, turn border green
               const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
-              if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+              if (allInputs.length === 0 || allInputs.every(i => i.classList.contains('correct'))) {
                 quizContent.style.borderColor = '#27ae60';
+                markQuestionCompleted();
+              } else {
+                quizContent.style.borderColor = '';
               }
             };
             wrapper.appendChild(inp);
@@ -2618,12 +2679,10 @@
         const secs = data.folders[currentFolder].sections;
         const total = secs.length;
         if (quizOrder.length > 1 && questionCompleted()) {
+          markQuestionCompleted();
           const prog = quizProgress[currentFolder];
-          if (prog) {
-            prog.completed.add(currentSection);
-            if (prog.completed.size === prog.total) {
-              alert('🎉 Section complete!');
-            }
+          if (prog && prog.completed.size === prog.total) {
+            alert('🎉 Section complete!');
           }
         }
         // If in Quiz All mode sequence, advance within that sequence first
