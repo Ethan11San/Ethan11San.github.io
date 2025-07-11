@@ -1914,8 +1914,13 @@
         altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
         altContainer.style.display = 'block';
         // For each unique hidden entry (by word+occurrence), show input
+        const sortedAlts = hiddenEntries.slice().sort((a,b)=>{
+          const wComp = a.word.localeCompare(b.word);
+          if (wComp !== 0) return wComp;
+          return a.occ - b.occ;
+        });
         let altCounts = {};
-        hiddenEntries.forEach(({ word, occ }) => {
+        sortedAlts.forEach(({ word, occ }) => {
           altCounts[word] = (altCounts[word] || 0) + 1;
           if (altCounts[word] === occ) {
             const key = `${word}_${occ}`;
@@ -2131,8 +2136,9 @@
         sec.hidden = validEntries;
 
         const sortedEntries = validEntries.slice().sort((a, b) => {
-          if (a.word === b.word) return b.occ - a.occ;
-          return 0;
+          const wComp = a.word.localeCompare(b.word);
+          if (wComp !== 0) return wComp;
+          return b.occ - a.occ;
         });
 
         sortedEntries.forEach(({ word, occ }) => {
