@@ -544,6 +544,36 @@
       let lastSectionOrder = null;
       // Track progress and random order per folder
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
+      // Restore saved quiz progress from localStorage
+      try {
+        const saved = localStorage.getItem('quizProgress');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          for (const [folder, obj] of Object.entries(parsed)) {
+            quizProgress[folder] = {
+              completed: new Set(obj.completed || []),
+              total: obj.total,
+              order: obj.order || null,
+              pos: obj.pos || 0
+            };
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to load saved progress', e);
+      }
+
+      function saveProgress() {
+        const out = {};
+        for (const [folder, obj] of Object.entries(quizProgress)) {
+          out[folder] = {
+            completed: Array.from(obj.completed || []),
+            total: obj.total,
+            order: obj.order,
+            pos: obj.pos || 0
+          };
+        }
+        localStorage.setItem('quizProgress', JSON.stringify(out));
+      }
 
       function updateProgressIndicator() {
         const cont = document.getElementById('progressStatus');
@@ -578,6 +608,7 @@
           prog.completed.add(currentSection);
         }
         updateProgressIndicator();
+        saveProgress();
       }
       // ----- Load persistent data, with static fallback -----
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
@@ -2092,6 +2123,7 @@
           quizOrder   = order;
           quizPos     = 0;
         }
+        saveProgress();
 
         updateProgressIndicator();
         showQuiz();
@@ -2203,6 +2235,7 @@
         currentSection = quizOrder[quizPos];
         const prog = quizProgress[currentFolder];
         if (prog) prog.pos = quizPos;
+        saveProgress();
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         updateProgressIndicator();
@@ -2215,6 +2248,7 @@
           .join(' ');
         titleElem.style.marginBottom = '16px';
         quizContent.innerHTML = '';
+        quizContent.style.borderColor = '';
         quizContent.appendChild(titleElem);
         
         // Highlight current section in left panel
