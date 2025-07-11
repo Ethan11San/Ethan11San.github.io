@@ -2230,12 +2230,14 @@
         });
       }
 
-      function showQuiz() {
-        // Advance to the correct section
-        currentSection = quizOrder[quizPos];
-        const prog = quizProgress[currentFolder];
-        if (prog) prog.pos = quizPos;
-        saveProgress();
+        function showQuiz() {
+          // Advance to the correct section
+          currentSection = quizOrder[quizPos];
+          const prog = quizProgress[currentFolder];
+          if (prog && quizOrder.length > 1) {
+            prog.pos = quizPos;
+            saveProgress();
+          }
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         updateProgressIndicator();
