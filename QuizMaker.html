@@ -544,35 +544,10 @@
       let lastSectionOrder = null;
       // Track progress and random order per folder
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
-      // Restore saved quiz progress from localStorage
-      try {
-        const saved = localStorage.getItem('quizProgress');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          for (const [folder, obj] of Object.entries(parsed)) {
-            quizProgress[folder] = {
-              completed: new Set(obj.completed || []),
-              total: obj.total,
-              order: obj.order || null,
-              pos: obj.pos || 0
-            };
-          }
-        }
-      } catch (e) {
-        console.warn('Failed to load saved progress', e);
-      }
+      // Progress is kept only for this session (no localStorage)
 
       function saveProgress() {
-        const out = {};
-        for (const [folder, obj] of Object.entries(quizProgress)) {
-          out[folder] = {
-            completed: Array.from(obj.completed || []),
-            total: obj.total,
-            order: obj.order,
-            pos: obj.pos || 0
-          };
-        }
-        localStorage.setItem('quizProgress', JSON.stringify(out));
+        // Previously saved to localStorage, but persistence was removed
       }
 
       function updateProgressIndicator() {
