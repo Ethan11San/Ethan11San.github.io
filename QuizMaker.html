@@ -491,6 +491,7 @@
         <button class="ql-undo">↺</button>
         <button class="ql-redo">↻</button>
         <button class="ql-list" value="bullet"></button>
+        <select class="ql-color"></select>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
@@ -877,9 +878,18 @@
             const from = Number(e.dataTransfer.getData('text/plain'));
             const secs = data.folders[currentFolder].sections;
             const moved = secs.splice(from, 1)[0];
-            secs.splice(i, 0, moved);
+            const to = from < i ? i - 1 : i;
+            secs.splice(to, 0, moved);
+            if (currentSection === from) {
+              currentSection = to;
+            } else if (from < currentSection && currentSection <= to) {
+              currentSection--;
+            } else if (to <= currentSection && currentSection < from) {
+              currentSection++;
+            }
             saveData();
             renderSections(lastSectionOrder);
+            if (!isQuizMode && currentSection !== null) loadSection();
           });
           let title='';
           if(s.type==='acronym') title = s.acronym;
