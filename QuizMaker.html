@@ -1110,7 +1110,6 @@
         // Hide all main editors
         if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
-        altContainer.innerHTML = '';
 
         if (sec.type === 'acronym') {
           labelEditor.style.display = 'block';
@@ -1211,20 +1210,6 @@
             h4.style.fontSize = '1.1rem';
             h4.style.flex = '1';
             row.appendChild(h4);
-
-            const toggleLbl = document.createElement('label');
-            toggleLbl.style.fontSize = '0.9rem';
-            toggleLbl.style.marginRight = '8px';
-            toggleLbl.textContent = 'Hide until solved ';
-            const toggle = document.createElement('input');
-            toggle.type = 'checkbox';
-            toggle.checked = !!def.hideUntilSolved;
-            toggle.onchange = () => {
-              def.hideUntilSolved = toggle.checked;
-              saveData();
-            };
-            toggleLbl.appendChild(toggle);
-            row.appendChild(toggleLbl);
             const del = document.createElement('span');
             del.textContent = '✖';
             del.style.cursor = 'pointer';
@@ -1262,8 +1247,8 @@
               saveData();
               buildDefinitionPreview(def, prevDiv, altDiv);
             });
-            wrapper.appendChild(ta);
             adjustDefHeight();
+            wrapper.appendChild(ta);
             wrapper.appendChild(prevDiv);
             wrapper.appendChild(altDiv);
             buildDefinitionPreview(def, prevDiv, altDiv);
@@ -1426,8 +1411,7 @@
                 labelText: lbl.text,
                 rawText: '',
                 hidden: [],
-                alts: {},
-                hideUntilSolved: false
+                alts: {}
               });
               saveData();
               isAddingDefinition = false;
@@ -2525,7 +2509,6 @@
                 if (entry && !entry.revealed) {
                   entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
                   entry.revealed = true;
-                  if (entry.hide) entry.para.style.display = '';
                 }
               } else {
                 // keep feedback colours while user is typing
@@ -2580,12 +2563,11 @@
               // Prefix each definition with its number – label name stays hidden until solved
               const para = document.createElement('p');
               para.style.marginBottom = '12px';
-              if (def.hideUntilSolved) para.style.display = 'none';
               const title = document.createElement('strong');
               title.textContent = (dIndex + 1) + '. ';
               para.appendChild(title);
               // Register this definition's title for reveal
-              titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
+              titleMap[def.labelText] = { el: title, idx: dIndex };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
               let counts = {};
