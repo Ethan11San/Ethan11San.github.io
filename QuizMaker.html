@@ -1269,6 +1269,13 @@
             buildDefinitionPreview(def, prevDiv, altDiv);
             defContainer.appendChild(wrapper);
           });
+          // Ensure textareas fit existing text after load
+          setTimeout(() => {
+            defContainer.querySelectorAll('textarea').forEach(t => {
+              t.style.height = 'auto';
+              t.style.height = t.scrollHeight + 'px';
+            });
+          }, 0);
           // (rest unchanged, image/label/arrow logic)
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
@@ -2072,6 +2079,8 @@
       function enterEdit(){
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
+        altContainer.style.display = 'none';
+        altContainer.innerHTML = '';
         renderSections(lastSectionOrder);
         updateProgressIndicator();
       }
