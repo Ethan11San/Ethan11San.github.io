@@ -2868,6 +2868,19 @@
         }
       };
 
+      // --- Keyboard shortcuts for quiz navigation and hints ---
+      document.addEventListener('keydown', e => {
+        if (!isQuizMode) return;                // only active in quiz modes
+        if (e.metaKey && e.key === 'Enter') {   // Command + Enter => next question
+          e.preventDefault();
+          nextBtn.click();
+        }
+        if (e.metaKey && (e.key === 'h' || e.key === 'H')) {  // Command + H => hint
+          e.preventDefault();
+          hintBtn.click();
+        }
+      });
+
     } catch (err) {
       console.error(err);
       alert('Unhandled error: ' + err.message);
