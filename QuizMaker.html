@@ -2795,98 +2795,89 @@
 
         if (sec.type === 'fill') {
           // quizContent already cleared and title appended above
-          // Now append the fill content
+          // Now append the fill content using token order so occurrences match
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
-          quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
+          quizContent.style.borderColor = '';
           const tokensArr = extractTokens(sec);
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
-          wrapQuizBlanks(quizContent, hiddenEntries);
-          // --- Improved blank sizing using text width measurement ---
-          // Create a hidden span for measuring text width
-          const measure = document.createElement('span');
-          Object.assign(measure.style, {
-            position: 'absolute',
-            visibility: 'hidden',
-            whiteSpace: 'pre',
-            left: '-9999px',
-            top: '-9999px',
-          });
-          document.body.appendChild(measure);
-          quizContent.querySelectorAll('.blank').forEach(wrapper => {
-            const input = wrapper.querySelector('input');
-            const word = wrapper.dataset.word || '';
-            // Ensure measure span uses the same font metrics
-            const computeFont = () => {
-              measure.style.font = window.getComputedStyle(input).font;
-            };
-            computeFont();
-            // Function to resize input based on value
-            const resize = val => {
-              measure.textContent = val;
-              const extra = 6; // slight padding so the box isn't too tight
-              input.style.width = (measure.getBoundingClientRect().width + extra) + 'px';
-            };
-            // Initial sizing
-            resize(word);
-            // Resize on each keystroke
-            input.addEventListener('input', () => {
-              computeFont();
-              resize(input.value || wrapper.dataset.word);
-            });
-          });
-          // Attach grading and navigation to all blanks
-          quizContent.querySelectorAll('.blank input').forEach(input => {
-            input.addEventListener('input', () => {
-              const enteredRaw   = input.value.trim();
-              const correctWord  = input.parentElement.dataset.word;
-              const occ          = input.parentElement.dataset.occ;
-              const section      = data.folders[currentFolder].sections[currentSection];
-              const altKey       = `${correctWord}_${occ}`;
-              const alts         = section.alts[altKey] || [];
-
-              const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-              const enteredNorm = normalize(enteredRaw);
-              const correctNorm = normalize(correctWord);
-              const isCorrect   = enteredNorm === correctNorm ||
-                                  alts.some(a => normalize(a) === enteredNorm);
-
-              if (enteredRaw.length === 0) {
-                input.classList.remove('correct', 'incorrect');
-              } else if (isCorrect) {
-                input.classList.add('correct');
-                input.classList.remove('incorrect');
-              } else {
-                input.classList.add('incorrect');
-                input.classList.remove('correct');
-              }
-
-              const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
-              if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
-                quizContent.style.borderColor = '#27ae60';
-                markQuestionCompleted();
-              } else {
-                quizContent.style.borderColor = '';
-              }
-            });
-
-            input.addEventListener('keydown', e => {
-              const inputs = Array.from(quizContent.querySelectorAll('.blank input'));
-              const idx = inputs.indexOf(input);
-              if (e.key === ' ') {
-                e.preventDefault();
-                if (input.classList.contains('correct') && idx < inputs.length - 1) {
-                  inputs[idx + 1].focus();
+          let counts = {};
+          tokensArr.forEach(tok => {
+            if (!tok.trim()) {
+              quizContent.appendChild(document.createTextNode(tok));
+              return;
+            }
+            const w = tok.trim();
+            counts[w] = (counts[w] || 0) + 1;
+            const occ = counts[w];
+            const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+            if (isHidden) {
+              const key = `${w}_${occ}`;
+              const answers = [w, ...(sec.alts[key] || [])];
+              const wrapper = document.createElement('span');
+              wrapper.className = 'blank';
+              const blankText = w.toUpperCase();
+              wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
+              const inp = document.createElement('input');
+              inp.className = 'blank-input';
+              inp.addEventListener('focus', () => { lastHintTarget = inp; });
+              inp.setAttribute('data-answer', JSON.stringify(answers));
+              const qcStyle = window.getComputedStyle(quizContent);
+              inp.style.fontFamily = qcStyle.fontFamily;
+              inp.style.fontSize = qcStyle.fontSize;
+              inp.style.padding = '0 2px';
+              inp.style.boxSizing = 'content-box';
+              const measurer = document.createElement('span');
+              measurer.style.visibility = 'hidden';
+              measurer.style.position = 'absolute';
+              measurer.style.whiteSpace = 'pre';
+              measurer.style.font = `${qcStyle.fontSize} ${qcStyle.fontFamily}`;
+              measurer.textContent = blankText;
+              document.body.appendChild(measurer);
+              inp.style.width = (measurer.offsetWidth + 4) + 'px';
+              document.body.removeChild(measurer);
+              inp.addEventListener('keydown', e => {
+                const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+                const idx = inputs.indexOf(inp);
+                if (e.key === ' ') {
+                  e.preventDefault();
+                  if (inp.classList.contains('correct') && idx < inputs.length - 1) {
+                    inputs[idx + 1].focus();
+                  }
                 }
-              }
-              if (e.key === 'Backspace' && input.selectionStart === 0 && input.selectionEnd === 0 && input.value === '' && idx > 0) {
-                e.preventDefault();
-                const prev = inputs[idx - 1];
-                prev.focus();
-                const len = prev.value.length;
-                prev.setSelectionRange(len, len);
-              }
-            });
+                if (e.key === 'Tab') {
+                  e.preventDefault();
+                  if (idx > 0) {
+                    inputs[idx - 1].focus();
+                  }
+                }
+                if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                  e.preventDefault();
+                  const prev = inputs[idx - 1];
+                  prev.focus();
+                  const len = prev.value.length;
+                  prev.setSelectionRange(len, len);
+                }
+              });
+              inp.oninput = () => {
+                const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+                const val = normalize(inp.value);
+                const ok = answers.some(a => normalize(a) === val);
+                inp.classList.toggle('correct', ok);
+                inp.classList.toggle('incorrect', !ok);
+                const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+                if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+                  quizContent.style.borderColor = '#27ae60';
+                  markQuestionCompleted();
+                } else {
+                  quizContent.style.borderColor = '';
+                }
+              };
+              wrapper.appendChild(inp);
+              quizContent.appendChild(wrapper);
+            } else {
+              quizContent.appendChild(document.createTextNode(tok));
+            }
           });
           return;
         }
