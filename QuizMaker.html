@@ -546,32 +546,577 @@
         const cont = document.getElementById('labelContainer');
         if (!cont) return;
         const mainImg = cont.querySelector('#labelImg');
-        const extras = Array.from(cont.querySelectorAll('img.extra-image'));
+        const wrappers = Array.from(cont.querySelectorAll('div.extra-container'));
         if (!mainImg) return;
         let left = mainImg.offsetWidth + EXTRA_GAP;
-        extras.forEach(img => {
-          img.style.left = left + 'px';
-          img.style.top = '0px';
-          left += img.offsetWidth + EXTRA_GAP;
+        const sec = data.folders[currentFolder].sections[currentSection];
+        wrappers.forEach((wrap, idx) => {
+          const ex = sec.extraImages[idx];
+          if (ex && ex.imgX != null && ex.imgY != null) {
+            wrap.style.left = ex.imgX + 'px';
+            wrap.style.top = ex.imgY + 'px';
+          } else {
+            wrap.style.left = left + 'px';
+            wrap.style.top = '0px';
+            left += wrap.offsetWidth + EXTRA_GAP;
+          }
+        });
+      }
+
+      function setupImageInteractions(container, overlay, img, obj, isExtra, index) {
+        if (window.ResizeObserver) {
+          new ResizeObserver(() => { if(!isExtra) updateDefPosition(); positionExtraImages(); }).observe(container);
+        }
+        container.style.resize = 'none';
+        if (isExtra || obj.imgX != null || obj.imgY != null) {
+          container.style.position = 'absolute';
+          if (obj.imgX != null) container.style.left = obj.imgX + 'px';
+          if (obj.imgY != null) container.style.top = obj.imgY + 'px';
+        } else {
+          container.style.position = 'relative';
+        }
+
+        let lastContextTime = 0;
+        container.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          if (e.metaKey) {
+            if (confirm('Delete this picture?')) {
+              const sec = data.folders[currentFolder].sections[currentSection];
+              if (isExtra) {
+                sec.extraImages.splice(index, 1);
+              } else {
+                sec.image = '';
+              }
+              saveData();
+              loadSection();
+            }
+            return;
+          }
+          const now = Date.now();
+          if (now - lastContextTime < 400) {
+            const existing = container.querySelector('#resizeHandle');
+            if (existing) {
+              existing.remove();
+            } else {
+              const handle = document.createElement('div');
+              handle.id = 'resizeHandle';
+              handle.style.position = 'absolute';
+              handle.style.width = '16px';
+              handle.style.height = '16px';
+              handle.style.bottom = '0';
+              handle.style.right = '0';
+              handle.style.background = '#3498db';
+              handle.style.cursor = 'se-resize';
+              handle.style.zIndex = '1000';
+              container.appendChild(handle);
+              handle.addEventListener('mousedown', ev => {
+                ev.preventDefault();
+                const startX = ev.clientX;
+                const startY = ev.clientY;
+                const startW = container.offsetWidth;
+                const startH = container.offsetHeight;
+                function onMouseMove(moveEv) {
+                  container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
+                  container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  positionExtraImages();
+                }
+                function onMouseUp() {
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+                  obj.imgWidth = container.offsetWidth;
+                  obj.imgHeight = container.offsetHeight;
+                  saveData();
+                  if(!isExtra) updateDefPosition();
+                  positionExtraImages();
+                }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+              });
+            }
+          }
+          lastContextTime = now;
+        });
+
+        container.addEventListener('mousedown', e => {
+          if (e.button !== 0 || e.target !== container) return;
+          e.preventDefault();
+          let startX = e.clientX, startY = e.clientY;
+          let origLeft = parseInt(container.style.left) || 0;
+          let origTop = parseInt(container.style.top) || 0;
+          function onMouseMove(ev) {
+            container.style.left = origLeft + (ev.clientX - startX) + 'px';
+            container.style.top = origTop + (ev.clientY - startY) + 'px';
+          }
+          function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            obj.imgX = parseInt(container.style.left) || 0;
+            obj.imgY = parseInt(container.style.top) || 0;
+            saveData();
+            if(!isExtra) updateDefPosition();
+            positionExtraImages();
+          }
+          document.addEventListener('mousemove', onMouseMove);
+          document.addEventListener('mouseup', onMouseUp);
+        });
+
+        img.onload = () => {
+          if (obj.imgWidth && obj.imgHeight) {
+            container.style.width = obj.imgWidth + 'px';
+            container.style.height = obj.imgHeight + 'px';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+          } else {
+            container.style.width = img.naturalWidth + 'px';
+            container.style.height = img.naturalHeight + 'px';
+          }
+          if(!isExtra) updateDefPosition();
+        };
+
+        overlay.ondblclick = evt => {
+          if (evt.metaKey) return;
+          const rect = img.getBoundingClientRect();
+          const x = evt.clientX - rect.left;
+          const y = evt.clientY - rect.top;
+          const text = prompt('Enter label text:');
+          if (text) {
+            obj.labels.push({ x, y, text, fontSize: 16 });
+            saveData();
+            loadSection();
+          }
+        };
+
+        obj.labels.forEach(lbl => {
+          const mark = document.createElement('div');
+          mark.textContent = lbl.text;
+          mark.style.position = 'absolute';
+          mark.style.display = 'inline-block';
+          mark.style.padding = '2px 4px';
+          mark.style.left = lbl.x + 'px';
+          mark.style.top = lbl.y + 'px';
+          mark.style.background = '#ffffff';
+          mark.style.border        = '1px solid #7f8c8d';
+          mark.style.overflow      = 'auto';
+          mark.style.whiteSpace    = 'nowrap';
+          mark.style.textOverflow  = 'ellipsis';
+          mark.style.cursor = 'move';
+          mark.style.resize = 'both';
+          mark.style.userSelect = 'none';
+          mark.style.webkitUserSelect = 'none';
+          mark.style.msUserSelect = 'none';
+          let defIdx = -1;
+          if (sec.definitions && sec.definitions.length) {
+            defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
+          }
+          if (defIdx >= 0) {
+            const num = document.createElement('span');
+            num.textContent = defIdx + 1;
+            num.style.position = 'absolute';
+            num.style.left = '-18px';
+            num.style.top = '0';
+            num.style.width = '16px';
+            num.style.height = '16px';
+            num.style.borderRadius = '50%';
+            num.style.background = '#1abc9c';
+            num.style.color = '#fff';
+            num.style.fontSize = '10px';
+            num.style.display = 'flex';
+            num.style.alignItems = 'center';
+            num.style.justifyContent = 'center';
+            num.style.pointerEvents = 'none';
+            mark.appendChild(num);
+          }
+          mark.addEventListener('contextmenu', evt => {
+            if (!evt.metaKey) return;
+            evt.preventDefault();
+            evt.stopImmediatePropagation();
+            if (confirm('Delete this label?')) {
+              const idx2 = obj.labels.indexOf(lbl);
+              if (idx2 >= 0) {
+                obj.labels.splice(idx2, 1);
+                saveData();
+                loadSection();
+              }
+            }
+          });
+          mark.addEventListener('click', evt => {
+            if (!isAddingDefinition) return;
+            evt.stopPropagation();
+            sec.definitions = sec.definitions || [];
+            sec.definitions.push({
+              labelText: lbl.text,
+              rawText: '',
+              hidden: [],
+              alts: {},
+              hideUntilSolved: false
+            });
+            saveData();
+            isAddingDefinition = false;
+            document.getElementById('addDefinitionBtn').textContent = 'Add Definition';
+            loadSection();
+          });
+          overlay.appendChild(mark);
+          mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
+          mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
+          mark.style.fontSize = lbl.fontSize + 'px';
+          mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+          mark.addEventListener('mouseup', () => {
+            lbl.w = mark.offsetWidth;
+            lbl.h = mark.offsetHeight;
+            saveData();
+          });
+          mark.ondblclick = evt => {
+            evt.stopPropagation();
+            evt.preventDefault();
+            const newText = prompt('Edit label text:', lbl.text);
+            if (newText !== null) {
+              lbl.text = newText;
+              mark.textContent = lbl.text;
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              mark.style.width = lbl.w + 'px';
+              mark.style.height = lbl.h + 'px';
+              saveData();
+            }
+          };
+          mark.oncontextmenu = evt => {
+            if (evt.metaKey) return; // meta-right-click used for delete
+            evt.preventDefault();
+            evt.stopPropagation();
+            const input = prompt('Font size in px:', lbl.fontSize);
+            const newSize = parseInt(input, 10);
+            if (!isNaN(newSize) && newSize > 0) {
+              lbl.fontSize = newSize;
+              mark.style.fontSize = lbl.fontSize + 'px';
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              mark.style.width = lbl.w + 'px';
+              mark.style.height = lbl.h + 'px';
+              saveData();
+            }
+          };
+          mark.onmousedown = evt => {
+            if (evt.button !== 0) return;
+            evt.preventDefault();
+            let startX = evt.clientX, startY = evt.clientY;
+            const origX = lbl.x, origY = lbl.y;
+            function onMouseMove(e) {
+              lbl.x = origX + (e.clientX - startX);
+              lbl.y = origY + (e.clientY - startY);
+              mark.style.left = lbl.x + 'px';
+              mark.style.top = lbl.y + 'px';
+            }
+            function onMouseUp() {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+              saveData();
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          };
+        });
+
+        let svgOverlay = overlay.querySelector('svg');
+        if (!svgOverlay) {
+          svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+          overlay.appendChild(svgOverlay);
+        } else {
+          while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
+        }
+        if (obj.arrows) {
+          obj.arrows.forEach((a, idx2) => {
+            const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+            const arrowLength = a.width * 3;
+            const arrowWidth = a.width * 2;
+            const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+            const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', a.x1);
+            line.setAttribute('y1', a.y1);
+            line.setAttribute('x2', lineEndX);
+            line.setAttribute('y2', lineEndY);
+            line.setAttribute('stroke', a.color);
+            line.setAttribute('stroke-width', a.width);
+            line.setAttribute('pointer-events', 'all');
+            svgOverlay.appendChild(line);
+            const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+            const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+            const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+            const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+            const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', points);
+            polygon.setAttribute('fill', a.color);
+            polygon.setAttribute('pointer-events', 'all');
+            svgOverlay.appendChild(polygon);
+            [line, polygon].forEach(el => {
+              el.addEventListener('contextmenu', evt => {
+                if (!evt.metaKey) return;
+                evt.preventDefault();
+                if (confirm('Delete this arrow?')) {
+                  obj.arrows.splice(idx2, 1);
+                  saveData();
+                  loadSection();
+                  return;
+                }
+              });
+              el.addEventListener('dblclick', evt => {
+                try {
+                  if (!evt.metaKey) return;
+                  evt.preventDefault();
+                  const existingPopup = document.getElementById('arrowEditPopup');
+                  if (existingPopup) existingPopup.remove();
+                  const popup = document.createElement('div');
+                  popup.id = 'arrowEditPopup';
+                  popup.style.position = 'absolute';
+                  const overlayRect = overlay.getBoundingClientRect();
+                  const fixedLeft = overlayRect.left + 50;
+                  const fixedTop = overlayRect.top + 50;
+                  popup.style.left = `${fixedLeft}px`;
+                  popup.style.top = `${fixedTop}px`;
+                  popup.style.transform = 'translate(-50%, -100%)';
+                  popup.style.transformOrigin = 'bottom center';
+                  popup.style.background = '#fff';
+                  popup.style.border = '1px solid #7f8c8d';
+                  popup.style.borderRadius = '4px';
+                  popup.style.padding = '8px';
+                  popup.style.zIndex = '10000';
+                  popup.innerHTML = `
+                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                      Color: <input type="color" id="arrowColorPicker" value="${a.color}">
+                    </label>
+                    <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                      Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
+                    </label>
+                    <div style="text-align:right;">
+                      <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
+                      <button id="arrowCancelBtn">Cancel</button>
+                    </div>
+                  `;
+                  popup.addEventListener('dblclick', evt2 => {
+                    evt2.stopPropagation();
+                  });
+                  overlay.appendChild(popup);
+                  document.getElementById('arrowSaveBtn').onclick = () => {
+                    const colorVal = document.getElementById('arrowColorPicker').value;
+                    const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
+                    if (colorVal && !isNaN(widthVal) && widthVal > 0) {
+                      obj.arrows[idx2].color = colorVal;
+                      obj.arrows[idx2].width = widthVal;
+                      saveData();
+                      loadSection();
+                    }
+                  };
+                  document.getElementById('arrowCancelBtn').onclick = () => {
+                    popup.remove();
+                  };
+                } catch (err) {
+                  console.error('Arrow popup handler error:', err);
+                }
+              });
+            });
+          });
+        }
+        let drawing = false;
+        let startX = 0, startY = 0;
+        let tempLine = null;
+        overlay.addEventListener('mousedown', evt => {
+          if (!evt.metaKey || evt.button !== 0) return;
+          const rect = img.getBoundingClientRect();
+          startX = evt.clientX - rect.left;
+          startY = evt.clientY - rect.top;
+          drawing = true;
+          tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          tempLine.setAttribute('x1', startX);
+          tempLine.setAttribute('y1', startY);
+          tempLine.setAttribute('x2', startX);
+          tempLine.setAttribute('y2', startY);
+          tempLine.setAttribute('stroke', '#e74c3c');
+          tempLine.setAttribute('stroke-width', '2');
+          svgOverlay.appendChild(tempLine);
+          evt.preventDefault();
+        });
+        overlay.addEventListener('mousemove', evt => {
+          if (!drawing) return;
+          const rect = img.getBoundingClientRect();
+          const currX = evt.clientX - rect.left;
+          const currY = evt.clientY - rect.top;
+          tempLine.setAttribute('x2', currX);
+          tempLine.setAttribute('y2', currY);
+        });
+        document.addEventListener('mouseup', evt => {
+          if (!drawing) return;
+          drawing = false;
+          const rect = img.getBoundingClientRect();
+          const endX = evt.clientX - rect.left;
+          const endY = evt.clientY - rect.top;
+          svgOverlay.removeChild(tempLine);
+          tempLine = null;
+          if (endX !== startX || endY !== startY) {
+            if (!obj.arrows) obj.arrows = [];
+            obj.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
+            saveData();
+            loadSection();
+          }
         });
       }
 
       function renderExtraImages(sec) {
         const cont = document.getElementById('labelContainer');
         if (!cont) return;
-        cont.querySelectorAll('img.extra-image').forEach(e => e.remove());
+        cont.querySelectorAll('div.extra-container').forEach(e => e.remove());
         if (sec.extraImages) {
-          sec.extraImages.forEach(ex => {
+          sec.extraImages.forEach((ex, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'extra-container';
+            wrap.style.position = 'absolute';
+            cont.appendChild(wrap);
             const img = document.createElement('img');
             img.className = 'extra-image';
             img.src = ex.image;
-            img.style.position = 'absolute';
+            img.style.display = 'block';
             img.style.userSelect = 'none';
-            cont.appendChild(img);
-            img.onload = positionExtraImages;
+            wrap.appendChild(img);
+            const overlay = document.createElement('div');
+            overlay.className = 'extra-overlay';
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            wrap.appendChild(overlay);
+            setupImageInteractions(wrap, overlay, img, ex, true, idx);
           });
           positionExtraImages();
         }
+      }
+
+      function renderQuizExtras(sec, container, mainWrap) {
+        const wrappers = [];
+        if (!sec.extraImages) return;
+        sec.extraImages.forEach((ex, idx) => {
+          const wrap = document.createElement('div');
+          wrap.className = 'quiz-extra';
+          wrap.style.position = 'absolute';
+          container.appendChild(wrap);
+          const img = document.createElement('img');
+          img.src = ex.image;
+          if (ex.imgWidth) {
+            img.style.width = ex.imgWidth + 'px';
+            img.style.height = 'auto';
+          } else {
+            img.style.maxWidth = '100%';
+          }
+          wrap.appendChild(img);
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+          wrap.appendChild(svg);
+          if (ex.arrows) {
+            ex.arrows.forEach(a => {
+              const ang = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+              const len = a.width * 3;
+              const aw  = a.width * 2;
+              const lineEndX = a.x2 - len * Math.cos(ang);
+              const lineEndY = a.y2 - len * Math.sin(ang);
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', a.x1);
+              line.setAttribute('y1', a.y1);
+              line.setAttribute('x2', lineEndX);
+              line.setAttribute('y2', lineEndY);
+              line.setAttribute('stroke', a.color);
+              line.setAttribute('stroke-width', a.width);
+              svg.appendChild(line);
+              const xBase1 = a.x2 - len * Math.cos(ang) + aw * Math.sin(ang);
+              const yBase1 = a.y2 - len * Math.sin(ang) - aw * Math.cos(ang);
+              const xBase2 = a.x2 - len * Math.cos(ang) - aw * Math.sin(ang);
+              const yBase2 = a.y2 - len * Math.sin(ang) + aw * Math.cos(ang);
+              const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+              poly.setAttribute('points', `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`);
+              poly.setAttribute('fill', a.color);
+              svg.appendChild(poly);
+            });
+          }
+          ex.labels.forEach(lbl => {
+            const inp = document.createElement('input');
+            inp.classList.add('blank-input');
+            inp.setAttribute('data-answer', JSON.stringify([lbl.text]));
+            inp.dataset.label = '1';
+            inp.type = 'text';
+            inp.style.position = 'absolute';
+            inp.style.left = lbl.x + 'px';
+            inp.style.top = lbl.y + 'px';
+            inp.style.border = '1px solid #7f8c8d';
+            inp.style.background = '#ffffff';
+            inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+            inp.style.fontSize = lbl.fontSize + 'px';
+            inp.style.padding = '0';
+            inp.style.boxSizing = 'border-box';
+            inp.style.minWidth = '0';
+            inp.style.borderRadius = '2px';
+            const meas = document.createElement('span');
+            meas.style.visibility = 'hidden';
+            meas.style.position = 'absolute';
+            meas.style.whiteSpace = 'pre';
+            meas.style.fontFamily = inp.style.fontFamily;
+            meas.style.fontSize = inp.style.fontSize;
+            meas.textContent = lbl.text.toUpperCase();
+            document.body.appendChild(meas);
+            const calcW = lbl.w ? lbl.w : (meas.offsetWidth + 4);
+            inp.style.width = calcW + 'px';
+            document.body.removeChild(meas);
+            inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
+            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            inp.oninput = () => {
+              const val = inp.value.trim().toLowerCase();
+              const ok = val === lbl.text.trim().toLowerCase();
+              if (ok) {
+                const txt = document.createElement('span');
+                txt.textContent = lbl.text;
+                txt.style.position = 'absolute';
+                txt.style.left = lbl.x + 'px';
+                txt.style.top = lbl.y + 'px';
+                txt.style.fontSize = lbl.fontSize + 'px';
+                txt.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+                txt.style.background = '#ffffff';
+                txt.style.border = '1px solid #27ae60';
+                txt.style.padding = '0 2px';
+                txt.style.borderRadius = '2px';
+                if (lbl.w) txt.style.width = lbl.w + 'px';
+                if (lbl.h) txt.style.height = lbl.h + 'px';
+                txt.style.display = 'inline-block';
+                wrap.appendChild(txt);
+                inp.remove();
+              } else {
+                inp.classList.remove('correct');
+                inp.classList.add('incorrect');
+              }
+            };
+            wrap.appendChild(inp);
+          });
+          wrappers.push(wrap);
+          img.onload = position;
+        });
+
+        function position() {
+          let left = mainWrap.offsetWidth + EXTRA_GAP;
+          wrappers.forEach((w, i) => {
+            const ex = sec.extraImages[i];
+            if (ex.imgX != null && ex.imgY != null) {
+              if (ex.imgX != null) w.style.left = ex.imgX + 'px';
+              if (ex.imgY != null) w.style.top = ex.imgY + 'px';
+            } else {
+              w.style.left = left + 'px';
+              w.style.top = '0px';
+              left += w.offsetWidth + EXTRA_GAP;
+            }
+          });
+        }
+        position();
       }
       let isQuizMode = true;   // start in quiz mode by default
       let lastHintTarget = null;  // track last focused blank for hint
@@ -1109,7 +1654,7 @@
             sec.image = reader.result;
           } else {
             sec.extraImages = sec.extraImages || [];
-            sec.extraImages[idx] = { image: reader.result, labels: [], arrows: [] };
+            sec.extraImages[idx] = { image: reader.result, labels: [], arrows: [], imgX:null, imgY:null, imgWidth:null, imgHeight:null };
           }
           await saveData();
           renderFolders();
@@ -1151,7 +1696,7 @@
                 sec.image = reader.result;
               } else {
                 sec.extraImages = sec.extraImages || [];
-                sec.extraImages[waitingForImagePaste.index] = { image: reader.result, labels: [], arrows: [] };
+                sec.extraImages[waitingForImagePaste.index] = { image: reader.result, labels: [], arrows: [], imgX:null, imgY:null, imgWidth:null, imgHeight:null };
               }
               await saveData();
               renderFolders();
@@ -1370,376 +1915,7 @@
             container.style.position = 'relative';
           }
           renderExtraImages(sec);
-          let lastContextTime = 0;
-          container.addEventListener('contextmenu', e => {
-            e.preventDefault();
-            const now = Date.now();
-            if (now - lastContextTime < 400) {
-              const existing = container.querySelector('#resizeHandle');
-              if (existing) {
-                existing.remove();
-              } else {
-                const handle = document.createElement('div');
-                handle.id = 'resizeHandle';
-                handle.style.position = 'absolute';
-                handle.style.width = '16px';
-                handle.style.height = '16px';
-                handle.style.bottom = '0';
-                handle.style.right = '0';
-                handle.style.background = '#3498db';
-                handle.style.cursor = 'se-resize';
-                handle.style.zIndex = '1000';
-                container.appendChild(handle);
-                handle.addEventListener('mousedown', ev => {
-                  ev.preventDefault();
-                  const startX = ev.clientX;
-                  const startY = ev.clientY;
-                  const startW = container.offsetWidth;
-                  const startH = container.offsetHeight;
-                  function onMouseMove(moveEv) {
-                    container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
-                    container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
-                    img.style.width = '100%';
-                    img.style.height = 'auto';
-                    positionExtraImages();
-                  }
-                  function onMouseUp() {
-                    img.style.width = '100%';
-                    img.style.height = 'auto';
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    sec.imgWidth = container.offsetWidth;
-                    sec.imgHeight = container.offsetHeight;
-                    saveData();
-                    updateDefPosition();
-                    positionExtraImages();
-                  }
-                  document.addEventListener('mousemove', onMouseMove);
-                  document.addEventListener('mouseup', onMouseUp);
-                });
-              }
-            }
-            lastContextTime = now;
-          });
-          container.addEventListener('mousedown', e => {
-            if (e.button !== 0 || e.target !== container) return;
-            e.preventDefault();
-            let startX = e.clientX, startY = e.clientY;
-            let origLeft = parseInt(container.style.left) || 0;
-            let origTop = parseInt(container.style.top) || 0;
-            function onMouseMove(ev) {
-              container.style.left = origLeft + (ev.clientX - startX) + 'px';
-              container.style.top = origTop + (ev.clientY - startY) + 'px';
-            }
-            function onMouseUp() {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-              sec.imgX = parseInt(container.style.left) || 0;
-              sec.imgY = parseInt(container.style.top) || 0;
-              saveData();
-              updateDefPosition();
-              positionExtraImages();
-            }
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          });
-          img.onload = () => {
-            if (sec.imgWidth && sec.imgHeight) {
-              container.style.width = sec.imgWidth + 'px';
-              container.style.height = sec.imgHeight + 'px';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            } else {
-              container.style.width = img.naturalWidth + 'px';
-              container.style.height = img.naturalHeight + 'px';
-            }
-            updateDefPosition();
-            renderExtraImages(sec);
-          };
-          overlay.ondblclick = evt => {
-            if (evt.metaKey) return;
-            const rect = img.getBoundingClientRect();
-            const x = evt.clientX - rect.left;
-            const y = evt.clientY - rect.top;
-            const text = prompt('Enter label text:');
-            if (text) {
-              sec.labels.push({ x, y, text, fontSize: 16 });
-              saveData();
-              loadSection();
-            }
-          };
-          sec.labels.forEach(lbl => {
-            const mark = document.createElement('div');
-            mark.textContent = lbl.text;
-            mark.style.position = 'absolute';
-            mark.style.display = 'inline-block';
-            mark.style.padding = '2px 4px';
-            mark.style.left = lbl.x + 'px';
-            mark.style.top = lbl.y + 'px';
-            mark.style.background = '#ffffff';
-            mark.style.border        = '1px solid #7f8c8d';
-            mark.style.overflow      = 'auto';
-            mark.style.whiteSpace    = 'nowrap';
-            mark.style.textOverflow  = 'ellipsis';
-            mark.style.cursor = 'move';
-            mark.style.resize = 'both';
-            mark.style.userSelect = 'none';
-            mark.style.webkitUserSelect = 'none';
-            mark.style.msUserSelect = 'none';
-            let defIdx = -1;
-            if (sec.definitions && sec.definitions.length) {
-              defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
-            }
-            if (defIdx >= 0) {
-              const num = document.createElement('span');
-              num.textContent = defIdx + 1;
-              num.style.position = 'absolute';
-              num.style.left = '-18px';
-              num.style.top = '0';
-              num.style.width = '16px';
-              num.style.height = '16px';
-              num.style.borderRadius = '50%';
-              num.style.background = '#1abc9c';
-              num.style.color = '#fff';
-              num.style.fontSize = '10px';
-              num.style.display = 'flex';
-              num.style.alignItems = 'center';
-              num.style.justifyContent = 'center';
-              num.style.pointerEvents = 'none';
-              mark.appendChild(num);
-            }
-            mark.addEventListener('contextmenu', evt => {
-              if (!evt.metaKey) return;
-              evt.preventDefault();
-              evt.stopPropagation();
-              if (confirm('Delete this label?')) {
-                const idx = sec.labels.indexOf(lbl);
-                if (idx >= 0) {
-                  sec.labels.splice(idx, 1);
-                  saveData();
-                  loadSection();
-                }
-              }
-            });
-            mark.addEventListener('click', evt => {
-              if (!isAddingDefinition) return;
-              evt.stopPropagation();
-              sec.definitions = sec.definitions || [];
-              sec.definitions.push({
-                labelText: lbl.text,
-                rawText: '',
-                hidden: [],
-                alts: {},
-                hideUntilSolved: false
-              });
-              saveData();
-              isAddingDefinition = false;
-              addDefBtn.textContent = 'Add Definition';
-              loadSection();
-            });
-            overlay.appendChild(mark);
-            mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
-            mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
-            mark.style.fontSize = lbl.fontSize + 'px';
-            mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-            mark.addEventListener('mouseup', () => {
-              lbl.w = mark.offsetWidth;
-              lbl.h = mark.offsetHeight;
-              saveData();
-            });
-            mark.ondblclick = evt => {
-              evt.stopPropagation();
-              evt.preventDefault();
-              const newText = prompt('Edit label text:', lbl.text);
-              if (newText !== null) {
-                lbl.text = newText;
-                mark.textContent = lbl.text;
-                lbl.w = mark.offsetWidth;
-                lbl.h = mark.offsetHeight;
-                mark.style.width = lbl.w + 'px';
-                mark.style.height = lbl.h + 'px';
-                saveData();
-              }
-            };
-            mark.oncontextmenu = evt => {
-              evt.preventDefault();
-              evt.stopPropagation();
-              const input = prompt('Font size in px:', lbl.fontSize);
-              const newSize = parseInt(input, 10);
-              if (!isNaN(newSize) && newSize > 0) {
-                lbl.fontSize = newSize;
-                mark.style.fontSize = lbl.fontSize + 'px';
-                lbl.w = mark.offsetWidth;
-                lbl.h = mark.offsetHeight;
-                mark.style.width = lbl.w + 'px';
-                mark.style.height = lbl.h + 'px';
-                saveData();
-              }
-            };
-            mark.onmousedown = evt => {
-              if (evt.button !== 0) return;
-              evt.preventDefault();
-              let startX = evt.clientX, startY = evt.clientY;
-              const origX = lbl.x, origY = lbl.y;
-              function onMouseMove(e) {
-                lbl.x = origX + (e.clientX - startX);
-                lbl.y = origY + (e.clientY - startY);
-                mark.style.left = lbl.x + 'px';
-                mark.style.top = lbl.y + 'px';
-              }
-              function onMouseUp(e) {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                saveData();
-              }
-              document.addEventListener('mousemove', onMouseMove);
-              document.addEventListener('mouseup', onMouseUp);
-            };
-          });
-          let svgOverlay = overlay.querySelector('svg');
-          if (!svgOverlay) {
-            svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
-            overlay.appendChild(svgOverlay);
-          } else {
-            while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
-          }
-          if (sec.arrows) {
-            sec.arrows.forEach((a, idx) => {
-              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-              const arrowLength = a.width * 3;
-              const arrowWidth = a.width * 2;
-              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
-              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-              line.setAttribute('x1', a.x1);
-              line.setAttribute('y1', a.y1);
-              line.setAttribute('x2', lineEndX);
-              line.setAttribute('y2', lineEndY);
-              line.setAttribute('stroke', a.color);
-              line.setAttribute('stroke-width', a.width);
-              line.setAttribute('pointer-events', 'all');
-              svgOverlay.appendChild(line);
-              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
-              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
-              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
-              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
-              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
-              const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-              polygon.setAttribute('points', points);
-              polygon.setAttribute('fill', a.color);
-              polygon.setAttribute('pointer-events', 'all');
-              svgOverlay.appendChild(polygon);
-              [line, polygon].forEach(el => {
-                el.addEventListener('contextmenu', evt => {
-                  if (!evt.metaKey) return;
-                  evt.preventDefault();
-                  if (confirm('Delete this arrow?')) {
-                    sec.arrows.splice(idx, 1);
-                    saveData();
-                    loadSection();
-                    return;
-                  }
-                });
-                el.addEventListener('dblclick', evt => {
-                  try {
-                    if (!evt.metaKey) return;
-                    evt.preventDefault();
-                    const existingPopup = document.getElementById('arrowEditPopup');
-                    if (existingPopup) existingPopup.remove();
-                    const popup = document.createElement('div');
-                    popup.id = 'arrowEditPopup';
-                    popup.style.position = 'absolute';
-                    const overlayRect = overlay.getBoundingClientRect();
-                    const fixedLeft = overlayRect.left + 50;
-                    const fixedTop = overlayRect.top + 50;
-                    popup.style.left = `${fixedLeft}px`;
-                    popup.style.top = `${fixedTop}px`;
-                    popup.style.transform = 'translate(-50%, -100%)';
-                    popup.style.transformOrigin = 'bottom center';
-                    popup.style.background = '#fff';
-                    popup.style.border = '1px solid #7f8c8d';
-                    popup.style.borderRadius = '4px';
-                    popup.style.padding = '8px';
-                    popup.style.zIndex = '10000';
-                    popup.innerHTML = `
-                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                        Color: <input type="color" id="arrowColorPicker" value="${a.color}">
-                      </label>
-                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                        Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
-                      </label>
-                      <div style="text-align:right;">
-                        <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
-                        <button id="arrowCancelBtn">Cancel</button>
-                      </div>
-                    `;
-                    popup.addEventListener('dblclick', evt2 => {
-                      evt2.stopPropagation();
-                    });
-                    overlay.appendChild(popup);
-                    document.getElementById('arrowSaveBtn').onclick = () => {
-                      const colorVal = document.getElementById('arrowColorPicker').value;
-                      const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
-                      if (colorVal && !isNaN(widthVal) && widthVal > 0) {
-                        sec.arrows[idx].color = colorVal;
-                        sec.arrows[idx].width = widthVal;
-                        saveData();
-                        loadSection();
-                      }
-                    };
-                    document.getElementById('arrowCancelBtn').onclick = () => {
-                      popup.remove();
-                    };
-                  } catch (err) {
-                    console.error('Arrow popup handler error:', err);
-                  }
-                });
-              });
-            });
-          }
-          let drawing = false;
-          let startX = 0, startY = 0;
-          let tempLine = null;
-          overlay.addEventListener('mousedown', evt => {
-            if (!evt.metaKey || evt.button !== 0) return;
-            const rect = img.getBoundingClientRect();
-            startX = evt.clientX - rect.left;
-            startY = evt.clientY - rect.top;
-            drawing = true;
-            tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            tempLine.setAttribute('x1', startX);
-            tempLine.setAttribute('y1', startY);
-            tempLine.setAttribute('x2', startX);
-            tempLine.setAttribute('y2', startY);
-            tempLine.setAttribute('stroke', '#e74c3c');
-            tempLine.setAttribute('stroke-width', '2');
-            svgOverlay.appendChild(tempLine);
-            evt.preventDefault();
-          });
-          overlay.addEventListener('mousemove', evt => {
-            if (!drawing) return;
-            const rect = img.getBoundingClientRect();
-            const currX = evt.clientX - rect.left;
-            const currY = evt.clientY - rect.top;
-            tempLine.setAttribute('x2', currX);
-            tempLine.setAttribute('y2', currY);
-          });
-          document.addEventListener('mouseup', evt => {
-            if (!drawing) return;
-            drawing = false;
-            const rect = img.getBoundingClientRect();
-            const endX = evt.clientX - rect.left;
-            const endY = evt.clientY - rect.top;
-            svgOverlay.removeChild(tempLine);
-            tempLine = null;
-            if (endX !== startX || endY !== startY) {
-              if (!sec.arrows) sec.arrows = [];
-              sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
-              saveData();
-              loadSection();
-            }
-          });
+          setupImageInteractions(container, overlay, img, sec, false);
           return;
         }
         // Reset Quill history *before* loading new content
@@ -2508,8 +2684,14 @@
         if (sec.type === 'label') {
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
+          const containerDiv = document.createElement('div');
+          containerDiv.style.position = 'relative';
+          containerDiv.style.display = 'inline-block';
+          containerDiv.style.overflow = 'visible';
+          quizContent.appendChild(containerDiv);
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
+          containerDiv.appendChild(wrapper);
           const img = document.createElement('img');
           img.src = sec.image;
           if (sec.imgWidth) {
@@ -2820,6 +3002,7 @@
             });
           }
           labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
+          renderQuizExtras(sec, containerDiv, wrapper);
           return;
         }
         // existing fill-in logic follows
