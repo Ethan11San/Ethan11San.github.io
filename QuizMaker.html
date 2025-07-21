@@ -772,7 +772,7 @@
         });
       }
 
-      function setupExtraResize(wrap, img, ex) {
+      function setupExtraResize(wrap, img, ex, del) {
         let lastContext = 0;
         wrap.addEventListener('contextmenu', e => {
           e.preventDefault();
@@ -781,6 +781,7 @@
             const existing = wrap.querySelector('.resize-handle');
             if (existing) {
               existing.remove();
+              if (del && !deleteMode) del.style.display = 'none';
             } else {
               const handle = document.createElement('div');
               handle.className = 'resize-handle';
@@ -793,6 +794,7 @@
               handle.style.cursor = 'se-resize';
               handle.style.zIndex = '1000';
               wrap.appendChild(handle);
+              if (del) del.style.display = 'inline';
               handle.addEventListener('mousedown', ev => {
                 ev.preventDefault();
                 const startX = ev.clientX;
@@ -880,7 +882,7 @@
               }
               positionExtraImages();
             };
-            setupExtraResize(wrap, img, ex);
+            setupExtraResize(wrap, img, ex, del);
             setupExtraImageInteractions(img, overlay, sec, ex);
           });
           positionExtraImages();
