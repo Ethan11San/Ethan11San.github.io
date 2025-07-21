@@ -542,36 +542,465 @@
       }
 
       const EXTRA_GAP = 20;
-      function positionExtraImages() {
-        const cont = document.getElementById('labelContainer');
+      function positionExtras(cont) {
         if (!cont) return;
-        const mainImg = cont.querySelector('#labelImg');
-        const extras = Array.from(cont.querySelectorAll('img.extra-image'));
+        const mainImg = cont.querySelector('#labelImg, .main-image');
+        const extras = Array.from(cont.querySelectorAll('div.extra-wrapper'));
         if (!mainImg) return;
         let left = mainImg.offsetWidth + EXTRA_GAP;
-        extras.forEach(img => {
-          img.style.left = left + 'px';
-          img.style.top = '0px';
-          left += img.offsetWidth + EXTRA_GAP;
+        extras.forEach(wrap => {
+          wrap.style.left = left + 'px';
+          wrap.style.top = '0px';
+          left += wrap.offsetWidth + EXTRA_GAP;
+        });
+      }
+      function positionExtraImages() {
+        const cont = document.getElementById('labelContainer');
+        positionExtras(cont);
+      }
+
+      function setupExtraImageInteractions(img, overlay, sec, ex) {
+        overlay.ondblclick = evt => {
+          if (evt.metaKey) return;
+          const rect = img.getBoundingClientRect();
+          const x = evt.clientX - rect.left;
+          const y = evt.clientY - rect.top;
+          const text = prompt('Enter label text:');
+          if (text) {
+            ex.labels.push({ x, y, text, fontSize: 16 });
+            saveData();
+            loadSection();
+          }
+        };
+        ex.labels.forEach(lbl => {
+          const mark = document.createElement('div');
+          mark.textContent = lbl.text;
+          Object.assign(mark.style, {
+            position: 'absolute',
+            display: 'inline-block',
+            padding: '2px 4px',
+            left: lbl.x + 'px',
+            top: lbl.y + 'px',
+            background: '#ffffff',
+            border: '1px solid #7f8c8d',
+            overflow: 'auto',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            cursor: 'move',
+            resize: 'both',
+            userSelect: 'none'
+          });
+          mark.addEventListener('contextmenu', evt => {
+            if (!evt.metaKey) return;
+            evt.preventDefault();
+            evt.stopPropagation();
+            if (confirm('Delete this label?')) {
+              const idx = ex.labels.indexOf(lbl);
+              if (idx >= 0) {
+                ex.labels.splice(idx, 1);
+                saveData();
+                loadSection();
+              }
+            }
+          });
+          mark.addEventListener('click', evt => {
+            if (!isAddingDefinition) return;
+            evt.stopPropagation();
+            sec.definitions = sec.definitions || [];
+            sec.definitions.push({
+              labelText: lbl.text,
+              rawText: '',
+              hidden: [],
+              alts: {},
+              hideUntilSolved: false
+            });
+            saveData();
+            isAddingDefinition = false;
+            const btn = document.getElementById('addDefinitionBtn');
+            if (btn) btn.textContent = 'Add Definition';
+            loadSection();
+          });
+          mark.ondblclick = evt => {
+            evt.stopPropagation();
+            evt.preventDefault();
+            const newText = prompt('Edit label text:', lbl.text);
+            if (newText !== null) {
+              lbl.text = newText;
+              mark.textContent = lbl.text;
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              mark.style.width = lbl.w + 'px';
+              mark.style.height = lbl.h + 'px';
+              saveData();
+            }
+          };
+          mark.oncontextmenu = evt => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            const input = prompt('Font size in px:', lbl.fontSize);
+            const newSize = parseInt(input, 10);
+            if (!isNaN(newSize) && newSize > 0) {
+              lbl.fontSize = newSize;
+              mark.style.fontSize = lbl.fontSize + 'px';
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              mark.style.width = lbl.w + 'px';
+              mark.style.height = lbl.h + 'px';
+              saveData();
+            }
+          };
+          mark.onmousedown = evt => {
+            if (evt.button !== 0) return;
+            evt.preventDefault();
+            let startX = evt.clientX, startY = evt.clientY;
+            const origX = lbl.x, origY = lbl.y;
+            function onMouseMove(e) {
+              lbl.x = origX + (e.clientX - startX);
+              lbl.y = origY + (e.clientY - startY);
+              mark.style.left = lbl.x + 'px';
+              mark.style.top = lbl.y + 'px';
+            }
+            function onMouseUp() {
+              document.removeEventListener('mousemove', onMouseMove);
+              document.removeEventListener('mouseup', onMouseUp);
+              saveData();
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          };
+          mark.style.fontSize = lbl.fontSize + 'px';
+          if (!lbl.w) lbl.w = mark.offsetWidth;
+          if (!lbl.h) lbl.h = mark.offsetHeight;
+          mark.style.width = lbl.w + 'px';
+          mark.style.height = lbl.h + 'px';
+          mark.addEventListener('mouseup', () => {
+            lbl.w = mark.offsetWidth;
+            lbl.h = mark.offsetHeight;
+            saveData();
+          });
+          overlay.appendChild(mark);
+        });
+        let svgOverlay = overlay.querySelector('svg');
+        if (!svgOverlay) {
+          svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+          overlay.appendChild(svgOverlay);
+        } else {
+          while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
+        }
+        if (ex.arrows) {
+          ex.arrows.forEach((a, idx) => {
+            const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+            const arrowLength = a.width * 3;
+            const arrowWidth = a.width * 2;
+            const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+            const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', a.x1);
+            line.setAttribute('y1', a.y1);
+            line.setAttribute('x2', lineEndX);
+            line.setAttribute('y2', lineEndY);
+            line.setAttribute('stroke', a.color);
+            line.setAttribute('stroke-width', a.width);
+            line.setAttribute('pointer-events', 'all');
+            svgOverlay.appendChild(line);
+            const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+            const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+            const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+            const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+            const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', points);
+            polygon.setAttribute('fill', a.color);
+            polygon.setAttribute('pointer-events', 'all');
+            svgOverlay.appendChild(polygon);
+            [line, polygon].forEach(el => {
+              el.addEventListener('contextmenu', evt => {
+                if (!evt.metaKey) return;
+                evt.preventDefault();
+                if (confirm('Delete this arrow?')) {
+                  ex.arrows.splice(idx, 1);
+                  saveData();
+                  loadSection();
+                  return;
+                }
+              });
+            });
+          });
+        }
+        let drawing = false;
+        let startX = 0, startY = 0;
+        let tempLine = null;
+        overlay.addEventListener('mousedown', evt => {
+          if (!evt.metaKey || evt.button !== 0) return;
+          const rect = img.getBoundingClientRect();
+          startX = evt.clientX - rect.left;
+          startY = evt.clientY - rect.top;
+          drawing = true;
+          tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          tempLine.setAttribute('x1', startX);
+          tempLine.setAttribute('y1', startY);
+          tempLine.setAttribute('x2', startX);
+          tempLine.setAttribute('y2', startY);
+          tempLine.setAttribute('stroke', '#e74c3c');
+          tempLine.setAttribute('stroke-width', '2');
+          svgOverlay.appendChild(tempLine);
+          evt.preventDefault();
+        });
+        overlay.addEventListener('mousemove', evt => {
+          if (!drawing) return;
+          const rect = img.getBoundingClientRect();
+          const currX = evt.clientX - rect.left;
+          const currY = evt.clientY - rect.top;
+          tempLine.setAttribute('x2', currX);
+          tempLine.setAttribute('y2', currY);
+        });
+        document.addEventListener('mouseup', evt => {
+          if (!drawing) return;
+          drawing = false;
+          const rect = img.getBoundingClientRect();
+          const endX = evt.clientX - rect.left;
+          const endY = evt.clientY - rect.top;
+          svgOverlay.removeChild(tempLine);
+          tempLine = null;
+          if (endX !== startX || endY !== startY) {
+            if (!ex.arrows) ex.arrows = [];
+            ex.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
+            saveData();
+            loadSection();
+          }
+        });
+      }
+
+      function setupExtraResize(wrap, img, ex) {
+        let lastContext = 0;
+        wrap.addEventListener('contextmenu', e => {
+          e.preventDefault();
+          const now = Date.now();
+          if (now - lastContext < 400) {
+            const existing = wrap.querySelector('.resize-handle');
+            if (existing) {
+              existing.remove();
+            } else {
+              const handle = document.createElement('div');
+              handle.className = 'resize-handle';
+              handle.style.position = 'absolute';
+              handle.style.width = '16px';
+              handle.style.height = '16px';
+              handle.style.bottom = '0';
+              handle.style.right = '0';
+              handle.style.background = '#3498db';
+              handle.style.cursor = 'se-resize';
+              handle.style.zIndex = '1000';
+              wrap.appendChild(handle);
+              handle.addEventListener('mousedown', ev => {
+                ev.preventDefault();
+                const startX = ev.clientX;
+                const startY = ev.clientY;
+                const startW = wrap.offsetWidth;
+                const startH = wrap.offsetHeight;
+                function onMove(mv) {
+                  wrap.style.width = (startW + (mv.clientX - startX)) + 'px';
+                  wrap.style.height = (startH + (mv.clientY - startY)) + 'px';
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  positionExtraImages();
+                }
+                function onUp() {
+                  document.removeEventListener('mousemove', onMove);
+                  document.removeEventListener('mouseup', onUp);
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  ex.imgWidth = wrap.offsetWidth;
+                  ex.imgHeight = wrap.offsetHeight;
+                  saveData();
+                  positionExtraImages();
+                }
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+              });
+            }
+          }
+          lastContext = now;
         });
       }
 
       function renderExtraImages(sec) {
         const cont = document.getElementById('labelContainer');
         if (!cont) return;
-        cont.querySelectorAll('img.extra-image').forEach(e => e.remove());
+        cont.querySelectorAll('div.extra-wrapper').forEach(e => e.remove());
         if (sec.extraImages) {
-          sec.extraImages.forEach(ex => {
+          sec.extraImages.forEach((ex, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'extra-wrapper';
+            wrap.style.position = 'absolute';
             const img = document.createElement('img');
             img.className = 'extra-image';
             img.src = ex.image;
-            img.style.position = 'absolute';
+            img.style.display = 'block';
             img.style.userSelect = 'none';
-            cont.appendChild(img);
-            img.onload = positionExtraImages;
+            if (ex.imgWidth && ex.imgHeight) {
+              wrap.style.width = ex.imgWidth + 'px';
+              wrap.style.height = ex.imgHeight + 'px';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            }
+            wrap.appendChild(img);
+            const overlay = document.createElement('div');
+            overlay.style.position = 'absolute';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.width = '100%';
+            overlay.style.height = '100%';
+            wrap.appendChild(overlay);
+            const del = document.createElement('span');
+            del.className = 'delete-icon';
+            del.textContent = '✖';
+            del.style.position = 'absolute';
+            del.style.right = '0';
+            del.style.top = '0';
+            del.style.display = deleteMode ? 'inline' : 'none';
+            del.onclick = evt => {
+              evt.stopPropagation();
+              if (confirm('Delete this picture?')) {
+                sec.extraImages.splice(idx, 1);
+                saveData();
+                loadSection();
+              }
+            };
+            wrap.appendChild(del);
+            cont.appendChild(wrap);
+            img.onload = () => {
+              if (!ex.imgWidth || !ex.imgHeight) {
+                wrap.style.width = img.naturalWidth + 'px';
+                wrap.style.height = img.naturalHeight + 'px';
+                ex.imgWidth = img.naturalWidth;
+                ex.imgHeight = img.naturalHeight;
+                saveData();
+              }
+              positionExtraImages();
+            };
+            setupExtraResize(wrap, img, ex);
+            setupExtraImageInteractions(img, overlay, sec, ex);
           });
           positionExtraImages();
         }
+      }
+
+      function renderQuizExtras(sec, container) {
+        container.querySelectorAll('div.extra-wrapper').forEach(e => e.remove());
+        if (!sec.extraImages) return;
+        sec.extraImages.forEach(ex => {
+          const wrap = document.createElement('div');
+          wrap.className = 'extra-wrapper';
+          wrap.style.position = 'absolute';
+          const img = document.createElement('img');
+          img.className = 'extra-image';
+          img.src = ex.image;
+          img.style.display = 'block';
+          img.style.userSelect = 'none';
+          if (ex.imgWidth && ex.imgHeight) {
+            wrap.style.width = ex.imgWidth + 'px';
+            wrap.style.height = ex.imgHeight + 'px';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+          } else {
+            img.onload = () => {
+              wrap.style.width = img.naturalWidth + 'px';
+              wrap.style.height = img.naturalHeight + 'px';
+              positionExtras(container);
+            };
+          }
+          wrap.appendChild(img);
+          const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+          svg.setAttribute('style','position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+          wrap.appendChild(svg);
+          if (ex.arrows) {
+            ex.arrows.forEach(a => {
+              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+              const arrowLength = a.width * 3;
+              const arrowWidth = a.width * 2;
+              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+              const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+              line.setAttribute('x1', a.x1);
+              line.setAttribute('y1', a.y1);
+              line.setAttribute('x2', lineEndX);
+              line.setAttribute('y2', lineEndY);
+              line.setAttribute('stroke', a.color);
+              line.setAttribute('stroke-width', a.width);
+              svg.appendChild(line);
+              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+              const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+              poly.setAttribute('points', points);
+              poly.setAttribute('fill', a.color);
+              svg.appendChild(poly);
+            });
+          }
+          ex.labels.forEach(lbl => {
+            const inp = document.createElement('input');
+            inp.classList.add('blank-input');
+            inp.dataset.label = '1';
+            inp.setAttribute('data-answer', JSON.stringify([lbl.text]));
+            inp.type = 'text';
+            inp.style.position = 'absolute';
+            inp.style.left = lbl.x + 'px';
+            inp.style.top = lbl.y + 'px';
+            inp.style.border = '1px solid #7f8c8d';
+            inp.style.background = '#ffffff';
+            inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+            inp.style.fontSize = lbl.fontSize + 'px';
+            inp.style.padding = '0';
+            inp.style.boxSizing = 'border-box';
+            inp.style.minWidth = '0';
+            inp.style.borderRadius = '2px';
+            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            const meas = document.createElement('span');
+            meas.style.visibility = 'hidden';
+            meas.style.position = 'absolute';
+            meas.style.whiteSpace = 'pre';
+            meas.style.fontFamily = inp.style.fontFamily;
+            meas.style.fontSize = inp.style.fontSize;
+            meas.textContent = lbl.text.toUpperCase();
+            document.body.appendChild(meas);
+            const calcW = lbl.w ? lbl.w : (meas.offsetWidth + 4);
+            inp.style.width = calcW + 'px';
+            document.body.removeChild(meas);
+            inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
+            inp.oninput = () => {
+              const val = inp.value.trim().toLowerCase();
+              const ok = val === lbl.text.trim().toLowerCase();
+              if (ok) {
+                const txt = document.createElement('span');
+                txt.textContent = lbl.text;
+                txt.style.position = 'absolute';
+                txt.style.left = lbl.x + 'px';
+                txt.style.top = lbl.y + 'px';
+                txt.style.fontSize = lbl.fontSize + 'px';
+                txt.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+                txt.style.background = '#ffffff';
+                txt.style.border = '1px solid #27ae60';
+                txt.style.padding = '0 2px';
+                txt.style.borderRadius = '2px';
+                if (lbl.w) txt.style.width = lbl.w + 'px';
+                if (lbl.h) txt.style.height = lbl.h + 'px';
+                wrap.appendChild(txt);
+                inp.remove();
+              } else {
+                inp.classList.remove('correct');
+                inp.classList.add('incorrect');
+                inp.style.borderColor = '#c0392b';
+              }
+            };
+            wrap.appendChild(inp);
+          });
+          container.appendChild(wrap);
+        });
+        positionExtras(container);
       }
       let isQuizMode = true;   // start in quiz mode by default
       let lastHintTarget = null;  // track last focused blank for hint
@@ -1227,7 +1656,7 @@
           labelEditor.style.display = 'block';
           labelEditor.innerHTML = `
             <div id="labelContainer" style="position:relative; display:inline-block; overflow:visible;">
-              <img id="labelImg" src="${sec.image}" style="display:block; user-select:none;">
+              <img id="labelImg" class="main-image" src="${sec.image}" style="display:block; user-select:none;">
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
           // (rest unchanged)
@@ -2511,6 +2940,7 @@
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
           const img = document.createElement('img');
+          img.className = 'main-image';
           img.src = sec.image;
           if (sec.imgWidth) {
             img.style.width = sec.imgWidth + 'px';
@@ -2519,6 +2949,7 @@
             img.style.maxWidth = '100%';
           }
           wrapper.appendChild(img);
+          img.onload = () => positionExtras(wrapper);
 
           // Create SVG overlay for arrows
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -2820,6 +3251,9 @@
             });
           }
           labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
+          if (sec.extraImages) {
+            renderQuizExtras(sec, wrapper);
+          }
           return;
         }
         // existing fill-in logic follows
