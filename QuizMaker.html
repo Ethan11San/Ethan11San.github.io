@@ -546,246 +546,29 @@
         const cont = document.getElementById('labelContainer');
         if (!cont) return;
         const mainImg = cont.querySelector('#labelImg');
-        const extras = Array.from(cont.querySelectorAll('div.extra-wrapper'));
+        const extras = Array.from(cont.querySelectorAll('img.extra-image'));
         if (!mainImg) return;
         let left = mainImg.offsetWidth + EXTRA_GAP;
-        extras.forEach(wrap => {
-          wrap.style.left = left + 'px';
-          wrap.style.top = '0px';
-          left += wrap.offsetWidth + EXTRA_GAP;
-        });
-      }
-
-      function setupExtraImageInteractions(img, overlay, ex) {
-        overlay.ondblclick = evt => {
-          if (evt.metaKey) return;
-          const rect = img.getBoundingClientRect();
-          const x = evt.clientX - rect.left;
-          const y = evt.clientY - rect.top;
-          const text = prompt('Enter label text:');
-          if (text) {
-            ex.labels.push({ x, y, text, fontSize: 16 });
-            saveData();
-            loadSection();
-          }
-        };
-        ex.labels.forEach(lbl => {
-          const mark = document.createElement('div');
-          mark.textContent = lbl.text;
-          Object.assign(mark.style, {
-            position: 'absolute',
-            display: 'inline-block',
-            padding: '2px 4px',
-            left: lbl.x + 'px',
-            top: lbl.y + 'px',
-            background: '#ffffff',
-            border: '1px solid #7f8c8d',
-            overflow: 'auto',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-            cursor: 'move',
-            resize: 'both',
-            userSelect: 'none'
-          });
-          mark.addEventListener('contextmenu', evt => {
-            if (!evt.metaKey) return;
-            evt.preventDefault();
-            evt.stopPropagation();
-            if (confirm('Delete this label?')) {
-              const idx = ex.labels.indexOf(lbl);
-              if (idx >= 0) {
-                ex.labels.splice(idx, 1);
-                saveData();
-                loadSection();
-              }
-            }
-          });
-          mark.ondblclick = evt => {
-            evt.stopPropagation();
-            evt.preventDefault();
-            const newText = prompt('Edit label text:', lbl.text);
-            if (newText !== null) {
-              lbl.text = newText;
-              mark.textContent = lbl.text;
-              lbl.w = mark.offsetWidth;
-              lbl.h = mark.offsetHeight;
-              mark.style.width = lbl.w + 'px';
-              mark.style.height = lbl.h + 'px';
-              saveData();
-            }
-          };
-          mark.oncontextmenu = evt => {
-            evt.preventDefault();
-            evt.stopPropagation();
-            const input = prompt('Font size in px:', lbl.fontSize);
-            const newSize = parseInt(input, 10);
-            if (!isNaN(newSize) && newSize > 0) {
-              lbl.fontSize = newSize;
-              mark.style.fontSize = lbl.fontSize + 'px';
-              lbl.w = mark.offsetWidth;
-              lbl.h = mark.offsetHeight;
-              mark.style.width = lbl.w + 'px';
-              mark.style.height = lbl.h + 'px';
-              saveData();
-            }
-          };
-          mark.onmousedown = evt => {
-            if (evt.button !== 0) return;
-            evt.preventDefault();
-            let startX = evt.clientX, startY = evt.clientY;
-            const origX = lbl.x, origY = lbl.y;
-            function onMouseMove(e) {
-              lbl.x = origX + (e.clientX - startX);
-              lbl.y = origY + (e.clientY - startY);
-              mark.style.left = lbl.x + 'px';
-              mark.style.top = lbl.y + 'px';
-            }
-            function onMouseUp() {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-              saveData();
-            }
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          };
-          mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
-          mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
-          mark.style.fontSize = lbl.fontSize + 'px';
-          overlay.appendChild(mark);
-        });
-        let svgOverlay = overlay.querySelector('svg');
-        if (!svgOverlay) {
-          svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
-          overlay.appendChild(svgOverlay);
-        } else {
-          while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
-        }
-        if (ex.arrows) {
-          ex.arrows.forEach((a, idx) => {
-            const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-            const arrowLength = a.width * 3;
-            const arrowWidth = a.width * 2;
-            const lineEndX = a.x2 - arrowLength * Math.cos(angle);
-            const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('x1', a.x1);
-            line.setAttribute('y1', a.y1);
-            line.setAttribute('x2', lineEndX);
-            line.setAttribute('y2', lineEndY);
-            line.setAttribute('stroke', a.color);
-            line.setAttribute('stroke-width', a.width);
-            line.setAttribute('pointer-events', 'all');
-            svgOverlay.appendChild(line);
-            const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
-            const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
-            const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
-            const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
-            const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
-            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            polygon.setAttribute('points', points);
-            polygon.setAttribute('fill', a.color);
-            polygon.setAttribute('pointer-events', 'all');
-            svgOverlay.appendChild(polygon);
-            [line, polygon].forEach(el => {
-              el.addEventListener('contextmenu', evt => {
-                if (!evt.metaKey) return;
-                evt.preventDefault();
-                if (confirm('Delete this arrow?')) {
-                  ex.arrows.splice(idx, 1);
-                  saveData();
-                  loadSection();
-                  return;
-                }
-              });
-            });
-          });
-        }
-        let drawing = false;
-        let startX = 0, startY = 0;
-        let tempLine = null;
-        overlay.addEventListener('mousedown', evt => {
-          if (!evt.metaKey || evt.button !== 0) return;
-          const rect = img.getBoundingClientRect();
-          startX = evt.clientX - rect.left;
-          startY = evt.clientY - rect.top;
-          drawing = true;
-          tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          tempLine.setAttribute('x1', startX);
-          tempLine.setAttribute('y1', startY);
-          tempLine.setAttribute('x2', startX);
-          tempLine.setAttribute('y2', startY);
-          tempLine.setAttribute('stroke', '#e74c3c');
-          tempLine.setAttribute('stroke-width', '2');
-          svgOverlay.appendChild(tempLine);
-          evt.preventDefault();
-        });
-        overlay.addEventListener('mousemove', evt => {
-          if (!drawing) return;
-          const rect = img.getBoundingClientRect();
-          const currX = evt.clientX - rect.left;
-          const currY = evt.clientY - rect.top;
-          tempLine.setAttribute('x2', currX);
-          tempLine.setAttribute('y2', currY);
-        });
-        document.addEventListener('mouseup', evt => {
-          if (!drawing) return;
-          drawing = false;
-          const rect = img.getBoundingClientRect();
-          const endX = evt.clientX - rect.left;
-          const endY = evt.clientY - rect.top;
-          svgOverlay.removeChild(tempLine);
-          tempLine = null;
-          if (endX !== startX || endY !== startY) {
-            if (!ex.arrows) ex.arrows = [];
-            ex.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
-            saveData();
-            loadSection();
-          }
+        extras.forEach(img => {
+          img.style.left = left + 'px';
+          img.style.top = '0px';
+          left += img.offsetWidth + EXTRA_GAP;
         });
       }
 
       function renderExtraImages(sec) {
         const cont = document.getElementById('labelContainer');
         if (!cont) return;
-        cont.querySelectorAll('div.extra-wrapper').forEach(e => e.remove());
+        cont.querySelectorAll('img.extra-image').forEach(e => e.remove());
         if (sec.extraImages) {
-          sec.extraImages.forEach((ex, idx) => {
-            const wrap = document.createElement('div');
-            wrap.className = 'extra-wrapper';
-            wrap.style.position = 'absolute';
+          sec.extraImages.forEach(ex => {
             const img = document.createElement('img');
             img.className = 'extra-image';
             img.src = ex.image;
-            img.style.display = 'block';
+            img.style.position = 'absolute';
             img.style.userSelect = 'none';
-            wrap.appendChild(img);
-            const overlay = document.createElement('div');
-            overlay.style.position = 'absolute';
-            overlay.style.top = '0';
-            overlay.style.left = '0';
-            overlay.style.width = '100%';
-            overlay.style.height = '100%';
-            wrap.appendChild(overlay);
-            const del = document.createElement('span');
-            del.className = 'delete-icon';
-            del.textContent = '✖';
-            del.style.position = 'absolute';
-            del.style.right = '0';
-            del.style.top = '0';
-            del.style.display = deleteMode ? 'inline' : 'none';
-            del.onclick = evt => {
-              evt.stopPropagation();
-              if (confirm('Delete this picture?')) {
-                sec.extraImages.splice(idx, 1);
-                saveData();
-                loadSection();
-              }
-            };
-            wrap.appendChild(del);
-            cont.appendChild(wrap);
+            cont.appendChild(img);
             img.onload = positionExtraImages;
-            setupExtraImageInteractions(img, overlay, ex);
           });
           positionExtraImages();
         }
@@ -3037,109 +2820,6 @@
             });
           }
           labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
-          if (sec.extraImages) {
-            sec.extraImages.forEach(ex => {
-              const wrap2 = document.createElement('div');
-              wrap2.style.position = 'relative';
-              wrap2.style.marginTop = '20px';
-              const img2 = document.createElement('img');
-              img2.src = ex.image;
-              img2.style.maxWidth = '100%';
-              wrap2.appendChild(img2);
-              const svg2 = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-              svg2.style.position = 'absolute';
-              svg2.style.top = '0';
-              svg2.style.left = '0';
-              svg2.style.width = '100%';
-              svg2.style.height = '100%';
-              svg2.style.pointerEvents = 'none';
-              wrap2.appendChild(svg2);
-              if (ex.arrows) {
-                ex.arrows.forEach(a => {
-                  const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-                  const arrowLength = a.width * 3;
-                  const arrowWidth = a.width * 2;
-                  const lineEndX = a.x2 - arrowLength * Math.cos(angle);
-                  const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-                  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                  line.setAttribute('x1', a.x1);
-                  line.setAttribute('y1', a.y1);
-                  line.setAttribute('x2', lineEndX);
-                  line.setAttribute('y2', lineEndY);
-                  line.setAttribute('stroke', a.color);
-                  line.setAttribute('stroke-width', a.width);
-                  svg2.appendChild(line);
-                  const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
-                  const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
-                  const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
-                  const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
-                  const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
-                  const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                  polygon.setAttribute('points', points);
-                  polygon.setAttribute('fill', a.color);
-                  svg2.appendChild(polygon);
-                });
-              }
-              ex.labels.forEach(lbl => {
-                const inp2 = document.createElement('input');
-                inp2.classList.add('blank-input');
-                inp2.setAttribute('data-answer', JSON.stringify([lbl.text]));
-                inp2.dataset.label = '1';
-                inp2.type = 'text';
-                inp2.style.position = 'absolute';
-                inp2.style.left = lbl.x + 'px';
-                inp2.style.top = lbl.y + 'px';
-                inp2.style.border = '1px solid #7f8c8d';
-                inp2.style.background = '#ffffff';
-                inp2.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-                inp2.style.fontSize = lbl.fontSize + 'px';
-                inp2.style.padding = '0';
-                inp2.style.boxSizing = 'border-box';
-                inp2.style.minWidth = '0';
-                inp2.style.borderRadius = '2px';
-                inp2.addEventListener('focus', () => { lastHintTarget = inp2; });
-                const sp = document.createElement('span');
-                sp.style.visibility = 'hidden';
-                sp.style.position = 'absolute';
-                sp.style.whiteSpace = 'pre';
-                sp.style.fontFamily = inp2.style.fontFamily;
-                sp.style.fontSize = inp2.style.fontSize;
-                sp.textContent = lbl.text.toUpperCase();
-                document.body.appendChild(sp);
-                const calcW = lbl.w ? lbl.w : (sp.offsetWidth + 4);
-                inp2.style.width = calcW + 'px';
-                document.body.removeChild(sp);
-                inp2.style.height = (lbl.h || inp2.offsetHeight) + 'px';
-                inp2.oninput = () => {
-                  const val = inp2.value.trim().toLowerCase();
-                  const ok = val === lbl.text.trim().toLowerCase();
-                  if (ok) {
-                    const txt = document.createElement('span');
-                    txt.textContent = lbl.text;
-                    txt.style.position = 'absolute';
-                    txt.style.left = lbl.x + 'px';
-                    txt.style.top = lbl.y + 'px';
-                    txt.style.fontSize = lbl.fontSize + 'px';
-                    txt.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-                    txt.style.background = '#ffffff';
-                    txt.style.border = '1px solid #27ae60';
-                    txt.style.padding = '0 2px';
-                    txt.style.borderRadius = '2px';
-                    if (lbl.w) txt.style.width = lbl.w + 'px';
-                    if (lbl.h) txt.style.height = lbl.h + 'px';
-                    wrap2.appendChild(txt);
-                    inp2.remove();
-                  } else {
-                    inp2.classList.remove('correct');
-                    inp2.classList.add('incorrect');
-                    inp2.style.borderColor = '#c0392b';
-                  }
-                };
-                wrap2.appendChild(inp2);
-              });
-              quizContent.appendChild(wrap2);
-            });
-          }
           return;
         }
         // existing fill-in logic follows
