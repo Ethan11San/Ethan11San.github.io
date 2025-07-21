@@ -2687,83 +2687,68 @@
       };
       quizAllBtn .onclick = enterRandomQuiz;
 
+
       function wrapQuizBlanks(container, hiddenEntries) {
-        // Filter out invalid hidden entries (word/occ not present in text)
         const sec = data.folders[currentFolder].sections[currentSection];
 
-        // Tokenize the section text exactly like previewSection/extractTokens
+        // Validate hidden entries against token counts
         const tokens = extractTokens(sec).map(t => t.trim()).filter(Boolean);
-
-        const validEntries = (hiddenEntries || []).filter(({ word, occ }) => {
+        const valid = (hiddenEntries || []).filter(({ word, occ }) => {
           const matches = tokens.filter(t => t === word);
-          const isValid = occ <= matches.length;
-          if (!isValid && sec.alts) {
-            delete sec.alts[`${word}_${occ}`];
-          }
-          return isValid;
+          const ok = occ <= matches.length;
+          if (!ok && sec.alts) delete sec.alts[`${word}_${occ}`];
+          return ok;
         });
-        sec.hidden = validEntries;
+        sec.hidden = valid;
 
-        const sortedEntries = validEntries.slice().sort((a, b) => {
-          const wComp = a.word.localeCompare(b.word);
-          if (wComp !== 0) return wComp;
-          return b.occ - a.occ;
+        const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+        const textNodes = [];
+        while (walker.nextNode()) {
+          const n = walker.currentNode;
+          if (!n.parentElement.closest('.quiz-title-word')) textNodes.push(n);
+        }
+
+        const tokenNodes = [];
+        textNodes.forEach(node => {
+          const parts = node.textContent.split(/(\s+)/);
+          let ref = node;
+          ref.textContent = parts[0];
+          tokenNodes.push({ node: ref, text: parts[0] });
+          for (let i = 1; i < parts.length; i++) {
+            const newNode = document.createTextNode(parts[i]);
+            ref.parentNode.insertBefore(newNode, ref.nextSibling);
+            ref = newNode;
+            tokenNodes.push({ node: ref, text: parts[i] });
+          }
         });
 
-        sortedEntries.forEach(({ word, occ }) => {
-          
-          const matches = [];
-          const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
-          while (walker.nextNode()) {
-            const node = walker.currentNode;
-            if (node.parentElement.closest('.quiz-title-word')) continue;
-            // Build a regex that matches the word with optional trailing punctuation
-            const escaped = word.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
-            const startsWordChar = /\w/.test(word[0]);
-            const endsWordChar   = /\w/.test(word[word.length - 1]);
-            let pattern = escaped;
-            if (startsWordChar) pattern = '\\b' + pattern;
-            if (endsWordChar)   pattern = pattern + '\\b';
-            const regex = new RegExp(pattern, 'gi');
-            let match;
-            while ((match = regex.exec(node.textContent)) !== null) {
-              // DEBUG: Log each matched node and match index
-              
-              matches.push({ node, index: match.index, length: match[0].length });
-            }
+        const counts = {};
+        const replacements = [];
+        tokenNodes.forEach(({ node, text }) => {
+          const w = text.trim();
+          if (!w) return;
+          counts[w] = (counts[w] || 0) + 1;
+          const occ = counts[w];
+          if (valid.some(e => e.word === w && e.occ === occ)) {
+            replacements.push({ node, word: w, occ });
           }
+        });
 
-          const targetMatch = matches[occ - 1];
-          // DEBUG: Log the target match for this word/occurrence
-          
-          if (targetMatch) {
-            const { node, index, length } = targetMatch;
-            const before = node.textContent.slice(0, index);
-            const target = node.textContent.slice(index, index + length);
-            const after = node.textContent.slice(index + length);
+        replacements.forEach(({ node, word, occ }) => {
+          const span = document.createElement('span');
+          span.className = 'blank';
+          span.dataset.word = word;
+          span.dataset.occ = occ;
 
-            const span = document.createElement('span');
-            span.className = 'blank';
-            span.dataset.word = target;
-            span.dataset.occ = occ;
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'blank-input';
+          const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
+          input.setAttribute('data-answer', JSON.stringify(answers));
+          input.addEventListener('focus', () => { lastHintTarget = input; });
 
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'blank-input';
-            const altKey = `${word}_${occ}`;
-            const answers = [word, ...(sec.alts[altKey] || [])];
-            input.setAttribute('data-answer', JSON.stringify(answers));
-            input.addEventListener('focus', () => { lastHintTarget = input; });
-            // Removed fixed em width here
-
-            span.appendChild(input);
-
-            const parent = node.parentNode;
-            parent.insertBefore(document.createTextNode(before), node);
-            parent.insertBefore(span, node);
-            parent.insertBefore(document.createTextNode(after), node);
-            parent.removeChild(node);
-          }
+          span.appendChild(input);
+          node.parentNode.replaceChild(span, node);
         });
       }
 
