@@ -2584,7 +2584,7 @@
                 wrapper.appendChild(txt);
                 inp.remove();               // get rid of the input box
                 // Auto‑focus the first blank of this label's definition or next label
-                const entry = titleMap[lbl.text];
+                let entry = titleMap[lbl.text];
                 if (entry && entry.para && entry.para._inputs && entry.para._inputs.length) {
                   const nextB = entry.para._inputs.find(b => !b.classList.contains('correct'));
                   if (nextB) {
@@ -2601,7 +2601,7 @@
                 }
 
                 // Reveal corresponding definition title now that this label is correct
-                const entry = titleMap[lbl.text];
+                entry = titleMap[lbl.text];
                 if (entry && !entry.revealed) {
                   entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
                   entry.revealed = true;
