@@ -229,7 +229,7 @@
     }
     .word:hover { background: #dfe6e9; }
     .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
-    #previewBtn, #saveSectionBtn {
+    #previewBtn, #saveSectionBtn, #addPictureBtn {
       margin-top: 12px;
       margin-right: 8px;
       padding: 8px 16px;
@@ -240,7 +240,7 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #previewBtn:hover, #saveSectionBtn:hover { background: #1e8449; }
+    #previewBtn:hover, #saveSectionBtn:hover, #addPictureBtn:hover { background: #1e8449; }
 
     /* —— Alternate Answers UI —— */
     #altContainer {
@@ -537,6 +537,40 @@
           defCont.style.position = 'absolute';
           defCont.style.top = (topOffset + addBtn.offsetHeight + 10) + 'px';
           defCont.style.left = cont.offsetLeft + 'px';
+        }
+        positionExtraImages();
+      }
+
+      const EXTRA_GAP = 20;
+      function positionExtraImages() {
+        const cont = document.getElementById('labelContainer');
+        if (!cont) return;
+        const mainImg = cont.querySelector('#labelImg');
+        const extras = Array.from(cont.querySelectorAll('img.extra-image'));
+        if (!mainImg) return;
+        let left = mainImg.offsetWidth + EXTRA_GAP;
+        extras.forEach(img => {
+          img.style.left = left + 'px';
+          img.style.top = '0px';
+          left += img.offsetWidth + EXTRA_GAP;
+        });
+      }
+
+      function renderExtraImages(sec) {
+        const cont = document.getElementById('labelContainer');
+        if (!cont) return;
+        cont.querySelectorAll('img.extra-image').forEach(e => e.remove());
+        if (sec.extraImages) {
+          sec.extraImages.forEach(ex => {
+            const img = document.createElement('img');
+            img.className = 'extra-image';
+            img.src = ex.image;
+            img.style.position = 'absolute';
+            img.style.userSelect = 'none';
+            cont.appendChild(img);
+            img.onload = positionExtraImages;
+          });
+          positionExtraImages();
         }
       }
       let isQuizMode = true;   // start in quiz mode by default
@@ -1192,7 +1226,7 @@
           // ...label editor code...
           labelEditor.style.display = 'block';
           labelEditor.innerHTML = `
-            <div id="labelContainer" style="position:relative; display:inline-block; overflow:auto;">
+            <div id="labelContainer" style="position:relative; display:inline-block; overflow:visible;">
               <img id="labelImg" src="${sec.image}" style="display:block; user-select:none;">
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
@@ -1325,7 +1359,7 @@
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
           if (window.ResizeObserver) {
-            new ResizeObserver(updateDefPosition).observe(container);
+            new ResizeObserver(() => { updateDefPosition(); positionExtraImages(); }).observe(container);
           }
           container.style.resize = 'none';
           if (sec.imgX != null && sec.imgY != null) {
@@ -1335,6 +1369,7 @@
           } else {
             container.style.position = 'relative';
           }
+          renderExtraImages(sec);
           let lastContextTime = 0;
           container.addEventListener('contextmenu', e => {
             e.preventDefault();
@@ -1366,6 +1401,7 @@
                     container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
                     img.style.width = '100%';
                     img.style.height = 'auto';
+                    positionExtraImages();
                   }
                   function onMouseUp() {
                     img.style.width = '100%';
@@ -1376,6 +1412,7 @@
                     sec.imgHeight = container.offsetHeight;
                     saveData();
                     updateDefPosition();
+                    positionExtraImages();
                   }
                   document.addEventListener('mousemove', onMouseMove);
                   document.addEventListener('mouseup', onMouseUp);
@@ -1401,6 +1438,7 @@
               sec.imgY = parseInt(container.style.top) || 0;
               saveData();
               updateDefPosition();
+              positionExtraImages();
             }
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
@@ -1416,6 +1454,7 @@
               container.style.height = img.naturalHeight + 'px';
             }
             updateDefPosition();
+            renderExtraImages(sec);
           };
           overlay.ondblclick = evt => {
             if (evt.metaKey) return;
@@ -1469,19 +1508,20 @@
               num.style.pointerEvents = 'none';
               mark.appendChild(num);
             }
-            mark.addEventListener('click', evt => {
-              if (evt.ctrlKey && evt.button === 0) {
-                evt.stopPropagation();
-                if (confirm('Delete this label?')) {
-                  const idx = sec.labels.indexOf(lbl);
-                  if (idx >= 0) {
-                    sec.labels.splice(idx, 1);
-                    saveData();
-                    loadSection();
-                  }
+            mark.addEventListener('contextmenu', evt => {
+              if (!evt.metaKey) return;
+              evt.preventDefault();
+              evt.stopPropagation();
+              if (confirm('Delete this label?')) {
+                const idx = sec.labels.indexOf(lbl);
+                if (idx >= 0) {
+                  sec.labels.splice(idx, 1);
+                  saveData();
+                  loadSection();
                 }
-                return;
               }
+            });
+            mark.addEventListener('click', evt => {
               if (!isAddingDefinition) return;
               evt.stopPropagation();
               sec.definitions = sec.definitions || [];
@@ -2580,7 +2620,7 @@
                 if (lbl.w) txt.style.width  = lbl.w + 'px';
                 if (lbl.h) txt.style.height = lbl.h + 'px';
                 txt.style.display = 'inline-block';
-                txt.addEventListener('click', deleteLabel);
+                txt.addEventListener('contextmenu', deleteLabel);
                 wrapper.appendChild(txt);
                 inp.remove();               // get rid of the input box
                 // Auto‑focus the first blank of this label's definition or next label
@@ -2623,19 +2663,19 @@
               }
             };
             const deleteLabel = evt => {
-              if (evt.ctrlKey && evt.button === 0) {
-                evt.stopPropagation();
-                if (confirm('Delete this label?')) {
-                  const idx = sec.labels.indexOf(lbl);
-                  if (idx >= 0) {
-                    sec.labels.splice(idx, 1);
-                    saveData();
-                    showQuiz();
-                  }
+              if (!evt.metaKey) return;
+              evt.preventDefault();
+              evt.stopPropagation();
+              if (confirm('Delete this label?')) {
+                const idx = sec.labels.indexOf(lbl);
+                if (idx >= 0) {
+                  sec.labels.splice(idx, 1);
+                  saveData();
+                  showQuiz();
                 }
               }
             };
-            inp.addEventListener('click', deleteLabel);
+            inp.addEventListener('contextmenu', deleteLabel);
             wrapper.appendChild(inp);
             // Number badge that matches the definition list
             let defIdx = -1;
