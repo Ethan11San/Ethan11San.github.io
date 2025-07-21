@@ -497,6 +497,7 @@
       <div style="margin-top:12px;">
         <button id="previewBtn">Preview Words</button>
         <button id="saveSectionBtn">Save Section</button>
+        <button id="addPictureBtn" style="display:none;">Add Picture</button>
       </div>
       <div id="preview"></div>
       <div id="labelEditor" style="display:none; position: relative;"></div>
@@ -638,7 +639,7 @@
       }
 
       let currentFolder = null, currentSection = null;
-      let waitingForImagePaste = false;
+      let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
             sectionSearch = document.getElementById('sectionSearch'),
@@ -654,7 +655,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
-            saveSectionBtn = document.getElementById('saveSectionBtn'), altContainer = document.getElementById('altContainer'),
+            saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -768,17 +769,32 @@
           // Enable drag-and-drop reordering for folders
           li.draggable = true;
           li.addEventListener('dragstart', e => {
-            e.dataTransfer.setData('text/plain', i);
+            e.dataTransfer.setData('folder-index', i);
           });
           li.addEventListener('dragover', e => e.preventDefault());
           li.addEventListener('drop', e => {
             e.preventDefault();
-            const from = Number(e.dataTransfer.getData('text/plain'));
-            const moved = data.folders.splice(from, 1)[0];
-            data.folders.splice(i, 0, moved);
-            saveData();
-            renderFolders();
-            renderSections(lastSectionOrder);
+            const folderFrom = e.dataTransfer.getData('folder-index');
+            const qIdx = e.dataTransfer.getData('question-index');
+            if (folderFrom) {
+              const from = Number(folderFrom);
+              const moved = data.folders.splice(from, 1)[0];
+              data.folders.splice(i, 0, moved);
+              saveData();
+              renderFolders();
+              renderSections(lastSectionOrder);
+            } else if (qIdx) {
+              const fromFolder = Number(e.dataTransfer.getData('from-folder'));
+              const secs = data.folders[fromFolder].sections;
+              const moved = secs.splice(Number(qIdx), 1)[0];
+              data.folders[i].sections.push(moved);
+              if (currentFolder === fromFolder) {
+                currentSection = Math.min(currentSection, secs.length - 1);
+              }
+              saveData();
+              renderFolders();
+              if (currentFolder === fromFolder || currentFolder === i) renderSections(lastSectionOrder);
+            }
           });
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
@@ -870,12 +886,13 @@
           // Enable drag-and-drop reordering for questions
           li.draggable = true;
           li.addEventListener('dragstart', e => {
-            e.dataTransfer.setData('text/plain', i);
+            e.dataTransfer.setData('question-index', i);
+            e.dataTransfer.setData('from-folder', currentFolder);
           });
           li.addEventListener('dragover', e => e.preventDefault());
           li.addEventListener('drop', e => {
             e.preventDefault();
-            const from = Number(e.dataTransfer.getData('text/plain'));
+            const from = Number(e.dataTransfer.getData('question-index'));
             const secs = data.folders[currentFolder].sections;
             const moved = secs.splice(from, 1)[0];
             const to = from < i ? i - 1 : i;
@@ -1040,9 +1057,10 @@
         loadSection();
         // Now prompt user for image input
         if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
-          waitingForImagePaste = true;
+          waitingForImagePaste = { target: 'main' };
           alert('Now paste the image from your clipboard.');
         } else {
+          labelImageInput.dataset.extraIndex = '';
           labelImageInput.click();
         }
       };
@@ -1050,9 +1068,15 @@
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
+        const idx = labelImageInput.dataset.extraIndex;
         reader.onload = async () => {
           const sec = data.folders[currentFolder].sections[currentSection];
-          sec.image = reader.result;
+          if (idx === '') {
+            sec.image = reader.result;
+          } else {
+            sec.extraImages = sec.extraImages || [];
+            sec.extraImages[idx] = { image: reader.result, labels: [], arrows: [] };
+          }
           await saveData();
           renderFolders();
           renderSections(lastSectionOrder);
@@ -1061,6 +1085,20 @@
         };
         reader.readAsDataURL(file);
         e.target.value = '';
+        labelImageInput.dataset.extraIndex = '';
+      };
+
+      addPictureBtn.onclick = () => {
+        if (currentFolder === null || currentSection === null) return alert('Select a question first');
+        const sec = data.folders[currentFolder].sections[currentSection];
+        const idx = (sec.extraImages ? sec.extraImages.length : 0);
+        if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
+          waitingForImagePaste = { target: 'extra', index: idx };
+          alert('Now paste the image from your clipboard.');
+        } else {
+          labelImageInput.dataset.extraIndex = idx;
+          labelImageInput.click();
+        }
       };
 
       // Allow pasting an image to update the current label question
@@ -1075,7 +1113,12 @@
             const reader = new FileReader();
             reader.onload = async () => {
               const sec = data.folders[currentFolder].sections[currentSection];
-              sec.image = reader.result;
+              if (waitingForImagePaste.target === 'main') {
+                sec.image = reader.result;
+              } else {
+                sec.extraImages = sec.extraImages || [];
+                sec.extraImages[waitingForImagePaste.index] = { image: reader.result, labels: [], arrows: [] };
+              }
               await saveData();
               renderFolders();
               renderSections(lastSectionOrder);
@@ -1083,7 +1126,7 @@
               loadSection();
             };
             reader.readAsDataURL(blob);
-            waitingForImagePaste = false;
+            waitingForImagePaste = null;
             e.preventDefault();
             break;
           }
@@ -1111,6 +1154,7 @@
         if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
         altContainer.innerHTML = '';
+        addPictureBtn.style.display = sec.type === 'label' ? 'inline-block' : 'none';
 
         if (sec.type === 'acronym') {
           labelEditor.style.display = 'block';
@@ -1426,6 +1470,18 @@
               mark.appendChild(num);
             }
             mark.addEventListener('click', evt => {
+              if (evt.ctrlKey && evt.button === 0) {
+                evt.stopPropagation();
+                if (confirm('Delete this label?')) {
+                  const idx = sec.labels.indexOf(lbl);
+                  if (idx >= 0) {
+                    sec.labels.splice(idx, 1);
+                    saveData();
+                    loadSection();
+                  }
+                }
+                return;
+              }
               if (!isAddingDefinition) return;
               evt.stopPropagation();
               sec.definitions = sec.definitions || [];
@@ -2467,6 +2523,8 @@
 
           // Map labelText → { el: titleElement, idx }
           const titleMap = {};
+          const labelInputs = {};
+          let labelOrder = [];
           // Render inline inputs
           sec.labels.forEach(lbl => {
             const inp = document.createElement('input');
@@ -2501,6 +2559,7 @@
             inp.style.width  = calcW + 'px';
             document.body.removeChild(measSpan);
             inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
+            labelInputs[lbl.text] = inp;
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = val === lbl.text.trim().toLowerCase();
@@ -2521,13 +2580,25 @@
                 if (lbl.w) txt.style.width  = lbl.w + 'px';
                 if (lbl.h) txt.style.height = lbl.h + 'px';
                 txt.style.display = 'inline-block';
+                txt.addEventListener('click', deleteLabel);
                 wrapper.appendChild(txt);
                 inp.remove();               // get rid of the input box
-                // Auto‑focus the next remaining picture‑label blank
-                setTimeout(() => {
-                  const next = wrapper.querySelector('input[data-label="1"]');
-                  if (next) next.focus();
-                }, 0);
+                // Auto‑focus the first blank of this label's definition or next label
+                const entry = titleMap[lbl.text];
+                if (entry && entry.para && entry.para._inputs && entry.para._inputs.length) {
+                  const nextB = entry.para._inputs.find(b => !b.classList.contains('correct'));
+                  if (nextB) {
+                    setTimeout(() => nextB.focus(),0);
+                  } else {
+                    const idx = entry.idx + 1;
+                    const nextLbl = labelOrder[idx];
+                    if (nextLbl) setTimeout(() => nextLbl.focus(),0);
+                  }
+                } else {
+                  const idx = entry ? entry.idx + 1 : 0;
+                  const nextLbl = labelOrder[idx];
+                  if (nextLbl) setTimeout(() => nextLbl.focus(),0);
+                }
 
                 // Reveal corresponding definition title now that this label is correct
                 const entry = titleMap[lbl.text];
@@ -2551,6 +2622,20 @@
                 img.style.outline = '';
               }
             };
+            const deleteLabel = evt => {
+              if (evt.ctrlKey && evt.button === 0) {
+                evt.stopPropagation();
+                if (confirm('Delete this label?')) {
+                  const idx = sec.labels.indexOf(lbl);
+                  if (idx >= 0) {
+                    sec.labels.splice(idx, 1);
+                    saveData();
+                    showQuiz();
+                  }
+                }
+              }
+            };
+            inp.addEventListener('click', deleteLabel);
             wrapper.appendChild(inp);
             // Number badge that matches the definition list
             let defIdx = -1;
@@ -2665,9 +2750,20 @@
                 document.body.removeChild(meas);
 
                 inp.oninput = () => {
-                  const ok = answers.some(a => a.toLowerCase() === inp.value.trim().toLowerCase());
+                  const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g,'');
+                  const val = normalize(inp.value);
+                  const ok = answers.some(a => normalize(a) === val);
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
+                  if (ok) {
+                    const nextB = para._inputs.find(b => !b.classList.contains('correct'));
+                    if (nextB) {
+                      setTimeout(() => nextB.focus(),0);
+                    } else {
+                      const nextLbl = labelOrder[dIndex+1];
+                      if (nextLbl) setTimeout(() => nextLbl.focus(),0);
+                    }
+                  }
                   const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                     quizContent.style.borderColor = '#27ae60';
@@ -2683,6 +2779,7 @@
               quizContent.appendChild(para);
             });
           }
+          labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
           return;
         }
         // existing fill-in logic follows
@@ -2755,8 +2852,9 @@
             });
             // Simplified input handler: just correctness, outline if all correct
             inp.oninput = () => {
-              const val = inp.value.trim().toLowerCase();
-              const ok = answers.some(a => a.toLowerCase() === val);
+              const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g,'');
+              const val = normalize(inp.value);
+              const ok = answers.some(a => normalize(a) === val);
               inp.classList.toggle('correct', ok);
               inp.classList.toggle('incorrect', !ok);
               const allInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
