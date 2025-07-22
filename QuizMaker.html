@@ -2423,7 +2423,33 @@
             });
           } else if (node.nodeType === Node.ELEMENT_NODE) {
             if (node.classList && node.classList.contains('popup-word')) {
-              previewDiv.appendChild(node.cloneNode(true));
+              const wrapper = document.createElement('span');
+              wrapper.className = 'popup-word';
+              if (node.dataset.img) wrapper.dataset.img = node.dataset.img;
+              const tokens = (node.innerText || '').split(/(\s+)/);
+              tokens.forEach(tok => {
+                if (!tok.trim()) {
+                  wrapper.appendChild(document.createTextNode(tok));
+                } else {
+                  const w = tok.trim();
+                  globalCounts[w] = (globalCounts[w] || 0) + 1;
+                  const occ = globalCounts[w];
+                  const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                  const wSpan = document.createElement('span');
+                  wSpan.className = 'word' + (isHidden ? ' hidden' : '');
+                  wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                  wSpan.onclick = () => {
+                    const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                    if (idx >= 0) hiddenEntries.splice(idx, 1);
+                    else hiddenEntries.push({ word: w, occ });
+                    sec.hidden = hiddenEntries;
+                    saveData();
+                    previewSection();
+                  };
+                  wrapper.appendChild(wSpan);
+                }
+              });
+              previewDiv.appendChild(wrapper);
             } else if (node.tagName === 'UL') {
               // Flatten each list item into its own preview line with a bullet
               node.childNodes.forEach(liNode => {
@@ -2494,7 +2520,33 @@
                     }
                   });
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.classList && child.classList.contains('popup-word')) {
-                  para.appendChild(child.cloneNode(true));
+                  const wrapper = document.createElement('span');
+                  wrapper.className = 'popup-word';
+                  if (child.dataset.img) wrapper.dataset.img = child.dataset.img;
+                  const tokens = (child.innerText || '').split(/(\s+)/);
+                  tokens.forEach(tok => {
+                    if (!tok.trim()) {
+                      wrapper.appendChild(document.createTextNode(tok));
+                    } else {
+                      const w = tok.trim();
+                      globalCounts[w] = (globalCounts[w] || 0) + 1;
+                      const occ = globalCounts[w];
+                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                      const wSpan = document.createElement('span');
+                      wSpan.className = 'word' + (isHidden ? ' hidden' : '');
+                      wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                      wSpan.onclick = () => {
+                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+                        if (idx >= 0) hiddenEntries.splice(idx, 1);
+                        else hiddenEntries.push({ word: w, occ });
+                        sec.hidden = hiddenEntries;
+                        saveData();
+                        previewSection();
+                      };
+                      wrapper.appendChild(wSpan);
+                    }
+                  });
+                  para.appendChild(wrapper);
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
                   para.appendChild(document.createElement('br'));
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
