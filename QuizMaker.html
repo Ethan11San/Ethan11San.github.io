@@ -229,6 +229,11 @@
     }
     .word:hover { background: #dfe6e9; }
     .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
+    .popup-word {
+      cursor: pointer;
+      border-bottom: 1px dashed #3498db;
+    }
+    .popup-word:hover { background: #dfe6e9; }
     #previewBtn, #saveSectionBtn, #addPictureBtn {
       margin-top: 12px;
       margin-right: 8px;
@@ -492,6 +497,7 @@
         <button class="ql-redo">↻</button>
         <button class="ql-list" value="bullet"></button>
         <select class="ql-color"></select>
+        <button id="addImageWordBtn">🖼️</button>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
@@ -1157,6 +1163,52 @@
       const toolbarModule = quill.getModule('toolbar');
       toolbarModule.addHandler('undo', () => quill.history.undo());
       toolbarModule.addHandler('redo', () => quill.history.redo());
+      const addImageWordBtn = document.getElementById('addImageWordBtn');
+      addImageWordBtn.addEventListener('click', async () => {
+        if (!ensureSelection()) return;
+        const range = quill.getSelection();
+        if (!range || range.length === 0) return alert('Select text first');
+        async function getClipboardImage() {
+          try {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+              const type = item.types.find(t => t.startsWith('image/'));
+              if (type) {
+                const blob = await item.getType(type);
+                return await new Promise(res => {
+                  const r = new FileReader();
+                  r.onload = () => res(r.result);
+                  r.readAsDataURL(blob);
+                });
+              }
+            }
+          } catch (err) {
+            console.warn('Clipboard read failed', err);
+          }
+          return null;
+        }
+        const insert = url => {
+          const selected = quill.getText(range.index, range.length);
+          quill.deleteText(range.index, range.length, 'user');
+          quill.clipboard.dangerouslyPasteHTML(range.index,
+            `<span class="popup-word" data-img="${url}">${selected}</span>`, 'user');
+          quill.setSelection(range.index + selected.length, 0, 'silent');
+          syncCurrentSection();
+        };
+        let url = await getClipboardImage();
+        if (url) return insert(url);
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = () => {
+          const file = input.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => insert(reader.result);
+          reader.readAsDataURL(file);
+        };
+        input.click();
+      });
       function syncCurrentSection(){
         if (currentFolder===null || currentSection===null) return;
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -2177,7 +2229,7 @@
         quill.history.clear();
         const html = sec.rawHtml || sec.rawText || '';
         // Load the HTML silently so it does not create an undo entry
-        quill.setContents(quill.clipboard.convert(html), 'silent');
+        quill.clipboard.dangerouslyPasteHTML(html, 'silent');
         adjustEditorHeight();  // ensure editor resizes for existing content
         // Run a second resize on next tick so Quill gets a chance to lay out its HTML
         setTimeout(() => requestAnimationFrame(adjustEditorHeight), 0);
@@ -3426,6 +3478,42 @@
           }, 1000);
         }
       };
+
+      // --- Popup word click handler ---
+      document.addEventListener('click', evt => {
+        const target = evt.target.closest('.popup-word');
+        if (!target) return;
+        evt.stopPropagation();
+        const existing = document.getElementById('imageWordPopup');
+        if (existing) existing.remove();
+        const popup = document.createElement('div');
+        popup.id = 'imageWordPopup';
+        popup.style.position = 'absolute';
+        const rect = target.getBoundingClientRect();
+        const left = rect.left + rect.width / 2;
+        const top = rect.top;
+        popup.style.left = `${left}px`;
+        popup.style.top = `${top}px`;
+        popup.style.transform = 'translate(-50%, -100%)';
+        popup.style.transformOrigin = 'bottom center';
+        popup.style.background = '#fff';
+        popup.style.border = '1px solid #7f8c8d';
+        popup.style.borderRadius = '4px';
+        popup.style.padding = '8px';
+        popup.style.zIndex = '10000';
+        const img = document.createElement('img');
+        img.src = target.dataset.img;
+        img.style.maxWidth = '200px';
+        img.style.maxHeight = '200px';
+        popup.appendChild(img);
+        popup.addEventListener('click', e => e.stopPropagation());
+        document.body.appendChild(popup);
+        const remove = () => {
+          popup.remove();
+          document.removeEventListener('click', remove);
+        };
+        setTimeout(() => document.addEventListener('click', remove), 0);
+      });
 
       // --- Keyboard shortcuts for quiz navigation and hints ---
       document.addEventListener('keydown', e => {
