@@ -2422,9 +2422,7 @@
               }
             });
           } else if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.classList && node.classList.contains('popup-word')) {
-              previewDiv.appendChild(node.cloneNode(true));
-            } else if (node.tagName === 'UL') {
+            if (node.tagName === 'UL') {
               // Flatten each list item into its own preview line with a bullet
               node.childNodes.forEach(liNode => {
                 if (liNode.nodeType !== Node.ELEMENT_NODE || liNode.tagName !== 'LI') return;
@@ -2493,8 +2491,6 @@
                       para.appendChild(span);
                     }
                   });
-                } else if (child.nodeType === Node.ELEMENT_NODE && child.classList && child.classList.contains('popup-word')) {
-                  para.appendChild(child.cloneNode(true));
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
                   para.appendChild(document.createElement('br'));
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
