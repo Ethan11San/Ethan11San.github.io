@@ -1135,6 +1135,23 @@
       const Size = Quill.import('formats/size');
       Size.whitelist = ['8px','10px','12px','14px','16px','18px','20px','24px','28px','32px'];
       Quill.register(Size, true);
+
+      // Custom blot to preserve popup-word spans with data-img attribute
+      const Inline = Quill.import('blots/inline');
+      class PopupWordBlot extends Inline {
+        static create(value) {
+          const node = super.create();
+          if (value) node.setAttribute('data-img', value);
+          return node;
+        }
+        static formats(node) {
+          return node.getAttribute('data-img');
+        }
+      }
+      PopupWordBlot.blotName = 'popupWord';
+      PopupWordBlot.tagName = 'span';
+      PopupWordBlot.className = 'popup-word';
+      Quill.register(PopupWordBlot);
       const quill = new Quill('#editor', {
         modules: {
           toolbar: '#toolbar',
@@ -1187,14 +1204,11 @@
           }
           return null;
         }
-        const insert = url => {
-          const selected = quill.getText(range.index, range.length);
-          quill.deleteText(range.index, range.length, 'user');
-          quill.clipboard.dangerouslyPasteHTML(range.index,
-            `<span class="popup-word" data-img="${url}">${selected}</span>`, 'user');
-          quill.setSelection(range.index + selected.length, 0, 'silent');
-          syncCurrentSection();
-        };
+          const insert = url => {
+            quill.formatText(range.index, range.length, 'popupWord', url, 'user');
+            quill.setSelection(range.index + range.length, 0, 'silent');
+            syncCurrentSection();
+          };
         let url = await getClipboardImage();
         if (url) return insert(url);
         const input = document.createElement('input');
