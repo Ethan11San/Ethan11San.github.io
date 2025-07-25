@@ -103,6 +103,15 @@
     .nav li.selected {
       font-weight: bold;
     }
+    .folder-swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
     .nav li.type-fill.selected {
       background: #1abc9c;
       color: #2c3e50;
@@ -1373,7 +1382,17 @@
               if (currentFolder === fromFolder || currentFolder === i) renderSections(lastSectionOrder);
             }
           });
-          li.textContent=f.name;
+          const swatch = document.createElement('span');
+          swatch.className = 'folder-swatch';
+          swatch.style.background = f.color || '#1abc9c';
+          swatch.onclick = evt => {
+            evt.stopPropagation();
+            showFolderColorPicker(i);
+          };
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = f.name;
+          li.appendChild(swatch);
+          li.appendChild(nameSpan);
           li.className=i===currentFolder?'selected':'';
           li.style.borderLeft = '8px solid ' + (f.color || '#1abc9c');
           li.onclick = () => {
