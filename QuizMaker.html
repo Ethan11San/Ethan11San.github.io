@@ -1324,6 +1324,22 @@
 
 
       function renderFolders(){
+        function showFolderColorPicker(idx) {
+          const colorInput = document.createElement("input");
+          colorInput.type = "color";
+          colorInput.value = data.folders[idx].color || "#1abc9c";
+          colorInput.style.position = "fixed";
+          colorInput.style.left = "-1000px";
+          document.body.appendChild(colorInput);
+          colorInput.addEventListener("change", () => {
+            data.folders[idx].color = colorInput.value;
+            saveData();
+            renderFolders();
+            updateHeader(headerTitle.textContent);
+            document.body.removeChild(colorInput);
+          });
+          colorInput.click();
+        }
         foldersUL.innerHTML='';
         data.folders.forEach((f,i)=>{
           let li=document.createElement('li');
@@ -1394,22 +1410,10 @@
           };
           li.ondblclick = evt => {
             if (evt.metaKey || evt.ctrlKey) {
-              const colorInput = document.createElement('input');
-              colorInput.type = 'color';
-              colorInput.value = f.color || '#1abc9c';
-              colorInput.style.position = 'fixed';
-              colorInput.style.left = '-1000px';
-              document.body.appendChild(colorInput);
-              colorInput.addEventListener('change', () => {
-                data.folders[i].color = colorInput.value;
-                saveData();
-                renderFolders();
-                updateHeader(headerTitle.textContent);
-                document.body.removeChild(colorInput);
-              });
-              colorInput.click();
+              evt.preventDefault();
+              showFolderColorPicker(i);
             } else {
-              const newName = prompt('Enter new folder name:', f.name);
+              const newName = prompt("Enter new folder name:", f.name);
               if (newName && newName.trim()) {
                 data.folders[i].name = newName.trim();
                 saveData();
@@ -1418,6 +1422,15 @@
               }
             }
           };
+          let lastRightClick = 0;
+          li.addEventListener("contextmenu", evt => {
+            const now = Date.now();
+            if (now - lastRightClick < 400) {
+              evt.preventDefault();
+              showFolderColorPicker(i);
+            }
+            lastRightClick = now;
+          });
           // Delete folder button
           const delF = document.createElement('span');
           delF.className = 'delete-icon';
