@@ -9,4 +9,4 @@ when opening the page directly from the file system), a final fallback fetches
 
 ## Changing folder colors
 
-In the **Folders** list, you can pick a custom color for a folder by holding either **Command** (macOS) or **Control** (Windows/Linux) while double-clicking the folder name. You can also double right-click the folder name to open the color picker.
+Each folder entry shows a small color square before its name. Click that square to pick a custom color. The original shortcuts (holding **Command** or **Control** while double-clicking, or double right-clicking the name) still work as well.
