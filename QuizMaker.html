@@ -141,6 +141,17 @@
       padding: 16px 24px;
       font-size: 1.3rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+    }
+    #folderBadge {
+      display: none;
+      margin-right: 8px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #34495e;
+      color: #fff;
+      font-size: 1rem;
     }
     #controls {
       display: flex;
@@ -461,7 +472,7 @@
   </div>
 
   <div id="main">
-    <div id="header">QuizMaker</div>
+    <div id="header"><span id="folderBadge"></span><span id="headerTitle">QuizMaker</span></div>
     <div id="controls">
       <button id="editModeBtn">✏️ Edit Mode</button>
       <button id="quizModeBtn">📝 Quiz Question</button>
@@ -675,8 +686,12 @@
             document.addEventListener('mouseup', onMouseUp);
           };
           mark.style.fontSize = lbl.fontSize + 'px';
-          if (!lbl.w) lbl.w = mark.offsetWidth;
-          if (!lbl.h) lbl.h = mark.offsetHeight;
+          overlay.appendChild(mark);
+          if (!lbl.w) {
+            lbl.w = mark.offsetWidth;
+            lbl.h = mark.offsetHeight;
+            saveData();
+          }
           mark.style.width = lbl.w + 'px';
           mark.style.height = lbl.h + 'px';
           mark.addEventListener('mouseup', () => {
@@ -684,7 +699,6 @@
             lbl.h = mark.offsetHeight;
             saveData();
           });
-          overlay.appendChild(mark);
         });
         let svgOverlay = overlay.querySelector('svg');
         if (!svgOverlay) {
@@ -1058,6 +1072,18 @@
         updateProgressIndicator();
         saveProgress();
       }
+
+      function updateHeader(titleText = '') {
+        headerTitle.textContent = titleText;
+        if (currentFolder !== null) {
+          const f = data.folders[currentFolder];
+          folderBadge.textContent = f.name;
+          folderBadge.style.backgroundColor = f.color || '#34495e';
+          folderBadge.style.display = 'inline-block';
+        } else {
+          folderBadge.style.display = 'none';
+        }
+      }
       // ----- Load persistent data, with static fallback -----
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
@@ -1131,6 +1157,8 @@
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
+      const folderBadge = document.getElementById('folderBadge');
+      const headerTitle = document.getElementById('headerTitle');
       // Whitelist pixel sizes for Quill's size format
       const Size = Quill.import('formats/size');
       Size.whitelist = ['8px','10px','12px','14px','16px','18px','20px','24px','28px','32px'];
@@ -1265,6 +1293,8 @@
           enterEdit();
           loadSection();
         }
+      } else {
+        updateHeader('QuizMaker');
       }
 
       // --- Auto-resize editor textarea with content up to its max height ---
@@ -1329,6 +1359,7 @@
           });
           li.textContent=f.name;
           li.className=i===currentFolder?'selected':'';
+          li.style.borderLeft = '8px solid ' + (f.color || '#1abc9c');
           li.onclick = () => {
             currentFolder = i;
             lastSectionOrder = null; // reset any prior search/order when switching folders
@@ -1349,21 +1380,42 @@
                 editorArea.style.display = 'none';
                 quizArea.style.display = 'block';
                 quizContent.innerHTML = '<p style="color:#7f8c8d;font-style:italic;">No questions in this folder.</p>';
+                updateHeader('');
               }
             } else {
               // Otherwise, default to edit mode for that section
               enterEdit();
               if (currentSection !== null) {
                 loadSection();
+              } else {
+                updateHeader('');
               }
             }
           };
-          li.ondblclick=()=>{
-            const newName = prompt('Enter new folder name:', f.name);
-            if(newName && newName.trim()){
-              data.folders[i].name = newName.trim();
-              saveData();
-              renderFolders();
+          li.ondblclick = evt => {
+            if (evt.metaKey) {
+              const colorInput = document.createElement('input');
+              colorInput.type = 'color';
+              colorInput.value = f.color || '#1abc9c';
+              colorInput.style.position = 'fixed';
+              colorInput.style.left = '-1000px';
+              document.body.appendChild(colorInput);
+              colorInput.addEventListener('change', () => {
+                data.folders[i].color = colorInput.value;
+                saveData();
+                renderFolders();
+                updateHeader(headerTitle.textContent);
+                document.body.removeChild(colorInput);
+              });
+              colorInput.click();
+            } else {
+              const newName = prompt('Enter new folder name:', f.name);
+              if (newName && newName.trim()) {
+                data.folders[i].name = newName.trim();
+                saveData();
+                renderFolders();
+                updateHeader(headerTitle.textContent);
+              }
             }
           };
           // Delete folder button
@@ -1393,7 +1445,11 @@
               lastSectionOrder = null; // reset ordering after folder deletion
               renderSections(lastSectionOrder);
               enterEdit();
-              if (currentSection !== null) loadSection();
+              if (currentSection !== null) {
+                loadSection();
+              } else {
+                updateHeader('');
+              }
             }
           };
           li.appendChild(delF);
@@ -1559,7 +1615,15 @@
         renderSections(lastSectionOrder);
       };
 
-      addFolderBtn.onclick=async()=>{ let name=newFolderName.value.trim(); if(!name)return alert('Folder name cannot be empty'); data.folders.push({ name, sections: []}); newFolderName.value=''; await saveData(); renderFolders(); };
+      addFolderBtn.onclick = async () => {
+        let name = newFolderName.value.trim();
+        if (!name) return alert('Folder name cannot be empty');
+        data.folders.push({ name, color: '#1abc9c', sections: [] });
+        newFolderName.value = '';
+        await saveData();
+        renderFolders();
+        updateHeader(headerTitle.textContent);
+      };
       addFillBtn.onclick=async()=>{
         if(currentFolder===null)return alert('Select a folder first');
         const fillTitle = prompt('Enter question title:');
@@ -1709,7 +1773,7 @@
           const defaultTitle = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
           titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
         }
-        document.getElementById('header').textContent = titleText;
+        updateHeader(titleText);
         // Hide all main editors
         if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
@@ -2064,8 +2128,13 @@
               loadSection();
             });
             overlay.appendChild(mark);
-            mark.style.width = (lbl.w || mark.offsetWidth) + 'px';
-            mark.style.height = (lbl.h || mark.offsetHeight) + 'px';
+            if (!lbl.w) {
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              saveData();
+            }
+            mark.style.width = lbl.w + 'px';
+            mark.style.height = lbl.h + 'px';
             mark.style.fontSize = lbl.fontSize + 'px';
             mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
             mark.addEventListener('mouseup', () => {
@@ -3028,7 +3097,7 @@
         }
         // Compute title logic for all types (already done above)
         // Update the main header to match the quiz question's title
-        document.getElementById('header').textContent = titleText;
+        updateHeader(titleText);
         if (sec.type === 'acronym') {
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
