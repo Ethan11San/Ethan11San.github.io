@@ -1393,7 +1393,7 @@
             }
           };
           li.ondblclick = evt => {
-            if (evt.metaKey) {
+            if (evt.metaKey || evt.ctrlKey) {
               const colorInput = document.createElement('input');
               colorInput.type = 'color';
               colorInput.value = f.color || '#1abc9c';
