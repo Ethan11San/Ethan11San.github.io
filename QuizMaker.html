@@ -147,11 +147,12 @@
     #folderBadge {
       display: none;
       margin-right: 8px;
-      padding: 2px 6px;
+      padding: 4px 10px;
       border-radius: 4px;
       background: #34495e;
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.1rem;
+      font-weight: bold;
     }
     #controls {
       display: flex;
@@ -1073,7 +1074,25 @@
         saveProgress();
       }
 
-      function updateHeader(titleText = '') {
+      function updateHeader(titleText) {
+        if (titleText === undefined) {
+          if (currentFolder !== null && currentSection !== null) {
+            const sec = data.folders[currentFolder].sections[currentSection];
+            if (sec.type === 'acronym') {
+              titleText = sec.acronym;
+            } else if (sec.type === 'label') {
+              const raw = sec.rawText || '';
+              const def = raw.split('\n')[0].trim() || 'Label Question';
+              titleText = sec.title && sec.title.trim() ? sec.title : def;
+            } else {
+              const def = (sec.rawText && sec.rawText.split('\n')[0].trim()) || '(untitled)';
+              titleText = sec.title && sec.title.trim() ? sec.title : def;
+            }
+          } else {
+            titleText = headerTitle.textContent || 'QuizMaker';
+          }
+        }
+
         headerTitle.textContent = titleText;
         if (currentFolder !== null) {
           const f = data.folders[currentFolder];
@@ -1439,6 +1458,7 @@
             } else {
               currentSection = null;
             }
+            updateHeader();
             renderFolders();
             renderSections(lastSectionOrder);
             // If in quiz mode, handle empty folders
@@ -1563,6 +1583,7 @@
           else li.classList.remove('selected');
           li.onclick = () => {
             currentSection = i;
+            updateHeader();
             renderSections(lastSectionOrder);
             if (isQuizMode) {
               enterQuizQuestion();   // show quiz for this section
