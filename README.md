@@ -9,4 +9,4 @@ when opening the page directly from the file system), a final fallback fetches
 
 ## Changing folder colors
 
-Each folder entry shows a small color square before its name. Click that square to pick a custom color. The original shortcuts (holding **Command** or **Control** while double-clicking, or double right-clicking the name) still work as well.
+Right-click any folder name to choose a custom color. Double-clicking a folder name will prompt you to rename it.

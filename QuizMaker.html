@@ -103,15 +103,6 @@
     .nav li.selected {
       font-weight: bold;
     }
-    .folder-swatch {
-      display: inline-block;
-      width: 12px;
-      height: 12px;
-      border-radius: 2px;
-      margin-right: 6px;
-      vertical-align: middle;
-      cursor: pointer;
-    }
     .nav li.type-fill.selected {
       background: #1abc9c;
       color: #2c3e50;
@@ -1382,16 +1373,8 @@
               if (currentFolder === fromFolder || currentFolder === i) renderSections(lastSectionOrder);
             }
           });
-          const swatch = document.createElement('span');
-          swatch.className = 'folder-swatch';
-          swatch.style.background = f.color || '#1abc9c';
-          swatch.onclick = evt => {
-            evt.stopPropagation();
-            showFolderColorPicker(i);
-          };
           const nameSpan = document.createElement('span');
           nameSpan.textContent = f.name;
-          li.appendChild(swatch);
           li.appendChild(nameSpan);
           li.className=i===currentFolder?'selected':'';
           li.style.borderLeft = '8px solid ' + (f.color || '#1abc9c');
@@ -1427,28 +1410,18 @@
               }
             }
           };
-          li.ondblclick = evt => {
-            if (evt.metaKey || evt.ctrlKey) {
-              evt.preventDefault();
-              showFolderColorPicker(i);
-            } else {
-              const newName = prompt("Enter new folder name:", f.name);
-              if (newName && newName.trim()) {
-                data.folders[i].name = newName.trim();
-                saveData();
-                renderFolders();
-                updateHeader(headerTitle.textContent);
-              }
+          li.ondblclick = () => {
+            const newName = prompt("Enter new folder name:", f.name);
+            if (newName && newName.trim()) {
+              data.folders[i].name = newName.trim();
+              saveData();
+              renderFolders();
+              updateHeader(headerTitle.textContent);
             }
           };
-          let lastRightClick = 0;
           li.addEventListener("contextmenu", evt => {
-            const now = Date.now();
-            if (now - lastRightClick < 400) {
-              evt.preventDefault();
-              showFolderColorPicker(i);
-            }
-            lastRightClick = now;
+            evt.preventDefault();
+            showFolderColorPicker(i);
           });
           // Delete folder button
           const delF = document.createElement('span');
