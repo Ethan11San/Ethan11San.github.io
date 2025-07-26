@@ -1340,6 +1340,58 @@
           });
           colorInput.click();
         }
+
+        function showFolderEditDialog(idx) {
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.background = 'rgba(0,0,0,0.3)';
+          overlay.style.display = 'flex';
+          overlay.style.alignItems = 'center';
+          overlay.style.justifyContent = 'center';
+          overlay.style.zIndex = '1000';
+
+          const dialog = document.createElement('div');
+          dialog.style.background = '#fff';
+          dialog.style.padding = '16px';
+          dialog.style.borderRadius = '4px';
+          dialog.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+
+          dialog.innerHTML =
+            '<div style="margin-bottom:8px;">' +
+              '<label>Name: <input id="folderEditName" type="text" value="' +
+                data.folders[idx].name.replace(/"/g,'&quot;') + '"></label>' +
+            '</div>' +
+            '<div style="margin-bottom:8px;">' +
+              '<label>Color: <input id="folderEditColor" type="color" value="' +
+                (data.folders[idx].color || '#1abc9c') + '"></label>' +
+            '</div>' +
+            '<div style="text-align:right;">' +
+              '<button id="folderEditOk">OK</button> ' +
+              '<button id="folderEditCancel">Cancel</button>' +
+            '</div>';
+
+          overlay.appendChild(dialog);
+          document.body.appendChild(overlay);
+
+          function close() { document.body.removeChild(overlay); }
+
+          dialog.querySelector('#folderEditCancel').onclick = close;
+          dialog.querySelector('#folderEditOk').onclick = () => {
+            const name = dialog.querySelector('#folderEditName').value.trim();
+            if (name) {
+              data.folders[idx].name = name;
+              data.folders[idx].color = dialog.querySelector('#folderEditColor').value;
+              saveData();
+              renderFolders();
+              updateHeader(headerTitle.textContent);
+            }
+            close();
+          };
+        }
         foldersUL.innerHTML='';
         data.folders.forEach((f,i)=>{
           let li=document.createElement('li');
@@ -1411,13 +1463,7 @@
             }
           };
           li.ondblclick = () => {
-            const newName = prompt("Enter new folder name:", f.name);
-            if (newName && newName.trim()) {
-              data.folders[i].name = newName.trim();
-              saveData();
-              renderFolders();
-              updateHeader(headerTitle.textContent);
-            }
+            showFolderEditDialog(i);
           };
           li.addEventListener("contextmenu", evt => {
             evt.preventDefault();
