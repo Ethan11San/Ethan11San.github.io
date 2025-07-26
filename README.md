@@ -9,4 +9,4 @@ when opening the page directly from the file system), a final fallback fetches
 
 ## Changing folder colors
 
-Right-click any folder name to choose a custom color. Double-clicking a folder name will prompt you to rename it.
+Right-click any folder name to quickly choose a custom color. Double-clicking now opens a dialog where you can edit the folder's name and color together.
