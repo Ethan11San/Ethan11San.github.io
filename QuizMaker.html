@@ -436,10 +436,67 @@
       margin-left: 1.5em; /* indent bullet + text */
       padding-left: 0;    /* prevent double indent */
     }
+
+    /* ----- Mobile layout ----- */
+    body.mobile { flex-direction: column; }
+    body.mobile #sidebar { display: none; }
+    body.mobile #controls { display: none; }
+    body.mobile #main { flex: 1; }
+    #mobileStart { display: none; padding: 16px; width: 100%; }
+    #mobileStart input { width: 100%; padding: 8px; margin-bottom: 12px; }
+    #mobileFolderList, #mobileSearchResults { list-style: none; padding: 0; margin: 0; }
+    #mobileFolderList li, #mobileSearchResults li {
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      cursor: pointer;
+    }
+    #mobileRandomBtn {
+      margin-top: 12px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      background: #3498db;
+      color: #fff;
+      font-weight: 500;
+    }
+    #folderSelectOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #folderSelectOverlay .content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+    }
+    body.mobile.quiz-active #mobileStart { display: none; }
+    body.mobile.quiz-active #main { display: flex; }
+    body.mobile:not(.quiz-active) #main { display: none; }
+    body.mobile:not(.quiz-active) #mobileStart { display: block; }
   </style>
 </head>
 <body>
 
+  <div id="mobileStart">
+    <input type="text" id="mobileSearch" placeholder="Search questions...">
+    <ul id="mobileFolderList"></ul>
+    <ul id="mobileSearchResults" style="display:none;"></ul>
+    <button id="mobileRandomBtn">Random Quiz</button>
+  </div>
+  <div id="folderSelectOverlay">
+    <div class="content">
+      <h3>Select folders</h3>
+      <div id="folderCheckboxes"></div>
+      <button id="startMobileRandom">Start Quiz</button>
+    </div>
+  </div>
 
   <div id="sidebar" style="display:flex; flex-direction:column; height:100vh;">
     <h3>Folders</h3>
@@ -1032,6 +1089,8 @@
       let lastSectionOrder = null;
       // Track progress and random order per folder
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
+      let multiFolderMode = false;
+      let multiProgress = { completed: new Set(), total: 0 };
       // Progress is kept only for this session (no localStorage)
 
       function saveProgress() {
@@ -1042,7 +1101,7 @@
         const cont = document.getElementById('progressStatus');
         const text = document.getElementById('progressText');
         const bar  = document.getElementById('progressBar');
-        const prog = quizProgress[currentFolder];
+        const prog = multiFolderMode ? multiProgress : quizProgress[currentFolder];
         if (!prog || !isQuizMode || quizOrder.length <= 1) {
           cont.style.display = 'none';
           return;
@@ -1053,6 +1112,109 @@
         bar.style.width = percent + '%';
       }
 
+      function isMobileDevice() {
+        return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      }
+
+      function setupMobileUI() {
+        buildMobileFolderList();
+        document.getElementById('mobileSearch').addEventListener('input', handleMobileSearch);
+        document.getElementById('mobileRandomBtn').addEventListener('click', showFolderSelectOverlay);
+      }
+
+      function buildMobileFolderList() {
+        const list = document.getElementById('mobileFolderList');
+        list.innerHTML = '';
+        data.folders.forEach((f, i) => {
+          const li = document.createElement('li');
+          li.textContent = f.name;
+          li.onclick = () => {
+            currentFolder = i;
+            multiFolderMode = false;
+            enterRandomQuiz();
+            startMobileQuizScreen();
+          };
+          list.appendChild(li);
+        });
+      }
+
+      function handleMobileSearch(e) {
+        const q = e.target.value.toLowerCase();
+        const folderList = document.getElementById('mobileFolderList');
+        const results = document.getElementById('mobileSearchResults');
+        results.innerHTML = '';
+        if (!q) {
+          folderList.style.display = 'block';
+          results.style.display = 'none';
+          return;
+        }
+        folderList.style.display = 'none';
+        results.style.display = 'block';
+        data.folders.forEach((f, fi) => {
+          f.sections.forEach((s, si) => {
+            const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
+            if (title.toLowerCase().includes(q)) {
+              const li = document.createElement('li');
+              li.textContent = `${f.name}: ${title}`;
+              li.onclick = () => {
+                currentFolder = fi;
+                currentSection = si;
+                multiFolderMode = false;
+                enterQuizQuestion();
+                startMobileQuizScreen();
+              };
+              results.appendChild(li);
+            }
+          });
+        });
+      }
+
+      function showFolderSelectOverlay() {
+        const overlay = document.getElementById('folderSelectOverlay');
+        const box = document.getElementById('folderCheckboxes');
+        box.innerHTML = '';
+        data.folders.forEach((f, i) => {
+          const label = document.createElement('label');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = i;
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(' ' + f.name));
+          const div = document.createElement('div');
+          div.appendChild(label);
+          box.appendChild(div);
+        });
+        overlay.style.display = 'flex';
+        document.getElementById('startMobileRandom').onclick = () => {
+          const selected = Array.from(box.querySelectorAll('input:checked')).map(c => parseInt(c.value));
+          overlay.style.display = 'none';
+          enterRandomQuizAcrossFolders(selected);
+        };
+        overlay.onclick = e => { if (e.target === overlay) overlay.style.display = 'none'; };
+      }
+
+      function enterRandomQuizAcrossFolders(folders) {
+        if (!folders.length) return;
+        multiFolderMode = true;
+        isQuizMode = true;
+        const combined = [];
+        folders.forEach(f => {
+          data.folders[f].sections.forEach((_, i) => combined.push({ folder: f, section: i }));
+        });
+        quizOrder = combined.sort(() => Math.random() - 0.5);
+        quizPos = 0;
+        multiProgress = { completed: new Set(), total: quizOrder.length };
+        editorArea.style.display = 'none';
+        quizArea.style.display = 'block';
+        startMobileQuizScreen();
+        showQuiz();
+        updateProgressIndicator();
+      }
+
+      function startMobileQuizScreen() {
+        document.body.classList.add('quiz-active');
+      }
+
       function questionCompleted() {
         const inputs = Array.from(document.querySelectorAll('#quizContent input[type="text"]'));
         if (!inputs.length) return true;
@@ -1060,18 +1222,24 @@
       }
 
       function markQuestionCompleted() {
-        let prog = quizProgress[currentFolder];
-        if (!prog) {
-          const total = data.folders[currentFolder].sections.length;
-          prog = quizProgress[currentFolder] = { completed: new Set(), total };
+        if (multiFolderMode) {
+          if (!multiProgress.completed.has(quizPos)) {
+            multiProgress.completed.add(quizPos);
+          }
         } else {
-          prog.total = data.folders[currentFolder].sections.length;
-        }
-        if (!prog.completed.has(currentSection)) {
-          prog.completed.add(currentSection);
+          let prog = quizProgress[currentFolder];
+          if (!prog) {
+            const total = data.folders[currentFolder].sections.length;
+            prog = quizProgress[currentFolder] = { completed: new Set(), total };
+          } else {
+            prog.total = data.folders[currentFolder].sections.length;
+          }
+          if (!prog.completed.has(currentSection)) {
+            prog.completed.add(currentSection);
+          }
+          saveProgress();
         }
         updateProgressIndicator();
-        saveProgress();
       }
 
       function updateHeader(titleText) {
@@ -1305,7 +1473,7 @@
       }
       renderFolders();
       renderSections(lastSectionOrder);
-      if (currentSection !== null) {
+      if (currentSection !== null && !isMobileDevice()) {
         if (isQuizMode) {
           enterQuizQuestion();
         } else {
@@ -1314,6 +1482,10 @@
         }
       } else {
         updateHeader('QuizMaker');
+      }
+      if (isMobileDevice()) {
+        document.body.classList.add('mobile');
+        setupMobileUI();
       }
 
       // --- Auto-resize editor textarea with content up to its max height ---
@@ -2905,6 +3077,7 @@
       }
       function enterQuiz(){
           if(!isQuizMode) syncCurrentSection();
+        multiFolderMode = false;
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -2918,6 +3091,7 @@
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
           if(!isQuizMode) syncCurrentSection();
+        multiFolderMode = false;
         isQuizMode = true;
         if (currentFolder === null) {
           alert('Select a folder first');
@@ -2959,6 +3133,7 @@
       }
 
       function enterQuizQuestion(){
+        multiFolderMode = false;
         if(!ensureSelection()) return;
         editorArea.style.display='none';
         quizArea.style.display='block';
@@ -3045,12 +3220,20 @@
       }
 
         function showQuiz() {
-          // Advance to the correct section
-          currentSection = quizOrder[quizPos];
-          const prog = quizProgress[currentFolder];
-          if (prog && quizOrder.length > 1) {
-            prog.pos = quizPos;
-            saveProgress();
+          // Advance to the correct section and folder
+          let entry = quizOrder[quizPos];
+          if (typeof entry === 'object') {
+            currentFolder = entry.folder;
+            currentSection = entry.section;
+          } else {
+            currentSection = entry;
+          }
+          if (!multiFolderMode) {
+            const prog = quizProgress[currentFolder];
+            if (prog && quizOrder.length > 1) {
+              prog.pos = quizPos;
+              saveProgress();
+            }
           }
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
@@ -3625,58 +3808,64 @@
           }
         });
       }
-      nextBtn.onclick = () => {
-        const secs = data.folders[currentFolder].sections;
-        const total = secs.length;
-        if (quizOrder.length > 1 && questionCompleted()) {
-          markQuestionCompleted();
-          const prog = quizProgress[currentFolder];
-          if (prog && prog.completed.size === prog.total) {
-            alert('🎉 Section complete!');
+        nextBtn.onclick = () => {
+          const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
+          const total = multiFolderMode ? null : secs.length;
+          if (quizOrder.length > 1 && questionCompleted()) {
+            markQuestionCompleted();
+            if (!multiFolderMode) {
+              const prog = quizProgress[currentFolder];
+              if (prog && prog.completed.size === prog.total) {
+                alert('🎉 Section complete!');
+              }
+            } else if (multiProgress.completed.size === multiProgress.total) {
+              alert('🎉 Quiz complete!');
+            }
           }
-        }
-        // If in Quiz All mode sequence, advance within that sequence first
-        if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
-          quizPos++;
-          const prog = quizProgress[currentFolder];
-          if (prog) prog.pos = quizPos;
-          showQuiz();
-          updateProgressIndicator();
-          return;
-        }
-        // Otherwise, move to the next section by index
-        if (currentSection < total - 1) {
-          currentSection++;
-          renderSections();
-          enterQuizQuestion();
-        } else {
-          alert('🎉 All done!');
-          enterEdit();
-        }
-        updateProgressIndicator();
-      };
-      backBtn.onclick = () => {
-        const secs = data.folders[currentFolder].sections;
-        if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
-          quizPos--;
-          const prog = quizProgress[currentFolder];
-          if (prog) prog.pos = quizPos;
-          showQuiz();
-          updateProgressIndicator();
-          return;
-        }
-        if (currentSection > 0) {
-          currentSection--;
-          renderSections();
-          if (isQuizMode) {
+          if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
+            quizPos++;
+            if (!multiFolderMode) {
+              const prog = quizProgress[currentFolder];
+              if (prog) prog.pos = quizPos;
+            }
+            showQuiz();
+            updateProgressIndicator();
+            return;
+          }
+          if (!multiFolderMode && currentSection < total - 1) {
+            currentSection++;
+            renderSections();
             enterQuizQuestion();
-          } else {
-            loadSection();
-            previewSection();
+          } else if (!multiFolderMode) {
+            alert('🎉 All done!');
+            enterEdit();
           }
-        }
-        updateProgressIndicator();
-      };
+          updateProgressIndicator();
+        };
+        backBtn.onclick = () => {
+          const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
+          if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
+            quizPos--;
+            if (!multiFolderMode) {
+              const prog = quizProgress[currentFolder];
+              if (prog) prog.pos = quizPos;
+            }
+            showQuiz();
+            updateProgressIndicator();
+            return;
+          }
+          if (!multiFolderMode && currentSection > 0) {
+            currentSection--;
+            renderSections();
+            if (isQuizMode) {
+              enterQuizQuestion();
+            } else {
+              loadSection();
+              previewSection();
+            }
+          }
+          updateProgressIndicator();
+        };
       // --- Hint button logic ---
       const hintBtn = document.getElementById('hintBtn');
       hintBtn.onclick = () => {
