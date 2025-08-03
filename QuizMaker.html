@@ -511,6 +511,11 @@
     body.mobile.quiz-active #main { display: flex; }
     body.mobile:not(.quiz-active) #main { display: none; }
     body.mobile:not(.quiz-active) #mobileStart { display: block; }
+    /* Ensure quiz images scale to fit smaller screens */
+    #quizContent img {
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body>
@@ -615,6 +620,7 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
   <script>
     (async () => {
       try {
@@ -4006,18 +4012,36 @@
         img.style.maxWidth = '200px';
         img.style.maxHeight = '200px';
         img.dataset.zoomed = '0';
-        img.addEventListener('dblclick', evt2 => {
-          evt2.stopPropagation();
-          if (img.dataset.zoomed === '1') {
-            img.style.maxWidth = '200px';
-            img.style.maxHeight = '200px';
-            img.dataset.zoomed = '0';
-          } else {
-            img.style.maxWidth = '80vw';
-            img.style.maxHeight = '80vh';
-            img.dataset.zoomed = '1';
-          }
-        });
+        const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        if (isTouch) {
+          img.addEventListener('click', evt2 => {
+            evt2.stopPropagation();
+            if (img.dataset.zoomed === '1') {
+              img.style.maxWidth = '200px';
+              img.style.maxHeight = '200px';
+              img.dataset.zoomed = '0';
+            } else {
+              img.style.maxWidth = '80vw';
+              img.style.maxHeight = '80vh';
+              img.dataset.zoomed = '1';
+            }
+          });
+          img.style.touchAction = 'none';
+          Panzoom(img, { maxScale: 5, minScale: 1 });
+        } else {
+          img.addEventListener('dblclick', evt2 => {
+            evt2.stopPropagation();
+            if (img.dataset.zoomed === '1') {
+              img.style.maxWidth = '200px';
+              img.style.maxHeight = '200px';
+              img.dataset.zoomed = '0';
+            } else {
+              img.style.maxWidth = '80vw';
+              img.style.maxHeight = '80vh';
+              img.dataset.zoomed = '1';
+            }
+          });
+        }
         popup.appendChild(img);
         popup.addEventListener('click', e => e.stopPropagation());
         document.body.appendChild(popup);
