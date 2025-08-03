@@ -666,6 +666,28 @@
         positionExtras(cont);
       }
 
+      function scaleLabels(container, baseWidth, baseHeight) {
+        const img = container.querySelector('img');
+        if (!img || !baseWidth || !baseHeight) return;
+        const scaleX = img.clientWidth / baseWidth;
+        const scaleY = img.clientHeight / baseHeight;
+        container.querySelectorAll('[data-orig-x]').forEach(el => {
+          const x = parseFloat(el.dataset.origX);
+          const y = parseFloat(el.dataset.origY);
+          el.style.left = (x * scaleX) + 'px';
+          el.style.top  = (y * scaleY) + 'px';
+          if (el.dataset.origFont) {
+            el.style.fontSize = (parseFloat(el.dataset.origFont) * scaleY) + 'px';
+          }
+          if (el.dataset.origW) {
+            el.style.width = (parseFloat(el.dataset.origW) * scaleX) + 'px';
+          }
+          if (el.dataset.origH) {
+            el.style.height = (parseFloat(el.dataset.origH) * scaleY) + 'px';
+          }
+        });
+      }
+
       function setupExtraImageInteractions(img, overlay, sec, ex) {
         overlay.ondblclick = evt => {
           if (evt.metaKey) return;
@@ -1011,17 +1033,12 @@
           img.src = ex.image;
           img.style.display = 'block';
           img.style.userSelect = 'none';
+          let baseW = 0, baseH = 0;
           if (ex.imgWidth && ex.imgHeight) {
             wrap.style.width = ex.imgWidth + 'px';
             wrap.style.height = ex.imgHeight + 'px';
             img.style.width = '100%';
             img.style.height = 'auto';
-          } else {
-            img.onload = () => {
-              wrap.style.width = img.naturalWidth + 'px';
-              wrap.style.height = img.naturalHeight + 'px';
-              positionExtras(container);
-            };
           }
           wrap.appendChild(img);
           const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -1053,6 +1070,21 @@
               svg.appendChild(poly);
             });
           }
+          const scaleThis = () => {
+            scaleLabels(wrap, baseW, baseH);
+            positionExtras(container);
+          };
+          img.onload = () => {
+            baseW = ex.imgWidth || img.naturalWidth;
+            baseH = ex.imgHeight || img.naturalHeight;
+            if (!ex.imgWidth || !ex.imgHeight) {
+              wrap.style.width = img.naturalWidth + 'px';
+              wrap.style.height = img.naturalHeight + 'px';
+            }
+            svg.setAttribute('viewBox', `0 0 ${baseW} ${baseH}`);
+            scaleThis();
+            window.addEventListener('resize', scaleThis);
+          };
           ex.labels.forEach(lbl => {
             const inp = document.createElement('input');
             inp.classList.add('blank-input');
@@ -1080,9 +1112,15 @@
             meas.textContent = lbl.text.toUpperCase();
             document.body.appendChild(meas);
             const calcW = lbl.w ? lbl.w : (meas.offsetWidth + 4);
-            inp.style.width = calcW + 'px';
             document.body.removeChild(meas);
-            inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
+            const calcH = lbl.h || inp.offsetHeight;
+            inp.style.width = calcW + 'px';
+            inp.style.height = calcH + 'px';
+            inp.dataset.origX = lbl.x;
+            inp.dataset.origY = lbl.y;
+            inp.dataset.origFont = lbl.fontSize;
+            inp.dataset.origW = calcW;
+            inp.dataset.origH = calcH;
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
               const ok = val === lbl.text.trim().toLowerCase();
@@ -1098,10 +1136,18 @@
                 txt.style.border = '1px solid #27ae60';
                 txt.style.padding = '0 2px';
                 txt.style.borderRadius = '2px';
-                if (lbl.w) txt.style.width = lbl.w + 'px';
-                if (lbl.h) txt.style.height = lbl.h + 'px';
+                const w = parseFloat(inp.dataset.origW);
+                const h = parseFloat(inp.dataset.origH);
+                txt.style.width = w + 'px';
+                txt.style.height = h + 'px';
+                txt.dataset.origX = lbl.x;
+                txt.dataset.origY = lbl.y;
+                txt.dataset.origFont = lbl.fontSize;
+                txt.dataset.origW = w;
+                txt.dataset.origH = h;
                 wrap.appendChild(txt);
                 inp.remove();
+                scaleLabels(wrap, baseW, baseH);
               } else {
                 inp.classList.remove('correct');
                 inp.classList.add('incorrect');
@@ -3488,7 +3534,39 @@
             img.style.maxWidth = '100%';
           }
           wrapper.appendChild(img);
-          img.onload = () => positionExtras(wrapper);
+          let baseWidth = 0, baseHeight = 0;
+          img.onload = () => {
+            baseWidth = sec.imgWidth || img.naturalWidth;
+            baseHeight = sec.imgHeight || img.naturalHeight;
+            svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
+            positionExtras(wrapper);
+            scaleLabels(wrapper, baseWidth, baseHeight);
+            if (sec.extraImages) {
+              const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
+              wraps.forEach((w, idx) => {
+                const ex = sec.extraImages[idx];
+                const exImg = w.querySelector('img');
+                const bw = ex.imgWidth || exImg.naturalWidth;
+                const bh = ex.imgHeight || exImg.naturalHeight;
+                scaleLabels(w, bw, bh);
+              });
+            }
+          };
+          window.addEventListener('resize', () => {
+            if (!baseWidth || !baseHeight) return;
+            scaleLabels(wrapper, baseWidth, baseHeight);
+            if (sec.extraImages) {
+              const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
+              wraps.forEach((w, idx) => {
+                const ex = sec.extraImages[idx];
+                const exImg = w.querySelector('img');
+                const bw = ex.imgWidth || exImg.naturalWidth;
+                const bh = ex.imgHeight || exImg.naturalHeight;
+                scaleLabels(w, bw, bh);
+              });
+            }
+            positionExtras(wrapper);
+          });
 
           // Create SVG overlay for arrows
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -3566,9 +3644,15 @@
             measSpan.textContent = lbl.text.toUpperCase();
             document.body.appendChild(measSpan);
             const calcW = lbl.w ? lbl.w : (measSpan.offsetWidth + 4);
-            inp.style.width  = calcW + 'px';
             document.body.removeChild(measSpan);
-            inp.style.height = (lbl.h || inp.offsetHeight) + 'px';
+            const calcH = lbl.h || inp.offsetHeight;
+            inp.style.width  = calcW + 'px';
+            inp.style.height = calcH + 'px';
+            inp.dataset.origX = lbl.x;
+            inp.dataset.origY = lbl.y;
+            inp.dataset.origFont = lbl.fontSize;
+            inp.dataset.origW = calcW;
+            inp.dataset.origH = calcH;
             labelInputs[lbl.text] = inp;
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
@@ -3587,12 +3671,20 @@
                 txt.style.border     = '1px solid #27ae60';
                 txt.style.padding    = '0 2px';
                 txt.style.borderRadius = '2px';
-                if (lbl.w) txt.style.width  = lbl.w + 'px';
-                if (lbl.h) txt.style.height = lbl.h + 'px';
+                const w = parseFloat(inp.dataset.origW);
+                const h = parseFloat(inp.dataset.origH);
+                txt.style.width  = w + 'px';
+                txt.style.height = h + 'px';
+                txt.dataset.origX = lbl.x;
+                txt.dataset.origY = lbl.y;
+                txt.dataset.origFont = lbl.fontSize;
+                txt.dataset.origW = w;
+                txt.dataset.origH = h;
                 txt.style.display = 'inline-block';
                 txt.addEventListener('contextmenu', deleteLabel);
                 wrapper.appendChild(txt);
                 inp.remove();               // get rid of the input box
+                scaleLabels(wrapper, baseWidth, baseHeight);
                 // Auto‑focus the first blank of this label's definition or next label
                 let entry = titleMap[lbl.text];
                 if (entry && entry.para && entry.para._inputs && entry.para._inputs.length) {
@@ -3668,6 +3760,11 @@
               badge.style.alignItems = 'center';
               badge.style.justifyContent = 'center';
               badge.style.pointerEvents = 'none';
+              badge.dataset.origX = lbl.x - 18;
+              badge.dataset.origY = lbl.y;
+              badge.dataset.origW = 16;
+              badge.dataset.origH = 16;
+              badge.dataset.origFont = 10;
               wrapper.appendChild(badge);
             }
           });
