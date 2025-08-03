@@ -1102,23 +1102,27 @@
             inp.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
             inp.style.fontSize = lbl.fontSize + 'px';
             inp.style.color = '#000';
-            inp.style.padding = '0';
+            inp.style.padding = '0 2px';
             inp.style.boxSizing = 'border-box';
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
             inp.addEventListener('focus', () => { lastHintTarget = inp; });
             const meas = document.createElement('span');
-            meas.style.visibility = 'hidden';
-            meas.style.position = 'absolute';
-            meas.style.whiteSpace = 'pre';
-            meas.style.fontFamily = inp.style.fontFamily;
-            meas.style.fontSize = inp.style.fontSize;
-            meas.textContent = lbl.text.toUpperCase();
+            Object.assign(meas.style, {
+              visibility: 'hidden',
+              position: 'absolute',
+              whiteSpace: 'pre',
+              fontFamily: inp.style.fontFamily,
+              fontSize: inp.style.fontSize
+            });
             document.body.appendChild(meas);
-            const calcW = lbl.w ? lbl.w : (meas.offsetWidth + 4);
-            document.body.removeChild(meas);
+            const getWidth = txt => {
+              meas.textContent = txt;
+              return meas.offsetWidth + 8;
+            };
+            const calcW = lbl.w ? lbl.w : getWidth(lbl.text);
             const calcH = lbl.h || inp.offsetHeight;
-           inp.style.width = calcW + 'px';
+            inp.style.width = calcW + 'px';
             inp.style.height = calcH + 'px';
             inp.style.lineHeight = calcH + 'px';
             inp.dataset.origLineHeight = calcH;
@@ -1127,7 +1131,8 @@
             inp.dataset.origFont = lbl.fontSize;
             inp.dataset.origW = calcW;
             inp.dataset.origH = calcH;
-            inp.oninput = () => {
+            inp.addEventListener('input', () => {
+              inp.style.width = getWidth(inp.value);
               const val = inp.value.trim().toLowerCase();
               const ok = val === lbl.text.trim().toLowerCase();
               if (ok) {
@@ -1163,7 +1168,8 @@
                 inp.classList.add('incorrect');
                 inp.style.borderColor = '#c0392b';
               }
-            };
+            });
+            inp.addEventListener('blur', () => meas.remove());
             wrap.appendChild(inp);
           });
           container.appendChild(wrap);
