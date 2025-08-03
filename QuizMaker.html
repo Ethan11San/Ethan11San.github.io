@@ -451,17 +451,28 @@
     #mobileFolderList, #mobileSearchResults { list-style: none; padding: 0; margin: 0; }
     #mobileFolderList > li { padding: 0; }
     #mobileFolderList > li > div.folder-header {
+      position: relative;
       display: flex;
       align-items: center;
-      gap: 8px;
       padding: 12px;
       border-bottom: 1px solid #ccc;
       cursor: pointer;
-      justify-content: flex-start;
     }
-    #mobileFolderList > li > div.folder-header input.folder-select,
-    #mobileFolderList > li > div.folder-header span {
-      flex: 0 0 auto;
+    #mobileFolderList.random-select > li > div.folder-header {
+      padding-left: 40px;
+    }
+    #mobileFolderList > li > div.folder-header input.folder-select {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      margin: 0;
+      display: none;
+    }
+    #mobileFolderList.random-select > li > div.folder-header input.folder-select {
+      display: block;
     }
     #mobileSearchResults li {
       padding: 12px;
@@ -475,7 +486,6 @@
       cursor: pointer;
       background: #f9f9f9;
     }
-    #mobileFolderList input.folder-select { margin-right: 0; }
     #mobileRandomBtn {
       margin-top: 12px;
       padding: 10px;
@@ -1152,7 +1162,6 @@
           cb.type = 'checkbox';
           cb.className = 'folder-select';
           cb.dataset.index = i;
-          cb.style.display = 'none';
           const titleSpan = document.createElement('span');
           titleSpan.textContent = f.name;
           header.appendChild(cb);
@@ -1188,14 +1197,13 @@
 
       function setRandomSelectMode(on) {
         randomSelectMode = on;
-        const checkboxes = document.querySelectorAll('#mobileFolderList .folder-select');
-        checkboxes.forEach(cb => {
-          cb.style.display = on ? 'inline-block' : 'none';
-          cb.checked = false;
-        });
+        const list = document.getElementById('mobileFolderList');
+        list.classList.toggle('random-select', on);
+        const checkboxes = list.querySelectorAll('.folder-select');
+        checkboxes.forEach(cb => { cb.checked = false; });
         mobileRandomGo.style.display = on ? 'block' : 'none';
         if (on) {
-          document.getElementById('mobileFolderList').style.display = 'block';
+          list.style.display = 'block';
           document.getElementById('mobileSearchResults').style.display = 'none';
         }
       }
