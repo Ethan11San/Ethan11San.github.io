@@ -602,6 +602,7 @@
       <div style="margin-top:12px;">
         <button id="previewBtn">Preview Words</button>
         <button id="saveSectionBtn">Save Section</button>
+        <button id="copyLocalBtn">Copy Local Changes</button>
         <button id="addPictureBtn" style="display:none;">Add Picture</button>
       </div>
       <div id="preview"></div>
@@ -1435,6 +1436,7 @@
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
       let staticMode = false;
+      let unsyncedChanges = false;
       try {
         // Attempt API fetch
         const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
@@ -1462,26 +1464,29 @@
           }
         }
       }
-      // Initialize currentFolder/Section based on loaded data...
-      function saveData() {
-        if (staticMode) {
-          console.warn('Static mode: changes will not be saved to server.');
-          return;
+
+      const stored = localStorage.getItem('quizDataLocal');
+      if (stored) {
+        try {
+          if (stored === JSON.stringify(data)) {
+            localStorage.removeItem('quizDataLocal');
+          } else {
+            data = JSON.parse(stored);
+            unsyncedChanges = true;
+          }
+        } catch (e) {
+          console.warn('Invalid local quiz data, ignoring', e);
+          localStorage.removeItem('quizDataLocal');
         }
-        fetch('http://localhost:5001/api/quizData', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        })
-        .then(resp => {
-          if (!resp.ok) throw new Error('Status ' + resp.status);
-        })
-        .catch(err => {
-          console.error('Error saving quiz data:', err);
-          alert('Error saving quiz data: ' + err.message);
-        });
       }
 
+      function saveData() {
+        localStorage.setItem('quizDataLocal', JSON.stringify(data));
+        unsyncedChanges = true;
+        if (copyLocalBtn) copyLocalBtn.disabled = false;
+      }
+
+      let copyLocalBtn;
       let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
@@ -1498,13 +1503,28 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
-            saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
+            saveSectionBtn = document.getElementById('saveSectionBtn'), copyLocalBtn = document.getElementById('copyLocalBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
+
+      copyLocalBtn.disabled = !unsyncedChanges;
+      copyLocalBtn.onclick = () => {
+        const storedData = localStorage.getItem('quizDataLocal');
+        if (!storedData) {
+          alert('No local changes to copy.');
+          return;
+        }
+        navigator.clipboard.writeText(storedData)
+          .then(() => alert('Local changes copied to clipboard.'))
+          .catch(err => {
+            console.error('Clipboard error:', err);
+            alert('Failed to copy: ' + err.message);
+          });
+      };
 
       homeBtn.onclick = () => {
         document.body.classList.remove('quiz-active');
