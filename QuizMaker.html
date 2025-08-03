@@ -3648,6 +3648,8 @@
             const calcH = lbl.h || inp.offsetHeight;
             inp.style.width  = calcW + 'px';
             inp.style.height = calcH + 'px';
+            // ensure typed text sits nicely within the box
+            inp.style.lineHeight = calcH + 'px';
             inp.dataset.origX = lbl.x;
             inp.dataset.origY = lbl.y;
             inp.dataset.origFont = lbl.fontSize;
@@ -3675,6 +3677,9 @@
                 const h = parseFloat(inp.dataset.origH);
                 txt.style.width  = w + 'px';
                 txt.style.height = h + 'px';
+                txt.style.whiteSpace = 'nowrap';
+                txt.style.overflow   = 'hidden';
+                txt.style.lineHeight = h + 'px';
                 txt.dataset.origX = lbl.x;
                 txt.dataset.origY = lbl.y;
                 txt.dataset.origFont = lbl.fontSize;
