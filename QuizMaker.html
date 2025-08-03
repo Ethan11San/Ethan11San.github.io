@@ -679,14 +679,34 @@
           if (el.dataset.origFont) {
             el.style.fontSize = (parseFloat(el.dataset.origFont) * scaleY) + 'px';
           }
-          if (el.dataset.origW) {
-            el.style.width = (parseFloat(el.dataset.origW) * scaleX) + 'px';
-          }
           if (el.dataset.origH) {
             el.style.height = (parseFloat(el.dataset.origH) * scaleY) + 'px';
           }
           if (el.dataset.origLineHeight) {
             el.style.lineHeight = (parseFloat(el.dataset.origLineHeight) * scaleY) + 'px';
+          }
+          if (el.dataset.origW) {
+            const scaledW = parseFloat(el.dataset.origW) * scaleX;
+            let needed = scaledW;
+            const txt = el.value || el.textContent || '';
+            if (txt) {
+              const meas = document.createElement('span');
+              Object.assign(meas.style, {
+                visibility: 'hidden',
+                position: 'absolute',
+                whiteSpace: 'pre',
+                fontFamily: el.style.fontFamily,
+                fontSize: el.style.fontSize,
+                left: '-9999px',
+                top: '-9999px',
+                pointerEvents: 'none'
+              });
+              meas.textContent = txt;
+              document.body.appendChild(meas);
+              needed = Math.max(needed, meas.offsetWidth + 12);
+              document.body.removeChild(meas);
+            }
+            el.style.width = needed + 'px';
           }
         });
       }
@@ -1126,7 +1146,8 @@
             document.body.appendChild(meas);
             const getWidth = txt => {
               meas.textContent = txt;
-              return Math.max(meas.offsetWidth + 8, 20);
+              // extra padding so caret doesn't overlap last character
+              return Math.max(meas.offsetWidth + 12, 24);
             };
             const calcW = lbl.w ? lbl.w : getWidth(lbl.text);
             const calcH = lbl.h || inp.offsetHeight;
