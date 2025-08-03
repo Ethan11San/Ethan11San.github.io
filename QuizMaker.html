@@ -449,11 +449,21 @@
     #mobileStart { display: none; padding: 16px; width: 100%; }
     #mobileStart input { width: 100%; padding: 8px; margin-bottom: 12px; }
     #mobileFolderList, #mobileSearchResults { list-style: none; padding: 0; margin: 0; }
-    #mobileFolderList li, #mobileSearchResults li {
+    #mobileFolderList > li { padding: 0; }
+    #mobileFolderList > li > div.folder-header,
+    #mobileSearchResults li {
       padding: 12px;
       border-bottom: 1px solid #ccc;
       cursor: pointer;
     }
+    #mobileFolderList li ul { list-style: none; padding-left: 20px; }
+    #mobileFolderList li ul li {
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      background: #f9f9f9;
+    }
+    #mobileFolderList input.folder-select { margin-right: 8px; }
     #mobileRandomBtn {
       margin-top: 12px;
       padding: 10px;
@@ -464,21 +474,16 @@
       color: #fff;
       font-weight: 500;
     }
-    #folderSelectOverlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
+    #mobileRandomGo {
+      margin-top: 12px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      background: #27ae60;
+      color: #fff;
+      font-weight: 500;
       display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    #folderSelectOverlay .content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 90%;
-      max-height: 90%;
-      overflow: auto;
     }
     body.mobile.quiz-active #mobileStart { display: none; }
     body.mobile.quiz-active #main { display: flex; }
@@ -493,13 +498,7 @@
     <ul id="mobileFolderList"></ul>
     <ul id="mobileSearchResults" style="display:none;"></ul>
     <button id="mobileRandomBtn">Random Quiz</button>
-  </div>
-  <div id="folderSelectOverlay">
-    <div class="content">
-      <h3>Select folders</h3>
-      <div id="folderCheckboxes"></div>
-      <button id="startMobileRandom">Start Quiz</button>
-    </div>
+    <button id="mobileRandomGo">Go</button>
   </div>
 
   <div id="sidebar">
@@ -590,6 +589,7 @@
       <button id="backBtn">⬅️ Back</button>
       <button id="nextBtn">Next Section ➡️</button>
       <button id="hintBtn">Hint</button>
+      <button id="homeBtn" style="display:none;">Home</button>
     </div>
   </div>
 
@@ -1095,6 +1095,7 @@
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
       let multiFolderMode = false;
       let multiProgress = { completed: new Set(), total: 0 };
+      let randomSelectMode = false;
       // Progress is kept only for this session (no localStorage)
 
       function saveProgress() {
@@ -1123,7 +1124,8 @@
       function setupMobileUI() {
         buildMobileFolderList();
         document.getElementById('mobileSearch').addEventListener('input', handleMobileSearch);
-        document.getElementById('mobileRandomBtn').addEventListener('click', showFolderSelectOverlay);
+        mobileRandomBtn.addEventListener('click', () => toggleRandomSelectMode());
+        mobileRandomGo.addEventListener('click', startSelectedRandomQuiz);
       }
 
       function buildMobileFolderList() {
@@ -1131,15 +1133,68 @@
         list.innerHTML = '';
         data.folders.forEach((f, i) => {
           const li = document.createElement('li');
-          li.textContent = f.name;
-          li.onclick = () => {
-            currentFolder = i;
-            multiFolderMode = false;
-            enterRandomQuiz();
-            startMobileQuizScreen();
+          const header = document.createElement('div');
+          header.className = 'folder-header';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'folder-select';
+          cb.dataset.index = i;
+          cb.style.display = 'none';
+          header.appendChild(cb);
+          header.appendChild(document.createTextNode(f.name));
+          const secList = document.createElement('ul');
+          secList.style.display = 'none';
+          f.sections.forEach((s, si) => {
+            const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
+            const sli = document.createElement('li');
+            sli.textContent = title;
+            sli.onclick = e => {
+              e.stopPropagation();
+              currentFolder = i;
+              currentSection = si;
+              multiFolderMode = false;
+              enterQuizQuestion();
+              startMobileQuizScreen();
+            };
+            secList.appendChild(sli);
+          });
+          header.onclick = () => {
+            if (randomSelectMode) {
+              cb.checked = !cb.checked;
+            } else {
+              secList.style.display = secList.style.display === 'none' ? 'block' : 'none';
+            }
           };
+          li.appendChild(header);
+          li.appendChild(secList);
           list.appendChild(li);
         });
+      }
+
+      function setRandomSelectMode(on) {
+        randomSelectMode = on;
+        const checkboxes = document.querySelectorAll('#mobileFolderList .folder-select');
+        checkboxes.forEach(cb => {
+          cb.style.display = on ? 'inline-block' : 'none';
+          cb.checked = false;
+        });
+        mobileRandomGo.style.display = on ? 'block' : 'none';
+        if (on) {
+          document.getElementById('mobileFolderList').style.display = 'block';
+          document.getElementById('mobileSearchResults').style.display = 'none';
+        }
+      }
+
+      function toggleRandomSelectMode() {
+        setRandomSelectMode(!randomSelectMode);
+      }
+
+      function startSelectedRandomQuiz() {
+        const selected = Array.from(document.querySelectorAll('#mobileFolderList .folder-select:checked')).map(c => parseInt(c.dataset.index));
+        if (selected.length) {
+          enterRandomQuizAcrossFolders(selected);
+        }
+        setRandomSelectMode(false);
       }
 
       function handleMobileSearch(e) {
@@ -1173,30 +1228,6 @@
         });
       }
 
-      function showFolderSelectOverlay() {
-        const overlay = document.getElementById('folderSelectOverlay');
-        const box = document.getElementById('folderCheckboxes');
-        box.innerHTML = '';
-        data.folders.forEach((f, i) => {
-          const label = document.createElement('label');
-          const cb = document.createElement('input');
-          cb.type = 'checkbox';
-          cb.value = i;
-          label.appendChild(cb);
-          label.appendChild(document.createTextNode(' ' + f.name));
-          const div = document.createElement('div');
-          div.appendChild(label);
-          box.appendChild(div);
-        });
-        overlay.style.display = 'flex';
-        document.getElementById('startMobileRandom').onclick = () => {
-          const selected = Array.from(box.querySelectorAll('input:checked')).map(c => parseInt(c.value));
-          overlay.style.display = 'none';
-          enterRandomQuizAcrossFolders(selected);
-        };
-        overlay.onclick = e => { if (e.target === overlay) overlay.style.display = 'none'; };
-      }
-
       function enterRandomQuizAcrossFolders(folders) {
         if (!folders.length) return;
         multiFolderMode = true;
@@ -1217,7 +1248,18 @@
 
       function startMobileQuizScreen() {
         document.body.classList.add('quiz-active');
+        homeBtn.style.display = 'none';
+        setRandomSelectMode(false);
       }
+
+      homeBtn.onclick = () => {
+        document.body.classList.remove('quiz-active');
+        isQuizMode = false;
+        quizArea.style.display = 'none';
+        currentFolder = null;
+        currentSection = null;
+        buildMobileFolderList();
+      };
 
       function questionCompleted() {
         const inputs = Array.from(document.querySelectorAll('#quizContent input[type="text"]'));
@@ -1242,6 +1284,9 @@
             prog.completed.add(currentSection);
           }
           saveProgress();
+        }
+        if (document.body.classList.contains('mobile') && quizOrder.length === 1) {
+          homeBtn.style.display = 'block';
         }
         updateProgressIndicator();
       }
@@ -1344,7 +1389,7 @@
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn');
+            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
