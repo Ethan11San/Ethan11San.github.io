@@ -1253,15 +1253,6 @@
         setRandomSelectMode(false);
       }
 
-      homeBtn.onclick = () => {
-        document.body.classList.remove('quiz-active');
-        isQuizMode = false;
-        quizArea.style.display = 'none';
-        currentFolder = null;
-        currentSection = null;
-        buildMobileFolderList();
-      };
-
       function questionCompleted() {
         const inputs = Array.from(document.querySelectorAll('#quizContent input[type="text"]'));
         if (!inputs.length) return true;
@@ -1395,6 +1386,15 @@
       const editorDiv = document.getElementById('editor');
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
+
+      homeBtn.onclick = () => {
+        document.body.classList.remove('quiz-active');
+        isQuizMode = false;
+        quizArea.style.display = 'none';
+        currentFolder = null;
+        currentSection = null;
+        buildMobileFolderList();
+      };
       // Whitelist pixel sizes for Quill's size format
       const Size = Quill.import('formats/size');
       Size.whitelist = ['8px','10px','12px','14px','16px','18px','20px','24px','28px','32px'];
