@@ -1091,6 +1091,7 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
+      let currentFolder = null, currentSection = null;
       // Track progress and random order per folder
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
       let multiFolderMode = false;
@@ -1371,7 +1372,6 @@
         });
       }
 
-      let currentFolder = null, currentSection = null;
       let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
