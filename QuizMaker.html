@@ -1106,19 +1106,27 @@
             inp.style.boxSizing = 'border-box';
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
-            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            inp.style.cursor = 'text';
+            inp.style.caretColor = '#000';
+            inp.addEventListener('focus', () => {
+              lastHintTarget = inp;
+              inp.style.width = getWidth(inp.value || lbl.text);
+            });
             const meas = document.createElement('span');
             Object.assign(meas.style, {
               visibility: 'hidden',
               position: 'absolute',
               whiteSpace: 'pre',
               fontFamily: inp.style.fontFamily,
-              fontSize: inp.style.fontSize
+              fontSize: inp.style.fontSize,
+              left: '-9999px',
+              top: '-9999px',
+              pointerEvents: 'none'
             });
             document.body.appendChild(meas);
             const getWidth = txt => {
               meas.textContent = txt;
-              return meas.offsetWidth + 8;
+              return Math.max(meas.offsetWidth + 8, 20);
             };
             const calcW = lbl.w ? lbl.w : getWidth(lbl.text);
             const calcH = lbl.h || inp.offsetHeight;
