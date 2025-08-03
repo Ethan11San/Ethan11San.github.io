@@ -450,7 +450,13 @@
     #mobileStart input { width: 100%; padding: 8px; margin-bottom: 12px; }
     #mobileFolderList, #mobileSearchResults { list-style: none; padding: 0; margin: 0; }
     #mobileFolderList > li { padding: 0; }
-    #mobileFolderList > li > div.folder-header,
+    #mobileFolderList > li > div.folder-header {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #ccc;
+      cursor: pointer;
+    }
     #mobileSearchResults li {
       padding: 12px;
       border-bottom: 1px solid #ccc;
@@ -1141,8 +1147,10 @@
           cb.className = 'folder-select';
           cb.dataset.index = i;
           cb.style.display = 'none';
+          const titleSpan = document.createElement('span');
+          titleSpan.textContent = f.name;
           header.appendChild(cb);
-          header.appendChild(document.createTextNode(f.name));
+          header.appendChild(titleSpan);
           const secList = document.createElement('ul');
           secList.style.display = 'none';
           f.sections.forEach((s, si) => {
