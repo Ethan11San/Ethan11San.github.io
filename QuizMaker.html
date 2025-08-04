@@ -599,8 +599,8 @@
         <button class="ql-bold"></button>
         <button class="ql-italic"></button>
         <button class="ql-underline"></button>
-        <button class="ql-undo">↺</button>
-        <button class="ql-redo">↻</button>
+        <button class="ql-undo" type="button">↺</button>
+        <button class="ql-redo" type="button">↻</button>
         <button class="ql-list" value="bullet"></button>
         <select class="ql-color"></select>
         <button id="addImageWordBtn">🖼️</button>
@@ -1577,11 +1577,16 @@
         }
       }
 
+      let storageFull = false;
       function saveData() {
+        if (storageFull) return;
         const diff = computeDiff(originalData, data);
         try {
           if (diff && Object.keys(diff).length) {
-            localStorage.setItem('quizDataLocal', JSON.stringify(diff));
+            const serialized = JSON.stringify(diff);
+            // ~5MB quota, bail out early if approaching limit
+            if (serialized.length > 4.5e6) throw new Error('Local data too large');
+            localStorage.setItem('quizDataLocal', serialized);
             unsyncedChanges = true;
             if (copyLocalBtn) copyLocalBtn.disabled = false;
           } else {
@@ -1590,7 +1595,8 @@
             if (copyLocalBtn) copyLocalBtn.disabled = true;
           }
         } catch (e) {
-          console.warn('Failed to persist local quiz data', e);
+          console.warn('Failed to persist local quiz data, disabling local save', e);
+          storageFull = true;
           unsyncedChanges = false;
           if (copyLocalBtn) copyLocalBtn.disabled = true;
         }
@@ -1668,7 +1674,13 @@
       Quill.register(PopupWordBlot);
       const quill = new Quill('#editor', {
         modules: {
-          toolbar: '#toolbar',
+          toolbar: {
+            container: '#toolbar',
+            handlers: {
+              undo: function () { this.quill.history.undo(); },
+              redo: function () { this.quill.history.redo(); }
+            }
+          },
           history: { delay: 1000, maxStack: 100, userOnly: true }
         },
         theme: 'snow'
@@ -1744,9 +1756,6 @@
         sec.rawText = quill.getText();
         saveData();
       }
-      // Also bind click for undo/redo in custom toolbar
-      document.querySelector('#toolbar .ql-undo').addEventListener('click', () => quill.history.undo());
-      document.querySelector('#toolbar .ql-redo').addEventListener('click', () => quill.history.redo());
       quill.on('text-change', () => {
         if (isQuizMode) return;
         if (!ensureSelection()) return;
