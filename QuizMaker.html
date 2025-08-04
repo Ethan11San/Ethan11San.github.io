@@ -412,7 +412,7 @@
       cursor: pointer; transition: background .2s;
     }
     #nextBtn:hover, #backBtn:hover { background: #71368a; }
-    #hintBtn {
+    #hintBtn, #editQuestionBtn {
       margin-top: 20px;
       padding: 10px 20px;
       border: none;
@@ -422,7 +422,7 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #hintBtn:hover {
+    #hintBtn:hover, #editQuestionBtn:hover {
       background: #71368a;
     }
 
@@ -552,6 +552,7 @@
     body.mobile.quiz-active #main { display: flex; }
     body.mobile:not(.quiz-active) #main { display: none; }
     body.mobile:not(.quiz-active) #mobileStart { display: block; }
+    body.mobile.quiz-active #header { cursor: pointer; }
     /* Ensure quiz images scale to fit smaller screens */
     #quizContent img {
       max-width: 100%;
@@ -668,6 +669,7 @@
       <button id="backBtn">⬅️ Back</button>
       <button id="nextBtn">Next Section ➡️</button>
       <button id="hintBtn">Hint</button>
+      <button id="editQuestionBtn" style="display:none;">Edit</button>
       <button id="homeBtn" style="display:none;">Home</button>
     </div>
   </div>
@@ -1519,38 +1521,44 @@
             const diff = computeDiff(orig[i], mod[i]);
             if (diff !== undefined) result[i] = diff;
           }
+          if (orig.length !== mod.length) result.length = mod.length;
           return Object.keys(result).length ? result : undefined;
         }
         const out = {};
         const keys = new Set([...Object.keys(orig || {}), ...Object.keys(mod || {})]);
         keys.forEach(key => {
-          const diff = computeDiff(orig ? orig[key] : undefined, mod ? mod[key] : undefined);
-          if (diff !== undefined) out[key] = diff;
+          const hasMod = mod && Object.prototype.hasOwnProperty.call(mod, key);
+          if (!hasMod) {
+            out[key] = null;
+          } else {
+            const diff = computeDiff(orig ? orig[key] : undefined, mod[key]);
+            if (diff !== undefined) out[key] = diff;
+          }
         });
         return Object.keys(out).length ? out : undefined;
       }
 
       function applyChanges(target, changes) {
-        if (typeof changes !== 'object' || changes === null) return changes;
-        if (Array.isArray(changes)) {
-          for (let i = 0; i < changes.length; i++) {
-            // Skip `null` entries that may have resulted from sparse arrays
-            // being stringified, otherwise they overwrite existing data.
-            if (changes[i] !== undefined && changes[i] !== null) {
-              target[i] = applyChanges(Array.isArray(changes[i]) ? (target[i] || []) : (target[i] || {}), changes[i]);
+          if (typeof changes !== 'object' || changes === null) return changes;
+          if (Array.isArray(target) && typeof changes.length === 'number') {
+            target.length = changes.length;
+          }
+          Object.keys(changes).forEach(key => {
+            if (Array.isArray(target) && key === 'length') return;
+            const val = changes[key];
+            if (val === null) {
+              if (Array.isArray(target)) {
+                target.splice(+key, 1);
+              } else {
+                delete target[key];
+              }
+            } else if (typeof val === 'object' && val !== null) {
+              target[key] = applyChanges(Array.isArray(val) ? (target[key] || []) : (target[key] || {}), val);
+            } else {
+              target[key] = val;
             }
-          }
+          });
           return target;
-        }
-        Object.keys(changes).forEach(key => {
-          const val = changes[key];
-          if (typeof val === 'object' && val !== null) {
-            target[key] = applyChanges(Array.isArray(val) ? (target[key] || []) : (target[key] || {}), val);
-          } else {
-            target[key] = val;
-          }
-        });
-        return target;
       }
 
       function stripImageData(obj) {
@@ -1678,13 +1686,14 @@
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
+            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       copyLocalBtn = document.getElementById('copyLocalBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
+      const headerElem = document.getElementById('header');
 
       copyLocalBtn.disabled = !unsyncedChanges;
       copyLocalBtn.onclick = () => {
@@ -1705,9 +1714,25 @@
         document.body.classList.remove('quiz-active');
         isQuizMode = false;
         quizArea.style.display = 'none';
+        editQuestionBtn.style.display = 'none';
         currentFolder = null;
         currentSection = null;
         buildMobileFolderList();
+      };
+
+      headerElem.onclick = () => {
+        if (document.body.classList.contains('mobile') && document.body.classList.contains('quiz-active')) {
+          homeBtn.onclick();
+        }
+      };
+
+      editQuestionBtn.onclick = () => {
+        const sec = currentFolder !== null && currentSection !== null ? data.folders[currentFolder].sections[currentSection] : null;
+        if (!sec || sec.type === 'label') return;
+        isQuizMode = false;
+        enterEdit();
+        loadSection();
+        previewSection();
       };
       // Whitelist pixel sizes for Quill's size format
       const Size = Quill.import('formats/size');
@@ -3636,6 +3661,11 @@
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         ensureSectionImages(currentFolder, sec);
+        if (document.body.classList.contains('mobile') && sec.type !== 'label') {
+          editQuestionBtn.style.display = 'inline-block';
+        } else {
+          editQuestionBtn.style.display = 'none';
+        }
         updateProgressIndicator();
         // Insert consistent title at top of quizContent
         const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
@@ -4327,7 +4357,6 @@
           updateProgressIndicator();
         };
       // --- Hint button logic ---
-      const hintBtn = document.getElementById('hintBtn');
       hintBtn.onclick = () => {
         // Determine target: last focused blank, then active focus, then first incomplete
         let target = null;
