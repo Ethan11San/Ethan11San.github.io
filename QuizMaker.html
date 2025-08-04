@@ -371,6 +371,16 @@
     .blank input:focus { outline: none; border-bottom-color: #3498db; }
     .blank input.correct { border-bottom-color: #27ae60; }
     .blank input.incorrect { border-bottom-color: #c0392b; }
+    @media (max-width: 600px) {
+      #quizArea,
+      #quizContent {
+        font-size: 1rem;
+      }
+      #quizContent .blank input,
+      .blank input {
+        font-size: 1rem;
+      }
+    }
     #nextBtn, #backBtn {
       margin-top: 20px; padding: 10px 20px;
       border: none; border-radius: 4px;
