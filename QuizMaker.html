@@ -1279,6 +1279,10 @@
             sli.textContent = title;
             sli.onclick = e => {
               e.stopPropagation();
+              if (!isQuizMode) {
+                syncCurrentSection();
+                if (typeof quill !== 'undefined') quill.blur();
+              }
               currentFolder = i;
               currentSection = si;
               multiFolderMode = false;
@@ -1344,6 +1348,10 @@
               const li = document.createElement('li');
               li.textContent = `${f.name}: ${title}`;
               li.onclick = () => {
+                if (!isQuizMode) {
+                  syncCurrentSection();
+                  if (typeof quill !== 'undefined') quill.blur();
+                }
                 currentFolder = fi;
                 currentSection = si;
                 multiFolderMode = false;
@@ -1358,6 +1366,10 @@
 
       function enterRandomQuizAcrossFolders(folders) {
         if (!folders.length) return;
+        if (!isQuizMode) {
+          syncCurrentSection();
+          if (typeof quill !== 'undefined') quill.blur();
+        }
         multiFolderMode = true;
         isQuizMode = true;
         const combined = [];
