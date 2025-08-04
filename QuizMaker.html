@@ -164,8 +164,11 @@
       padding: 12px 24px;
       background: #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    #controls button {
+    #controls .mode-btn {
       flex: 1;
       padding: 8px;
       border: none;
@@ -176,7 +179,11 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #controls button:hover { background: #2980b9; }
+    #controls .mode-btn:hover { background: #2980b9; }
+    #editorArea img {
+      max-width: 100%;
+      height: auto;
+    }
 
     /* —— Editor & Preview —— */
     #formatToolbar {
@@ -562,9 +569,9 @@
   <div id="main">
     <div id="header"><span id="folderBadge"></span><span id="headerTitle">QuizMaker</span></div>
     <div id="controls">
-      <button id="editModeBtn">✏️ Edit Mode</button>
-      <button id="quizModeBtn">📝 Quiz Question</button>
-      <button id="quizAllBtn">🎲 Random Quiz</button>
+      <button class="mode-btn" id="editModeBtn">✏️ Edit Mode</button>
+      <button class="mode-btn" id="quizModeBtn">📝 Quiz Question</button>
+      <button class="mode-btn" id="quizAllBtn">🎲 Random Quiz</button>
     </div>
 
     <div id="progressStatus" style="display:none; margin:8px 24px;">
@@ -3440,7 +3447,10 @@
         showQuiz();
       }
       quizModeBtn.onclick = () => {
-        if(!isQuizMode) syncCurrentSection();
+        if(!isQuizMode){
+          syncCurrentSection();
+          if (typeof quill !== 'undefined') quill.blur();
+        }
         isQuizMode = true;
         // Show quiz for the currently selected section
         if (currentSection !== null) {
@@ -3449,7 +3459,13 @@
           enterQuiz();
         }
       };
-      quizAllBtn .onclick = enterRandomQuiz;
+      quizAllBtn.onclick = () => {
+        if(!isQuizMode){
+          syncCurrentSection();
+          if (typeof quill !== 'undefined') quill.blur();
+        }
+        enterRandomQuiz();
+      };
 
 
       function wrapQuizBlanks(container, hiddenEntries) {
