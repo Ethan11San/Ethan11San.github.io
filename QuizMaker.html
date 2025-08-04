@@ -1438,6 +1438,7 @@
       let originalData;
       let staticMode = false;
       let unsyncedChanges = false;
+      let imageData = {};
       const isLocalEnv = ['localhost', '127.0.0.1'].includes(location.hostname);
 
       function computeDiff(orig, mod) {
@@ -1526,6 +1527,16 @@
       }
 
       originalData = JSON.parse(JSON.stringify(data));
+      try {
+        const imgResp = await fetch('./imageData.json', { cache: 'no-store' });
+        if (imgResp.ok) {
+          imageData = await imgResp.json();
+        } else {
+          console.warn('imageData.json not found or inaccessible');
+        }
+      } catch (err) {
+        console.warn('Could not load imageData.json', err);
+      }
       const stored = localStorage.getItem('quizDataLocal');
       if (stored) {
         try {
@@ -2268,6 +2279,7 @@
       // Quill will override this function below after Quill is initialized.
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
+        ensureSectionImages(currentFolder, sec);
         // Update header to show current section title
         let titleText = '';
         if (sec.type === 'acronym') {
@@ -2953,6 +2965,28 @@
         return (sec.rawText || '').split(/(\s+)/).filter(t => t.length > 0);
       }
 
+      function ensureSectionImages(folderIdx, sec) {
+        const folder = data.folders[folderIdx];
+        if (!folder || !sec || !imageData) return;
+        const folderImgs = imageData[folder.name] || {};
+        const entry = folderImgs[sec.title];
+        if (entry) {
+          if (!sec.image && entry.image) {
+            sec.image = entry.image;
+          }
+          if (entry.extraImages) {
+            sec.extraImages = sec.extraImages || [];
+            entry.extraImages.forEach((img, idx) => {
+              if (!sec.extraImages[idx]) {
+                sec.extraImages[idx] = { image: img, labels: [], arrows: [] };
+              } else if (!sec.extraImages[idx].image) {
+                sec.extraImages[idx].image = img;
+              }
+            });
+          }
+        }
+      }
+
       function previewSection() {
         const sec = data.folders[currentFolder].sections[currentSection];
         // Use rawHtml if present, otherwise convert rawText to HTML with paragraphs
@@ -3500,6 +3534,7 @@
           }
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
+        ensureSectionImages(currentFolder, sec);
         updateProgressIndicator();
         // Insert consistent title at top of quizContent
         const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
