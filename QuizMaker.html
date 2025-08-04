@@ -1435,9 +1435,54 @@
       // ----- Load persistent data, with static fallback -----
       const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
       let data;
+      let originalData;
       let staticMode = false;
       let unsyncedChanges = false;
       const isLocalEnv = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+      function computeDiff(orig, mod) {
+        if (orig === mod) return undefined;
+        if (typeof orig !== 'object' || orig === null || typeof mod !== 'object' || mod === null) {
+          return mod;
+        }
+        if (Array.isArray(orig) && Array.isArray(mod)) {
+          const result = [];
+          const len = Math.max(orig.length, mod.length);
+          for (let i = 0; i < len; i++) {
+            const diff = computeDiff(orig[i], mod[i]);
+            if (diff !== undefined) result[i] = diff;
+          }
+          return result.length ? result : undefined;
+        }
+        const out = {};
+        const keys = new Set([...Object.keys(orig || {}), ...Object.keys(mod || {})]);
+        keys.forEach(key => {
+          const diff = computeDiff(orig ? orig[key] : undefined, mod ? mod[key] : undefined);
+          if (diff !== undefined) out[key] = diff;
+        });
+        return Object.keys(out).length ? out : undefined;
+      }
+
+      function applyChanges(target, changes) {
+        if (typeof changes !== 'object' || changes === null) return changes;
+        if (Array.isArray(changes)) {
+          for (let i = 0; i < changes.length; i++) {
+            if (changes[i] !== undefined) {
+              target[i] = applyChanges(Array.isArray(changes[i]) ? (target[i] || []) : (target[i] || {}), changes[i]);
+            }
+          }
+          return target;
+        }
+        Object.keys(changes).forEach(key => {
+          const val = changes[key];
+          if (typeof val === 'object' && val !== null) {
+            target[key] = applyChanges(Array.isArray(val) ? (target[key] || []) : (target[key] || {}), val);
+          } else {
+            target[key] = val;
+          }
+        });
+        return target;
+      }
 
       if (isLocalEnv) {
         try {
@@ -1475,15 +1520,19 @@
         }
       }
 
+      originalData = JSON.parse(JSON.stringify(data));
       const stored = localStorage.getItem('quizDataLocal');
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          if (!Array.isArray(parsed.folders) || parsed.folders.length === 0) {
-            localStorage.removeItem('quizDataLocal');
-          } else if (!data || !Array.isArray(data.folders) || data.folders.length === 0) {
-            data = parsed;
-            unsyncedChanges = true;
+          if (parsed && Object.keys(parsed).length) {
+            applyChanges(data, parsed);
+            const remaining = computeDiff(originalData, data);
+            if (!remaining) {
+              localStorage.removeItem('quizDataLocal');
+            } else {
+              unsyncedChanges = true;
+            }
           } else {
             localStorage.removeItem('quizDataLocal');
           }
@@ -1494,9 +1543,16 @@
       }
 
       function saveData() {
-        localStorage.setItem('quizDataLocal', JSON.stringify(data));
-        unsyncedChanges = true;
-        if (copyLocalBtn) copyLocalBtn.disabled = false;
+        const diff = computeDiff(originalData, data);
+        if (diff && Object.keys(diff).length) {
+          localStorage.setItem('quizDataLocal', JSON.stringify(diff));
+          unsyncedChanges = true;
+          if (copyLocalBtn) copyLocalBtn.disabled = false;
+        } else {
+          localStorage.removeItem('quizDataLocal');
+          unsyncedChanges = false;
+          if (copyLocalBtn) copyLocalBtn.disabled = true;
+        }
       }
 
       let copyLocalBtn;
@@ -1516,8 +1572,9 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
-            saveSectionBtn = document.getElementById('saveSectionBtn'), copyLocalBtn = document.getElementById('copyLocalBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
+            saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
+      copyLocalBtn = document.getElementById('copyLocalBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
