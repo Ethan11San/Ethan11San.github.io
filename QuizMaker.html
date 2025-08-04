@@ -1579,12 +1579,18 @@
 
       function saveData() {
         const diff = computeDiff(originalData, data);
-        if (diff && Object.keys(diff).length) {
-          localStorage.setItem('quizDataLocal', JSON.stringify(diff));
-          unsyncedChanges = true;
-          if (copyLocalBtn) copyLocalBtn.disabled = false;
-        } else {
-          localStorage.removeItem('quizDataLocal');
+        try {
+          if (diff && Object.keys(diff).length) {
+            localStorage.setItem('quizDataLocal', JSON.stringify(diff));
+            unsyncedChanges = true;
+            if (copyLocalBtn) copyLocalBtn.disabled = false;
+          } else {
+            localStorage.removeItem('quizDataLocal');
+            unsyncedChanges = false;
+            if (copyLocalBtn) copyLocalBtn.disabled = true;
+          }
+        } catch (e) {
+          console.warn('Failed to persist local quiz data', e);
           unsyncedChanges = false;
           if (copyLocalBtn) copyLocalBtn.disabled = true;
         }
