@@ -1481,7 +1481,7 @@
           const parsed = JSON.parse(stored);
           if (!Array.isArray(parsed.folders) || parsed.folders.length === 0) {
             localStorage.removeItem('quizDataLocal');
-          } else if (JSON.stringify(parsed) !== JSON.stringify(data)) {
+          } else if (!data || !Array.isArray(data.folders) || data.folders.length === 0) {
             data = parsed;
             unsyncedChanges = true;
           } else {
