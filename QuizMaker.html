@@ -281,7 +281,7 @@
       border-bottom: 1px dashed #3498db;
     }
     .popup-word:hover { background: #dfe6e9; }
-    #previewBtn, #saveSectionBtn, #addPictureBtn {
+    #previewBtn, #saveSectionBtn, #addPictureBtn, #resumeQuizBtn {
       margin-top: 12px;
       margin-right: 8px;
       padding: 8px 16px;
@@ -292,7 +292,7 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #previewBtn:hover, #saveSectionBtn:hover, #addPictureBtn:hover { background: #1e8449; }
+    #previewBtn:hover, #saveSectionBtn:hover, #addPictureBtn:hover, #resumeQuizBtn:hover { background: #1e8449; }
 
     /* —— Alternate Answers UI —— */
     #altContainer {
@@ -537,6 +537,16 @@
       color: #fff;
       font-weight: 500;
     }
+    #copyLocalBtn {
+      margin-top: 12px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      background: #8e44ad;
+      color: #fff;
+      font-weight: 500;
+    }
     #mobileRandomGo {
       margin-top: 12px;
       padding: 10px;
@@ -577,6 +587,7 @@
     <ul id="mobileFolderList"></ul>
     <ul id="mobileSearchResults" style="display:none;"></ul>
     <button id="mobileRandomBtn">Random Quiz</button>
+    <button id="copyLocalBtn">Copy Local Changes</button>
     <button id="mobileRandomGo">Go</button>
   </div>
 
@@ -654,7 +665,7 @@
       <div style="margin-top:12px;">
         <button id="previewBtn">Preview Words</button>
         <button id="saveSectionBtn">Save Section</button>
-        <button id="copyLocalBtn">Copy Local Changes</button>
+        <button id="resumeQuizBtn" style="display:none;">Back to Quiz</button>
         <button id="addPictureBtn" style="display:none;">Add Picture</button>
       </div>
       <div id="preview"></div>
@@ -1305,7 +1316,15 @@
       function buildMobileFolderList() {
         const list = document.getElementById('mobileFolderList');
         list.innerHTML = '';
-        data.folders.forEach((f, i) => {
+        const unique = [];
+        const seen = new Set();
+        for (let i = data.folders.length - 1; i >= 0; i--) {
+          const f = data.folders[i];
+          if (!f || !f.name || seen.has(f.name)) continue;
+          seen.add(f.name);
+          unique.unshift({ f, i });
+        }
+        unique.forEach(({ f, i }) => {
           const li = document.createElement('li');
           const header = document.createElement('div');
           header.className = 'folder-header';
@@ -1668,7 +1687,7 @@
         }
       }
 
-      let copyLocalBtn;
+      let copyLocalBtn, resumeQuizBtn;
       let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
@@ -1685,15 +1704,29 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
-            saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
+            saveSectionBtn = document.getElementById('saveSectionBtn'), resumeQuizBtn = document.getElementById('resumeQuizBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       copyLocalBtn = document.getElementById('copyLocalBtn');
+      resumeQuizBtn = document.getElementById('resumeQuizBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
+
+      function updateResumeQuizBtn() {
+        if (!resumeQuizBtn) return;
+        if (document.body.classList.contains('mobile') &&
+            document.body.classList.contains('quiz-active') &&
+            editorArea.style.display !== 'none') {
+          resumeQuizBtn.style.display = 'inline-block';
+        } else {
+          resumeQuizBtn.style.display = 'none';
+        }
+      }
+
+      updateResumeQuizBtn();
 
       copyLocalBtn.disabled = !unsyncedChanges;
       copyLocalBtn.onclick = () => {
@@ -1710,6 +1743,15 @@
           });
       };
 
+      resumeQuizBtn.onclick = () => {
+        isQuizMode = true;
+        editorArea.style.display = 'none';
+        quizArea.style.display = 'block';
+        showQuiz();
+        updateProgressIndicator();
+        updateResumeQuizBtn();
+      };
+
       homeBtn.onclick = () => {
         document.body.classList.remove('quiz-active');
         isQuizMode = false;
@@ -1718,6 +1760,7 @@
         currentFolder = null;
         currentSection = null;
         buildMobileFolderList();
+        updateResumeQuizBtn();
       };
 
       headerElem.onclick = () => {
@@ -3488,6 +3531,7 @@
         altContainer.innerHTML = '';
         renderSections(lastSectionOrder);
         updateProgressIndicator();
+        updateResumeQuizBtn();
       }
       function enterQuiz(){
           if(!isQuizMode) syncCurrentSection();
