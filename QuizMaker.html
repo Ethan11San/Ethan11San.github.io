@@ -1437,17 +1437,27 @@
       let data;
       let staticMode = false;
       let unsyncedChanges = false;
-      try {
-        // Attempt API fetch
-        const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
-        if (resp.ok) {
-          data = await resp.json();
-        } else {
-          throw new Error('API response not OK: ' + resp.status);
+      const isLocalEnv = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+      if (isLocalEnv) {
+        try {
+          // Attempt API fetch in local development
+          const resp = await fetch('http://localhost:5001/api/quizData', { cache: 'no-store' });
+          if (resp.ok) {
+            data = await resp.json();
+          } else {
+            throw new Error('API response not OK: ' + resp.status);
+          }
+        } catch (apiErr) {
+          console.warn('API unavailable, falling back to quizData.json', apiErr);
+          staticMode = true;
         }
-      } catch (apiErr) {
-        console.warn('API unavailable, falling back to quizData.json', apiErr);
+      } else {
+        // When not running locally, skip API fetch
         staticMode = true;
+      }
+
+      if (!data) {
         try {
           const resp2 = await fetch('./quizData.json', { cache: 'no-store' });
           if (!resp2.ok) throw new Error('Static file response not OK');
