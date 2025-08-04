@@ -1509,6 +1509,18 @@
         return target;
       }
 
+      function stripImageData(obj) {
+        if (typeof obj !== 'object' || obj === null) return obj;
+        delete obj.image;
+        Object.keys(obj).forEach(key => {
+          const val = stripImageData(obj[key]);
+          if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) {
+            delete obj[key];
+          }
+        });
+        return obj;
+      }
+
       if (isLocalEnv) {
         try {
           // Attempt API fetch in local development
@@ -1562,8 +1574,9 @@
           const parsed = JSON.parse(stored);
           if (parsed && Object.keys(parsed).length) {
             applyChanges(data, parsed);
-            const remaining = computeDiff(originalData, data);
-            if (!remaining) {
+            let remaining = computeDiff(originalData, data);
+            if (remaining) remaining = stripImageData(remaining);
+            if (!remaining || !Object.keys(remaining).length) {
               localStorage.removeItem('quizDataLocal');
             } else {
               unsyncedChanges = true;
@@ -1580,7 +1593,8 @@
       let storageFull = false;
       function saveData() {
         if (storageFull) return;
-        const diff = computeDiff(originalData, data);
+        let diff = computeDiff(originalData, data);
+        if (diff) diff = stripImageData(diff);
         try {
           if (diff && Object.keys(diff).length) {
             const serialized = JSON.stringify(diff);
