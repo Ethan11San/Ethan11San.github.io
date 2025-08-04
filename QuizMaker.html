@@ -1468,10 +1468,11 @@
       const stored = localStorage.getItem('quizDataLocal');
       if (stored) {
         try {
-          if (stored === JSON.stringify(data)) {
+          const parsed = JSON.parse(stored);
+          if (JSON.stringify(parsed) === JSON.stringify(data) || !Array.isArray(parsed.folders)) {
             localStorage.removeItem('quizDataLocal');
           } else {
-            data = JSON.parse(stored);
+            data = parsed;
             unsyncedChanges = true;
           }
         } catch (e) {
