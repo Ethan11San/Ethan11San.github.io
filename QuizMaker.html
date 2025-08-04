@@ -1446,13 +1446,16 @@
           return mod;
         }
         if (Array.isArray(orig) && Array.isArray(mod)) {
-          const result = [];
+          // Use object with numeric keys to avoid sparse arrays turning into
+          // `null` values when JSON stringified. This keeps the diff minimal
+          // and prevents unintended `null` entries when reapplying changes.
+          const result = {};
           const len = Math.max(orig.length, mod.length);
           for (let i = 0; i < len; i++) {
             const diff = computeDiff(orig[i], mod[i]);
             if (diff !== undefined) result[i] = diff;
           }
-          return result.length ? result : undefined;
+          return Object.keys(result).length ? result : undefined;
         }
         const out = {};
         const keys = new Set([...Object.keys(orig || {}), ...Object.keys(mod || {})]);
@@ -1467,7 +1470,9 @@
         if (typeof changes !== 'object' || changes === null) return changes;
         if (Array.isArray(changes)) {
           for (let i = 0; i < changes.length; i++) {
-            if (changes[i] !== undefined) {
+            // Skip `null` entries that may have resulted from sparse arrays
+            // being stringified, otherwise they overwrite existing data.
+            if (changes[i] !== undefined && changes[i] !== null) {
               target[i] = applyChanges(Array.isArray(changes[i]) ? (target[i] || []) : (target[i] || {}), changes[i]);
             }
           }
