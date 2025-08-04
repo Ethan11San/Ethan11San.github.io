@@ -1524,10 +1524,6 @@
           }
         }
       }
-      if (!data || typeof data !== 'object' || !Array.isArray(data.folders)) {
-        console.warn('Invalid quiz data structure, resetting.');
-        data = { folders: [] };
-      }
 
       originalData = JSON.parse(JSON.stringify(data));
       const stored = localStorage.getItem('quizDataLocal');
@@ -1731,11 +1727,10 @@
       });
 
       // —— Initial UI render using migrated or loaded data ——
-      if (Array.isArray(data?.folders) && data.folders.length > 0) {
+      if (data.folders.length > 0) {
         currentFolder = 0;
-        currentSection = Array.isArray(data.folders[0]?.sections) && data.folders[0].sections.length > 0 ? 0 : null;
+        currentSection = data.folders[0].sections.length > 0 ? 0 : null;
       } else {
-        data = { folders: [] };
         currentFolder = null;
         currentSection = null;
       }
