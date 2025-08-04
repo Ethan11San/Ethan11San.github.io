@@ -576,9 +576,12 @@
     const earlyMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
     if (earlyMobile) {
       document.body.classList.add('mobile');
-    } else {
-      document.body.classList.remove('loading');
     }
+    // Remove loading state immediately so mobile devices aren't stuck on the splash
+    // screen and the initial UI can render as soon as possible.
+    requestAnimationFrame(() => {
+      document.body.classList.remove('loading');
+    });
   </script>
   <div id="loadingScreen">Loading...</div>
 
