@@ -770,22 +770,28 @@
         if (!img || !baseWidth || !baseHeight) return;
         const scaleX = img.clientWidth / baseWidth;
         const scaleY = img.clientHeight / baseHeight;
+        const uniScale = Math.min(scaleX, scaleY);
         container.querySelectorAll('[data-orig-x]').forEach(el => {
           const x = parseFloat(el.dataset.origX);
           const y = parseFloat(el.dataset.origY);
           el.style.left = (x * scaleX) + 'px';
           el.style.top  = (y * scaleY) + 'px';
+          const useUniform = el.dataset.origW && el.dataset.origH &&
+            parseFloat(el.dataset.origW) === parseFloat(el.dataset.origH);
+          const wScale = useUniform ? uniScale : scaleX;
+          const hScale = useUniform ? uniScale : scaleY;
+          const fontScale = useUniform ? uniScale : scaleY;
           if (el.dataset.origFont) {
-            el.style.fontSize = (parseFloat(el.dataset.origFont) * scaleY) + 'px';
+            el.style.fontSize = (parseFloat(el.dataset.origFont) * fontScale) + 'px';
           }
           if (el.dataset.origH) {
-            el.style.height = (parseFloat(el.dataset.origH) * scaleY) + 'px';
+            el.style.height = (parseFloat(el.dataset.origH) * hScale) + 'px';
           }
           if (el.dataset.origLineHeight) {
-            el.style.lineHeight = (parseFloat(el.dataset.origLineHeight) * scaleY) + 'px';
+            el.style.lineHeight = (parseFloat(el.dataset.origLineHeight) * hScale) + 'px';
           }
           if (el.dataset.origW) {
-            const scaledW = parseFloat(el.dataset.origW) * scaleX;
+            const scaledW = parseFloat(el.dataset.origW) * wScale;
             let needed = scaledW;
             const txt = el.value || el.textContent || '';
             if (txt) {
@@ -1995,7 +2001,7 @@
 
       editQuestionBtn.onclick = () => {
         const sec = currentFolder !== null && currentSection !== null ? data.folders[currentFolder].sections[currentSection] : null;
-        if (!sec || sec.type === 'label') return;
+        if (!sec) return;
         isQuizMode = false;
         enterEdit();
         loadSection();
