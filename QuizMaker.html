@@ -1775,9 +1775,10 @@
           return arr;
         }
         const out = {};
+        // Only exclude raw image data fields so position/size info persists in localStorage
         const imgKeys = new Set([
-          'image','img','imgWidth','imgHeight','imgX','imgY',
-          'x','y','w','h','fontSize','arrows'
+          'image', // main/base64 image data
+          'img'    // generic image field used in some structures
         ]);
         Object.keys(obj).forEach(key => {
           if (imgKeys.has(key)) return;
