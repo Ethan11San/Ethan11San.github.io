@@ -811,6 +811,66 @@
       }
 
       function setupExtraImageInteractions(img, overlay, sec, ex) {
+        if (document.body.classList.contains('mobile')) {
+          ex.labels.forEach(lbl => {
+            const mark = document.createElement('div');
+            mark.textContent = lbl.text;
+            Object.assign(mark.style, {
+              position: 'absolute',
+              display: 'inline-block',
+              padding: '2px 4px',
+              left: lbl.x + 'px',
+              top: lbl.y + 'px',
+              background: '#ffffff',
+              border: '1px solid #7f8c8d',
+              overflow: 'auto',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              userSelect: 'none'
+            });
+            mark.addEventListener('click', evt => {
+              if (!isAddingDefinition) return;
+              evt.stopPropagation();
+              sec.definitions = sec.definitions || [];
+              sec.definitions.push({
+                labelText: lbl.text,
+                rawText: '',
+                hidden: [],
+                alts: {},
+                hideUntilSolved: false
+              });
+              saveData();
+              isAddingDefinition = false;
+              const btn = document.getElementById('addDefinitionBtn');
+              if (btn) btn.textContent = 'Add Definition';
+              loadSection();
+            });
+            mark.ondblclick = evt => {
+              evt.stopPropagation();
+              evt.preventDefault();
+              const newText = prompt('Edit label text:', lbl.text);
+              if (newText !== null) {
+                lbl.text = newText;
+                mark.textContent = lbl.text;
+                lbl.w = mark.offsetWidth;
+                lbl.h = mark.offsetHeight;
+                mark.style.width = lbl.w + 'px';
+                mark.style.height = lbl.h + 'px';
+                saveData();
+              }
+            };
+            mark.style.fontSize = lbl.fontSize + 'px';
+            overlay.appendChild(mark);
+            if (!lbl.w) {
+              lbl.w = mark.offsetWidth;
+              lbl.h = mark.offsetHeight;
+              saveData();
+            }
+            mark.style.width = lbl.w + 'px';
+            mark.style.height = lbl.h + 'px';
+          });
+          return;
+        }
         overlay.ondblclick = evt => {
           if (evt.metaKey) return;
           const rect = img.getBoundingClientRect();
@@ -839,7 +899,8 @@
             textOverflow: 'ellipsis',
             cursor: 'move',
             resize: 'both',
-            userSelect: 'none'
+            userSelect: 'none',
+            touchAction: 'none'
           });
           mark.addEventListener('contextmenu', evt => {
             if (!evt.metaKey) return;
@@ -919,6 +980,26 @@
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
           };
+          mark.ontouchstart = evt => {
+            evt.preventDefault();
+            const touch = evt.touches[0];
+            let startX = touch.clientX, startY = touch.clientY;
+            const origX = lbl.x, origY = lbl.y;
+            function onMove(e) {
+              const t = e.touches[0];
+              lbl.x = origX + (t.clientX - startX);
+              lbl.y = origY + (t.clientY - startY);
+              mark.style.left = lbl.x + 'px';
+              mark.style.top = lbl.y + 'px';
+            }
+            function onEnd() {
+              document.removeEventListener('touchmove', onMove);
+              document.removeEventListener('touchend', onEnd);
+              saveData();
+            }
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+          };
           mark.style.fontSize = lbl.fontSize + 'px';
           overlay.appendChild(mark);
           if (!lbl.w) {
@@ -929,6 +1010,11 @@
           mark.style.width = lbl.w + 'px';
           mark.style.height = lbl.h + 'px';
           mark.addEventListener('mouseup', () => {
+            lbl.w = mark.offsetWidth;
+            lbl.h = mark.offsetHeight;
+            saveData();
+          });
+          mark.addEventListener('touchend', () => {
             lbl.w = mark.offsetWidth;
             lbl.h = mark.offsetHeight;
             saveData();
@@ -1027,6 +1113,7 @@
       }
 
       function setupExtraResize(wrap, img, ex, del) {
+        if (document.body.classList.contains('mobile')) return;
         let lastContext = 0;
         wrap.addEventListener('contextmenu', e => {
           e.preventDefault();
@@ -1076,6 +1163,33 @@
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
               });
+              handle.addEventListener('touchstart', ev => {
+                ev.preventDefault();
+                const startX = ev.touches[0].clientX;
+                const startW = wrap.offsetWidth;
+                const aspect = img.naturalHeight / img.naturalWidth || 1;
+                function onMove(mv) {
+                  const newW = startW + (mv.touches[0].clientX - startX);
+                  const newH = newW * aspect;
+                  wrap.style.width = newW + 'px';
+                  wrap.style.height = newH + 'px';
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  positionExtraImages();
+                }
+                function onUp() {
+                  document.removeEventListener('touchmove', onMove);
+                  document.removeEventListener('touchend', onUp);
+                  img.style.width = '100%';
+                  img.style.height = 'auto';
+                  ex.imgWidth = wrap.offsetWidth;
+                  ex.imgHeight = wrap.offsetHeight;
+                  saveData();
+                  positionExtraImages();
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onUp);
+              }, { passive: false });
             }
           }
           lastContext = now;
@@ -1651,8 +1765,12 @@
           return arr;
         }
         const out = {};
+        const imgKeys = new Set([
+          'image','img','imgWidth','imgHeight','imgX','imgY',
+          'x','y','w','h','fontSize','arrows'
+        ]);
         Object.keys(obj).forEach(key => {
-          if (key === 'image') return;
+          if (imgKeys.has(key)) return;
           const val = stripImageData(obj[key]);
           if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) return;
           out[key] = val;
@@ -2545,6 +2663,7 @@
       // Quill will override this function below after Quill is initialized.
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
+        const isMobile = document.body.classList.contains('mobile');
         ensureSectionImages(currentFolder, sec);
         // Update header to show current section title
         let titleText = '';
@@ -2563,7 +2682,7 @@
         if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
         altContainer.innerHTML = '';
-        addPictureBtn.style.display = sec.type === 'label' ? 'inline-block' : 'none';
+        addPictureBtn.style.display = (sec.type === 'label' && !document.body.classList.contains('mobile')) ? 'inline-block' : 'none';
 
         if (sec.type === 'acronym') {
           labelEditor.style.display = 'block';
@@ -2746,7 +2865,7 @@
           }
           renderExtraImages(sec);
           let lastContextTime = 0;
-          container.addEventListener('contextmenu', e => {
+          if (!isMobile) container.addEventListener('contextmenu', e => {
             e.preventDefault();
             const now = Date.now();
             if (now - lastContextTime < 400) {
@@ -2793,11 +2912,39 @@
                   document.addEventListener('mousemove', onMouseMove);
                   document.addEventListener('mouseup', onMouseUp);
                 });
+                handle.addEventListener('touchstart', ev => {
+                  ev.preventDefault();
+                  const startX = ev.touches[0].clientX;
+                  const startW = container.offsetWidth;
+                  const aspect = img.naturalHeight / img.naturalWidth || 1;
+                  function onMove(moveEv) {
+                    const newW = startW + (moveEv.touches[0].clientX - startX);
+                    const newH = newW * aspect;
+                    container.style.width = newW + 'px';
+                    container.style.height = newH + 'px';
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    positionExtraImages();
+                  }
+                  function onEnd() {
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onEnd);
+                    sec.imgWidth = container.offsetWidth;
+                    sec.imgHeight = container.offsetHeight;
+                    saveData();
+                    updateDefPosition();
+                    positionExtraImages();
+                  }
+                  document.addEventListener('touchmove', onMove, { passive: false });
+                  document.addEventListener('touchend', onEnd);
+                }, { passive: false });
               }
             }
             lastContextTime = now;
           });
-          container.addEventListener('mousedown', e => {
+          if (!isMobile) container.addEventListener('mousedown', e => {
             if (e.button !== 0 || e.target !== container) return;
             e.preventDefault();
             let startX = e.clientX, startY = e.clientY;
@@ -2819,6 +2966,29 @@
             document.addEventListener('mousemove', onMouseMove);
             document.addEventListener('mouseup', onMouseUp);
           });
+          if (!isMobile) container.addEventListener('touchstart', e => {
+            if (e.target !== container) return;
+            e.preventDefault();
+            let startX = e.touches[0].clientX, startY = e.touches[0].clientY;
+            let origLeft = parseInt(container.style.left) || 0;
+            let origTop = parseInt(container.style.top) || 0;
+            function onMove(ev) {
+              const t = ev.touches[0];
+              container.style.left = origLeft + (t.clientX - startX) + 'px';
+              container.style.top = origTop + (t.clientY - startY) + 'px';
+            }
+            function onEnd() {
+              document.removeEventListener('touchmove', onMove);
+              document.removeEventListener('touchend', onEnd);
+              sec.imgX = parseInt(container.style.left) || 0;
+              sec.imgY = parseInt(container.style.top) || 0;
+              saveData();
+              updateDefPosition();
+              positionExtraImages();
+            }
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd);
+          }, { passive: false });
           img.onload = () => {
             if (sec.imgWidth && sec.imgHeight) {
               container.style.width = sec.imgWidth + 'px';
@@ -2832,7 +3002,7 @@
             updateDefPosition();
             renderExtraImages(sec);
           };
-          overlay.ondblclick = evt => {
+          if (!isMobile) overlay.ondblclick = evt => {
             if (evt.metaKey) return;
             const rect = img.getBoundingClientRect();
             const x = evt.clientX - rect.left;
@@ -2857,11 +3027,12 @@
             mark.style.overflow      = 'auto';
             mark.style.whiteSpace    = 'nowrap';
             mark.style.textOverflow  = 'ellipsis';
-            mark.style.cursor = 'move';
-            mark.style.resize = 'both';
+            mark.style.cursor = isMobile ? 'default' : 'move';
+            mark.style.resize = isMobile ? 'none' : 'both';
             mark.style.userSelect = 'none';
             mark.style.webkitUserSelect = 'none';
             mark.style.msUserSelect = 'none';
+            mark.style.touchAction = isMobile ? 'auto' : 'none';
             let defIdx = -1;
             if (sec.definitions && sec.definitions.length) {
               defIdx = sec.definitions.findIndex(d => d.labelText === lbl.text);
@@ -2923,11 +3094,18 @@
             mark.style.height = lbl.h + 'px';
             mark.style.fontSize = lbl.fontSize + 'px';
             mark.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
-            mark.addEventListener('mouseup', () => {
-              lbl.w = mark.offsetWidth;
-              lbl.h = mark.offsetHeight;
-              saveData();
-            });
+            if (!isMobile) {
+              mark.addEventListener('mouseup', () => {
+                lbl.w = mark.offsetWidth;
+                lbl.h = mark.offsetHeight;
+                saveData();
+              });
+              mark.addEventListener('touchend', () => {
+                lbl.w = mark.offsetWidth;
+                lbl.h = mark.offsetHeight;
+                saveData();
+              });
+            }
             mark.ondblclick = evt => {
               evt.stopPropagation();
               evt.preventDefault();
@@ -2957,170 +3135,194 @@
                 saveData();
               }
             };
-            mark.onmousedown = evt => {
-              if (evt.button !== 0) return;
-              evt.preventDefault();
-              let startX = evt.clientX, startY = evt.clientY;
-              const origX = lbl.x, origY = lbl.y;
-              function onMouseMove(e) {
-                lbl.x = origX + (e.clientX - startX);
-                lbl.y = origY + (e.clientY - startY);
-                mark.style.left = lbl.x + 'px';
-                mark.style.top = lbl.y + 'px';
-              }
-              function onMouseUp(e) {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-                saveData();
-              }
-              document.addEventListener('mousemove', onMouseMove);
-              document.addEventListener('mouseup', onMouseUp);
-            };
-          });
-          let svgOverlay = overlay.querySelector('svg');
-          if (!svgOverlay) {
-            svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
-            overlay.appendChild(svgOverlay);
-          } else {
-            while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
-          }
-          if (sec.arrows) {
-            sec.arrows.forEach((a, idx) => {
-              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-              const arrowLength = a.width * 3;
-              const arrowWidth = a.width * 2;
-              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
-              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-              line.setAttribute('x1', a.x1);
-              line.setAttribute('y1', a.y1);
-              line.setAttribute('x2', lineEndX);
-              line.setAttribute('y2', lineEndY);
-              line.setAttribute('stroke', a.color);
-              line.setAttribute('stroke-width', a.width);
-              line.setAttribute('pointer-events', 'all');
-              svgOverlay.appendChild(line);
-              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
-              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
-              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
-              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
-              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
-              const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-              polygon.setAttribute('points', points);
-              polygon.setAttribute('fill', a.color);
-              polygon.setAttribute('pointer-events', 'all');
-              svgOverlay.appendChild(polygon);
-              [line, polygon].forEach(el => {
-                el.addEventListener('contextmenu', evt => {
-                  if (!evt.metaKey) return;
-                  evt.preventDefault();
-                  if (confirm('Delete this arrow?')) {
-                    sec.arrows.splice(idx, 1);
-                    saveData();
-                    loadSection();
-                    return;
-                  }
-                });
-                el.addEventListener('dblclick', evt => {
-                  try {
-                    if (!evt.metaKey) return;
-                    evt.preventDefault();
-                    const existingPopup = document.getElementById('arrowEditPopup');
-                    if (existingPopup) existingPopup.remove();
-                    const popup = document.createElement('div');
-                    popup.id = 'arrowEditPopup';
-                    popup.style.position = 'absolute';
-                    const overlayRect = overlay.getBoundingClientRect();
-                    const fixedLeft = overlayRect.left + 50;
-                    const fixedTop = overlayRect.top + 50;
-                    popup.style.left = `${fixedLeft}px`;
-                    popup.style.top = `${fixedTop}px`;
-                    popup.style.transform = 'translate(-50%, -100%)';
-                    popup.style.transformOrigin = 'bottom center';
-                    popup.style.background = '#fff';
-                    popup.style.border = '1px solid #7f8c8d';
-                    popup.style.borderRadius = '4px';
-                    popup.style.padding = '8px';
-                    popup.style.zIndex = '10000';
-                    popup.innerHTML = `
-                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                        Color: <input type="color" id="arrowColorPicker" value="${a.color}">
-                      </label>
-                      <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
-                        Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
-                      </label>
-                      <div style="text-align:right;">
-                        <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
-                        <button id="arrowCancelBtn">Cancel</button>
-                      </div>
-                    `;
-                    popup.addEventListener('dblclick', evt2 => {
-                      evt2.stopPropagation();
-                    });
-                    overlay.appendChild(popup);
-                    document.getElementById('arrowSaveBtn').onclick = () => {
-                      const colorVal = document.getElementById('arrowColorPicker').value;
-                      const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
-                      if (colorVal && !isNaN(widthVal) && widthVal > 0) {
-                        sec.arrows[idx].color = colorVal;
-                        sec.arrows[idx].width = widthVal;
-                        saveData();
-                        loadSection();
-                      }
-                    };
-                    document.getElementById('arrowCancelBtn').onclick = () => {
-                      popup.remove();
-                    };
-                  } catch (err) {
-                    console.error('Arrow popup handler error:', err);
-                  }
-                });
-              });
-            });
-          }
-          let drawing = false;
-          let startX = 0, startY = 0;
-          let tempLine = null;
-          overlay.addEventListener('mousedown', evt => {
-            if (!evt.metaKey || evt.button !== 0) return;
-            const rect = img.getBoundingClientRect();
-            startX = evt.clientX - rect.left;
-            startY = evt.clientY - rect.top;
-            drawing = true;
-            tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            tempLine.setAttribute('x1', startX);
-            tempLine.setAttribute('y1', startY);
-            tempLine.setAttribute('x2', startX);
-            tempLine.setAttribute('y2', startY);
-            tempLine.setAttribute('stroke', '#e74c3c');
-            tempLine.setAttribute('stroke-width', '2');
-            svgOverlay.appendChild(tempLine);
-            evt.preventDefault();
-          });
-          overlay.addEventListener('mousemove', evt => {
-            if (!drawing) return;
-            const rect = img.getBoundingClientRect();
-            const currX = evt.clientX - rect.left;
-            const currY = evt.clientY - rect.top;
-            tempLine.setAttribute('x2', currX);
-            tempLine.setAttribute('y2', currY);
-          });
-          document.addEventListener('mouseup', evt => {
-            if (!drawing) return;
-            drawing = false;
-            const rect = img.getBoundingClientRect();
-            const endX = evt.clientX - rect.left;
-            const endY = evt.clientY - rect.top;
-            svgOverlay.removeChild(tempLine);
-            tempLine = null;
-            if (endX !== startX || endY !== startY) {
-              if (!sec.arrows) sec.arrows = [];
-              sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
-              saveData();
-              loadSection();
+            if (!isMobile) {
+              mark.onmousedown = evt => {
+                if (evt.button !== 0) return;
+                evt.preventDefault();
+                let startX = evt.clientX, startY = evt.clientY;
+                const origX = lbl.x, origY = lbl.y;
+                function onMouseMove(e) {
+                  lbl.x = origX + (e.clientX - startX);
+                  lbl.y = origY + (e.clientY - startY);
+                  mark.style.left = lbl.x + 'px';
+                  mark.style.top = lbl.y + 'px';
+                }
+                function onMouseUp(e) {
+                  document.removeEventListener('mousemove', onMouseMove);
+                  document.removeEventListener('mouseup', onMouseUp);
+                  saveData();
+                }
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+              };
+              mark.ontouchstart = evt => {
+                evt.preventDefault();
+                const touch = evt.touches[0];
+                let startX = touch.clientX, startY = touch.clientY;
+                const origX = lbl.x, origY = lbl.y;
+                function onMove(e) {
+                  const t = e.touches[0];
+                  lbl.x = origX + (t.clientX - startX);
+                  lbl.y = origY + (t.clientY - startY);
+                  mark.style.left = lbl.x + 'px';
+                  mark.style.top = lbl.y + 'px';
+                }
+                function onEnd() {
+                  document.removeEventListener('touchmove', onMove);
+                  document.removeEventListener('touchend', onEnd);
+                  saveData();
+                }
+                document.addEventListener('touchmove', onMove, { passive: false });
+                document.addEventListener('touchend', onEnd);
+              };
             }
           });
+          if (!isMobile) {
+            let svgOverlay = overlay.querySelector('svg');
+            if (!svgOverlay) {
+              svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+              svgOverlay.setAttribute('style', 'position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;');
+              overlay.appendChild(svgOverlay);
+            } else {
+              while (svgOverlay.firstChild) svgOverlay.removeChild(svgOverlay.firstChild);
+            }
+            if (sec.arrows) {
+              sec.arrows.forEach((a, idx) => {
+                const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
+                const arrowLength = a.width * 3;
+                const arrowWidth = a.width * 2;
+                const lineEndX = a.x2 - arrowLength * Math.cos(angle);
+                const lineEndY = a.y2 - arrowLength * Math.sin(angle);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', a.x1);
+                line.setAttribute('y1', a.y1);
+                line.setAttribute('x2', lineEndX);
+                line.setAttribute('y2', lineEndY);
+                line.setAttribute('stroke', a.color);
+                line.setAttribute('stroke-width', a.width);
+                line.setAttribute('pointer-events', 'all');
+                svgOverlay.appendChild(line);
+                const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+                const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+                const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+                const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+                const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.setAttribute('points', points);
+                polygon.setAttribute('fill', a.color);
+                polygon.setAttribute('pointer-events', 'all');
+                svgOverlay.appendChild(polygon);
+                [line, polygon].forEach(el => {
+                  el.addEventListener('contextmenu', evt => {
+                    if (!evt.metaKey) return;
+                    evt.preventDefault();
+                    if (confirm('Delete this arrow?')) {
+                      sec.arrows.splice(idx, 1);
+                      saveData();
+                      loadSection();
+                      return;
+                    }
+                  });
+                  el.addEventListener('dblclick', evt => {
+                    try {
+                      if (!evt.metaKey) return;
+                      evt.preventDefault();
+                      const existingPopup = document.getElementById('arrowEditPopup');
+                      if (existingPopup) existingPopup.remove();
+                      const popup = document.createElement('div');
+                      popup.id = 'arrowEditPopup';
+                      popup.style.position = 'absolute';
+                      const overlayRect = overlay.getBoundingClientRect();
+                      const fixedLeft = overlayRect.left + 50;
+                      const fixedTop = overlayRect.top + 50;
+                      popup.style.left = `${fixedLeft}px`;
+                      popup.style.top = `${fixedTop}px`;
+                      popup.style.transform = 'translate(-50%, -100%)';
+                      popup.style.transformOrigin = 'bottom center';
+                      popup.style.background = '#fff';
+                      popup.style.border = '1px solid #7f8c8d';
+                      popup.style.borderRadius = '4px';
+                      popup.style.padding = '8px';
+                      popup.style.zIndex = '10000';
+                      popup.innerHTML = `
+                        <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                          Color: <input type="color" id="arrowColorPicker" value="${a.color}">
+                        </label>
+                        <label style="display:block;font-size:0.9rem;margin-bottom:4px;">
+                          Width: <input type="number" id="arrowWidthPicker" min="1" value="${a.width}" style="width:50px;">
+                        </label>
+                        <div style="text-align:right;">
+                          <button id="arrowSaveBtn" style="margin-right:4px;">Save</button>
+                          <button id="arrowCancelBtn">Cancel</button>
+                        </div>
+                      `;
+                      popup.addEventListener('dblclick', evt2 => {
+                        evt2.stopPropagation();
+                      });
+                      overlay.appendChild(popup);
+                      document.getElementById('arrowSaveBtn').onclick = () => {
+                        const colorVal = document.getElementById('arrowColorPicker').value;
+                        const widthVal = parseFloat(document.getElementById('arrowWidthPicker').value);
+                        if (colorVal && !isNaN(widthVal) && widthVal > 0) {
+                          sec.arrows[idx].color = colorVal;
+                          sec.arrows[idx].width = widthVal;
+                          saveData();
+                          loadSection();
+                        }
+                      };
+                      document.getElementById('arrowCancelBtn').onclick = () => {
+                        popup.remove();
+                      };
+                    } catch (err) {
+                      console.error('Arrow popup handler error:', err);
+                    }
+                  });
+                });
+              });
+            }
+            let drawing = false;
+            let startX = 0, startY = 0;
+            let tempLine = null;
+            overlay.addEventListener('mousedown', evt => {
+              if (!evt.metaKey || evt.button !== 0) return;
+              const rect = img.getBoundingClientRect();
+              startX = evt.clientX - rect.left;
+              startY = evt.clientY - rect.top;
+              drawing = true;
+              tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              tempLine.setAttribute('x1', startX);
+              tempLine.setAttribute('y1', startY);
+              tempLine.setAttribute('x2', startX);
+              tempLine.setAttribute('y2', startY);
+              tempLine.setAttribute('stroke', '#e74c3c');
+              tempLine.setAttribute('stroke-width', '2');
+              svgOverlay.appendChild(tempLine);
+              evt.preventDefault();
+            });
+            overlay.addEventListener('mousemove', evt => {
+              if (!drawing) return;
+              const rect = img.getBoundingClientRect();
+              const currX = evt.clientX - rect.left;
+              const currY = evt.clientY - rect.top;
+              tempLine.setAttribute('x2', currX);
+              tempLine.setAttribute('y2', currY);
+            });
+            document.addEventListener('mouseup', evt => {
+              if (!drawing) return;
+              drawing = false;
+              const rect = img.getBoundingClientRect();
+              const endX = evt.clientX - rect.left;
+              const endY = evt.clientY - rect.top;
+              svgOverlay.removeChild(tempLine);
+              tempLine = null;
+              if (endX !== startX || endY !== startY) {
+                if (!sec.arrows) sec.arrows = [];
+                sec.arrows.push({ x1: startX, y1: startY, x2: endX, y2: endY, color: '#e74c3c', width: 2 });
+                saveData();
+                loadSection();
+              }
+            });
+          }
           return;
         }
         // Reset Quill history *before* loading new content
@@ -3820,7 +4022,7 @@
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         ensureSectionImages(currentFolder, sec);
-        if (document.body.classList.contains('mobile') && sec.type !== 'label') {
+        if (document.body.classList.contains('mobile')) {
           editQuestionBtn.style.display = 'inline-block';
         } else {
           editQuestionBtn.style.display = 'none';
