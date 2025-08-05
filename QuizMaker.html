@@ -1321,15 +1321,8 @@
       function buildMobileFolderList() {
         const list = document.getElementById('mobileFolderList');
         list.innerHTML = '';
-        const unique = [];
-        const seen = new Set();
-        for (let i = data.folders.length - 1; i >= 0; i--) {
-          const f = data.folders[i];
-          if (!f || !f.name || seen.has(f.name)) continue;
-          seen.add(f.name);
-          unique.unshift({ f, i });
-        }
-        unique.forEach(({ f, i }) => {
+        data.folders.forEach((f, i) => {
+          if (!f || !f.name) return;
           const li = document.createElement('li');
           const header = document.createElement('div');
           header.className = 'folder-header';
