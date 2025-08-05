@@ -3839,6 +3839,8 @@
         // Highlight current section in left panel
         renderSections(lastSectionOrder);
 
+        updateHeader(titleText);
+
         if (sec.type === 'fill') {
           // quizContent already cleared and title appended above
           // Now append the fill content
@@ -3936,9 +3938,6 @@
           });
           return;
         }
-        // Compute title logic for all types (already done above)
-        // Update the main header to match the quiz question's title
-        updateHeader(titleText);
         if (sec.type === 'acronym') {
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
