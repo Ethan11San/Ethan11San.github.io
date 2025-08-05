@@ -2083,10 +2083,56 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawText": "",
+          "hidden": [
+            {
+              "word": "lift",
+              "occ": 1
+            },
+            {
+              "word": "Wingtip",
+              "occ": 1
+            },
+            {
+              "word": "Vortices",
+              "occ": 1
+            },
+            {
+              "word": "speed",
+              "occ": 1
+            },
+            {
+              "word": "Form",
+              "occ": 1
+            },
+            {
+              "word": "Drag",
+              "occ": 2
+            },
+            {
+              "word": "Skin",
+              "occ": 1
+            },
+            {
+              "word": "Friction",
+              "occ": 1
+            },
+            {
+              "word": "Drag",
+              "occ": 3
+            },
+            {
+              "word": "Interference",
+              "occ": 1
+            },
+            {
+              "word": "Drag",
+              "occ": 4
+            }
+          ],
+          "rawText": "Induced Drag\nByproduct of lift - Increases with Angle of Attack\nCause by Wingtip Vortices\nParasite Drags (3)\nIncreases with speed\nForm Drag - Shape of Aircraft\nSkin Friction Drag - Surface of Aircraft\nInterference Drag - Connecting Surfaces\n",
           "title": "Types of Drag",
-          "type": "fill"
+          "type": "fill",
+          "rawHtml": "<p><strong><u>Induced Drag</u></strong></p><p>Byproduct of lift - Increases with Angle of Attack</p><p>Cause by Wingtip Vortices</p><p><strong><u>Parasite Drags (3)</u></strong></p><p>Increases with speed</p><ul><li>Form Drag - Shape of Aircraft</li><li>Skin Friction Drag - Surface of Aircraft</li><li>Interference Drag - Connecting Surfaces</li></ul>"
         }
       ],
       "color": "#d9eb37"
@@ -3006,36 +3052,32 @@
           "alts": {},
           "hidden": [
             {
-              "occ": 1,
-              "word": "Center"
+              "word": "Center",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Weather"
+              "word": "Weather",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Advisory"
+              "word": "Advisory",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "2"
+              "word": "ARTCC",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "hazardous"
+              "word": "2",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "ARTCC"
-            },
-            {
-              "occ": 2,
-              "word": "2"
+              "word": "hazardous",
+              "occ": 1
             }
           ],
-          "rawHtml": "<p><strong>Center Weather Advisory</strong></p><p>Issued when there are hazardous conditions occurring in the next 2 hours and valid for 2 Hours.</p><p>Issued for things that normal SIGMETs and AIRMETs haven't covered or to supplement them.</p><p>Issued by ARTCC and Broadcast by ATC to warn pilots also available from FSS or datalink or online. </p>",
-          "rawText": "Center Weather Advisory\nIssued when there are hazardous conditions occurring in the next 2 hours and valid for 2 Hours.\nIssued for things that normal SIGMETs and AIRMETs haven't covered or to supplement them.\nIssued by ARTCC and Broadcast by ATC to warn pilots also available from FSS or datalink or online. \n",
+          "rawHtml": "<p><strong>Center Weather Advisory</strong></p><p>Issued for hazardous conditions not covered under AIRMETs or SIGMETs. </p><p>Used for 2 Hour periods.</p><p>Issued by ARTCC and Broadcast by ATC to warn pilots also available from FSS or datalink or online. </p>",
+          "rawText": "Center Weather Advisory\nIssued for hazardous conditions not covered under AIRMETs or SIGMETs. \nUsed for 2 Hour periods.\nIssued by ARTCC and Broadcast by ATC to warn pilots also available from FSS or datalink or online. \n",
           "title": "Center Weather Advisory (CWA)",
           "type": "fill"
         },
@@ -3769,9 +3811,30 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>Class D Airspace</p><p>Can be tailored to needs also but typical dimensions are 2500 AGL and a 4 NM Radius.</p><p>When tower closes airspace reverts to class E or G.</p><p>Required to Enter</p><p>Two Way radio communications - usually 10NM out, must hear tail number read back.</p><p>Speed limit for D and C within 2500 AGl and 4 NM is 200 KIAS.</p><p><br></p>",
-          "rawText": "Class D Airspace\nCan be tailored to needs also but typical dimensions are 2500 AGL and a 4 NM Radius.\nWhen tower closes airspace reverts to class E or G.\nRequired to Enter\nTwo Way radio communications - usually 10NM out, must hear tail number read back.\nSpeed limit for D and C within 2500 AGl and 4 NM is 200 KIAS.\n\n",
+          "hidden": [
+            {
+              "word": "4",
+              "occ": 1
+            },
+            {
+              "word": "2500",
+              "occ": 1
+            },
+            {
+              "word": "E",
+              "occ": 1
+            },
+            {
+              "word": "G.",
+              "occ": 1
+            },
+            {
+              "word": "200",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p><strong style=\"color: rgb(0, 71, 178);\">S</strong><strong>t</strong><strong style=\"color: rgb(0, 71, 178);\">a</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">da</strong><strong>r</strong><strong style=\"color: rgb(0, 71, 178);\">d </strong><strong style=\"color: rgb(0, 41, 102);\">D</strong><strong>i</strong><strong style=\"color: rgb(0, 71, 178);\">me</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">si</strong><strong>on</strong><strong style=\"color: rgb(0, 71, 178);\">s</strong></p><ul><li>4 NM Radius | 2500 AGL</li></ul><p><strong>Tower Closure</strong> —</p><p>Airspace reverts to class E or G.</p><p><strong>Entry Requirements</strong> —</p><ul><li>Two Way radios (Tail #)</li><li><em>Speed limit</em> for D and C within 2500 AGL and 4 NM is 200 KIAS.</li></ul>",
+          "rawText": "Standard Dimensions\n4 NM Radius | 2500 AGL\nTower Closure —\nAirspace reverts to class E or G.\nEntry Requirements —\nTwo Way radios (Tail #)\nSpeed limit for D and C within 2500 AGL and 4 NM is 200 KIAS.\n",
           "title": "Class D Airspace",
           "type": "fill"
         },
@@ -6444,48 +6507,44 @@
           "alts": {},
           "hidden": [
             {
-              "occ": 1,
-              "word": "Ground"
+              "word": "Ground",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "speed"
+              "word": "speed",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "11.3"
+              "word": "11.3",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "elevation"
+              "word": "elevation",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "2500"
+              "word": "2500",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "45"
+              "word": "45",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "squared"
+              "word": "squared",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "divided"
+              "word": "divided",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Eights"
+              "word": "95",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "on"
-            },
-            {
-              "occ": 1,
-              "word": "95"
+              "word": "tailwind",
+              "occ": 1
             }
           ],
           "rawHtml": "<p>Eights on Pylons</p><p>Pivotal altitude: Ground speed squared divided by 11.3 + elevation </p><p>Clean configuration </p><p>Doesn’t have the altitude restriction of 1500 AGL</p><p>Start at 2500 MSL</p><p>95 knots </p><p><br></p><p>Find two points </p><p>Get to pivotal altitude </p><p>Position for 45 degrees quartering tailwind </p><p>Bug heading. - entry heading is also exit heading </p><p>Fly until first point is abeam your shoulder</p><p>This has to be done with a crosswind from the points  </p><p>When ground speed goes down pitch goes down and vice versa</p><p>You fly about 5 seconds when you level out </p><p>If the point starts to get in front of your wing you push forward and if it moves back you pull back</p>",
@@ -6839,7 +6898,8 @@
           "title": "Wing Fire",
           "type": "fill"
         }
-      ]
+      ],
+      "color": "#942192"
     },
     {
       "name": "Acronyms",
