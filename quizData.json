@@ -6021,9 +6021,46 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>Visual (Eyes) - Most helpful, Center Cones that work best with high light and provide color, Rim Rods responsible for peripheral vision and work best at night.</p>",
-          "rawText": "Visual (Eyes) - Most helpful, Center Cones that work best with high light and provide color, Rim Rods responsible for peripheral vision and work best at night.\n",
+          "hidden": [
+            {
+              "word": "Visual",
+              "occ": 1
+            },
+            {
+              "word": "Vestibular",
+              "occ": 1
+            },
+            {
+              "word": "Kinesthetic",
+              "occ": 1
+            },
+            {
+              "word": "Center",
+              "occ": 1
+            },
+            {
+              "word": "Cones",
+              "occ": 1
+            },
+            {
+              "word": "Rim",
+              "occ": 1
+            },
+            {
+              "word": "Rods",
+              "occ": 1
+            },
+            {
+              "word": "Otolith",
+              "occ": 1
+            },
+            {
+              "word": "Semicircular",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p><strong>Visual</strong> (Eyes) - Most helpful</p><p><em>Contains -</em></p><ul><li>Center Cones that work best with high light and provide color</li><li>Rim Rods responsible for peripheral vision and work best at night.</li></ul><p><strong>Vestibular</strong> (Inner Ear)</p><p>Contains </p><ul><li>Otolith Organs (Crystals)</li><li>Semicircular Canals (Fluid)</li></ul><p><strong>Kinesthetic</strong> (Muscles, Skin)</p><p>Uses receptors in muscle and skin to sense position.</p>",
+          "rawText": "Visual (Eyes) - Most helpful\nContains -\nCenter Cones that work best with high light and provide color\nRim Rods responsible for peripheral vision and work best at night.\nVestibular (Inner Ear)\nContains \nOtolith Organs (Crystals)\nSemicircular Canals (Fluid)\nKinesthetic (Muscles, Skin)\nUses receptors in muscle and skin to sense position.\n",
           "title": "The Three Sensory Systems",
           "type": "fill"
         }
@@ -6848,16 +6885,20 @@
           "alts": {},
           "hidden": [
             {
-              "occ": 1,
-              "word": "123"
+              "word": "123",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "pretty"
+              "word": "pretty",
+              "occ": 1
+            },
+            {
+              "word": "Please",
+              "occ": 1
             }
           ],
-          "rawHtml": "<p>Testing tester 123 </p><p>Test me Please pretty</p>",
-          "rawText": "Testing tester 123 \nTest me Please pretty\n",
+          "rawHtml": "<p>Testing tester 123 </p><p>Test me Please pretty</p><p>hello test</p>",
+          "rawText": "Testing tester 123 \nTest me Please pretty\nhello test\n",
           "title": "Test Question #1",
           "type": "fill"
         },
