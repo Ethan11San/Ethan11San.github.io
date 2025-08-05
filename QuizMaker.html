@@ -283,7 +283,7 @@
       border-bottom: 1px dashed #3498db;
     }
     .popup-word:hover { background: #dfe6e9; }
-    #previewBtn, #saveSectionBtn, #addPictureBtn, #resumeQuizBtn {
+    #addPictureBtn, #resumeQuizBtn {
       margin-top: 12px;
       margin-right: 8px;
       padding: 8px 16px;
@@ -294,7 +294,7 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #previewBtn:hover, #saveSectionBtn:hover, #addPictureBtn:hover, #resumeQuizBtn:hover { background: #1e8449; }
+    #addPictureBtn:hover, #resumeQuizBtn:hover { background: #1e8449; }
 
     /* —— Alternate Answers UI —— */
     #altContainer {
@@ -348,6 +348,11 @@
     #quizArea, #quizContent {
       font-size: 1.2rem;
     }
+    #labelEditor img.main-image,
+    #quizContent img.main-image {
+      max-width: 100%;
+      height: auto;
+    }
     /* —— Fill-In Quiz Font & Size —— */
     #quizContent .blank input {
       font-size: inherit;
@@ -357,6 +362,7 @@
     #quizContent .blank {
       font-family: Arial, sans-serif;
     }
+    .blank-input { box-sizing: border-box; }
     /* —— Acronym Quiz Font & Width —— */
     #quizContent input[type="text"] {
       font-family: Arial, sans-serif;
@@ -697,8 +703,6 @@
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
-        <button id="previewBtn">Preview Words</button>
-        <button id="saveSectionBtn">Save Section</button>
         <button id="resumeQuizBtn" style="display:none;">Back to Quiz</button>
         <button id="addPictureBtn" style="display:none;">Add Picture</button>
       </div>
@@ -1922,8 +1926,7 @@
             quizAllBtn  = document.getElementById('quizAllBtn'),
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
-            previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
-            saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
+            previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -2858,6 +2861,25 @@
           const img = document.getElementById('labelImg');
           const overlay = document.getElementById('labelOverlay');
           const container = document.getElementById('labelContainer');
+          let baseWidth = 0, baseHeight = 0, editScale = 1;
+          img.onload = () => {
+            baseWidth  = sec.imgWidth || img.naturalWidth;
+            baseHeight = sec.imgHeight || img.naturalHeight;
+            container.style.width  = baseWidth + 'px';
+            container.style.height = baseHeight + 'px';
+            editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
+            container.style.transform = `scale(${editScale})`;
+            container.style.transformOrigin = 'top left';
+            updateDefPosition();
+            positionExtraImages();
+          };
+          window.addEventListener('resize', () => {
+            if (!baseWidth) return;
+            editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
+            container.style.transform = `scale(${editScale})`;
+            updateDefPosition();
+            positionExtraImages();
+          });
           if (window.ResizeObserver) {
             new ResizeObserver(() => { updateDefPosition(); positionExtraImages(); }).observe(container);
           }
@@ -3349,7 +3371,6 @@
         previewDiv.style.display = 'block';
         // The Quill version of loadSection will override the editor loading.
       }
-      previewBtn.onclick=()=>{ if(!ensureSelection())return; previewSection(); };
       // Normalize sec.hidden entries to objects { word, occ }
       function getHiddenEntries(sec, tokens) {
         const entries = Array.isArray(sec.hidden) ? sec.hidden : [];
@@ -3821,22 +3842,6 @@
         if (editorArea) editorArea.scrollTop = editorScrollTop;
         window.scrollTo(0, pageScrollTop);
       }
-      saveSectionBtn.onclick = async () => {
-        if (!ensureSelection()) return;
-        // For fill-in, rawHtml is already updated live on input.
-        // Only update rawText for non-label if needed (for legacy support)
-        const sec = data.folders[currentFolder].sections[currentSection];
-        if (sec.type !== 'label' && !sec.rawHtml) {
-          sec.rawText = editorDiv.innerText || '';
-        }
-        // sec.hidden is already updated in previewSection's click handler
-        await saveData();
-        renderSections(lastSectionOrder);
-        loadSection();
-        alert('Section saved ✔️');
-      };
-
-
       editModeBtn.onclick = () => {
         isQuizMode = false;
         enterEdit();
@@ -4196,15 +4201,12 @@
           quizContent.appendChild(titleElem);
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
+          wrapper.style.maxWidth = '100%';
           const img = document.createElement('img');
           img.className = 'main-image';
           img.src = sec.image;
-          if (sec.imgWidth) {
-            img.style.width = sec.imgWidth + 'px';
-            img.style.height = 'auto';
-          } else {
-            img.style.maxWidth = '100%';
-          }
+          img.style.width = '100%';
+          img.style.height = 'auto';
           wrapper.appendChild(img);
           let baseWidth = 0, baseHeight = 0;
           img.onload = () => {
