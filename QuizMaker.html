@@ -1525,6 +1525,8 @@
       // Fallback hosted copy for environments where local JSON can't be fetched
       const GITHUB_JSON_URL = 'https://Ethan11San.github.io/quizData.json';
       const GITHUB_IMAGE_URL = 'https://Ethan11San.github.io/imageData.json';
+      const RAW_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
+      const RAW_IMAGE_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/imageData.json';
       let data;
       let originalData;
       let staticMode = false;
@@ -1623,14 +1625,21 @@
           if (!resp2.ok) throw new Error('Static file response not OK');
           data = await resp2.json();
         } catch (staticErr) {
-          console.warn('Local quizData.json unavailable, attempting GitHub raw', staticErr);
+          console.warn('Local quizData.json unavailable, attempting GitHub', staticErr);
           try {
             const resp3 = await fetch(GITHUB_JSON_URL, { cache: 'no-store' });
-            if (!resp3.ok) throw new Error('GitHub raw response not OK');
+            if (!resp3.ok) throw new Error('GitHub Pages response not OK');
             data = await resp3.json();
           } catch (githubErr) {
-            console.error('Error loading quiz data from GitHub:', githubErr);
-            data = { folders: [] };
+            console.warn('Error loading quiz data from GitHub Pages', githubErr);
+            try {
+              const resp4 = await fetch(RAW_JSON_URL, { cache: 'no-store' });
+              if (!resp4.ok) throw new Error('GitHub raw response not OK');
+              data = await resp4.json();
+            } catch (rawErr) {
+              console.error('Error loading quiz data from GitHub', rawErr);
+              data = { folders: [] };
+            }
           }
         }
       }
@@ -1652,10 +1661,19 @@
             if (fallbackResp.ok) {
               imageData = await fallbackResp.json();
             } else {
-              console.warn('imageData.json not found or inaccessible');
+              throw new Error('GitHub Pages image response not OK');
             }
           } catch (err2) {
-            console.warn('Could not load imageData.json', err2);
+            try {
+              const rawResp = await fetch(RAW_IMAGE_URL, { cache: 'no-store' });
+              if (rawResp.ok) {
+                imageData = await rawResp.json();
+              } else {
+                console.warn('imageData.json not found or inaccessible');
+              }
+            } catch (err3) {
+              console.warn('Could not load imageData.json', err3);
+            }
           }
         }
       })();
