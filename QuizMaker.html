@@ -1634,16 +1634,20 @@
       }
 
       originalData = JSON.parse(JSON.stringify(data));
-      try {
-        const imgResp = await fetch('./imageData.json', { cache: 'no-store' });
-        if (imgResp.ok) {
-          imageData = await imgResp.json();
-        } else {
-          console.warn('imageData.json not found or inaccessible');
+
+      // Load image data in the background so the UI can render immediately.
+      (async () => {
+        try {
+          const imgResp = await fetch('./imageData.json', { cache: 'no-store' });
+          if (imgResp.ok) {
+            imageData = await imgResp.json();
+          } else {
+            console.warn('imageData.json not found or inaccessible');
+          }
+        } catch (err) {
+          console.warn('Could not load imageData.json', err);
         }
-      } catch (err) {
-        console.warn('Could not load imageData.json', err);
-      }
+      })();
       const stored = localStorage.getItem('quizDataLocal');
       if (stored) {
         try {
