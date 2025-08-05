@@ -1052,12 +1052,13 @@
               handle.addEventListener('mousedown', ev => {
                 ev.preventDefault();
                 const startX = ev.clientX;
-                const startY = ev.clientY;
                 const startW = wrap.offsetWidth;
-                const startH = wrap.offsetHeight;
+                const aspect = img.naturalHeight / img.naturalWidth || 1;
                 function onMove(mv) {
-                  wrap.style.width = (startW + (mv.clientX - startX)) + 'px';
-                  wrap.style.height = (startH + (mv.clientY - startY)) + 'px';
+                  const newW = startW + (mv.clientX - startX);
+                  const newH = newW * aspect;
+                  wrap.style.width = newW + 'px';
+                  wrap.style.height = newH + 'px';
                   img.style.width = '100%';
                   img.style.height = 'auto';
                   positionExtraImages();
@@ -2767,12 +2768,13 @@
                 handle.addEventListener('mousedown', ev => {
                   ev.preventDefault();
                   const startX = ev.clientX;
-                  const startY = ev.clientY;
                   const startW = container.offsetWidth;
-                  const startH = container.offsetHeight;
+                  const aspect = img.naturalHeight / img.naturalWidth || 1;
                   function onMouseMove(moveEv) {
-                    container.style.width = (startW + (moveEv.clientX - startX)) + 'px';
-                    container.style.height = (startH + (moveEv.clientY - startY)) + 'px';
+                    const newW = startW + (moveEv.clientX - startX);
+                    const newH = newW * aspect;
+                    container.style.width = newW + 'px';
+                    container.style.height = newH + 'px';
                     img.style.width = '100%';
                     img.style.height = 'auto';
                     positionExtraImages();
