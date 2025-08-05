@@ -3246,6 +3246,8 @@
       }
 
       function previewSection() {
+        const editorScrollTop = editorArea ? editorArea.scrollTop : 0;
+        const pageScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
         const sec = data.folders[currentFolder].sections[currentSection];
         // Use rawHtml if present, otherwise convert rawText to HTML with paragraphs
         const text = sec.rawHtml
@@ -3523,10 +3525,14 @@
             altContainer.appendChild(ai);
           }
         });
+        if (editorArea) editorArea.scrollTop = editorScrollTop;
+        window.scrollTo(0, pageScrollTop);
       }
 
       // —— Helper: build preview & alternate‑answer UI for a single definition ——
       function buildDefinitionPreview(defObj, previewDiv, altDiv) {
+        const editorScrollTop = editorArea ? editorArea.scrollTop : 0;
+        const pageScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
         const tokens = (defObj.rawText || '').split(/(\s+)/);
         defObj.hidden = defObj.hidden || [];
         defObj.alts   = defObj.alts   || {};
@@ -3595,6 +3601,8 @@
           altDiv.appendChild(label);
           altDiv.appendChild(ai);
         });
+        if (editorArea) editorArea.scrollTop = editorScrollTop;
+        window.scrollTo(0, pageScrollTop);
       }
       saveSectionBtn.onclick = async () => {
         if (!ensureSelection()) return;
