@@ -1340,6 +1340,13 @@
         return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
       }
 
+      function hideSafariBar() {
+        if (!isMobileDevice()) return;
+        setTimeout(() => window.scrollTo(0, 1), 100);
+      }
+      window.addEventListener('load', hideSafariBar);
+      window.addEventListener('orientationchange', hideSafariBar);
+
       function setupMobileUI() {
         buildMobileFolderList();
         document.getElementById('mobileSearch').addEventListener('input', handleMobileSearch);
@@ -4472,18 +4479,19 @@
             updateProgressIndicator();
             return;
           }
-          if (!multiFolderMode && currentSection < total - 1) {
-            currentSection++;
-            renderSections();
-            enterQuizQuestion();
-          } else if (!multiFolderMode) {
-            alert('🎉 All done!');
-            enterEdit();
-          }
-          updateProgressIndicator();
-        };
-        backBtn.onclick = () => {
-          const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
+        if (!multiFolderMode && currentSection < total - 1) {
+          currentSection++;
+          renderSections();
+          enterQuizQuestion();
+        } else if (!multiFolderMode) {
+          alert('🎉 All done!');
+          enterEdit();
+        }
+        updateProgressIndicator();
+        updateHeader();
+      };
+      backBtn.onclick = () => {
+        const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
           if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
             quizPos--;
             if (!multiFolderMode) {
@@ -4504,8 +4512,9 @@
               previewSection();
             }
           }
-          updateProgressIndicator();
-        };
+        updateProgressIndicator();
+        updateHeader();
+      };
       // --- Hint button logic ---
       hintBtn.onclick = () => {
         // Determine target: last focused blank, then active focus, then first incomplete
