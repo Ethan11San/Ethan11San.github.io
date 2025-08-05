@@ -559,6 +559,20 @@
       color: #fff;
       font-weight: 500;
     }
+
+    /* Compact side-by-side local storage buttons for desktop */
+    #desktopLocalBtns {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+    }
+    #desktopLocalBtns .copy-local-btn,
+    #desktopLocalBtns .clear-local-btn {
+      flex: 1;
+      padding: 6px;
+      margin-top: 0;
+      width: auto;
+    }
     #mobileRandomGo {
       margin-top: 12px;
       padding: 10px;
@@ -612,6 +626,10 @@
     <ul id="folders" class="nav"></ul>
     <input id="newFolderName" placeholder="New folder name">
     <button id="addFolderBtn">Add Folder</button>
+    <div id="desktopLocalBtns">
+      <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
+      <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
+    </div>
     <hr style="border:1px solid #34495e;opacity:.2;margin:20px 0;">
     <h3>Questions</h3>
     <div style="position: relative; margin-bottom: 8px;">
@@ -634,8 +652,6 @@
       <button id="addLabelBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Diagram</button>
       <button id="addAcronymBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Acronym</button>
       <button id="toggleDeleteBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">🗑️ Delete</button>
-      <button id="copyLocalBtnDesktop" class="copy-local-btn" style="grid-column:1/-1;">Copy Local Changes</button>
-      <button id="clearLocalBtnDesktop" class="clear-local-btn" style="grid-column:1/-1;">Clear Local Storage</button>
       <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
     </div>
   </div>
