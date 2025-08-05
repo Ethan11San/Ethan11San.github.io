@@ -1321,7 +1321,21 @@
       function buildMobileFolderList() {
         const list = document.getElementById('mobileFolderList');
         list.innerHTML = '';
-        data.folders.forEach((f, i) => {
+        // Maintain the original folder order defined in the source data.
+        const ordered = data.folders
+          .map((f, idx) => ({ folder: f, idx }))
+          .sort((a, b) => {
+            if (originalData && Array.isArray(originalData.folders)) {
+              const order = originalData.folders;
+              const ai = order.findIndex(of => of.name === a.folder.name);
+              const bi = order.findIndex(of => of.name === b.folder.name);
+              if (ai !== -1 && bi !== -1) return ai - bi;
+              if (ai !== -1) return -1;
+              if (bi !== -1) return 1;
+            }
+            return a.idx - b.idx;
+          });
+        ordered.forEach(({ folder: f, idx }) => {
           if (!f || !f.name) return;
           const li = document.createElement('li');
           const header = document.createElement('div');
@@ -1329,7 +1343,7 @@
           const cb = document.createElement('input');
           cb.type = 'checkbox';
           cb.className = 'folder-select';
-          cb.dataset.index = i;
+          cb.dataset.index = idx;
           const titleSpan = document.createElement('span');
           titleSpan.textContent = f.name;
           header.appendChild(cb);
@@ -1346,7 +1360,7 @@
                 syncCurrentSection();
                 if (typeof quill !== 'undefined') quill.blur();
               }
-              currentFolder = i;
+              currentFolder = idx;
               currentSection = si;
               multiFolderMode = false;
               enterQuizQuestion();
