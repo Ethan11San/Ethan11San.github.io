@@ -539,13 +539,23 @@
       color: #fff;
       font-weight: 500;
     }
-    #copyLocalBtn {
+    .copy-local-btn {
       margin-top: 12px;
       padding: 10px;
       width: 100%;
       border: none;
       border-radius: 4px;
       background: #8e44ad;
+      color: #fff;
+      font-weight: 500;
+    }
+    .clear-local-btn {
+      margin-top: 12px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      background: #e74c3c;
       color: #fff;
       font-weight: 500;
     }
@@ -592,7 +602,8 @@
     <ul id="mobileFolderList"><li class="loading">Loading folders...</li></ul>
     <ul id="mobileSearchResults" style="display:none;"></ul>
     <button id="mobileRandomBtn">Random Quiz</button>
-    <button id="copyLocalBtn">Copy Local Changes</button>
+    <button id="copyLocalBtn" class="copy-local-btn">Copy Local Changes</button>
+    <button id="clearLocalBtn" class="clear-local-btn">Clear Local Storage</button>
     <button id="mobileRandomGo">Go</button>
   </div>
 
@@ -623,6 +634,8 @@
       <button id="addLabelBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Diagram</button>
       <button id="addAcronymBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">+ Acronym</button>
       <button id="toggleDeleteBtn" style="padding: 4px 12px; white-space: normal; overflow-wrap: break-word; text-align: center; line-height: 1.2em;">🗑️ Delete</button>
+      <button id="copyLocalBtnDesktop" class="copy-local-btn" style="grid-column:1/-1;">Copy Local Changes</button>
+      <button id="clearLocalBtnDesktop" class="clear-local-btn" style="grid-column:1/-1;">Clear Local Storage</button>
       <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
     </div>
   </div>
@@ -1538,6 +1551,11 @@
       let originalData;
       let staticMode = false;
       let unsyncedChanges = false;
+      let copyLocalBtns = [], clearLocalBtns = [];
+      function updateLocalButtons() {
+        copyLocalBtns.forEach(btn => btn.disabled = !unsyncedChanges);
+        clearLocalBtns.forEach(btn => btn.disabled = !unsyncedChanges);
+      }
       let imageData = {};
       const isLocalEnv = ['localhost', '127.0.0.1'].includes(location.hostname);
 
@@ -1728,21 +1746,19 @@
             if (serialized.length > 4.5e6) throw new Error('Local data too large');
             localStorage.setItem('quizDataLocal', serialized);
             unsyncedChanges = true;
-            if (copyLocalBtn) copyLocalBtn.disabled = false;
           } else {
             localStorage.removeItem('quizDataLocal');
             unsyncedChanges = false;
-            if (copyLocalBtn) copyLocalBtn.disabled = true;
           }
         } catch (e) {
           console.warn('Failed to persist local quiz data, disabling local save', e);
           storageFull = true;
           unsyncedChanges = false;
-          if (copyLocalBtn) copyLocalBtn.disabled = true;
         }
+        updateLocalButtons();
       }
 
-      let copyLocalBtn, resumeQuizBtn;
+      let resumeQuizBtn;
       let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
@@ -1761,7 +1777,8 @@
             previewDiv = document.getElementById('preview'), previewBtn = document.getElementById('previewBtn'),
             saveSectionBtn = document.getElementById('saveSectionBtn'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
-      copyLocalBtn = document.getElementById('copyLocalBtn');
+      copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
+      clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
       resumeQuizBtn = document.getElementById('resumeQuizBtn');
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -1783,8 +1800,8 @@
 
       updateResumeQuizBtn();
 
-      copyLocalBtn.disabled = !unsyncedChanges;
-      copyLocalBtn.onclick = () => {
+      updateLocalButtons();
+      copyLocalBtns.forEach(btn => btn.onclick = () => {
         const storedData = localStorage.getItem('quizDataLocal');
         if (!storedData) {
           alert('No local changes to copy.');
@@ -1796,7 +1813,17 @@
             console.error('Clipboard error:', err);
             alert('Failed to copy: ' + err.message);
           });
-      };
+      });
+
+      clearLocalBtns.forEach(btn => btn.onclick = () => {
+        if (!unsyncedChanges) return;
+        if (confirm('Clear all local changes?')) {
+          localStorage.removeItem('quizDataLocal');
+          unsyncedChanges = false;
+          updateLocalButtons();
+          location.reload();
+        }
+      });
 
       resumeQuizBtn.onclick = () => {
         isQuizMode = true;
