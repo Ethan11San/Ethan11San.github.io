@@ -1522,7 +1522,9 @@
         }
       }
       // ----- Load persistent data, with static fallback -----
-      const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
+      // Fallback hosted copy for environments where local JSON can't be fetched
+      const GITHUB_JSON_URL = 'https://Ethan11San.github.io/quizData.json';
+      const GITHUB_IMAGE_URL = 'https://Ethan11San.github.io/imageData.json';
       let data;
       let originalData;
       let staticMode = false;
@@ -1642,10 +1644,19 @@
           if (imgResp.ok) {
             imageData = await imgResp.json();
           } else {
-            console.warn('imageData.json not found or inaccessible');
+            throw new Error('imageData.json not found');
           }
         } catch (err) {
-          console.warn('Could not load imageData.json', err);
+          try {
+            const fallbackResp = await fetch(GITHUB_IMAGE_URL, { cache: 'no-store' });
+            if (fallbackResp.ok) {
+              imageData = await fallbackResp.json();
+            } else {
+              console.warn('imageData.json not found or inaccessible');
+            }
+          } catch (err2) {
+            console.warn('Could not load imageData.json', err2);
+          }
         }
       })();
       const stored = localStorage.getItem('quizDataLocal');
