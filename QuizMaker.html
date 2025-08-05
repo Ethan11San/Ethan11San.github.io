@@ -1598,14 +1598,24 @@
 
       function stripImageData(obj) {
         if (typeof obj !== 'object' || obj === null) return obj;
-        delete obj.image;
+        if (Array.isArray(obj)) {
+          const arr = [];
+          obj.forEach((item, idx) => {
+            const val = stripImageData(item);
+            if (!(typeof val === 'object' && val !== null && Object.keys(val).length === 0)) {
+              arr[idx] = val;
+            }
+          });
+          return arr;
+        }
+        const out = {};
         Object.keys(obj).forEach(key => {
+          if (key === 'image') return;
           const val = stripImageData(obj[key]);
-          if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) {
-            delete obj[key];
-          }
+          if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) return;
+          out[key] = val;
         });
-        return obj;
+        return out;
       }
 
       if (isLocalEnv) {
