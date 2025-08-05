@@ -348,8 +348,7 @@
     #quizArea, #quizContent {
       font-size: 1.2rem;
     }
-    #labelEditor img.main-image,
-    #quizContent img.main-image {
+    #labelEditor img.main-image {
       max-width: 100%;
       height: auto;
     }
@@ -595,8 +594,8 @@
     body.mobile:not(.quiz-active) #main { display: none; }
     body.mobile:not(.quiz-active) #mobileStart { display: block; }
     body.mobile.quiz-active #header { cursor: pointer; }
-    /* Ensure quiz images scale to fit smaller screens */
-    #quizContent img {
+    /* Ensure quiz images scale to fit smaller screens (mobile only) */
+    body.mobile #quizContent img {
       max-width: 100%;
       height: auto;
     }
