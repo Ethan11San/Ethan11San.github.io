@@ -771,30 +771,24 @@
       function scaleLabels(container, baseWidth, baseHeight) {
         const img = container.querySelector('img');
         if (!img || !baseWidth || !baseHeight) return;
-        const scaleX = img.clientWidth / baseWidth;
-        const scaleY = img.clientHeight / baseHeight;
-        const uniScale = Math.min(scaleX, scaleY);
+        const scale = img.clientWidth / baseWidth;
         container.querySelectorAll('[data-orig-x]').forEach(el => {
           const x = parseFloat(el.dataset.origX);
           const y = parseFloat(el.dataset.origY);
-          el.style.left = (x * scaleX) + 'px';
-          el.style.top  = (y * scaleY) + 'px';
-          const useUniform = el.dataset.origW && el.dataset.origH &&
-            parseFloat(el.dataset.origW) === parseFloat(el.dataset.origH);
-          const wScale = useUniform ? uniScale : scaleX;
-          const hScale = useUniform ? uniScale : scaleY;
-          const fontScale = useUniform ? uniScale : scaleY;
+          el.style.left = (x * scale) + 'px';
+          el.style.top  = (y * scale) + 'px';
           if (el.dataset.origFont) {
-            el.style.fontSize = (parseFloat(el.dataset.origFont) * fontScale) + 'px';
+            el.style.fontSize = (parseFloat(el.dataset.origFont) * scale) + 'px';
           }
           if (el.dataset.origH) {
-            el.style.height = (parseFloat(el.dataset.origH) * hScale) + 'px';
-          }
-          if (el.dataset.origLineHeight) {
-            el.style.lineHeight = (parseFloat(el.dataset.origLineHeight) * hScale) + 'px';
+            const h = parseFloat(el.dataset.origH) * scale;
+            el.style.height = h + 'px';
+            if (el.dataset.origLineHeight) {
+              el.style.lineHeight = h + 'px';
+            }
           }
           if (el.dataset.origW) {
-            const scaledW = parseFloat(el.dataset.origW) * wScale;
+            const scaledW = parseFloat(el.dataset.origW) * scale;
             let needed = scaledW;
             const txt = el.value || el.textContent || '';
             if (txt) {
@@ -2865,23 +2859,32 @@
           img.onload = () => {
             baseWidth  = sec.imgWidth || img.naturalWidth;
             baseHeight = sec.imgHeight || img.naturalHeight;
-            container.style.width  = baseWidth + 'px';
-            container.style.height = baseHeight + 'px';
             editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
-            container.style.transform = `scale(${editScale})`;
-            container.style.transformOrigin = 'top left';
+            const dispW = baseWidth * editScale;
+            const dispH = baseHeight * editScale;
+            container.style.width  = dispW + 'px';
+            container.style.height = dispH + 'px';
+            img.style.width = dispW + 'px';
+            img.style.height = dispH + 'px';
+            scaleLabels(container, baseWidth, baseHeight);
             updateDefPosition();
             positionExtraImages();
           };
           window.addEventListener('resize', () => {
             if (!baseWidth) return;
             editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
-            container.style.transform = `scale(${editScale})`;
+            const dispW = baseWidth * editScale;
+            const dispH = baseHeight * editScale;
+            container.style.width  = dispW + 'px';
+            container.style.height = dispH + 'px';
+            img.style.width = dispW + 'px';
+            img.style.height = dispH + 'px';
+            scaleLabels(container, baseWidth, baseHeight);
             updateDefPosition();
             positionExtraImages();
           });
           if (window.ResizeObserver) {
-            new ResizeObserver(() => { updateDefPosition(); positionExtraImages(); }).observe(container);
+            new ResizeObserver(() => { updateDefPosition(); scaleLabels(container, baseWidth, baseHeight); positionExtraImages(); }).observe(container);
           }
           container.style.resize = 'none';
           if (sec.imgX != null && sec.imgY != null) {
@@ -2924,6 +2927,7 @@
                     container.style.height = newH + 'px';
                     img.style.width = '100%';
                     img.style.height = 'auto';
+                    scaleLabels(container, baseWidth, baseHeight);
                     positionExtraImages();
                   }
                   function onMouseUp() {
@@ -2935,6 +2939,7 @@
                     sec.imgHeight = container.offsetHeight;
                     saveData();
                     updateDefPosition();
+                    scaleLabels(container, baseWidth, baseHeight);
                     positionExtraImages();
                   }
                   document.addEventListener('mousemove', onMouseMove);
@@ -2952,6 +2957,7 @@
                     container.style.height = newH + 'px';
                     img.style.width = '100%';
                     img.style.height = 'auto';
+                    scaleLabels(container, baseWidth, baseHeight);
                     positionExtraImages();
                   }
                   function onEnd() {
@@ -2963,6 +2969,7 @@
                     sec.imgHeight = container.offsetHeight;
                     saveData();
                     updateDefPosition();
+                    scaleLabels(container, baseWidth, baseHeight);
                     positionExtraImages();
                   }
                   document.addEventListener('touchmove', onMove, { passive: false });
@@ -4331,6 +4338,16 @@
             inp.dataset.origFont = lbl.fontSize;
             inp.dataset.origW = calcW;
             inp.dataset.origH = calcH;
+            if (document.body.classList.contains('mobile')) {
+              inp.readOnly = true;
+              inp.addEventListener('click', () => {
+                const resp = prompt('Enter answer:', inp.value);
+                if (resp !== null) {
+                  inp.value = resp;
+                  inp.dispatchEvent(new Event('input'));
+                }
+              });
+            }
             labelInputs[lbl.text] = inp;
             inp.oninput = () => {
               const val = inp.value.trim().toLowerCase();
