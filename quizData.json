@@ -784,14 +784,6 @@
             {
               "occ": 2,
               "word": "compensation"
-            },
-            {
-              "occ": 1,
-              "word": "3"
-            },
-            {
-              "occ": 1,
-              "word": "18"
             }
           ],
           "rawHtml": "<p>Common Carriage</p><p>  ◊ Holding out to transport people or property from place to place for compensation or hire. </p><p><br></p><p>Private Carriage</p><p>  ◊ Transporting people or property from place to place for compensation or hire.</p><p>Doesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.</p>",
@@ -1555,6 +1547,10 @@
             {
               "occ": 1,
               "word": "inspection"
+            },
+            {
+              "occ": 1,
+              "word": "10"
             }
           ],
           "rawHtml": "<p>No difference in the inspection itself</p><p>Annuals need an A&amp;P with Inspection Authorization (IA)</p><p>100 Hours only need an A&amp;P</p><p>Annuals are certified as the Aircraft as a whole was inspected while</p><p>100 Hours should have a separate certification for each Airframe, Engine, and Prop</p><p>100 Hour be overflown by 10 hours to get to inspection location but counts for the next 100 hours</p><p>An annual can count as your 100 Hour but not the other way around</p>",
@@ -1609,6 +1605,14 @@
             {
               "occ": 1,
               "word": "log"
+            },
+            {
+              "occ": 1,
+              "word": "basic"
+            },
+            {
+              "occ": 1,
+              "word": "upkeep"
             }
           ],
           "rawHtml": "<p><strong><em>Part 43</em></strong></p><p>Preventative Maintenance can be performed by an owner / operator that holds at least a private pilot license.</p><p>Defined as simple or minor preservation operations or the replacement of small standard parts not involving complex assembly.</p><p>Anything not in part 43 appendix A paragraph C is not preventative maintenance,</p><p>However things like adding oil or adding air to tires is considered basic upkeep and not listed as preventative maintenance.</p><p>Must log work - Description | Date | Name, Signature, Cert Number, and kind of Cert for the person who did the work.</p>",
@@ -1953,7 +1957,11 @@
           "type": "fill"
         },
         {
-          "alts": {},
+          "alts": {
+            "strength_1": [
+              "Integrity"
+            ]
+          },
           "hidden": [
             {
               "occ": 1,
@@ -6023,9 +6031,22 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>You should not fly within 24 hours of going scuba diving.</p><p>Increased pressure under water causing nitrogen to dissolve in your tissues</p><p>At altitude with lower pressure this nitrogen tries to bubble and escape in joints and other areas causing extreme pain,</p><p>this is called the bends.</p><p><br></p>",
-          "rawText": "You should not fly within 24 hours of going scuba diving.\nIncreased pressure under water causing nitrogen to dissolve in your tissues\nAt altitude with lower pressure this nitrogen tries to bubble and escape in joints and other areas causing extreme pain,\nthis is called the bends.\n\n",
+          "hidden": [
+            {
+              "occ": 1,
+              "word": "24"
+            },
+            {
+              "occ": 1,
+              "word": "12"
+            },
+            {
+              "occ": 1,
+              "word": "nitrogen"
+            }
+          ],
+          "rawHtml": "<p>You should not fly within 24 hours of going scuba diving if controlled ascents are necessary.</p><p>Else should wait at least 12 hours.</p><p>Increased pressure under water causing nitrogen to dissolve in your tissues</p><p>At altitude with lower pressure this nitrogen tries to bubble and escape in joints and other areas causing extreme pain,</p><p>this is called the bends.</p>",
+          "rawText": "You should not fly within 24 hours of going scuba diving if controlled ascents are necessary.\\nElse should wait at least 12 hours.\\nIncreased pressure under water causing nitrogen to dissolve in your tissues\\nAt altitude with lower pressure this nitrogen tries to bubble and escape in joints and other areas causing extreme pain,\\nthis is called the bends.\\n",
           "title": "The Bends",
           "type": "fill"
         },
@@ -6076,9 +6097,14 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>Have to report accidents or serious incidents immediately to nearest NTSB office, then a written report within 10 days.</p><p>Accident - Death or serious injury (Hospitalization more than 48 hours within 7 days) to person</p><p> or substantial damage (Requiring major repair or replacement of component) to aircraft.</p><p><br></p>",
-          "rawText": "Have to report accidents or serious incidents immediately to nearest NTSB office, then a written report within 10 days.\nAccident - Death or serious injury (Hospitalization more than 48 hours within 7 days) to person\n or substantial damage (Requiring major repair or replacement of component) to aircraft.\n\n",
+          "hidden": [
+            {
+              "occ": 1,
+              "word": "830.5"
+            }
+          ],
+          "rawHtml": "<p>FAR - 830.5</p><p>Have to report accidents or serious incidents immediately to nearest NTSB office, then a written report within 10 days.</p><p>Accident - Death or serious injury (Hospitalization more than 48 hours within 7 days) to person</p><p> or substantial damage (Requiring major repair or replacement of component) to aircraft.</p>",
+          "rawText": "FAR - 830.5\\nHave to report accidents or serious incidents immediately to nearest NTSB office, then a written report within 10 days.\\nAccident - Death or serious injury (Hospitalization more than 48 hours within 7 days) to person\\n or substantial damage (Requiring major repair or replacement of component) to aircraft.\\n",
           "title": "Incidents / Accidents",
           "type": "fill"
         },
