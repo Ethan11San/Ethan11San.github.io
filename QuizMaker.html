@@ -381,19 +381,6 @@
       background: #fff;
       cursor: move;
     }
-
-    #definitionOverlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow-y: auto;
-      background: #fff;
-      z-index: 1000;
-      padding: 20px;
-    }
     /* Grading full border for correct inputs */
     input.correct {
       border: 2px solid #27ae60 !important;
@@ -2880,9 +2867,7 @@
             baseHeight = sec.imgHeight || img.naturalHeight;
             container.style.width  = baseWidth + 'px';
             container.style.height = baseHeight + 'px';
-            editScale = Math.min(1,
-              (window.innerWidth - 20) / baseWidth,
-              (window.innerHeight - 200) / baseHeight);
+            editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
             container.style.transform = `scale(${editScale})`;
             container.style.transformOrigin = 'top left';
             updateDefPosition();
@@ -2890,9 +2875,7 @@
           };
           window.addEventListener('resize', () => {
             if (!baseWidth) return;
-            editScale = Math.min(1,
-              (window.innerWidth - 20) / baseWidth,
-              (window.innerHeight - 200) / baseHeight);
+            editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
             container.style.transform = `scale(${editScale})`;
             updateDefPosition();
             positionExtraImages();
@@ -4067,10 +4050,6 @@
         quizContent.innerHTML = '';
         quizContent.style.borderColor = '';
         quizContent.appendChild(titleElem);
-        quizContent.style.padding = '24px';
-        quizContent.style.border = '2px solid #bdc3c7';
-        const existingOverlay = document.getElementById('definitionOverlay');
-        if (existingOverlay) existingOverlay.remove();
         
         // Highlight current section in left panel
         renderSections(lastSectionOrder);
@@ -4220,40 +4199,35 @@
         if (sec.type === 'label') {
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
-          quizContent.style.padding = '0';
-          quizContent.style.border = 'none';
-          let defOverlay = document.getElementById('definitionOverlay');
-          if (!defOverlay) {
-            defOverlay = document.createElement('div');
-            defOverlay.id = 'definitionOverlay';
-            quizArea.appendChild(defOverlay);
-          }
-          defOverlay.style.display = 'none';
-          defOverlay.innerHTML = '';
-
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
+          wrapper.style.maxWidth = '100%';
           const img = document.createElement('img');
           img.className = 'main-image';
           img.src = sec.image;
           img.style.width = '100%';
-          img.style.height = '100%';
+          img.style.height = 'auto';
           wrapper.appendChild(img);
           let baseWidth = 0, baseHeight = 0;
-
-          const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          svgOverlay.style.position = 'absolute';
-          svgOverlay.style.top = '0';
-          svgOverlay.style.left = '0';
-          svgOverlay.style.width = '100%';
-          svgOverlay.style.height = '100%';
-          svgOverlay.style.pointerEvents = 'none';
-          wrapper.appendChild(svgOverlay);
-
-          const applyScale = () => {
-            const scale = Math.min(window.innerWidth / baseWidth, (window.innerHeight - 40) / baseHeight);
-            wrapper.style.width = baseWidth * scale + 'px';
-            wrapper.style.height = baseHeight * scale + 'px';
+          img.onload = () => {
+            baseWidth = sec.imgWidth || img.naturalWidth;
+            baseHeight = sec.imgHeight || img.naturalHeight;
+            svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
+            positionExtras(wrapper);
+            scaleLabels(wrapper, baseWidth, baseHeight);
+            if (sec.extraImages) {
+              const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
+              wraps.forEach((w, idx) => {
+                const ex = sec.extraImages[idx];
+                const exImg = w.querySelector('img');
+                const bw = ex.imgWidth || exImg.naturalWidth;
+                const bh = ex.imgHeight || exImg.naturalHeight;
+                scaleLabels(w, bw, bh);
+              });
+            }
+          };
+          window.addEventListener('resize', () => {
+            if (!baseWidth || !baseHeight) return;
             scaleLabels(wrapper, baseWidth, baseHeight);
             if (sec.extraImages) {
               const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
@@ -4266,46 +4240,17 @@
               });
             }
             positionExtras(wrapper);
-          };
-
-          img.onload = () => {
-            baseWidth = sec.imgWidth || img.naturalWidth;
-            baseHeight = sec.imgHeight || img.naturalHeight;
-            svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
-            applyScale();
-          };
-          window.addEventListener('resize', () => {
-            if (!baseWidth || !baseHeight) return;
-            applyScale();
           });
 
-          // Draw saved arrows
-          if (sec.arrows) {
-            sec.arrows.forEach(a => {
-              const angle = Math.atan2(a.y2 - a.y1, a.x2 - a.x1);
-              const arrowLength = a.width * 3;
-              const arrowWidth = a.width * 2;
-              const lineEndX = a.x2 - arrowLength * Math.cos(angle);
-              const lineEndY = a.y2 - arrowLength * Math.sin(angle);
-              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-              line.setAttribute('x1', a.x1);
-              line.setAttribute('y1', a.y1);
-              line.setAttribute('x2', lineEndX);
-              line.setAttribute('y2', lineEndY);
-              line.setAttribute('stroke', a.color);
-              line.setAttribute('stroke-width', a.width);
-              svgOverlay.appendChild(line);
-              const xBase1 = a.x2 - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
-              const yBase1 = a.y2 - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
-              const xBase2 = a.x2 - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
-              const yBase2 = a.y2 - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
-              const points = `${a.x2},${a.y2} ${xBase1},${yBase1} ${xBase2},${yBase2}`;
-              const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-              polygon.setAttribute('points', points);
-              polygon.setAttribute('fill', a.color);
-              svgOverlay.appendChild(polygon);
-            });
-          }
+          // Create SVG overlay for arrows
+          const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svgOverlay.style.position = 'absolute';
+          svgOverlay.style.top = '0';
+          svgOverlay.style.left = '0';
+          svgOverlay.style.width = '100%';
+          svgOverlay.style.height = '100%';
+          svgOverlay.style.pointerEvents = 'none';
+          wrapper.appendChild(svgOverlay);
 
           // Draw saved arrows
           if (sec.arrows) {
@@ -4392,6 +4337,7 @@
               const ok = val === lbl.text.trim().toLowerCase();
 
               if (ok) {
+                // Replace the input with the revealed label text
                 const txt = document.createElement('span');
                 txt.textContent = lbl.text;
                 txt.style.position = 'absolute';
@@ -4421,27 +4367,40 @@
                 txt.style.display = 'inline-block';
                 txt.addEventListener('contextmenu', deleteLabel);
                 wrapper.appendChild(txt);
-                inp.remove();
+                inp.remove();               // get rid of the input box
                 scaleLabels(wrapper, baseWidth, baseHeight);
+                // Auto‑focus the first blank of this label's definition or next label
+                let entry = titleMap[lbl.text];
+                if (entry && entry.para && entry.para._inputs && entry.para._inputs.length) {
+                  const nextB = entry.para._inputs.find(b => !b.classList.contains('correct'));
+                  if (nextB) {
+                    setTimeout(() => nextB.focus(),0);
+                  } else {
+                    const idx = entry.idx + 1;
+                    const nextLbl = labelOrder[idx];
+                    if (nextLbl) setTimeout(() => nextLbl.focus(),0);
+                  }
+                } else {
+                  const idx = entry ? entry.idx + 1 : 0;
+                  const nextLbl = labelOrder[idx];
+                  if (nextLbl) setTimeout(() => nextLbl.focus(),0);
+                }
 
-                const entry = titleMap[lbl.text];
+                // Reveal corresponding definition title now that this label is correct
+                entry = titleMap[lbl.text];
                 if (entry && !entry.revealed) {
                   entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
                   entry.revealed = true;
                   if (entry.hide) entry.para.style.display = '';
                 }
-
-                if (definitionMap[lbl.text]) {
-                  showDefinition(lbl.text);
-                } else {
-                  checkCompletion();
-                }
               } else {
+                // keep feedback colours while user is typing
                 inp.classList.remove('correct');
                 inp.classList.add('incorrect');
                 inp.style.borderColor = '#c0392b';
               }
 
+              // Re‑evaluate overall correctness outline
               const remainingInputs = Array.from(wrapper.querySelectorAll('input'));
               if (remainingInputs.length === 0) {
                 img.style.outline = '2px solid #27ae60';
@@ -4495,22 +4454,22 @@
           });
 
           quizContent.appendChild(wrapper);
-          const definitionMap = {};
-          const storedDefs = [];
-          let defsHdr = null;
-
+          // ---- Render mini‑fill definitions under the image ----
           if (sec.definitions && sec.definitions.length) {
-            defsHdr = document.createElement('h4');
+            const defsHdr = document.createElement('h4');
             defsHdr.textContent = 'Definitions';
             defsHdr.style.marginTop = '20px';
+            quizContent.appendChild(defsHdr);
 
             sec.definitions.forEach((def, dIndex) => {
+              // Prefix each definition with its number – label name stays hidden until solved
               const para = document.createElement('p');
               para.style.marginBottom = '12px';
               if (def.hideUntilSolved) para.style.display = 'none';
               const title = document.createElement('strong');
               title.textContent = (dIndex + 1) + '. ';
               para.appendChild(title);
+              // Register this definition's title for reveal
               titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
@@ -4538,20 +4497,40 @@
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
+                // Track focus for definition blanks too
                 inp.addEventListener('focus', () => { lastHintTarget = inp; });
+                // keep track of blanks for this definition
                 if (!para._inputs) para._inputs = [];
                 para._inputs.push(inp);
+                // Match font family & size to regular fill‑in blanks
                 const qcStyle = window.getComputedStyle(quizContent);
                 inp.style.fontFamily = qcStyle.fontFamily;
                 inp.style.fontSize   = qcStyle.fontSize;
                 inp.style.padding    = '0 2px';
+                // Space → next blank (if correct); Tab → previous; Backspace at start → previous
                 inp.addEventListener('keydown', e => {
-                  const inputs = Array.from(para._inputs);
+                  const inputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   const idx = inputs.indexOf(inp);
-                  if (e.key === ' ') { e.preventDefault(); if (inp.classList.contains('correct') && idx < inputs.length - 1) inputs[idx + 1].focus(); }
-                  if (e.key === 'Tab') { e.preventDefault(); if (idx > 0) inputs[idx - 1].focus(); }
-                  if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) { e.preventDefault(); const prev = inputs[idx - 1]; prev.focus(); const len = prev.value.length; prev.setSelectionRange(len, len); }
+                  if (e.key === ' ') {
+                    e.preventDefault();
+                    if (inp.classList.contains('correct') && idx < inputs.length - 1) {
+                      inputs[idx + 1].focus();
+                    }
+                  }
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (idx > 0) inputs[idx - 1].focus();
+                  }
+                  if (e.key === 'Backspace' && inp.selectionStart === 0 && inp.selectionEnd === 0 && inp.value === '' && idx > 0) {
+                    e.preventDefault();
+                    const prev = inputs[idx - 1];
+                    prev.focus();
+                    const len = prev.value.length;
+                    prev.setSelectionRange(len, len);
+                  }
                 });
+
+                // width sizing identical to regular fill‑ins
                 const meas = document.createElement('span');
                 meas.style.visibility = 'hidden';
                 meas.style.position   = 'absolute';
@@ -4572,48 +4551,25 @@
                     if (nextB) {
                       setTimeout(() => nextB.focus(),0);
                     } else {
-                      defOverlay.style.display = 'none';
-                      quizContent.style.display = 'block';
-                      definitionMap[def.labelText].solved = true;
-                      checkCompletion();
+                      const nextLbl = labelOrder[dIndex+1];
+                      if (nextLbl) setTimeout(() => nextLbl.focus(),0);
                     }
+                  }
+                  const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
+                  if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
+                    quizContent.style.borderColor = '#27ae60';
+                    markQuestionCompleted();
+                  } else {
+                    quizContent.style.borderColor = '';
                   }
                 };
 
                 span.appendChild(inp);
                 para.appendChild(span);
               });
-              definitionMap[def.labelText] = { para, solved:false };
-              storedDefs.push(para);
+              quizContent.appendChild(para);
             });
           }
-
-          function showDefinition(labelText) {
-            const defObj = definitionMap[labelText];
-            if (!defObj || defObj.solved) { checkCompletion(); return; }
-            defOverlay.innerHTML = '';
-            const head = document.createElement('h4');
-            head.textContent = labelText;
-            defOverlay.appendChild(head);
-            defOverlay.appendChild(defObj.para);
-            quizContent.style.display = 'none';
-            defOverlay.style.display = 'block';
-            const first = defObj.para._inputs ? defObj.para._inputs.find(b => !b.classList.contains('correct')) : null;
-            if (first) setTimeout(() => first.focus(),0);
-          }
-
-          function checkCompletion() {
-            const labelsLeft = wrapper.querySelectorAll('input.blank-input').length;
-            const allDefsSolved = Object.values(definitionMap).every(d => d.solved);
-            if (labelsLeft === 0 && allDefsSolved) {
-              if (defsHdr) quizContent.appendChild(defsHdr);
-              storedDefs.forEach(p => quizContent.appendChild(p));
-              quizContent.style.display = 'block';
-              quizContent.style.borderColor = '#27ae60';
-              markQuestionCompleted();
-            }
-          }
-
           labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
           if (sec.extraImages) {
             renderQuizExtras(sec, wrapper);
