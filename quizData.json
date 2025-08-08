@@ -1647,34 +1647,34 @@
           "arrows": [],
           "definitions": [
             {
-            "alts": {},
-            "hidden": [
-              {
-                "occ": 1,
-                "word": "middle"
-              }
-            ],
-            "hideUntilSolved": true,
-            "labelText": "Camber",
-            "rawText": "A line connecting the leading and trailing edge of the wing that goes through the exact middle of the wing showing its curvature. \nThe more curvature (camber) the faster air goes over top which generates more lift but also drag. At lower airspeeds the drag is less noticeable and you get the extra lift and lower stall speeds.\nHowever at higher speeds drag is increased a lot and would outweigh the benefits. Thats why we use flaps at lower speeds - they increase the camber of the wing."
-          },
-          {
-            "alts": {},
-            "hidden": [
-              {
-                "occ": 1,
-                "word": "straight"
-              }
-            ],
-            "hideUntilSolved": true,
-            "labelText": "Chord",
-            "rawText": "Connects the leading and trailing edges of the wings in a straight line. \nUsed to measure AoA - The angle between the chord line and relative wind. "
-          }
+              "alts": {},
+              "hidden": [
+                {
+                  "occ": 1,
+                  "word": "middle"
+                }
+              ],
+              "hideUntilSolved": true,
+              "labelText": "Camber",
+              "rawText": "A line connecting the leading and trailing edge of the wing that goes through the exact middle of the wing showing its curvature. \nThe more curvature (camber) the faster air goes over top which generates more lift but also drag. At lower airspeeds the drag is less noticeable and you get the extra lift and lower stall speeds.\nHowever at higher speeds drag is increased a lot and would outweigh the benefits. Thats why we use flaps at lower speeds - they increase the camber of the wing."
+            },
+            {
+              "alts": {},
+              "hidden": [
+                {
+                  "occ": 1,
+                  "word": "straight"
+                }
+              ],
+              "hideUntilSolved": true,
+              "labelText": "Chord",
+              "rawText": "Connects the leading and trailing edges of the wings in a straight line. \nUsed to measure AoA - The angle between the chord line and relative wind. "
+            }
           ],
           "hidden": [],
           "image": "",
-          "imgHeight": 991,
-          "imgWidth": 1231,
+          "imgHeight": 928,
+          "imgWidth": 1229,
           "labels": [
             {
               "fontSize": 20,
@@ -1992,22 +1992,6 @@
           "hidden": [
             {
               "occ": 1,
-              "word": "Spiraling"
-            },
-            {
-              "occ": 1,
-              "word": "Slipstream"
-            },
-            {
-              "occ": 1,
-              "word": "P"
-            },
-            {
-              "occ": 1,
-              "word": "Factor"
-            },
-            {
-              "occ": 1,
               "word": "Torque"
             },
             {
@@ -2049,22 +2033,6 @@
             {
               "occ": 1,
               "word": "offset"
-            },
-            {
-              "occ": 1,
-              "word": "downward"
-            },
-            {
-              "occ": 1,
-              "word": "blade"
-            },
-            {
-              "occ": 1,
-              "word": "vertical"
-            },
-            {
-              "occ": 1,
-              "word": "stabilizer"
             },
             {
               "occ": 1,
@@ -4049,6 +4017,38 @@
             {
               "occ": 1,
               "word": "TTS"
+            },
+            {
+              "occ": 1,
+              "word": "Special"
+            },
+            {
+              "occ": 2,
+              "word": "Flight"
+            },
+            {
+              "occ": 1,
+              "word": "Rules"
+            },
+            {
+              "occ": 2,
+              "word": "Area,"
+            },
+            {
+              "occ": 1,
+              "word": "Terminal"
+            },
+            {
+              "occ": 1,
+              "word": "Radar"
+            },
+            {
+              "occ": 1,
+              "word": "Service"
+            },
+            {
+              "occ": 1,
+              "word": "Area,"
             }
           ],
           "rawHtml": "<p>Acronyms - MCPRAWN TTS</p><ul><li>Military Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.</li><li>Controlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. </li><li>Prohibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.</li><li>Restricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. </li><li>Alert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.</li><li>Waring Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.</li><li>National Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.</li></ul><p>Intercept Procedures if you accidentally bust restricted airspace -</p><p>Squawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. </p><p>*Bonus <strong>ADIZ</strong> - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>RSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>emporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.</p><p> <strong style=\"color: rgb(230, 0, 0);\">S</strong><strong>FRA</strong> - Special Flight Rules Area, Unique air traffic control rules apply here.</p>",
