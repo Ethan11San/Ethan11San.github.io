@@ -1963,15 +1963,17 @@
       }
 
       updateLocalButtons();
-      copyLocalBtns.forEach(btn => btn.onclick = async () => {
-        await verifyAndClearLocal();
+      copyLocalBtns.forEach(btn => btn.onclick = () => {
         const storedData = localStorage.getItem('quizDataLocal');
         if (!storedData) {
           alert('No local changes to copy.');
           return;
         }
         navigator.clipboard.writeText(storedData)
-          .then(() => alert('Local changes copied to clipboard.'))
+          .then(() => {
+            alert('Local changes copied to clipboard.');
+            verifyAndClearLocal();
+          })
           .catch(err => {
             console.error('Clipboard error:', err);
             alert('Failed to copy: ' + err.message);
