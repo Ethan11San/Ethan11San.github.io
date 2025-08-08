@@ -578,6 +578,7 @@
       margin-top: 0;
       width: auto;
     }
+    #resumeRandomBtn,
     #mobileRandomGo {
       margin-top: 12px;
       padding: 10px;
@@ -623,6 +624,7 @@
     <button id="mobileRandomBtn">Random Quiz</button>
     <button id="copyLocalBtn" class="copy-local-btn">Copy Local Changes</button>
     <button id="clearLocalBtn" class="clear-local-btn">Clear Local Storage</button>
+    <button id="resumeRandomBtn" style="display:none;">Resume</button>
     <button id="mobileRandomGo">Go</button>
   </div>
 
@@ -1433,10 +1435,31 @@
       let multiFolderMode = false;
       let multiProgress = { completed: new Set(), total: 0 };
       let randomSelectMode = false;
+      let resumeRandomBtn;
       // Progress is kept only for this session (no localStorage)
 
       function saveProgress() {
         // Previously saved to localStorage, but persistence was removed
+      }
+
+      function saveRandomQuizState() {
+        if (!multiFolderMode) return;
+        const state = {
+          order: quizOrder,
+          completed: Array.from(multiProgress.completed)
+        };
+        localStorage.setItem('lastRandomQuiz', JSON.stringify(state));
+        updateResumeButton();
+      }
+
+      function updateResumeButton() {
+        if (!resumeRandomBtn) return;
+        const hasState = !!localStorage.getItem('lastRandomQuiz');
+        if (hasState && document.body.classList.contains('mobile') && !document.body.classList.contains('quiz-active')) {
+          resumeRandomBtn.style.display = 'block';
+        } else {
+          resumeRandomBtn.style.display = 'none';
+        }
       }
 
       function updateProgressIndicator() {
@@ -1615,6 +1638,7 @@
         startMobileQuizScreen();
         showQuiz();
         updateProgressIndicator();
+        saveRandomQuizState();
       }
 
       function startMobileQuizScreen() {
@@ -1633,6 +1657,12 @@
         if (multiFolderMode) {
           if (!multiProgress.completed.has(quizPos)) {
             multiProgress.completed.add(quizPos);
+          }
+          if (multiProgress.completed.size === multiProgress.total) {
+            localStorage.removeItem('lastRandomQuiz');
+            updateResumeButton();
+          } else {
+            saveRandomQuizState();
           }
         } else {
           let prog = quizProgress[currentFolder];
@@ -1921,7 +1951,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
+            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
       resumeQuizBtn = document.getElementById('resumeQuizBtn');
@@ -1944,6 +1974,7 @@
       }
 
       updateResumeQuizBtn();
+      updateResumeButton();
 
       async function verifyAndClearLocal() {
         try {
@@ -1984,11 +2015,40 @@
         if (!unsyncedChanges) return;
         if (confirm('Clear all local changes?')) {
           localStorage.removeItem('quizDataLocal');
+          localStorage.removeItem('lastRandomQuiz');
           unsyncedChanges = false;
           updateLocalButtons();
+          updateResumeButton();
           location.reload();
         }
       });
+
+      resumeRandomBtn.onclick = () => {
+        const stored = localStorage.getItem('lastRandomQuiz');
+        if (!stored) return;
+        try {
+          const state = JSON.parse(stored);
+          multiFolderMode = true;
+          isQuizMode = true;
+          quizOrder = state.order || [];
+          multiProgress = { completed: new Set(state.completed || []), total: quizOrder.length };
+          quizPos = quizOrder.findIndex((_, i) => !multiProgress.completed.has(i));
+          if (quizPos === -1) {
+            localStorage.removeItem('lastRandomQuiz');
+            updateResumeButton();
+            return;
+          }
+          editorArea.style.display = 'none';
+          quizArea.style.display = 'block';
+          startMobileQuizScreen();
+          showQuiz();
+          updateProgressIndicator();
+          updateResumeButton();
+        } catch (e) {
+          localStorage.removeItem('lastRandomQuiz');
+          updateResumeButton();
+        }
+      };
 
       resumeQuizBtn.onclick = () => {
         isQuizMode = true;
@@ -2008,6 +2068,7 @@
         currentSection = null;
         buildMobileFolderList();
         updateResumeQuizBtn();
+        updateResumeButton();
       };
 
       headerElem.onclick = () => {
