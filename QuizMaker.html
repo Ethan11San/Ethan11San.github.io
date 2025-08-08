@@ -506,6 +506,14 @@
       border-bottom: 1px solid #ccc;
       cursor: pointer;
     }
+    #mobileFolderList > li > div.folder-header .completion-counter {
+      margin-left: auto;
+      background: #3498db;
+      color: #fff;
+      border-radius: 12px;
+      padding: 2px 6px;
+      font-size: 0.8rem;
+    }
     #mobileFolderList.random-select > li > div.folder-header {
       padding-left: 40px;
     }
@@ -1436,6 +1444,24 @@
       let multiProgress = { completed: new Set(), total: 0 };
       let randomSelectMode = false;
       let resumeRandomBtn;
+      let completionCounts = JSON.parse(localStorage.getItem('folderCompletionCounts') || '{}');
+      let justCompleted = false;
+
+      function getCompletionCount(idx) {
+        return completionCounts[String(idx)] || 0;
+      }
+      function setCompletionCount(idx, val) {
+        completionCounts[String(idx)] = val;
+        localStorage.setItem('folderCompletionCounts', JSON.stringify(completionCounts));
+      }
+      function incrementCompletionCount(idx) {
+        setCompletionCount(idx, getCompletionCount(idx) + 1);
+        updateFolderCounterDisplay(idx);
+      }
+      function updateFolderCounterDisplay(idx) {
+        const el = document.querySelector(`#mobileFolderList li[data-index="${idx}"] .completion-counter`);
+        if (el) el.textContent = getCompletionCount(idx);
+      }
       // Progress is kept only for this session (no localStorage)
 
       function saveProgress() {
@@ -1515,6 +1541,7 @@
         ordered.forEach(({ folder: f, idx }) => {
           if (!f || !f.name) return;
           const li = document.createElement('li');
+          li.dataset.index = idx;
           const header = document.createElement('div');
           header.className = 'folder-header';
           const cb = document.createElement('input');
@@ -1525,6 +1552,10 @@
           titleSpan.textContent = f.name;
           header.appendChild(cb);
           header.appendChild(titleSpan);
+          const countSpan = document.createElement('span');
+          countSpan.className = 'completion-counter';
+          countSpan.textContent = getCompletionCount(idx);
+          header.appendChild(countSpan);
           const secList = document.createElement('ul');
           secList.style.display = 'none';
           f.sections.forEach((s, si) => {
@@ -1661,6 +1692,7 @@
           if (multiProgress.completed.size === multiProgress.total) {
             localStorage.removeItem('lastRandomQuiz');
             updateResumeButton();
+            alert('🎉 Quiz complete!');
           } else {
             saveRandomQuizState();
           }
@@ -1672,10 +1704,21 @@
           } else {
             prog.total = data.folders[currentFolder].sections.length;
           }
+          const before = prog.completed.size;
           if (!prog.completed.has(currentSection)) {
             prog.completed.add(currentSection);
           }
-          saveProgress();
+          if (prog.completed.size === prog.total && before !== prog.total) {
+            alert('🎉 Section complete!');
+            incrementCompletionCount(currentFolder);
+            prog.completed.clear();
+            prog.order = null;
+            prog.pos = 0;
+            saveProgress();
+            justCompleted = true;
+          } else {
+            saveProgress();
+          }
         }
         if (document.body.classList.contains('mobile') && quizOrder.length === 1) {
           homeBtn.style.display = 'block';
@@ -4768,16 +4811,8 @@
         nextBtn.onclick = () => {
           const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
           const total = multiFolderMode ? null : secs.length;
-          if (quizOrder.length > 1 && questionCompleted()) {
+          if (questionCompleted() && !justCompleted) {
             markQuestionCompleted();
-            if (!multiFolderMode) {
-              const prog = quizProgress[currentFolder];
-              if (prog && prog.completed.size === prog.total) {
-                alert('🎉 Section complete!');
-              }
-            } else if (multiProgress.completed.size === multiProgress.total) {
-              alert('🎉 Quiz complete!');
-            }
           }
           if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
             quizPos++;
@@ -4799,6 +4834,7 @@
         }
         updateProgressIndicator();
         updateHeader();
+        justCompleted = false;
       };
       backBtn.onclick = () => {
         const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
