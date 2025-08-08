@@ -1647,19 +1647,29 @@
           "arrows": [],
           "definitions": [
             {
-              "alts": {},
-              "hidden": [],
-              "hideUntilSolved": false,
-              "labelText": "Camber",
-              "rawText": "A line connecting the leading and trailing edge of the wing that stays in the middle of the wing showing its curvature. \nThe more curvature (camber) the faster air goes over top which generates more lift but also drag. At lower airspeeds the drag is less noticeable and you get the extra lift and lower stall speeds.\nHowever at higher speeds drag is increased a lot and would outweigh the benefits. Thats why we use flaps at lower speeds - they increase the camber of the wing."
-            },
-            {
-              "alts": {},
-              "hidden": [],
-              "hideUntilSolved": false,
-              "labelText": "Chord",
-              "rawText": "Connects the leading and trailing edges of the wings in a straight line. \nUsed to measure AoA - The angle between the chord line and relative wind. "
-            }
+            "alts": {},
+            "hidden": [
+              {
+                "occ": 1,
+                "word": "middle"
+              }
+            ],
+            "hideUntilSolved": true,
+            "labelText": "Camber",
+            "rawText": "A line connecting the leading and trailing edge of the wing that goes through the exact middle of the wing showing its curvature. \nThe more curvature (camber) the faster air goes over top which generates more lift but also drag. At lower airspeeds the drag is less noticeable and you get the extra lift and lower stall speeds.\nHowever at higher speeds drag is increased a lot and would outweigh the benefits. Thats why we use flaps at lower speeds - they increase the camber of the wing."
+          },
+          {
+            "alts": {},
+            "hidden": [
+              {
+                "occ": 1,
+                "word": "straight"
+              }
+            ],
+            "hideUntilSolved": true,
+            "labelText": "Chord",
+            "rawText": "Connects the leading and trailing edges of the wings in a straight line. \nUsed to measure AoA - The angle between the chord line and relative wind. "
+          }
           ],
           "hidden": [],
           "image": "",
