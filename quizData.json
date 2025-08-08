@@ -41,6 +41,10 @@
             {
               "occ": 1,
               "word": "ID"
+            },
+            {
+              "occ": 1,
+              "word": "PIC"
             }
           ],
           "rawHtml": "<p>Required to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p>",
