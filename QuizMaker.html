@@ -573,14 +573,17 @@
       font-weight: 500;
     }
 
-    /* Compact side-by-side local storage buttons for desktop */
-    #desktopLocalBtns {
+    /* Compact side-by-side local storage buttons for desktop and mobile */
+    #desktopLocalBtns,
+    #mobileLocalBtns {
       margin-top: 8px;
       display: flex;
       gap: 8px;
     }
     #desktopLocalBtns .copy-local-btn,
-    #desktopLocalBtns .clear-local-btn {
+    #desktopLocalBtns .clear-local-btn,
+    #mobileLocalBtns .copy-local-btn,
+    #mobileLocalBtns .clear-local-btn {
       flex: 1;
       padding: 6px;
       margin-top: 0;
@@ -630,8 +633,10 @@
     <ul id="mobileFolderList"><li class="loading">Loading folders...</li></ul>
     <ul id="mobileSearchResults" style="display:none;"></ul>
     <button id="mobileRandomBtn">Random Quiz</button>
-    <button id="copyLocalBtn" class="copy-local-btn">Copy Local Changes</button>
-    <button id="clearLocalBtn" class="clear-local-btn">Clear Local Storage</button>
+    <div id="mobileLocalBtns">
+      <button id="copyLocalBtn" class="copy-local-btn">Copy Local Changes</button>
+      <button id="clearLocalBtn" class="clear-local-btn">Clear Local Storage</button>
+    </div>
     <button id="resumeRandomBtn" style="display:none;">Resume</button>
     <button id="mobileRandomGo">Go</button>
   </div>
