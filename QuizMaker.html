@@ -2040,6 +2040,10 @@
           if (!diff || !Object.keys(diff).length) {
             localStorage.removeItem('quizDataLocal');
             unsyncedChanges = false;
+            // Reset baseline data so future saves don't keep re-copying
+            // already-synced changes.
+            data = remote;
+            originalData = JSON.parse(JSON.stringify(remote));
             updateLocalButtons();
           }
         } catch (e) {
