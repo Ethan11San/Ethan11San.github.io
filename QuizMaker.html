@@ -1941,47 +1941,14 @@
           }
         }
       })();
-      const stored = localStorage.getItem('quizDataLocal');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed && Object.keys(parsed).length) {
-            applyChanges(data, parsed);
-            let remaining = computeDiff(originalData, data);
-            if (remaining) remaining = stripImageData(remaining);
-            if (!remaining || !Object.keys(remaining).length) {
-              localStorage.removeItem('quizDataLocal');
-            } else {
-              unsyncedChanges = true;
-            }
-          } else {
-            localStorage.removeItem('quizDataLocal');
-          }
-        } catch (e) {
-          console.warn('Invalid local quiz data, ignoring', e);
-          localStorage.removeItem('quizDataLocal');
-        }
-      }
+      localStorage.removeItem('quizDataLocal');
 
-      let storageFull = false;
       function saveData() {
-        if (storageFull) return;
         let diff = computeDiff(originalData, data);
         if (diff) diff = stripImageData(diff);
-        try {
-          if (diff && Object.keys(diff).length) {
-            const serialized = JSON.stringify(diff);
-            // ~5MB quota, bail out early if approaching limit
-            if (serialized.length > 4.5e6) throw new Error('Local data too large');
-            localStorage.setItem('quizDataLocal', serialized);
-            unsyncedChanges = true;
-          } else {
-            localStorage.removeItem('quizDataLocal');
-            unsyncedChanges = false;
-          }
-        } catch (e) {
-          console.warn('Failed to persist local quiz data, disabling local save', e);
-          storageFull = true;
+        if (diff && Object.keys(diff).length) {
+          unsyncedChanges = true;
+        } else {
           unsyncedChanges = false;
         }
         updateLocalButtons();
@@ -2030,38 +1997,18 @@
       updateResumeQuizBtn();
       updateResumeButton();
 
-      async function verifyAndClearLocal() {
-        try {
-          const resp = await fetch(RAW_JSON_URL, { cache: 'no-store' });
-          if (!resp.ok) return;
-          const remote = await resp.json();
-          let diff = computeDiff(remote, data);
-          if (diff) diff = stripImageData(diff);
-          if (!diff || !Object.keys(diff).length) {
-            localStorage.removeItem('quizDataLocal');
-            unsyncedChanges = false;
-            // Reset baseline data so future saves don't keep re-copying
-            // already-synced changes.
-            data = remote;
-            originalData = JSON.parse(JSON.stringify(remote));
-            updateLocalButtons();
-          }
-        } catch (e) {
-          console.warn('Failed to verify remote data', e);
-        }
-      }
-
       updateLocalButtons();
       copyLocalBtns.forEach(btn => btn.onclick = () => {
-        const storedData = localStorage.getItem('quizDataLocal');
-        if (!storedData) {
+        let diff = computeDiff(originalData, data);
+        if (diff) diff = stripImageData(diff);
+        if (!diff || !Object.keys(diff).length) {
           alert('No local changes to copy.');
           return;
         }
-        navigator.clipboard.writeText(storedData)
+        const serialized = JSON.stringify(diff);
+        navigator.clipboard.writeText(serialized)
           .then(() => {
             alert('Local changes copied to clipboard.');
-            verifyAndClearLocal();
           })
           .catch(err => {
             console.error('Clipboard error:', err);
@@ -2072,7 +2019,6 @@
       clearLocalBtns.forEach(btn => btn.onclick = () => {
         if (!unsyncedChanges) return;
         if (confirm('Clear all local changes?')) {
-          localStorage.removeItem('quizDataLocal');
           localStorage.removeItem('lastRandomQuiz');
           unsyncedChanges = false;
           updateLocalButtons();
