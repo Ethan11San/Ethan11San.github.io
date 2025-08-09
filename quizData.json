@@ -2665,31 +2665,21 @@
               "word": "Shear"
             },
             {
-              "occ": 1,
-              "word": "Sustained"
-            },
-            {
-              "occ": 1,
               "word": "Surface"
             },
             {
-              "occ": 1,
               "word": "Winds"
             },
             {
-              "occ": 1,
               "word": "30"
             },
             {
-              "occ": 1,
               "word": "1000"
             },
             {
-              "occ": 1,
               "word": "3"
             },
             {
-              "occ": 1,
               "word": "50"
             },
             {
@@ -2701,16 +2691,13 @@
               "word": "Icing"
             },
             {
-              "occ": 1,
               "word": "moderate"
             },
             {
-              "occ": 1,
               "word": "6"
             },
             {
-              "occ": 2,
-              "word": "6"
+              "occ": 2
             }
           ],
           "rawHtml": "<p><strong>Airmen's Meteorological Information</strong></p><p>AIRMETs are forecast weather advisories depicting where moderate hazards may occur.</p><p>Issued every 6 hours and valid for 6 hours</p><p>Three Types:</p><p>Tango - Moderate Turbulence | Low Level Wind Shear | Sustained Surface Winds of 30 Knots or more.</p><p>Sierra - Ceilings Less than 1000 ft and/or visibility less than 3 SM affecting over 50 % of the area.</p><p>Zulu - Moderate Icing | Provides Freezing Level Heights</p>",
@@ -3003,22 +2990,9 @@
           "definitions": [
             {
               "alts": {},
-              "hidden": [
-                {
-                  "occ": 1,
-                  "word": "5"
-                },
-                {
-                  "occ": 1,
-                  "word": "Light"
-                },
-                {
-                  "occ": 1,
-                  "word": "green"
-                }
-              ],
+              "hidden": [],
               "labelText": "Convective Outlook Chart",
-              "rawText": "Issued 5 times a day and shows the probability for severe and non severe convection activity.\nLight green TSTM areas are non severe and the rest show different probabilities for severe thunderstorms - Wing Gusts over 50 Knots, tornados, hail over 1 inch.\n"
+              "rawText": "Issued 5 times a day and shows the probability for severe and non severe convection activity.\nLight green TSTM areas are non severe and the rest show different probabilities for severe thunderstorms - Wind Gusts over 50 Knots, tornados, hail over 1 inch.\n"
             }
           ],
           "hidden": [],
@@ -3644,22 +3618,10 @@
             {
               "occ": 1,
               "word": "Out."
-            },
-            {
-              "occ": 1,
-              "word": "Mach"
-            },
-            {
-              "occ": 1,
-              "word": "1"
-            },
-            {
-              "occ": 1,
-              "word": "10000ft"
             }
           ],
-          "rawHtml": "<p>Starts at 18000 MSL and goes up to FL600 out to 12 NM off the coast.</p><p>In Class A you use Flight levels and pressure altitudes - set your altimeter to 29.92</p><p>Requirements -</p><p>Current Instrument rating in an IFR approved aircraft on an IFR flight plan.</p><p>Mode C transponder with ADS-B Out.</p><p>Airspeed less than Mach 1 above 10000ft MSL.</p>",
-          "rawText": "Starts at 18000 MSL and goes up to FL600 out to 12 NM off the coast.\nIn Class A you use Flight levels and pressure altitudes - set your altimeter to 29.92\nRequirements -\nCurrent Instrument rating in an IFR approved aircraft on an IFR flight plan.\nMode C transponder with ADS-B Out.\nAirspeed less than Mach 1 above 10000ft MSL.\n",
+          "rawHtml": "<p>Starts at 18000 MSL and goes up to FL600 out to 12 NM off the coast.</p><p>In Class A you use Flight levels and pressure altitudes - set your altimeter to 29.92</p><p>Requirements -</p><p>Current Instrument rating in an IFR approved aircraft on an IFR flight plan.</p><p>Mode C transponder with ADS-B Out.</p>",
+          "rawText": "Starts at 18000 MSL and goes up to FL600 out to 12 NM off the coast.\nIn Class A you use Flight levels and pressure altitudes - set your altimeter to 29.92\nRequirements -\nCurrent Instrument rating in an IFR approved aircraft on an IFR flight plan.\nMode C transponder with ADS-B Out.\n",
           "title": "Class A Airspace",
           "type": "fill"
         },
@@ -3930,8 +3892,8 @@
               "word": "uncontrolled"
             }
           ],
-          "rawHtml": "<p>Class G airspace in uncontrolled - ATC services are not available.</p><p>Could fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.</p><p>If there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.</p>",
-          "rawText": "Class G airspace in uncontrolled - ATC services are not available.\nCould fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.\nIf there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.\n",
+          "rawHtml": "<p>Class G airspace is uncontrolled -> ATC services are not available.</p><p>Could fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.</p><p>If there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.</p>",
+          "rawText": "Class G airspace is uncontrolled -> ATC services are not available.\nCould fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.\nIf there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.\n",
           "title": "Class G airspace",
           "type": "fill"
         },
@@ -3955,10 +3917,6 @@
               "word": "Area"
             },
             {
-              "occ": 1,
-              "word": "Waring"
-            },
-            {
               "occ": 3,
               "word": "Area"
             },
@@ -3967,7 +3925,6 @@
               "word": "Military"
             },
             {
-              "occ": 1,
               "word": "Operation"
             },
             {
@@ -3987,11 +3944,9 @@
               "word": "Controlled"
             },
             {
-              "occ": 1,
               "word": "Firing"
             },
             {
-              "occ": 1,
               "word": "Areas"
             },
             {
@@ -4011,19 +3966,15 @@
               "word": "Flight"
             },
             {
-              "occ": 1,
               "word": "Restrictions"
             },
             {
-              "occ": 1,
               "word": "MCPRAWN"
             },
             {
-              "occ": 1,
               "word": "TTS"
             },
             {
-              "occ": 1,
               "word": "Special"
             },
             {
@@ -4043,20 +3994,17 @@
               "word": "Terminal"
             },
             {
-              "occ": 1,
               "word": "Radar"
             },
             {
-              "occ": 1,
               "word": "Service"
             },
             {
-              "occ": 1,
               "word": "Area,"
             }
           ],
-          "rawHtml": "<p>Acronyms - MCPRAWN TTS</p><ul><li>Military Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.</li><li>Controlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. </li><li>Prohibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.</li><li>Restricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. </li><li>Alert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.</li><li>Waring Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.</li><li>National Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.</li></ul><p>Intercept Procedures if you accidentally bust restricted airspace -</p><p>Squawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. </p><p>*Bonus <strong>ADIZ</strong> - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>RSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>emporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.</p><p> <strong style=\"color: rgb(230, 0, 0);\">S</strong><strong>FRA</strong> - Special Flight Rules Area, Unique air traffic control rules apply here.</p>",
-          "rawText": "Acronyms - MCPRAWN TTS\nMilitary Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.\nControlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. \nProhibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.\nRestricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. \nAlert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.\nWaring Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.\nNational Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.\nIntercept Procedures if you accidentally bust restricted airspace -\nSquawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. \n*Bonus ADIZ - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.\n TRSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.\n Temporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.\n SFRA - Special Flight Rules Area, Unique air traffic control rules apply here.\n",
+          "rawHtml": "<p>Acronyms - MCPRAWN TTS</p><ul><li>Military Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.</li><li>Controlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. </li><li>Prohibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.</li><li>Restricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. </li><li>Alert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.</li><li>Warning Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.</li><li>National Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.</li></ul><p>Intercept Procedures if you accidentally bust restricted airspace -</p><p>Squawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. </p><p>*Bonus <strong>ADIZ</strong> - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>RSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>emporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.</p><p> <strong style=\"color: rgb(230, 0, 0);\">S</strong><strong>FRA</strong> - Special Flight Rules Area, Unique air traffic control rules apply here.</p>",
+          "rawText": "Acronyms - MCPRAWN TTS\nMilitary Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.\nControlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. \nProhibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.\nRestricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. \nAlert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.\nWarning Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.\nNational Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.\nIntercept Procedures if you accidentally bust restricted airspace -\nSquawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. \n*Bonus ADIZ - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.\n TRSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.\n Temporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.\n SFRA - Special Flight Rules Area, Unique air traffic control rules apply here.\n",
           "title": "Special Use Airspace",
           "type": "fill"
         },
@@ -4078,6 +4026,10 @@
             {
               "occ": 2,
               "word": "500"
+            },
+            {
+              "word": "2000",
+              "occ": 2
             }
           ],
           "rawHtml": "<p>Minimum Safe Altitudes 91.119</p><p>Congested Areas - 1000 ft above the highest obstacle in a 2000 ft radius.</p><p>Sparsely Populated/ Water - 500 ft above any person vehicle or structure if there are any.</p><p>Other - 500 ft above the surface.</p><p>Always have to be able to make an emergency landing without undue hazard to persons or property on the surface.</p><p>*Pilots are strongly requested to stay at least 2000 ft above the surface of Wildlife Refuges.</p>",
@@ -4102,9 +4054,18 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>Your Altitude above sea level (MSL) adjusted for standard pressure of 29.92</p><p>Found With: 29.92 - Altimeter Setting * 1000 + Field Elevation, Set 29.92 into Kollsman Window on altimeter.</p><p>When traveling from high to low pressures or temperatures remember this phrase for what your altimeter will read -</p><p>\" High to Low look Out Below \".</p><p>In Cold Weather and low pressure you will be lower to the ground than what the altimeter makes you think.</p>",
-          "rawText": "Your Altitude above sea level (MSL) adjusted for standard pressure of 29.92\nFound With: 29.92 - Altimeter Setting * 1000 + Field Elevation, Set 29.92 into Kollsman Window on altimeter.\nWhen traveling from high to low pressures or temperatures remember this phrase for what your altimeter will read -\n\" High to Low look Out Below \".\nIn Cold Weather and low pressure you will be lower to the ground than what the altimeter makes you think.\n",
+          "hidden": [
+            {
+              "word": "Standard",
+              "occ": 1
+            },
+            {
+              "word": "Current",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p>Your Altitude above sea level (MSL) adjusted for standard pressure of 29.92</p><p>Found With: Standard altimeter setting - Current Setting * 1000 + Field Elevation, Set 29.92 into Kollsman Window on altimeter.</p><p>When traveling from high to low pressures or temperatures remember this phrase for what your altimeter will read -</p><p>\" High to Low look Out Below \".</p><p>In Cold Weather and low pressure you will be lower to the ground than what the altimeter makes you think.</p>",
+          "rawText": "Your Altitude above sea level (MSL) adjusted for standard pressure of 29.92\nFound With: Standard altimeter setting - Current Setting * 1000 + Field Elevation, Set 29.92 into Kollsman Window on altimeter.\nWhen traveling from high to low pressures or temperatures remember this phrase for what your altimeter will read -\n\" High to Low look Out Below \".\nIn Cold Weather and low pressure you will be lower to the ground than what the altimeter makes you think.\n",
           "title": "Pressure Altitude",
           "type": "fill"
         },
@@ -4187,8 +4148,8 @@
         {
           "alts": {},
           "hidden": [],
-          "rawHtml": "<p>Rotating Beacons - </p><p>Runway Edge Lights = White | Last 2000ft = Yellow</p><p>Runway Centerline Lights = White | Last 3000ft = Alternating Red/White | Last 1000ft = Red</p><p>Taxiway Edge Lights = Blue</p><p>Threshold Lights = Bar of green lights</p><p>REIL = White strobes flashing on each side of the end of runway</p>",
-          "rawText": "Rotating Beacons - \nRunway Edge Lights = White | Last 2000ft = Yellow\nRunway Centerline Lights = White | Last 3000ft = Alternating Red/White | Last 1000ft = Red\nTaxiway Edge Lights = Blue\nThreshold Lights = Bar of green lights\nREIL = White strobes flashing on each side of the end of runway\n",
+          "rawHtml": "<p>Rotating Beacons </p><p>Runway Edge Lights = White | Last 2000ft = Yellow</p><p>Runway Centerline Lights = White | Last 3000ft = Alternating Red/White | Last 1000ft = Red</p><p>Taxiway Edge Lights = Blue</p><p>Threshold Lights = Bar of green lights</p><p>REIL = White strobes flashing on each side of the end of runway</p>",
+          "rawText": "Rotating Beacons \nRunway Edge Lights = White | Last 2000ft = Yellow\nRunway Centerline Lights = White | Last 3000ft = Alternating Red/White | Last 1000ft = Red\nTaxiway Edge Lights = Blue\nThreshold Lights = Bar of green lights\nREIL = White strobes flashing on each side of the end of runway\n",
           "title": "Airport Lights",
           "type": "fill"
         },
@@ -4253,8 +4214,8 @@
               "word": "all"
             }
           ],
-          "rawHtml": "<p>Above 12500 MSL required use by flight crew members for more than 30 minutes</p><p>Above 14000 MSL required use by flight crew members any time.</p><p>Above 15000 MSL required to supply all occupants with supplemental oxygen.</p><p>*At night vision it is recommended above 5000 MSL because vision erodes rapidly and pilots are more tired</p><p> During the Day it is still recommended above 10000 MSL</p><p>Altitudes are actually cabin pressure altitudes and can be lower MSL with lower than standard altimeter settings</p>",
-          "rawText": "Above 12500 MSL required use by flight crew members for more than 30 minutes\nAbove 14000 MSL required use by flight crew members any time.\nAbove 15000 MSL required to supply all occupants with supplemental oxygen.\n*At night vision it is recommended above 5000 MSL because vision erodes rapidly and pilots are more tired\n During the Day it is still recommended above 10000 MSL\nAltitudes are actually cabin pressure altitudes and can be lower MSL with lower than standard altimeter settings\n",
+          "rawHtml": "<p>Above 12500 MSL required use by flight crew members for more than 30 minutes</p><p>Above 14000 MSL required use by flight crew members any time.</p><p>Above 15000 MSL required to supply all occupants with supplemental oxygen.</p><p>*At night vision it is recommended above 5000 MSL because vision erodes rapidly and pilots are more tired</p><p> During the Day it is still recommended above 10000 MSL</p><p>Altitudes are actually cabin pressure altitudes and can be lower than MSL with lower than standard altimeter settings</p>",
+          "rawText": "Above 12500 MSL required use by flight crew members for more than 30 minutes\nAbove 14000 MSL required use by flight crew members any time.\nAbove 15000 MSL required to supply all occupants with supplemental oxygen.\n*At night vision it is recommended above 5000 MSL because vision erodes rapidly and pilots are more tired\n During the Day it is still recommended above 10000 MSL\nAltitudes are actually cabin pressure altitudes and can be lower than MSL with lower than standard altimeter settings\n",
           "title": "Supplemental Oxygen Requirements",
           "type": "fill"
         }
@@ -4634,9 +4595,38 @@
         },
         {
           "alts": {},
-          "hidden": [],
-          "rawHtml": "<p>Attitude Indicator: Horizontally mounted Gyro that spins from a Vacuum Pump and maintains the Horizons attitude using rigidity in space, </p><p>and then the instrument housing moves around it showing pitch and bank changes with the reference arms. </p><p>Avoids precession errors by having pendulous vanes on the bottom that are held down by gravity which cover air holes </p><p>that create a force on one side if the moved off its position that will move it back to align the vanes with the air holes again. </p>",
-          "rawText": "Attitude Indicator: Horizontally mounted Gyro that spins from a Vacuum Pump and maintains the Horizons attitude using rigidity in space, \nand then the instrument housing moves around it showing pitch and bank changes with the reference arms. \nAvoids precession errors by having pendulous vanes on the bottom that are held down by gravity which cover air holes \nthat create a force on one side if the moved off its position that will move it back to align the vanes with the air holes again. ",
+          "hidden": [
+            {
+              "word": "pendulous",
+              "occ": 1
+            },
+            {
+              "word": "vanes",
+              "occ": 1
+            },
+            {
+              "word": "horizontally",
+              "occ": 1
+            },
+            {
+              "word": "Vacuum",
+              "occ": 1
+            },
+            {
+              "word": "rigidity",
+              "occ": 1
+            },
+            {
+              "word": "in",
+              "occ": 1
+            },
+            {
+              "word": "space.",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p>Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.</p><p><br></p><p>Avoids precession errors by having pendulous vanes that swing and cover air holes.</p>",
+          "rawText": "Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.\n\nAvoids precession errors by having pendulous vanes that swing and cover air holes.\n",
           "title": "Attitude Indicator",
           "type": "fill"
         },
@@ -6993,7 +6983,7 @@
               "occ": 1
             },
             {
-              "word": "Please",
+              "word": "test",
               "occ": 1
             }
           ],
