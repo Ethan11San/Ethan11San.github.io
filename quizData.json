@@ -3892,7 +3892,7 @@
               "word": "uncontrolled"
             }
           ],
-          "rawHtml": "<p>Class G airspace is uncontrolled -> ATC services are not available.</p><p>Could fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.</p><p>If there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.</p>",
+          "rawHtml": "<p>Class G airspace is uncontrolled -&gt; ATC services are not available.</p><p>Could fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.</p><p>If there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.</p>",
           "rawText": "Class G airspace is uncontrolled -> ATC services are not available.\nCould fly IMC in G without an IFR flight plan except that is considered 91.13 dangerous and reckless aviation so you can't.\nIf there is a towered class G airport you still must be in communication within 4NM and 2500 AGL.\n",
           "title": "Class G airspace",
           "type": "fill"
