@@ -1700,9 +1700,12 @@
             multiProgress.completed.add(quizPos);
           }
           if (multiProgress.completed.size === multiProgress.total) {
+            const folders = new Set(quizOrder.map(q => q.folder));
+            folders.forEach(f => incrementCompletionCount(f));
             localStorage.removeItem('lastRandomQuiz');
             updateResumeButton();
             alert('🎉 Quiz complete!');
+            justCompleted = true;
           } else {
             saveRandomQuizState();
           }
@@ -4127,6 +4130,7 @@
       }
 
         function showQuiz() {
+          justCompleted = false;
           // Advance to the correct section and folder
           let entry = quizOrder[quizPos];
           if (typeof entry === 'object') {
@@ -4789,10 +4793,12 @@
         });
       }
         nextBtn.onclick = () => {
+          if (justCompleted) return;
           const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
           const total = multiFolderMode ? null : secs.length;
           if (questionCompleted() && !justCompleted) {
             markQuestionCompleted();
+            if (justCompleted) return;
           }
           if (isQuizMode && quizOrder.length > 1 && quizPos < quizOrder.length - 1) {
             quizPos++;
@@ -4814,7 +4820,6 @@
         }
         updateProgressIndicator();
         updateHeader();
-        justCompleted = false;
       };
       backBtn.onclick = () => {
         const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
