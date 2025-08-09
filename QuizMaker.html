@@ -1941,15 +1941,34 @@
           }
         }
       })();
-      localStorage.removeItem('quizDataLocal');
+      const storedLocal = localStorage.getItem('quizDataLocal');
+      if (storedLocal) {
+        try {
+          const localDiff = JSON.parse(storedLocal);
+          const patched = applyChanges(JSON.parse(JSON.stringify(data)), localDiff);
+          const remaining = computeDiff(data, patched);
+          if (remaining && Object.keys(remaining).length) {
+            data = patched;
+            unsyncedChanges = true;
+            localStorage.setItem('quizDataLocal', JSON.stringify(remaining));
+          } else {
+            localStorage.removeItem('quizDataLocal');
+          }
+        } catch (e) {
+          console.warn('Failed to apply local changes', e);
+          localStorage.removeItem('quizDataLocal');
+        }
+      }
 
       function saveData() {
         let diff = computeDiff(originalData, data);
         if (diff) diff = stripImageData(diff);
         if (diff && Object.keys(diff).length) {
           unsyncedChanges = true;
+          localStorage.setItem('quizDataLocal', JSON.stringify(diff));
         } else {
           unsyncedChanges = false;
+          localStorage.removeItem('quizDataLocal');
         }
         updateLocalButtons();
       }
@@ -2020,6 +2039,7 @@
         if (!unsyncedChanges) return;
         if (confirm('Clear all local changes?')) {
           localStorage.removeItem('lastRandomQuiz');
+          localStorage.removeItem('quizDataLocal');
           unsyncedChanges = false;
           updateLocalButtons();
           updateResumeButton();
