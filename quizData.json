@@ -41,10 +41,6 @@
             {
               "occ": 1,
               "word": "ID"
-            },
-            {
-              "occ": 1,
-              "word": "PIC"
             }
           ],
           "rawHtml": "<p>Required to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p>",
@@ -1406,7 +1402,7 @@
               "word": "Operator"
             }
           ],
-          "rawHtml": "<p>A plane is airworthy if it conforms to it's original type design and is in condition for safe flight\nwith all needed documents, inspections, and equipment. \n\nIt is the responsibility of the Owner / Operator to maintain it in airworthy conditions with proper maintenance records.\n</p>",
+          "rawHtml": "<p>A plane is airworthy if it conforms to it's original type design and is in condition for safe flight</p><p>with all needed documents, inspections, and equipment. </p><p><br></p><p>It is the responsibility of the Owner / Operator to maintain it in airworthy conditions with proper maintenance records.</p>",
           "rawText": "A plane is airworthy if it conforms to it's original type design and is in condition for safe flight\nwith all needed documents, inspections, and equipment. \n\nIt is the responsibility of the Owner / Operator to maintain it in airworthy conditions with proper maintenance records.\n",
           "title": "Aircraft Airworthiness",
           "type": "fill"
@@ -1639,6 +1635,12 @@
           "rawText": "",
           "title": "Supplemental Type Certificate",
           "type": "fill"
+        },
+        {
+          "type": "fill",
+          "title": "AVVIATE",
+          "rawText": "\n",
+          "rawHtml": "<h4><br></h4>"
         }
       ],
       "color": "#ffb43f"
