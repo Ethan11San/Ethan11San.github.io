@@ -8,7 +8,6 @@
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <link rel="preload" href="quizData.json" as="fetch" crossorigin="anonymous">
-  <link rel="preload" href="imageData.json" as="fetch" crossorigin="anonymous">
   <style>
     /* Ensure formatted spans do not disrupt line spacing */
     #editor span {
@@ -1230,7 +1229,11 @@
             wrap.style.position = 'absolute';
             const img = document.createElement('img');
             img.className = 'extra-image';
-            img.src = ex.image;
+            const base = ex.image || '';
+            img.src = base;
+            if (ex.imageRef) {
+              imageURL(ex.imageRef).then(url => { if (url) img.src = url; });
+            }
             img.style.display = 'block';
             img.style.userSelect = 'none';
             if (ex.imgWidth && ex.imgHeight) {
@@ -1290,7 +1293,11 @@
           wrap.style.position = 'absolute';
           const img = document.createElement('img');
           img.className = 'extra-image';
-          img.src = ex.image;
+          const base = ex.image || '';
+          img.src = base;
+          if (ex.imageRef) {
+            imageURL(ex.imageRef).then(url => { if (url) img.src = url; });
+          }
           img.style.display = 'block';
           img.style.userSelect = 'none';
           let baseW = 0, baseH = 0;
@@ -1771,9 +1778,7 @@
       // ----- Load persistent data, with static fallback -----
       // Fallback hosted copy for environments where local JSON can't be fetched
       const GITHUB_JSON_URL = 'https://Ethan11San.github.io/quizData.json';
-      const GITHUB_IMAGE_URL = 'https://Ethan11San.github.io/imageData.json';
       const RAW_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
-      const RAW_IMAGE_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/imageData.json';
       let data;
       let originalData;
       let staticMode = false;
@@ -1783,8 +1788,145 @@
         copyLocalBtns.forEach(btn => btn.disabled = !unsyncedChanges);
         clearLocalBtns.forEach(btn => btn.disabled = !unsyncedChanges);
       }
-      let imageData = {};
       const isLocalEnv = ['localhost', '127.0.0.1'].includes(location.hostname);
+
+      // --- IndexedDB helpers for local image storage ---
+      function openDB() {
+        return new Promise((res, rej) => {
+          const r = indexedDB.open('quiz-local', 1);
+          r.onupgradeneeded = () => r.result.createObjectStore('images', { keyPath: 'hash' });
+          r.onsuccess = () => res(r.result);
+          r.onerror = () => rej(r.error);
+        });
+      }
+
+      async function idbPut(hash, blob) {
+        const db = await openDB();
+        return new Promise((res, rej) => {
+          const tx = db.transaction('images', 'readwrite');
+          tx.objectStore('images').put({ hash, blob, ts: Date.now() });
+          tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+        });
+      }
+
+      async function idbGet(hash) {
+        const db = await openDB();
+        return new Promise((res, rej) => {
+          const tx = db.transaction('images', 'readonly');
+          const req = tx.objectStore('images').get(hash);
+          req.onsuccess = () => res(req.result?.blob || null);
+          req.onerror = () => rej(req.error);
+        });
+      }
+
+      // Compress image, hash and store
+      async function compressImage(file, {max = 1600, quality = 0.75} = {}) {
+        const bmp = await createImageBitmap(file);
+        const s = Math.min(max / bmp.width, max / bmp.height, 1);
+        const w = Math.round(bmp.width * s), h = Math.round(bmp.height * s);
+        const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
+        c.getContext('2d', { alpha: false }).drawImage(bmp, 0, 0, w, h);
+        const toType = c.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+        const blob = await new Promise(r => c.toBlob(b => r(b), toType, quality));
+        const buf = await blob.arrayBuffer();
+        const digest = await crypto.subtle.digest('SHA-256', buf);
+        const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        return { blob, hash, ext: toType === 'image/webp' ? 'webp' : 'jpg' };
+      }
+
+      async function addLocalImage(file) {
+        const { blob, hash, ext } = await compressImage(file);
+        await idbPut(hash, blob);
+        return { imageRef: `sha256:${hash}`, ext };
+      }
+
+      async function imageURL(imageRef) {
+        if (!imageRef?.startsWith('sha256:')) return null;
+        const blob = await idbGet(imageRef.slice(7));
+        return blob ? URL.createObjectURL(blob) : null;
+      }
+
+      async function uploadImageToGitHub({ owner, repo, branch = 'main', token }, hash, blob, ext = 'webp') {
+        const path = `images/${hash}.${ext}`;
+        const content = await new Promise((res, rej) => {
+          const fr = new FileReader();
+          fr.onload = () => res(fr.result.split(',')[1]);
+          fr.onerror = () => rej(fr.error);
+          fr.readAsDataURL(blob);
+        });
+        const base = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+        const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+        let sha = null;
+        const head = await fetch(`${base}?ref=${encodeURIComponent(branch)}`, { headers });
+        if (head.ok) sha = (await head.json()).sha;
+        const body = { message: sha ? `chore: update image ${path}` : `chore: add image ${path}`, branch, content, ...(sha ? { sha } : {}) };
+        const r = await fetch(base, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (!r.ok) throw new Error(`GitHub upload failed ${r.status}`);
+        return { path };
+      }
+
+      const repoInfo = { owner: 'Ethan11San', repo: 'Ethan11San.github.io' };
+
+      async function syncImagesAndData(token) {
+        const opts = { ...repoInfo, branch: 'main', token };
+        // Upload any pending images
+        for (const folder of data.folders || []) {
+          for (const sec of folder.sections || []) {
+            if (sec.imageRef) {
+              const hash = sec.imageRef.slice(7);
+              const blob = await idbGet(hash);
+              if (blob) {
+                const ext = sec.imageExt || (blob.type === 'image/jpeg' ? 'jpg' : 'webp');
+                const { path } = await uploadImageToGitHub(opts, hash, blob, ext);
+                sec.image = path;
+                delete sec.imageRef;
+                delete sec.imageExt;
+              }
+            }
+            if (sec.extraImages) {
+              for (const ex of sec.extraImages) {
+                if (ex.imageRef) {
+                  const hash = ex.imageRef.slice(7);
+                  const blob = await idbGet(hash);
+                  if (blob) {
+                    const ext = ex.ext || (blob.type === 'image/jpeg' ? 'jpg' : 'webp');
+                    const { path } = await uploadImageToGitHub(opts, hash, blob, ext);
+                    ex.image = path;
+                    delete ex.imageRef;
+                    delete ex.ext;
+                  }
+                }
+              }
+            }
+            if (sec.rawHtml && typeof sec.rawHtml === 'string') {
+              const matches = [...sec.rawHtml.matchAll(/data-img="sha256:([0-9a-f]+)"/g)];
+              for (const m of matches) {
+                const hash = m[1];
+                const blob = await idbGet(hash);
+                if (blob) {
+                  const ext = blob.type === 'image/jpeg' ? 'jpg' : 'webp';
+                  const { path } = await uploadImageToGitHub(opts, hash, blob, ext);
+                  sec.rawHtml = sec.rawHtml.replace(`data-img="sha256:${hash}"`, `data-img="${path}"`);
+                }
+              }
+            }
+          }
+        }
+        // Commit quizData.json
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        const base = `https://api.github.com/repos/${opts.owner}/${opts.repo}/contents/quizData.json`;
+        const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+        let sha = null;
+        const head = await fetch(`${base}?ref=${encodeURIComponent(opts.branch)}`, { headers });
+        if (head.ok) sha = (await head.json()).sha;
+        const body = { message: 'chore: update quiz data', branch: opts.branch, content, ...(sha ? { sha } : {}) };
+        const resp = await fetch(base, { method: 'PUT', headers, body: JSON.stringify(body) });
+        if (!resp.ok) throw new Error('Quiz data upload failed ' + resp.status);
+        originalData = JSON.parse(JSON.stringify(data));
+        localStorage.removeItem('quizDataLocal');
+        unsyncedChanges = false;
+        updateLocalButtons();
+      }
 
       function computeDiff(orig, mod) {
         if (orig === mod) return undefined;
@@ -1913,37 +2055,8 @@
 
       originalData = JSON.parse(JSON.stringify(data));
 
-      // Load image data in the background so the UI can render immediately.
-      (async () => {
-        try {
-          const imgResp = await fetch('./imageData.json', { cache: 'no-store' });
-          if (imgResp.ok) {
-            imageData = await imgResp.json();
-          } else {
-            throw new Error('imageData.json not found');
-          }
-        } catch (err) {
-          try {
-            const fallbackResp = await fetch(GITHUB_IMAGE_URL, { cache: 'no-store' });
-            if (fallbackResp.ok) {
-              imageData = await fallbackResp.json();
-            } else {
-              throw new Error('GitHub Pages image response not OK');
-            }
-          } catch (err2) {
-            try {
-              const rawResp = await fetch(RAW_IMAGE_URL, { cache: 'no-store' });
-              if (rawResp.ok) {
-                imageData = await rawResp.json();
-              } else {
-                console.warn('imageData.json not found or inaccessible');
-              }
-            } catch (err3) {
-              console.warn('Could not load imageData.json', err3);
-            }
-          }
-        }
-      })();
+      // Images are now handled individually and stored locally in IndexedDB,
+      // so the legacy imageData.json is no longer loaded.
       const storedLocal = localStorage.getItem('quizDataLocal');
       if (storedLocal) {
         try {
@@ -2020,22 +2133,33 @@
       updateResumeButton();
 
       updateLocalButtons();
-      copyLocalBtns.forEach(btn => btn.onclick = () => {
+      copyLocalBtns.forEach(btn => btn.onclick = async () => {
         let diff = computeDiff(originalData, data);
         if (diff) diff = stripImageData(diff);
         if (!diff || !Object.keys(diff).length) {
-          alert('No local changes to copy.');
+          alert('No local changes to sync.');
           return;
         }
-        const serialized = JSON.stringify(diff);
-        navigator.clipboard.writeText(serialized)
-          .then(() => {
-            alert('Local changes copied to clipboard.');
-          })
-          .catch(err => {
-            console.error('Clipboard error:', err);
-            alert('Failed to copy: ' + err.message);
-          });
+        const token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
+        if (!token) {
+          const serialized = JSON.stringify(diff);
+          navigator.clipboard.writeText(serialized)
+            .then(() => {
+              alert('Local changes copied to clipboard.');
+            })
+            .catch(err => {
+              console.error('Clipboard error:', err);
+              alert('Failed to copy: ' + err.message);
+            });
+          return;
+        }
+        try {
+          await syncImagesAndData(token);
+          alert('Sync complete.');
+        } catch (err) {
+          console.error('Sync error:', err);
+          alert('Sync failed: ' + err.message);
+        }
       });
 
       clearLocalBtns.forEach(btn => btn.onclick = () => {
@@ -2178,12 +2302,7 @@
             for (const item of items) {
               const type = item.types.find(t => t.startsWith('image/'));
               if (type) {
-                const blob = await item.getType(type);
-                return await new Promise(res => {
-                  const r = new FileReader();
-                  r.onload = () => res(r.result);
-                  r.readAsDataURL(blob);
-                });
+                return await item.getType(type);
               }
             }
           } catch (err) {
@@ -2191,22 +2310,21 @@
           }
           return null;
         }
-          const insert = url => {
-            quill.formatText(range.index, range.length, 'popupWord', url, 'user');
-            quill.setSelection(range.index + range.length, 0, 'silent');
-            syncCurrentSection();
-          };
-        let url = await getClipboardImage();
-        if (url) return insert(url);
+        const insert = async file => {
+          const { imageRef } = await addLocalImage(file);
+          quill.formatText(range.index, range.length, 'popupWord', imageRef, 'user');
+          quill.setSelection(range.index + range.length, 0, 'silent');
+          syncCurrentSection();
+        };
+        let blob = await getClipboardImage();
+        if (blob) { await insert(blob); return; }
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.onchange = () => {
+        input.onchange = async () => {
           const file = input.files[0];
           if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => insert(reader.result);
-          reader.readAsDataURL(file);
+          await insert(file);
         };
         input.click();
       });
@@ -2675,23 +2793,21 @@
       labelImageInput.onchange = async e => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
+        const { imageRef, ext } = await addLocalImage(file);
         const idx = labelImageInput.dataset.extraIndex;
-        reader.onload = async () => {
-          const sec = data.folders[currentFolder].sections[currentSection];
-          if (idx === '') {
-            sec.image = reader.result;
-          } else {
-            sec.extraImages = sec.extraImages || [];
-            sec.extraImages[idx] = { image: reader.result, labels: [], arrows: [] };
-          }
-          await saveData();
-          renderFolders();
-          renderSections(lastSectionOrder);
-          enterEdit();
-          loadSection();
-        };
-        reader.readAsDataURL(file);
+        const sec = data.folders[currentFolder].sections[currentSection];
+        if (idx === '') {
+          sec.imageRef = imageRef;
+          sec.imageExt = ext;
+        } else {
+          sec.extraImages = sec.extraImages || [];
+          sec.extraImages[idx] = { imageRef, ext, labels: [], arrows: [] };
+        }
+        await saveData();
+        renderFolders();
+        renderSections(lastSectionOrder);
+        enterEdit();
+        loadSection();
         e.target.value = '';
         labelImageInput.dataset.extraIndex = '';
       };
@@ -2716,26 +2832,22 @@
         const items = e.clipboardData && e.clipboardData.items;
 
         async function handleBlob(blob) {
-          return new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = async () => {
-              const sec = data.folders[currentFolder].sections[currentSection];
-              if (waitingForImagePaste.target === 'main') {
-                sec.image = reader.result;
-              } else {
-                sec.extraImages = sec.extraImages || [];
-                sec.extraImages[waitingForImagePaste.index] = { image: reader.result, labels: [], arrows: [] };
-              }
-              await saveData();
-              renderFolders();
-              renderSections(lastSectionOrder);
-              enterEdit();
-              loadSection();
-              waitingForImagePaste = null;
-              resolve(true);
-            };
-            reader.readAsDataURL(blob);
-          });
+          const { imageRef, ext } = await addLocalImage(blob);
+          const sec = data.folders[currentFolder].sections[currentSection];
+          if (waitingForImagePaste.target === 'main') {
+            sec.imageRef = imageRef;
+            sec.imageExt = ext;
+          } else {
+            sec.extraImages = sec.extraImages || [];
+            sec.extraImages[waitingForImagePaste.index] = { imageRef, ext, labels: [], arrows: [] };
+          }
+          await saveData();
+          renderFolders();
+          renderSections(lastSectionOrder);
+          enterEdit();
+          loadSection();
+          waitingForImagePaste = null;
+          return true;
         }
 
         let found = false;
@@ -2830,11 +2942,15 @@
           // (unchanged label editor code)
           // ...label editor code...
           labelEditor.style.display = 'block';
+          const mainSrc = sec.image || '';
           labelEditor.innerHTML = `
             <div id="labelContainer" style="position:relative; display:inline-block; overflow:visible;">
-              <img id="labelImg" class="main-image" src="${sec.image}" style="display:block; user-select:none;">
+              <img id="labelImg" class="main-image" src="${mainSrc}" style="display:block; user-select:none;">
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
+          if (sec.imageRef) {
+            imageURL(sec.imageRef).then(url => { const el = document.getElementById('labelImg'); if (url && el) el.src = url; });
+          }
           // (rest unchanged)
           // ...rest of label editor code...
           // -- Definitions UI Start --
@@ -3577,25 +3693,10 @@
       }
 
       function ensureSectionImages(folderIdx, sec) {
-        const folder = data.folders[folderIdx];
-        if (!folder || !sec || !imageData) return;
-        const folderImgs = imageData[folder.name] || {};
-        const entry = folderImgs[sec.title];
-        if (entry) {
-          if (!sec.image && entry.image) {
-            sec.image = entry.image;
-          }
-          if (entry.extraImages) {
-            sec.extraImages = sec.extraImages || [];
-            entry.extraImages.forEach((img, idx) => {
-              if (!sec.extraImages[idx]) {
-                sec.extraImages[idx] = { image: img, labels: [], arrows: [] };
-              } else if (!sec.extraImages[idx].image) {
-                sec.extraImages[idx].image = img;
-              }
-            });
-          }
-        }
+        // Legacy helper used when images were stored in imageData.json.
+        // With content-addressed files, images are loaded directly via
+        // their stored path or local imageRef, so this function now
+        // simply exists as a no-op for backward compatibility.
       }
 
       function previewSection() {
@@ -4320,7 +4421,11 @@
           wrapper.style.maxWidth = '100%';
           const img = document.createElement('img');
           img.className = 'main-image';
-          img.src = sec.image;
+          const base = sec.image || '';
+          img.src = base;
+          if (sec.imageRef) {
+            imageURL(sec.imageRef).then(url => { if (url) img.src = url; });
+          }
           img.style.width = '100%';
           img.style.height = 'auto';
           wrapper.appendChild(img);
@@ -4910,7 +5015,12 @@
         popup.style.padding = '8px';
         popup.style.zIndex = '10000';
         const img = document.createElement('img');
-        img.src = target.dataset.img;
+        const ref = target.dataset.img;
+        if (ref && ref.startsWith('sha256:')) {
+          imageURL(ref).then(url => { if (url) img.src = url; });
+        } else {
+          img.src = ref || '';
+        }
         img.style.maxWidth = '200px';
         img.style.maxHeight = '200px';
         img.dataset.zoomed = '0';

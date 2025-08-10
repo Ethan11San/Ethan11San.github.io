@@ -5,10 +5,13 @@ When loaded, `QuizMaker.html` will attempt to fetch quiz data from a local API
 (`http://localhost:5001/api/quizData`). If that fails, it falls back to the
 bundled `quizData.json` or the copy hosted on GitHub.
 
-Any edits you make are stored in your browser's local storage. Use the
-**Copy Local Changes** button to copy the entire JSON to your clipboard and
-send it for inclusion in `quizData.json`. When the repository version matches
-your local copy, the saved changes are cleared from the browser automatically.
+Any text edits you make are stored in your browser's local storage. Images
+added to questions are kept separately in IndexedDB and referenced by a content
+hash. Use the **Copy Local Changes** button to either copy the JSON diff to
+your clipboard or, if you provide a GitHub token when prompted, automatically
+upload your changes and any new images directly to this repository.
+When the repository version matches your local copy, the saved changes are
+cleared from the browser automatically.
 
 ## Changing folder colors
 
