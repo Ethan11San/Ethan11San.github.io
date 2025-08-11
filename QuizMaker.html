@@ -278,9 +278,12 @@
     }
     .word:hover { background: #dfe6e9; }
     .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
+    .word.hidden.linked { background: #d4edda; }
     .hidden-reveal { display: none; }
     #editor .hidden-reveal { display: inline; background: #fff3cd; border-bottom: 1px dashed #f39c12; }
+    #editor .hidden-reveal.pending { background: #ffe8a1; outline: 2px solid #f39c12; }
     #preview .hidden-reveal, #quizContent .hidden-reveal { display: none; }
+    body.linking #preview .word.hidden { background: #ffe8a1; cursor: pointer; }
     .popup-word {
       cursor: pointer;
       border-bottom: 1px dashed #3498db;
@@ -2415,9 +2418,20 @@
         span.textContent = range.toString();
         range.deleteContents();
         range.insertNode(span);
+        if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
         pendingRevealSpan = span;
+        span.classList.add('pending');
+        document.body.classList.add('linking');
         syncCurrentSection();
         previewSection();
+      });
+      editorDiv.addEventListener('click', e => {
+        const span = e.target.closest('.hidden-reveal');
+        if (!span) return;
+        if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
+        pendingRevealSpan = span;
+        span.classList.add('pending');
+        document.body.classList.add('linking');
       });
       function syncCurrentSection(){
         if (currentFolder===null || currentSection===null) return;
@@ -3850,6 +3864,8 @@
         previewDiv.innerHTML = '';
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = text;
+        const linkedReveals = new Set(Array.from(tempDiv.querySelectorAll('.hidden-reveal[data-reveal-for]')).map(s => s.dataset.revealFor));
+        document.body.classList.toggle('linking', !!pendingRevealSpan);
 
         let counts = {};
         sec.hidden = sec.hidden || [];
@@ -3859,10 +3875,13 @@
           return getHiddenEntries(sec, tokens);
         }
 
-        function handleWordClick(w, occ) {
+        function handleWordClick(w, occ, el) {
           if (pendingRevealSpan) {
             pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
+            pendingRevealSpan.classList.remove('pending');
             pendingRevealSpan = null;
+            document.body.classList.remove('linking');
+            if (el) el.classList.add('linked');
             syncCurrentSection();
             saveData();
             previewSection();
@@ -3936,10 +3955,12 @@
                 globalCounts[w] = (globalCounts[w] || 0) + 1;
                 const occ = globalCounts[w];
                 const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                const revealKey = `${w}_${occ}`;
+                const hasReveal = linkedReveals.has(revealKey);
                 const span = document.createElement('span');
-                span.className = 'word' + (isHidden ? ' hidden' : '');
+                span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
                 span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                span.onclick = () => handleWordClick(w, occ);
+                span.onclick = () => handleWordClick(w, occ, span);
                 previewDiv.appendChild(span);
               }
             });
@@ -3957,10 +3978,12 @@
                   globalCounts[w] = (globalCounts[w] || 0) + 1;
                   const occ = globalCounts[w];
                   const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                  const revealKey = `${w}_${occ}`;
+                  const hasReveal = linkedReveals.has(revealKey);
                   const wSpan = document.createElement('span');
-                  wSpan.className = 'word' + (isHidden ? ' hidden' : '');
+                  wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
                   wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                  wSpan.onclick = () => handleWordClick(w, occ);
+                  wSpan.onclick = () => handleWordClick(w, occ, wSpan);
                   wrapper.appendChild(wSpan);
                 }
               });
@@ -3987,11 +4010,13 @@
                     globalCounts[w] = (globalCounts[w] || 0) + 1;
                     const occ = globalCounts[w];
                     const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                    const revealKey = `${w}_${occ}`;
+                    const hasReveal = linkedReveals.has(revealKey);
 
                     const span = document.createElement('span');
-                    span.className = 'word' + (isHidden ? ' hidden' : '');
+                    span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
                     span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ);
+                    span.onclick = () => handleWordClick(w, occ, span);
                     line.appendChild(span);
                   }
                 });
@@ -4013,10 +4038,12 @@
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
                       const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                      const revealKey = `${w}_${occ}`;
+                      const hasReveal = linkedReveals.has(revealKey);
                       const span = document.createElement('span');
-                      span.className = 'word' + (isHidden ? ' hidden' : '');
+                      span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
                       span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ);
+                    span.onclick = () => handleWordClick(w, occ, span);
                     para.appendChild(span);
                   }
                 });
@@ -4033,10 +4060,12 @@
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
                       const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                      const revealKey = `${w}_${occ}`;
+                      const hasReveal = linkedReveals.has(revealKey);
                       const wSpan = document.createElement('span');
-                      wSpan.className = 'word' + (isHidden ? ' hidden' : '');
+                      wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
                       wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      wSpan.onclick = () => handleWordClick(w, occ);
+                      wSpan.onclick = () => handleWordClick(w, occ, wSpan);
                       wrapper.appendChild(wSpan);
                     }
                   });
@@ -4053,19 +4082,14 @@
                       const w = tok.trim();
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
-                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                      const span = document.createElement('span');
-                      span.className = 'word' + (isHidden ? ' hidden' : '');
-                      span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      span.onclick = () => {
-                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                        if (idx >= 0) hiddenEntries.splice(idx, 1);
-                        else hiddenEntries.push({ word: w, occ });
-                        sec.hidden = hiddenEntries;
-                        saveData();
-                        previewSection();
-                      };
-                      para.appendChild(span);
+                        const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
+                        const revealKey = `${w}_${occ}`;
+                        const hasReveal = linkedReveals.has(revealKey);
+                        const span = document.createElement('span');
+                        span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                        span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+                        span.onclick = () => handleWordClick(w, occ, span);
+                        para.appendChild(span);
                     }
                   });
                 }
@@ -4131,6 +4155,7 @@
         const hiddenEntries = getHiddenEntries(defObj, tokens);
         previewDiv.innerHTML = '';
         altDiv.innerHTML     = '<h4>Alternate answers (comma-separated):</h4>';
+        document.body.classList.toggle('linking', !!pendingRevealSpan);
 
         // clickable words
         let counts = {};
@@ -4153,13 +4178,17 @@
           const occ = counts[w];
           const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
 
+          const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+          const hasReveal = entry && entry.reveal;
           const span = document.createElement('span');
-          span.className = 'word' + (isHidden ? ' hidden' : '');
+          span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
           span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
           span.onclick = () => {
             if (pendingRevealSpan) {
               pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
+              pendingRevealSpan.classList.remove('pending');
               pendingRevealSpan = null;
+              document.body.classList.remove('linking');
               syncCurrentSection();
               saveData();
               buildDefinitionPreview(defObj, previewDiv, altDiv);
