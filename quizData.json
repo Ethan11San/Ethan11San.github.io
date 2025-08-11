@@ -1640,7 +1640,8 @@
           "type": "fill",
           "title": "AVVIATE",
           "rawText": "\n",
-          "rawHtml": "<h4><br></h4>"
+          "rawHtml": "<h4><br></h4>",
+          "hidden": []
         }
       ],
       "color": "#ffb43f"
@@ -7009,53 +7010,6 @@
           "rawText": "This is the There test question.\n7210\n",
           "title": "Test    #3",
           "type": "fill"
-        },
-        {
-          "alts": {},
-          "arrows": [],
-          "definitions": [],
-          "extraImages": [
-            {
-              "arrows": [],
-              "image": "",
-              "imgHeight": 591,
-              "imgWidth": 1357,
-              "labels": [
-                {
-                  "fontSize": 16,
-                  "h": 34,
-                  "text": "Test",
-                  "w": 67,
-                  "x": 38,
-                  "y": 18
-                },
-                {
-                  "fontSize": 16,
-                  "h": 89,
-                  "text": "asdasd",
-                  "w": 230,
-                  "x": 162,
-                  "y": 161
-                }
-              ]
-            }
-          ],
-          "hidden": [],
-          "image": "",
-          "labels": [
-            {
-              "fontSize": 16,
-              "h": 67,
-              "text": "asd",
-              "w": 77,
-              "x": 288,
-              "y": 183
-            }
-          ],
-          "rawHtml": "<p>This is the There test question.<img src=\"//:0\"></p><p>7210</p>",
-          "rawText": "This is the There test question.\n7210\n",
-          "title": "TEST D",
-          "type": "label"
         }
       ]
     }
