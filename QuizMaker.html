@@ -654,6 +654,13 @@
       height: auto;
     }
   </style>
+  <style id="linkingStyles">
+.source-token{background:rgba(255,238,150,.65);border-radius:4px;padding:0 2px}
+#linkBtn[hidden]{display:none}
+#preview .blank{padding:0 2px;border-radius:4px}
+#preview .blank.linked{outline:2px solid #4a7}
+#preview.linking-ready .blank{cursor:crosshair}
+  </style>
 </head>
 <body class="loading">
 
@@ -758,6 +765,7 @@
         <button id="addImageWordBtn">🖼️</button>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
+      <button id="linkBtn" type="button" hidden>Link selection</button>
       <div style="margin-top:12px;">
         <button id="resumeQuizBtn" style="display:none;">Back to Quiz</button>
         <button id="addPictureBtn" style="display:none;">Add Picture</button>
@@ -5389,6 +5397,175 @@
       alert('Unhandled error: ' + err.message);
     }
   })();
+  </script>
+  <script>
+(() => {
+  function init() {
+    const source = document.querySelector('#editor');
+    const blanks = document.querySelector('#preview');
+    const linkBtn = document.getElementById('linkBtn');
+    if (!source || !blanks || !linkBtn) { console.warn('Missing editors or button'); return; }
+
+    initBlanks();
+
+    let currentToken = null;
+
+    const toggleBtn = () => {
+      const r = getRangeIn(source);
+      linkBtn.hidden = !(r && !r.collapsed);
+    };
+
+    document.addEventListener('selectionchange', toggleBtn);
+
+    linkBtn.addEventListener('click', () => {
+      const r = getRangeIn(source);
+      if (!r || r.collapsed) return;
+      const token = wrapSelectionAsToken(r);
+      enterLinkingMode(token);
+      const after = document.createRange();
+      after.setStartAfter(token); after.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(after);
+      linkBtn.hidden = true;
+    });
+
+    blanks.addEventListener('click', e => {
+      const target = e.target.closest('.blank');
+      if (!target || !currentToken) return;
+      linkTokenToBlank(currentToken, target);
+      exitLinkingMode();
+    });
+
+    source.addEventListener('click', e => {
+      const t = e.target.closest('.source-token');
+      if (!t) return;
+      enterLinkingMode(t);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && currentToken) exitLinkingMode();
+    });
+
+    function enterLinkingMode(token) {
+      if (currentToken) exitLinkingMode();
+      currentToken = token;
+      token.classList.add('linking');
+      blanks.classList.add('linking-ready');
+    }
+
+    function exitLinkingMode() {
+      if (!currentToken) return;
+      currentToken.classList.remove('linking');
+      blanks.classList.remove('linking-ready');
+      currentToken = null;
+    }
+
+    function getRangeIn(container) {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return null;
+      const r = sel.getRangeAt(0);
+      const inContainer = container.contains(r.startContainer) && container.contains(r.endContainer);
+      return inContainer ? r : null;
+    }
+
+    function wrapSelectionAsToken(range) {
+      const commonEl = range.commonAncestorContainer.nodeType === 1
+        ? range.commonAncestorContainer
+        : range.commonAncestorContainer.parentElement;
+      const existing = commonEl && commonEl.closest('.source-token');
+      if (existing && existing.contains(range.cloneContents())) return existing;
+
+      const span = document.createElement('span');
+      span.className = 'source-token';
+      span.dataset.tokenId = span.dataset.tokenId || 't' + cryptoRandom();
+      span.tabIndex = 0;
+
+      const frag = range.extractContents();
+      trimFragmentWhitespace(frag);
+      span.appendChild(frag);
+      range.insertNode(span);
+      span.normalize();
+      return span;
+    }
+
+    function linkTokenToBlank(token, blank) {
+      if (token.dataset.blankId) {
+        const old = blanks.querySelector(`.blank[data-blank-id="${token.dataset.blankId}"]`);
+        if (old) unlinkBoth(token, old);
+      }
+      if (blank.dataset.tokenId) {
+        const old = source.querySelector(`.source-token[data-token-id="${blank.dataset.tokenId}"]`);
+        if (old) unlinkBoth(old, blank);
+      }
+
+      token.dataset.tokenId = token.dataset.tokenId || 't' + cryptoRandom();
+      blank.dataset.blankId = blank.dataset.blankId || 'b' + cryptoRandom();
+
+      token.dataset.blankId = blank.dataset.blankId;
+      blank.dataset.tokenId = token.dataset.tokenId;
+
+      token.classList.add('linked');
+      blank.classList.add('linked');
+    }
+
+    function unlinkBoth(token, blank) {
+      delete token.dataset.blankId;
+      delete blank.dataset.tokenId;
+      token.classList.remove('linked');
+      blank.classList.remove('linked');
+    }
+
+    function initBlanks() {
+      blanks.querySelectorAll('.blank').forEach((b, i) => {
+        if (!b.dataset.blankId) b.dataset.blankId = 'b' + (i + 1);
+      });
+      const walker = document.createTreeWalker(blanks, NodeFilter.SHOW_TEXT, null);
+      const toReplace = [];
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        if (node.nodeValue && /_{3,}/.test(node.nodeValue)) toReplace.push(node);
+      }
+      toReplace.forEach(node => {
+        const parts = node.nodeValue.split(/(_{3,})/);
+        const frag = document.createDocumentFragment();
+        let blankCount = blanks.querySelectorAll('.blank').length;
+        parts.forEach(p => {
+          if (!p) return;
+          if (/_{3,}/.test(p)) {
+            const s = document.createElement('span');
+            s.className = 'blank';
+            s.dataset.blankId = 'b' + (++blankCount);
+            s.textContent = '____';
+            frag.appendChild(s);
+          } else {
+            frag.appendChild(document.createTextNode(p));
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
+      });
+    }
+
+    function trimFragmentWhitespace(frag) {
+      let first = frag.firstChild, last = frag.lastChild;
+      if (first && first.nodeType === 3) first.nodeValue = first.nodeValue.replace(/^\s+/, '');
+      if (last && last.nodeType === 3) last.nodeValue = last.nodeValue.replace(/\s+$/, '');
+    }
+
+    function cryptoRandom() {
+      const a = new Uint32Array(2);
+      (window.crypto || window.msCrypto).getRandomValues(a);
+      return (a[0] >>> 0).toString(36) + (a[1] >>> 0).toString(36);
+    }
+
+    toggleBtn();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
   </script>
 </body>
 </html>
