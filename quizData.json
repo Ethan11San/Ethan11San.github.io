@@ -7006,8 +7006,8 @@
         {
           "alts": {},
           "hidden": [],
-          "rawHtml": "<p>This is the There test question.<img src=\"//:0\"></p><p>7210</p>",
-          "rawText": "This is the There test question.\n7210\n",
+          "rawHtml": "<p>Did this new save thing work?</p>",
+          "rawText": "Did this new save thing work?\n",
           "title": "Test    #3",
           "type": "fill"
         }
