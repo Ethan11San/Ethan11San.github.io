@@ -2439,20 +2439,46 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        // When the toolbar button is clicked Quill loses focus, so rely on
-        // Quill's "silent" selection retrieval to get the last active range.
+        // Quill loses focus when toolbar buttons are used, so fall back to the
+        // last known range if the current selection is null.
         const range = quill.getSelection(true) || lastRange;
-        if (!range || range.length === 0) return alert('Select text first');
-        quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
+        if (!range || range.length === 0) {
+          alert('Select text first');
+          return;
+        }
+
+        // Toggle the hiddenReveal format for the selected text. If the
+        // selection already has the format applied we remove it, otherwise we
+        // apply it and mark the span as pending so the user can link it to a
+        // hidden word.
+        const formats = quill.getFormat(range);
+        const alreadyHidden = !!formats.hiddenReveal;
+        quill.formatText(
+          range.index,
+          range.length,
+          'hiddenReveal',
+          alreadyHidden ? false : true,
+          'user'
+        );
+
         const [leaf] = quill.getLeaf(range.index);
         const span =
           leaf?.domNode?.closest?.('.hidden-reveal') ||
           leaf?.domNode?.parentElement?.closest('.hidden-reveal');
-        if (!span) return;
-        if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
-        pendingRevealSpan = span;
-        span.classList.add('pending');
-        document.body.classList.add('linking');
+
+        if (pendingRevealSpan) {
+          pendingRevealSpan.classList.remove('pending');
+          pendingRevealSpan = null;
+        }
+
+        if (!alreadyHidden && span) {
+          pendingRevealSpan = span;
+          span.classList.add('pending');
+          document.body.classList.add('linking');
+        } else {
+          document.body.classList.remove('linking');
+        }
+
         syncCurrentSection();
         previewSection();
       });
