@@ -2177,6 +2177,7 @@
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
       let pendingRevealSpan = null;
+      let lastRange = null;
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
@@ -2364,6 +2365,9 @@
         },
         theme: 'snow'
       });
+      quill.on('selection-change', range => {
+        if (range) lastRange = range;
+      });
       // Auto‑expand the editor height to fit its content
       function adjustEditorHeight() {
         const root      = quill.root;             // editable area (ql-editor)
@@ -2425,11 +2429,12 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        const range = quill.getSelection(true);
+        const range = lastRange;
         if (!range || range.length === 0) return alert('Select text first');
         quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
         const [leaf] = quill.getLeaf(range.index);
-        const span = leaf.domNode.closest('.hidden-reveal');
+        const span = leaf && leaf.domNode ? leaf.domNode.closest('.hidden-reveal') : null;
+        if (!span) return;
         if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
         pendingRevealSpan = span;
         span.classList.add('pending');
