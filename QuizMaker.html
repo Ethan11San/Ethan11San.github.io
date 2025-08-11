@@ -756,7 +756,6 @@
         <button class="ql-list" value="bullet"></button>
         <select class="ql-color"></select>
         <button id="addImageWordBtn">🖼️</button>
-        <button id="hideBtn" type="button">🙈</button>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
@@ -2436,15 +2435,12 @@
         };
         input.click();
       });
-      const hideBtn = document.getElementById('hideBtn');
-      hideBtn.addEventListener('click', () => {
-        if (!ensureSelection()) return;
-        // Quill loses focus when toolbar buttons are used, so fall back to the
-        // last known range if the current selection is null.
+      quill.keyboard.addBinding({ key: 'R', shortKey: true, shiftKey: true }, () => {
+        if (!ensureSelection()) return false;
         const range = quill.getSelection(true) || lastRange;
         if (!range || range.length === 0) {
           alert('Select text first');
-          return;
+          return false;
         }
 
         // Toggle the hiddenReveal format for the selected text. If the
@@ -2481,6 +2477,7 @@
 
         syncCurrentSection();
         previewSection();
+        return false;
       });
       editorDiv.addEventListener('click', e => {
         const span = e.target.closest('.hidden-reveal');
