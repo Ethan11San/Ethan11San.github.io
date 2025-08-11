@@ -2433,7 +2433,9 @@
         if (!range || range.length === 0) return alert('Select text first');
         quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
         const [leaf] = quill.getLeaf(range.index);
-        const span = leaf && leaf.domNode ? leaf.domNode.closest('.hidden-reveal') : null;
+        const span =
+          leaf?.domNode?.closest?.('.hidden-reveal') ||
+          leaf?.domNode?.parentElement?.closest('.hidden-reveal');
         if (!span) return;
         if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
         pendingRevealSpan = span;
