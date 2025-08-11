@@ -2388,7 +2388,7 @@
       const addImageWordBtn = document.getElementById('addImageWordBtn');
       addImageWordBtn.addEventListener('click', async () => {
         if (!ensureSelection()) return;
-        const range = quill.getSelection();
+        const range = quill.getSelection(true);
         if (!range || range.length === 0) return alert('Select text first');
         async function getClipboardImage() {
           try {
@@ -2425,7 +2425,7 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        const range = quill.getSelection();
+        const range = quill.getSelection(true);
         if (!range || range.length === 0) return alert('Select text first');
         quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
         const [leaf] = quill.getLeaf(range.index);
