@@ -277,11 +277,21 @@
       cursor: pointer;
     }
     .word:hover { background: #dfe6e9; }
-    .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
+    .word.hidden {
+      color: transparent;
+      text-shadow: 0 0 5px #000;
+      background: #fff3cd;
+      border-bottom: 1px dashed #f39c12;
+    }
     .word.hidden.linked { background: #d4edda; }
-    .hidden-reveal { display: none; }
-    #editor .hidden-reveal { display: inline; background: #fff3cd; border-bottom: 1px dashed #f39c12; }
-    #editor .hidden-reveal.pending { background: #ffe8a1; outline: 2px solid #f39c12; }
+    .hidden-reveal {
+      background: #fff3cd;
+      border-bottom: 1px dashed #f39c12;
+    }
+    #editor .hidden-reveal.pending {
+      background: #ffe8a1;
+      outline: 2px solid #f39c12;
+    }
     #preview .hidden-reveal, #quizContent .hidden-reveal { display: none; }
     body.linking #preview .word.hidden { background: #ffe8a1; cursor: pointer; }
     .popup-word {
