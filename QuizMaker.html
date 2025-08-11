@@ -2366,7 +2366,7 @@
         theme: 'snow'
       });
       quill.on('selection-change', range => {
-        if (range) lastRange = range;
+        if (range && range.length > 0) lastRange = range;
       });
       // Auto‑expand the editor height to fit its content
       function adjustEditorHeight() {
