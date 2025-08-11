@@ -8,6 +8,7 @@
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
   <link rel="preload" href="quizData.json" as="fetch" crossorigin="anonymous">
+  <link rel="preload" href="imageData.json" as="fetch" crossorigin="anonymous">
   <style>
     /* Ensure formatted spans do not disrupt line spacing */
     #editor span {
@@ -1779,6 +1780,9 @@
       // Fallback hosted copy for environments where local JSON can't be fetched
       const GITHUB_JSON_URL = 'https://Ethan11San.github.io/quizData.json';
       const RAW_JSON_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/quizData.json';
+      const GITHUB_IMAGE_URL = 'https://Ethan11San.github.io/imageData.json';
+      const RAW_IMAGE_URL = 'https://raw.githubusercontent.com/Ethan11San/Ethan11San.github.io/main/imageData.json';
+      let imageData = {};
       let data;
       let originalData;
       let staticMode = false;
@@ -2055,8 +2059,38 @@
 
       originalData = JSON.parse(JSON.stringify(data));
 
-      // Images are now handled individually and stored locally in IndexedDB,
-      // so the legacy imageData.json is no longer loaded.
+      // Load legacy image data for backward compatibility
+      (async () => {
+        try {
+          const imgResp = await fetch('./imageData.json', { cache: 'no-store' });
+          if (imgResp.ok) {
+            imageData = await imgResp.json();
+          } else {
+            throw new Error('imageData.json not found');
+          }
+        } catch (err) {
+          try {
+            const fallbackResp = await fetch(GITHUB_IMAGE_URL, { cache: 'no-store' });
+            if (fallbackResp.ok) {
+              imageData = await fallbackResp.json();
+            } else {
+              throw new Error('GitHub Pages image response not OK');
+            }
+          } catch (err2) {
+            try {
+              const rawResp = await fetch(RAW_IMAGE_URL, { cache: 'no-store' });
+              if (rawResp.ok) {
+                imageData = await rawResp.json();
+              } else {
+                console.warn('imageData.json not found or inaccessible');
+              }
+            } catch (err3) {
+              console.warn('Could not load imageData.json', err3);
+            }
+          }
+        }
+      })();
+
       const storedLocal = localStorage.getItem('quizDataLocal');
       if (storedLocal) {
         try {
@@ -3708,10 +3742,56 @@
       }
 
       function ensureSectionImages(folderIdx, sec) {
-        // Legacy helper used when images were stored in imageData.json.
-        // With content-addressed files, images are loaded directly via
-        // their stored path or local imageRef, so this function now
-        // simply exists as a no-op for backward compatibility.
+        const folder = data.folders[folderIdx];
+        if (!folder || !sec || !imageData) return;
+        const entry = (imageData[folder.name] || {})[sec.title];
+        if (!entry) return;
+
+        if (!sec.image && entry.image) {
+          sec.image = entry.image;
+        }
+        if (sec.image && !sec.imageRef && typeof sec.image === 'string' && sec.image.startsWith('data:')) {
+          (async () => {
+            try {
+              const blob = await (await fetch(sec.image)).blob();
+              const buf = await blob.arrayBuffer();
+              const digest = await crypto.subtle.digest('SHA-256', buf);
+              const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+              await idbPut(hash, blob);
+              sec.imageRef = `sha256:${hash}`;
+              const ext = blob.type.split('/')[1]?.split(';')[0] || 'png';
+              sec.imageExt = ext;
+            } catch (e) {
+              console.warn('Failed to convert legacy main image', e);
+            }
+          })();
+        }
+        if (entry.extraImages) {
+          sec.extraImages = sec.extraImages || [];
+          entry.extraImages.forEach((imgData, idx) => {
+            if (!sec.extraImages[idx]) sec.extraImages[idx] = { labels: [], arrows: [] };
+            if (!sec.extraImages[idx].image) {
+              sec.extraImages[idx].image = imgData;
+            }
+            const target = sec.extraImages[idx];
+            if (target.image && !target.imageRef && typeof target.image === 'string' && target.image.startsWith('data:')) {
+              (async () => {
+                try {
+                  const blob = await (await fetch(target.image)).blob();
+                  const buf = await blob.arrayBuffer();
+                  const digest = await crypto.subtle.digest('SHA-256', buf);
+                  const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+                  await idbPut(hash, blob);
+                  target.imageRef = `sha256:${hash}`;
+                  const ext = blob.type.split('/')[1]?.split(';')[0] || 'png';
+                  target.ext = ext;
+                } catch (e) {
+                  console.warn('Failed to convert legacy extra image', e);
+                }
+              })();
+            }
+          });
+        }
       }
 
       function previewSection() {
@@ -4434,6 +4514,7 @@
           const wrapper = document.createElement('div');
           wrapper.style.position = 'relative';
           wrapper.style.maxWidth = '100%';
+          wrapper.style.display = 'inline-block';
           const img = document.createElement('img');
           img.className = 'main-image';
           const base = sec.image || '';
@@ -4441,13 +4522,20 @@
           if (sec.imageRef) {
             imageURL(sec.imageRef).then(url => { if (url) img.src = url; });
           }
-          img.style.width = '100%';
-          img.style.height = 'auto';
           wrapper.appendChild(img);
           let baseWidth = 0, baseHeight = 0;
           img.onload = () => {
             baseWidth = sec.imgWidth || img.naturalWidth;
             baseHeight = sec.imgHeight || img.naturalHeight;
+            if (!isMobileDevice()) {
+              wrapper.style.width = baseWidth + 'px';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            } else {
+              wrapper.style.width = '100%';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            }
             svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
             positionExtras(wrapper);
             scaleLabels(wrapper, baseWidth, baseHeight);
@@ -4464,6 +4552,15 @@
           };
           window.addEventListener('resize', () => {
             if (!baseWidth || !baseHeight) return;
+            if (!isMobileDevice()) {
+              wrapper.style.width = baseWidth + 'px';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            } else {
+              wrapper.style.width = '100%';
+              img.style.width = '100%';
+              img.style.height = 'auto';
+            }
             scaleLabels(wrapper, baseWidth, baseHeight);
             if (sec.extraImages) {
               const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
