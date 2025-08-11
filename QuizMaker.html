@@ -2141,13 +2141,16 @@
           return;
         }
 
-        let token = null;
-        const savedToken = localStorage.getItem('githubToken');
-        if (savedToken) {
-          const useSaved = confirm('Use saved GitHub token?\nPress OK to use saved token or Cancel to enter a new one.');
-          if (useSaved) token = savedToken;
-        }
-        if (!token) {
+        let token = localStorage.getItem('githubToken');
+        if (token) {
+          const reuse = confirm('Reuse saved GitHub token?\nPress OK to reuse, or Cancel to enter a new token.');
+          if (!reuse) {
+            token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
+            if (token) {
+              localStorage.setItem('githubToken', token);
+            }
+          }
+        } else {
           token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
           if (token) {
             localStorage.setItem('githubToken', token);
