@@ -5411,17 +5411,21 @@
     initBlanks();
 
     let currentToken = null;
+    let storedRange = null;
 
     const toggleBtn = () => {
       const r = getRangeIn(source);
       console.log('toggleBtn range', r);
       linkBtn.hidden = !(r && !r.collapsed);
+      storedRange = r && !r.collapsed ? r.cloneRange() : null;
     };
 
     document.addEventListener('selectionchange', toggleBtn);
 
+    linkBtn.addEventListener('mousedown', e => e.preventDefault());
+
     linkBtn.addEventListener('click', () => {
-      const r = getRangeIn(source);
+      const r = storedRange;
       console.log('linkBtn click range', r);
       if (!r || r.collapsed) return;
       const token = wrapSelectionAsToken(r);
