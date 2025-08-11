@@ -362,11 +362,6 @@
       font-family: Arial, sans-serif;
     }
     .blank-input { box-sizing: border-box; }
-    #quizContent .blank .reveal {
-      margin-left: 6px;
-      color: #555;
-      font-style: italic;
-    }
     /* —— Acronym Quiz Font & Width —— */
     #quizContent input[type="text"] {
       font-family: Arial, sans-serif;
@@ -4310,18 +4305,16 @@
           if (!w) return;
           counts[w] = (counts[w] || 0) + 1;
           const occ = counts[w];
-          const entry = valid.find(e => e.word === w && e.occ === occ);
-          if (entry) {
-            replacements.push({ node, word: w, occ, reveal: entry.reveal });
+          if (valid.some(e => e.word === w && e.occ === occ)) {
+            replacements.push({ node, word: w, occ });
           }
         });
 
-        replacements.forEach(({ node, word, occ, reveal }) => {
+        replacements.forEach(({ node, word, occ }) => {
           const span = document.createElement('span');
           span.className = 'blank';
           span.dataset.word = word;
           span.dataset.occ = occ;
-          if (reveal) span.dataset.reveal = reveal;
 
           const input = document.createElement('input');
           input.type = 'text';
@@ -4423,11 +4416,9 @@
           // Attach grading and navigation to all blanks
           quizContent.querySelectorAll('.blank input').forEach(input => {
             input.addEventListener('input', () => {
-              const wrapper      = input.parentElement;
-              const revealText   = wrapper.dataset.reveal;
               const enteredRaw   = input.value.trim();
-              const correctWord  = wrapper.dataset.word;
-              const occ          = wrapper.dataset.occ;
+              const correctWord  = input.parentElement.dataset.word;
+              const occ          = input.parentElement.dataset.occ;
               const section      = data.folders[currentFolder].sections[currentSection];
               const altKey       = `${correctWord}_${occ}`;
               const alts         = section.alts[altKey] || [];
@@ -4440,29 +4431,12 @@
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
-                if (revealText) {
-                  const note = wrapper.querySelector('.reveal');
-                  if (note) note.remove();
-                }
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
-                if (revealText) {
-                  let note = wrapper.querySelector('.reveal');
-                  if (!note) {
-                    note = document.createElement('span');
-                    note.className = 'reveal';
-                    note.textContent = revealText;
-                    wrapper.appendChild(note);
-                  }
-                }
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
-                if (revealText) {
-                  const note = wrapper.querySelector('.reveal');
-                  if (note) note.remove();
-                }
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
@@ -4845,10 +4819,6 @@
               titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
-              const revealMap = {};
-              hiddenEntries.forEach(e => {
-                if (e.reveal) revealMap[`${e.word}_${e.occ}`] = e.reveal;
-              });
               let counts = {};
               tokens.forEach(tok => {
                 if (!tok.trim()) {
@@ -4858,8 +4828,6 @@
                 const w = tok.trim();
                 counts[w] = (counts[w] || 0) + 1;
                 const occ = counts[w];
-                const key = `${w}_${occ}`;
-                const revealText = revealMap[key];
                 const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
 
                 if (!isHidden) {
@@ -4867,11 +4835,11 @@
                   return;
                 }
 
+                const key = `${w}_${occ}`;
                 const answers = [w, ...(def.alts[key] || [])];
 
                 const span = document.createElement('span');
                 span.className = 'blank';
-                if (revealText) span.dataset.reveal = revealText;
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
@@ -4924,23 +4892,7 @@
                   const ok = answers.some(a => normalize(a) === val);
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-
-                  const revealText = span.dataset.reveal;
-                  if (inp.value.trim().length === 0) {
-                    if (revealText) {
-                      const note = span.querySelector('.reveal');
-                      if (note) note.remove();
-                    }
-                  } else if (ok) {
-                    if (revealText) {
-                      let note = span.querySelector('.reveal');
-                      if (!note) {
-                        note = document.createElement('span');
-                        note.className = 'reveal';
-                        note.textContent = revealText;
-                        span.appendChild(note);
-                      }
-                    }
+                  if (ok) {
                     const nextB = para._inputs.find(b => !b.classList.contains('correct'));
                     if (nextB) {
                       setTimeout(() => nextB.focus(),0);
@@ -4948,13 +4900,7 @@
                       const nextLbl = labelOrder[dIndex+1];
                       if (nextLbl) setTimeout(() => nextLbl.focus(),0);
                     }
-                  } else {
-                    if (revealText) {
-                      const note = span.querySelector('.reveal');
-                      if (note) note.remove();
-                    }
                   }
-
                   const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                     quizContent.style.borderColor = '#27ae60';
