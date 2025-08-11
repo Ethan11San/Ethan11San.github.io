@@ -3886,6 +3886,11 @@
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = text;
         const linkedReveals = new Set(Array.from(tempDiv.querySelectorAll('.hidden-reveal[data-reveal-for]')).map(s => s.dataset.revealFor));
+        const revealMap = {};
+        tempDiv.querySelectorAll('.hidden-reveal[data-reveal-for]').forEach(s => {
+          const key = s.dataset.revealFor;
+          if (key) revealMap[key] = s.textContent.trim();
+        });
         document.body.classList.toggle('linking', !!pendingRevealSpan);
 
         let counts = {};
@@ -3961,6 +3966,13 @@
         // Remove empty tokens
         allTokens = allTokens.filter(t => t.length > 0);
         const hiddenEntries = getHiddenEntries(sec, allTokens);
+        hiddenEntries.forEach(e => {
+          const key = `${e.word}_${e.occ}`;
+          if (revealMap[key]) e.reveal = revealMap[key];
+          else delete e.reveal;
+        });
+        sec.hidden = hiddenEntries;
+        saveData();
         // We'll use a running count per word for the preview rendering
         let globalCounts = {};
 
@@ -4123,7 +4135,7 @@
           }
         });
 
-        // Build alternate-answer and reveal inputs for hidden words
+        // Build alternate-answer inputs for hidden words
         altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
         altContainer.style.display = 'block';
         const sortedAlts = hiddenEntries.slice().sort((a,b)=>{
@@ -4132,7 +4144,7 @@
           return a.occ - b.occ;
         });
         let altCounts = {};
-        sortedAlts.forEach(({ word, occ, reveal }) => {
+        sortedAlts.forEach(({ word, occ }) => {
           altCounts[word] = (altCounts[word] || 0) + 1;
           if (altCounts[word] === occ) {
             const key = `${word}_${occ}`;
@@ -4146,18 +4158,8 @@
               sec.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
               saveData();
             };
-            const ri = document.createElement('input');
-            ri.className = 'reveal-input';
-            ri.placeholder = 'reveal text';
-            ri.value = reveal || '';
-            ri.oninput = () => {
-              const entry = sec.hidden.find(e => e.word === word && e.occ === occ);
-              if (entry) entry.reveal = ri.value.trim() || undefined;
-              saveData();
-            };
             altContainer.appendChild(label);
             altContainer.appendChild(ai);
-            altContainer.appendChild(ri);
             altContainer.appendChild(document.createElement('br'));
           }
         });
@@ -4247,19 +4249,8 @@
             defObj.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
             saveData();
           };
-          const ri = document.createElement('input');
-          ri.className = 'reveal-input';
-          ri.placeholder = 'reveal text';
-          const entry = defObj.hidden.find(e => e.word === w && e.occ === occ);
-          ri.value = entry && entry.reveal ? entry.reveal : '';
-          ri.oninput = () => {
-            const e = defObj.hidden.find(x => x.word === w && x.occ === occ);
-            if (e) e.reveal = ri.value.trim() || undefined;
-            saveData();
-          };
           altDiv.appendChild(label);
           altDiv.appendChild(ai);
-          altDiv.appendChild(ri);
           altDiv.appendChild(document.createElement('br'));
         });
         if (editorArea) editorArea.scrollTop = editorScrollTop;
