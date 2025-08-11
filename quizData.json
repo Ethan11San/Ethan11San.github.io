@@ -848,7 +848,8 @@
             },
             {
               "occ": 2,
-              "word": "Transponder"
+              "word": "Transponder",
+              "reveal": "Required every 24 Calendar Months"
             },
             {
               "occ": 3,
