@@ -2696,8 +2696,8 @@
             if (isQuizMode) {
               enterQuizQuestion();   // show quiz for this section
             } else {
-              loadSection();
               enterEdit();           // show editor
+              loadSection();
             }
           };
           li.ondblclick=()=>{
@@ -3638,6 +3638,9 @@
         const html = sec.rawHtml || sec.rawText || '';
         // Load the HTML silently so it does not create an undo entry
         quill.clipboard.dangerouslyPasteHTML(html, 'silent');
+        // Ensure new content starts with normal formatting
+        quill.setSelection(0, 0, 'silent');
+        ['bold', 'italic', 'underline'].forEach(f => quill.format(f, false, 'silent'));
         adjustEditorHeight();  // ensure editor resizes for existing content
         // Run a second resize on next tick so Quill gets a chance to lay out its HTML
         setTimeout(() => requestAnimationFrame(adjustEditorHeight), 0);
