@@ -658,8 +658,9 @@
 .source-token{background:rgba(255,238,150,.65);border-radius:4px;padding:0 2px}
 #linkBtn[hidden]{display:none}
 #preview .blank{padding:0 2px;border-radius:4px}
-#preview .blank.linked{outline:2px solid #4a7}
-#preview.linking-ready .blank{cursor:crosshair}
+#preview .blank.linked{outline:2px solid #4a7;background:#d4edda}
+#preview.linking-ready .blank{cursor:crosshair;background:#ffeaa7;outline:2px dashed #f39c12}
+.source-token.linking{background:#ffe066;outline:2px dashed #f39c12}
   </style>
 </head>
 <body class="loading">
@@ -5458,6 +5459,7 @@
       currentToken = token;
       token.classList.add('linking');
       blanks.classList.add('linking-ready');
+      document.body.classList.add('linking');
     }
 
     function exitLinkingMode() {
@@ -5465,6 +5467,7 @@
       if (!currentToken) return;
       currentToken.classList.remove('linking');
       blanks.classList.remove('linking-ready');
+      document.body.classList.remove('linking');
       currentToken = null;
     }
 
@@ -5499,22 +5502,15 @@
 
     function getTokenInfo(token) {
       const target = token.textContent.trim();
-      const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT, null);
-      const counts = {};
-      while (walker.nextNode()) {
-        const node = walker.currentNode;
-        const parts = node.textContent.split(/(\s+)/);
-        for (const part of parts) {
-          const w = part.trim();
-          if (!w) continue;
-          counts[w] = (counts[w] || 0) + 1;
-          const inToken = node.parentElement && node.parentElement.closest('.source-token') === token;
-          if (inToken && w === target) {
-            return { word: target, occ: counts[w] };
-          }
-        }
-      }
-      return { word: target, occ: counts[target] || 1 };
+      const range = document.createRange();
+      range.setStart(source, 0);
+      range.setEnd(token, 0);
+      const before = range.toString();
+      const escaped = target.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      const re = new RegExp(`\b${escaped}\b`, 'g');
+      let occ = 0;
+      while (re.exec(before)) occ++;
+      return { word: target, occ: occ + 1 };
     }
 
     function linkTokenToBlank(token, blank) {
@@ -5547,6 +5543,7 @@
         }
         syncCurrentSection();
         previewSection();
+        console.log('hidden entries after link', sec.hidden);
       }
     }
 
@@ -5569,6 +5566,9 @@
       blank.classList.remove('linked');
       syncCurrentSection();
       previewSection();
+      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
+        console.log('hidden entries after unlink', data.folders[currentFolder].sections[currentSection].hidden);
+      }
     }
 
     function initBlanks() {
