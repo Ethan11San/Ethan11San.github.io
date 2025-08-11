@@ -6942,7 +6942,7 @@
           "entries": [
             {
               "answer": "Gas",
-              "extra": "",
+              "extra": "Test",
               "letter": "G"
             },
             {
@@ -6967,7 +6967,9 @@
             }
           ],
           "rawText": "",
-          "type": "acronym"
+          "type": "acronym",
+          "hidden": [],
+          "alts": {}
         }
       ]
     },
