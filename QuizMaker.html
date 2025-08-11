@@ -5405,6 +5405,7 @@
     const blanks = document.querySelector('#preview');
     const linkBtn = document.getElementById('linkBtn');
     if (!source || !blanks || !linkBtn) { console.warn('Missing editors or button'); return; }
+    console.log('Link selection initialized', { source, blanks, linkBtn });
 
     initBlanks();
 
@@ -5412,6 +5413,7 @@
 
     const toggleBtn = () => {
       const r = getRangeIn(source);
+      console.log('toggleBtn range', r);
       linkBtn.hidden = !(r && !r.collapsed);
     };
 
@@ -5419,8 +5421,10 @@
 
     linkBtn.addEventListener('click', () => {
       const r = getRangeIn(source);
+      console.log('linkBtn click range', r);
       if (!r || r.collapsed) return;
       const token = wrapSelectionAsToken(r);
+      console.log('token created', token);
       enterLinkingMode(token);
       const after = document.createRange();
       after.setStartAfter(token); after.collapse(true);
@@ -5431,6 +5435,7 @@
 
     blanks.addEventListener('click', e => {
       const target = e.target.closest('.blank');
+      console.log('blank clicked', { target, currentToken });
       if (!target || !currentToken) return;
       linkTokenToBlank(currentToken, target);
       exitLinkingMode();
@@ -5438,6 +5443,7 @@
 
     source.addEventListener('click', e => {
       const t = e.target.closest('.source-token');
+      console.log('source token clicked', t);
       if (!t) return;
       enterLinkingMode(t);
     });
@@ -5447,6 +5453,7 @@
     });
 
     function enterLinkingMode(token) {
+      console.log('enterLinkingMode', token);
       if (currentToken) exitLinkingMode();
       currentToken = token;
       token.classList.add('linking');
@@ -5454,6 +5461,7 @@
     }
 
     function exitLinkingMode() {
+      console.log('exitLinkingMode', currentToken);
       if (!currentToken) return;
       currentToken.classList.remove('linking');
       blanks.classList.remove('linking-ready');
@@ -5469,6 +5477,7 @@
     }
 
     function wrapSelectionAsToken(range) {
+      console.log('wrapSelectionAsToken', range);
       const commonEl = range.commonAncestorContainer.nodeType === 1
         ? range.commonAncestorContainer
         : range.commonAncestorContainer.parentElement;
@@ -5489,6 +5498,7 @@
     }
 
     function linkTokenToBlank(token, blank) {
+      console.log('linkTokenToBlank', { token, blank });
       if (token.dataset.blankId) {
         const old = blanks.querySelector(`.blank[data-blank-id="${token.dataset.blankId}"]`);
         if (old) unlinkBoth(token, old);
@@ -5509,6 +5519,7 @@
     }
 
     function unlinkBoth(token, blank) {
+      console.log('unlinkBoth', { token, blank });
       delete token.dataset.blankId;
       delete blank.dataset.tokenId;
       token.classList.remove('linked');
