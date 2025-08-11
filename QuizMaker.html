@@ -278,6 +278,9 @@
     }
     .word:hover { background: #dfe6e9; }
     .word.hidden { color: transparent; text-shadow: 0 0 5px #000; }
+    .hidden-reveal { display: none; }
+    #editor .hidden-reveal { display: inline; background: #fff3cd; border-bottom: 1px dashed #f39c12; }
+    #preview .hidden-reveal, #quizContent .hidden-reveal { display: none; }
     .popup-word {
       cursor: pointer;
       border-bottom: 1px dashed #3498db;
@@ -2170,6 +2173,7 @@
       const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
+      let pendingRevealSpan = null;
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
@@ -2402,27 +2406,16 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        const range = quill.getSelection();
-        if (!range || range.length === 0) return alert('Select text first');
-        const sec = data.folders[currentFolder].sections[currentSection];
-        const text = quill.getText();
-        const selStart = range.index;
-        const selEnd = range.index + range.length;
-        const regex = /\S+/g;
-        let match;
-        const counts = {};
-        sec.hidden = sec.hidden || [];
-        while ((match = regex.exec(text)) !== null) {
-          const word = match[0];
-          const start = match.index;
-          const end = regex.lastIndex;
-          counts[word] = (counts[word] || 0) + 1;
-          const occ = counts[word];
-          if (end <= selStart || start >= selEnd) continue;
-          const idx = sec.hidden.findIndex(e => e.word === word && e.occ === occ);
-          if (idx >= 0) sec.hidden.splice(idx, 1);
-          else sec.hidden.push({ word, occ });
-        }
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return alert('Select text first');
+        const range = sel.getRangeAt(0);
+        if (!editorDiv.contains(range.commonAncestorContainer)) return;
+        const span = document.createElement('span');
+        span.className = 'hidden-reveal';
+        span.textContent = range.toString();
+        range.deleteContents();
+        range.insertNode(span);
+        pendingRevealSpan = span;
         syncCurrentSection();
         previewSection();
       });
@@ -3866,15 +3859,38 @@
           return getHiddenEntries(sec, tokens);
         }
 
+        function handleWordClick(w, occ) {
+          if (pendingRevealSpan) {
+            pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
+            pendingRevealSpan = null;
+            syncCurrentSection();
+            saveData();
+            previewSection();
+          } else {
+            const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+            if (idx >= 0) hiddenEntries.splice(idx, 1);
+            else hiddenEntries.push({ word: w, occ });
+            sec.hidden = hiddenEntries;
+            saveData();
+            previewSection();
+          }
+        }
+
         // Collect all tokens for hidden word occurrence counting
         let allTokens = [];
         tempDiv.childNodes.forEach(node => {
+          if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('hidden-reveal')) {
+            return;
+          }
           if (node.nodeType === Node.TEXT_NODE) {
             // Split text by whitespace for tokens
             allTokens.push(...node.textContent.split(/(\s+)/));
           } else if (node.nodeType === Node.ELEMENT_NODE) {
             if (node.tagName === 'P' || node.tagName === 'DIV') {
               node.childNodes.forEach(child => {
+                if (child.nodeType === Node.ELEMENT_NODE && child.classList.contains('hidden-reveal')) {
+                  return;
+                }
                 if (child.nodeType === Node.TEXT_NODE) {
                   allTokens.push(...child.textContent.split(/(\s+)/));
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
@@ -3923,14 +3939,7 @@
                 const span = document.createElement('span');
                 span.className = 'word' + (isHidden ? ' hidden' : '');
                 span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                span.onclick = () => {
-                  const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                  if (idx >= 0) hiddenEntries.splice(idx, 1);
-                  else hiddenEntries.push({ word: w, occ });
-                  sec.hidden = hiddenEntries;
-                  saveData();
-                  previewSection();
-                };
+                span.onclick = () => handleWordClick(w, occ);
                 previewDiv.appendChild(span);
               }
             });
@@ -3951,14 +3960,7 @@
                   const wSpan = document.createElement('span');
                   wSpan.className = 'word' + (isHidden ? ' hidden' : '');
                   wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                  wSpan.onclick = () => {
-                    const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                    if (idx >= 0) hiddenEntries.splice(idx, 1);
-                    else hiddenEntries.push({ word: w, occ });
-                    sec.hidden = hiddenEntries;
-                    saveData();
-                    previewSection();
-                  };
+                  wSpan.onclick = () => handleWordClick(w, occ);
                   wrapper.appendChild(wSpan);
                 }
               });
@@ -3989,14 +3991,7 @@
                     const span = document.createElement('span');
                     span.className = 'word' + (isHidden ? ' hidden' : '');
                     span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => {
-                      const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                      if (idx >= 0) hiddenEntries.splice(idx, 1);
-                      else hiddenEntries.push({ word: w, occ });
-                      sec.hidden = hiddenEntries;
-                      saveData();
-                      previewSection();
-                    };
+                    span.onclick = () => handleWordClick(w, occ);
                     line.appendChild(span);
                   }
                 });
@@ -4021,17 +4016,10 @@
                       const span = document.createElement('span');
                       span.className = 'word' + (isHidden ? ' hidden' : '');
                       span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      span.onclick = () => {
-                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                        if (idx >= 0) hiddenEntries.splice(idx, 1);
-                        else hiddenEntries.push({ word: w, occ });
-                        sec.hidden = hiddenEntries;
-                        saveData();
-                        previewSection();
-                      };
-                      para.appendChild(span);
-                    }
-                  });
+                    span.onclick = () => handleWordClick(w, occ);
+                    para.appendChild(span);
+                  }
+                });
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.classList && child.classList.contains('popup-word')) {
                   const wrapper = document.createElement('span');
                   wrapper.className = 'popup-word';
@@ -4048,14 +4036,7 @@
                       const wSpan = document.createElement('span');
                       wSpan.className = 'word' + (isHidden ? ' hidden' : '');
                       wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      wSpan.onclick = () => {
-                        const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-                        if (idx >= 0) hiddenEntries.splice(idx, 1);
-                        else hiddenEntries.push({ word: w, occ });
-                        sec.hidden = hiddenEntries;
-                        saveData();
-                        previewSection();
-                      };
+                      wSpan.onclick = () => handleWordClick(w, occ);
                       wrapper.appendChild(wSpan);
                     }
                   });
@@ -4176,13 +4157,21 @@
           span.className = 'word' + (isHidden ? ' hidden' : '');
           span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
           span.onclick = () => {
-            const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-            (idx >= 0)
-              ? hiddenEntries.splice(idx, 1)
-              : hiddenEntries.push({ word: w, occ });
-            defObj.hidden = hiddenEntries;
-            saveData();
-            buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
+            if (pendingRevealSpan) {
+              pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
+              pendingRevealSpan = null;
+              syncCurrentSection();
+              saveData();
+              buildDefinitionPreview(defObj, previewDiv, altDiv);
+            } else {
+              const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+              (idx >= 0)
+                ? hiddenEntries.splice(idx, 1)
+                : hiddenEntries.push({ word: w, occ });
+              defObj.hidden = hiddenEntries;
+              saveData();
+              buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
+            }
           };
           previewDiv.appendChild(span);
         });
@@ -4351,7 +4340,7 @@
         const textNodes = [];
         while (walker.nextNode()) {
           const n = walker.currentNode;
-          if (!n.parentElement.closest('.quiz-title-word')) textNodes.push(n);
+          if (!n.parentElement.closest('.quiz-title-word') && !n.parentElement.closest('.hidden-reveal')) textNodes.push(n);
         }
 
         const tokenNodes = [];
@@ -4502,6 +4491,7 @@
               const correctNorm = normalize(correctWord);
               const isCorrect   = enteredNorm === correctNorm ||
                                   alts.some(a => normalize(a) === enteredNorm);
+              const revealKey   = `${correctWord}_${occ}`;
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
@@ -4509,6 +4499,9 @@
                   const note = wrapper.querySelector('.reveal');
                   if (note) note.remove();
                 }
+                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
+                  s.style.display = 'none';
+                });
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
@@ -4521,6 +4514,9 @@
                     wrapper.appendChild(note);
                   }
                 }
+                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
+                  s.style.display = 'inline';
+                });
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
@@ -4528,6 +4524,9 @@
                   const note = wrapper.querySelector('.reveal');
                   if (note) note.remove();
                 }
+                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
+                  s.style.display = 'none';
+                });
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
