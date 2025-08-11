@@ -2335,6 +2335,22 @@
       PopupWordBlot.tagName = 'span';
       PopupWordBlot.className = 'popup-word';
       Quill.register(PopupWordBlot);
+
+      // Custom blot to preserve spans used for hidden word reveals
+      class HiddenRevealBlot extends Inline {
+        static create(value) {
+          const node = super.create();
+          if (value && value !== true) node.setAttribute('data-reveal-for', value);
+          return node;
+        }
+        static formats(node) {
+          return node.getAttribute('data-reveal-for');
+        }
+      }
+      HiddenRevealBlot.blotName = 'hiddenReveal';
+      HiddenRevealBlot.tagName = 'span';
+      HiddenRevealBlot.className = 'hidden-reveal';
+      Quill.register(HiddenRevealBlot);
       const quill = new Quill('#editor', {
         modules: {
           toolbar: {
@@ -2409,15 +2425,11 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        const sel = window.getSelection();
-        if (!sel.rangeCount) return alert('Select text first');
-        const range = sel.getRangeAt(0);
-        if (!editorDiv.contains(range.commonAncestorContainer)) return;
-        const span = document.createElement('span');
-        span.className = 'hidden-reveal';
-        span.textContent = range.toString();
-        range.deleteContents();
-        range.insertNode(span);
+        const range = quill.getSelection();
+        if (!range || range.length === 0) return alert('Select text first');
+        quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
+        const [leaf] = quill.getLeaf(range.index);
+        const span = leaf.domNode.closest('.hidden-reveal');
         if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
         pendingRevealSpan = span;
         span.classList.add('pending');
