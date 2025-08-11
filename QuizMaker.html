@@ -5497,6 +5497,26 @@
       return span;
     }
 
+    function getTokenInfo(token) {
+      const target = token.textContent.trim();
+      const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT, null);
+      const counts = {};
+      while (walker.nextNode()) {
+        const node = walker.currentNode;
+        const parts = node.textContent.split(/(\s+)/);
+        for (const part of parts) {
+          const w = part.trim();
+          if (!w) continue;
+          counts[w] = (counts[w] || 0) + 1;
+          const inToken = node.parentElement && node.parentElement.closest('.source-token') === token;
+          if (inToken && w === target) {
+            return { word: target, occ: counts[w] };
+          }
+        }
+      }
+      return { word: target, occ: counts[target] || 1 };
+    }
+
     function linkTokenToBlank(token, blank) {
       console.log('linkTokenToBlank', { token, blank });
       if (token.dataset.blankId) {
@@ -5516,14 +5536,39 @@
 
       token.classList.add('linked');
       blank.classList.add('linked');
+
+      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
+        const sec = data.folders[currentFolder].sections[currentSection];
+        const info = getTokenInfo(token);
+        sec.hidden = sec.hidden || [];
+        if (!sec.hidden.some(e => e.word === info.word && e.occ === info.occ)) {
+          sec.hidden.push(info);
+          saveData();
+        }
+        syncCurrentSection();
+        previewSection();
+      }
     }
 
     function unlinkBoth(token, blank) {
       console.log('unlinkBoth', { token, blank });
+      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
+        const sec = data.folders[currentFolder].sections[currentSection];
+        const info = getTokenInfo(token);
+        if (sec && sec.hidden) {
+          const idx = sec.hidden.findIndex(e => e.word === info.word && e.occ === info.occ);
+          if (idx >= 0) {
+            sec.hidden.splice(idx, 1);
+            saveData();
+          }
+        }
+      }
       delete token.dataset.blankId;
       delete blank.dataset.tokenId;
       token.classList.remove('linked');
       blank.classList.remove('linked');
+      syncCurrentSection();
+      previewSection();
     }
 
     function initBlanks() {
