@@ -5425,7 +5425,7 @@
     linkBtn.addEventListener('mousedown', e => e.preventDefault());
 
     linkBtn.addEventListener('click', () => {
-      const r = storedRange || getRangeIn(source);
+      const r = storedRange;
       console.log('linkBtn click range', r);
       if (!r || r.collapsed) return;
       const token = wrapSelectionAsToken(r);
@@ -5438,12 +5438,10 @@
       linkBtn.hidden = true;
     });
 
-    blanks.addEventListener('mousedown', e => {
+    blanks.addEventListener('click', e => {
       const target = e.target.closest('.blank');
       console.log('blank clicked', { target, currentToken });
       if (!target || !currentToken) return;
-      e.preventDefault();
-      e.stopPropagation();
       linkTokenToBlank(currentToken, target);
       exitLinkingMode();
     });
