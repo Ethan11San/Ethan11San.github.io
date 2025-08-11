@@ -313,10 +313,26 @@
       border: 1px solid #7f8c8d;
       border-radius: 4px;
     }
+    .reveal-input {
+      width: 200px;
+      padding: 2px 4px;
+      margin-bottom: 4px;
+      margin-right: 8px;
+      font-size: 0.8rem;
+      border: 1px solid #7f8c8d;
+      border-radius: 4px;
+    }
 
     /* Override the generic #labelEditor input rule so alternate‑answer boxes stay compact */
     #labelEditor .alt-input {
       width: 120px;
+      padding: 2px 4px;
+      margin-bottom: 4px;
+      margin-right: 8px;
+      font-size: 0.8rem;
+    }
+    #labelEditor .reveal-input {
+      width: 200px;
       padding: 2px 4px;
       margin-bottom: 4px;
       margin-right: 8px;
@@ -362,6 +378,11 @@
       font-family: Arial, sans-serif;
     }
     .blank-input { box-sizing: border-box; }
+    #quizContent .blank .reveal {
+      margin-left: 6px;
+      color: #555;
+      font-style: italic;
+    }
     /* —— Acronym Quiz Font & Width —— */
     #quizContent input[type="text"] {
       font-family: Arial, sans-serif;
@@ -719,6 +740,7 @@
         <button class="ql-list" value="bullet"></button>
         <select class="ql-color"></select>
         <button id="addImageWordBtn">🖼️</button>
+        <button id="hideBtn" type="button">🙈</button>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
       <div style="margin-top:12px;">
@@ -2377,6 +2399,33 @@
         };
         input.click();
       });
+      const hideBtn = document.getElementById('hideBtn');
+      hideBtn.addEventListener('click', () => {
+        if (!ensureSelection()) return;
+        const range = quill.getSelection();
+        if (!range || range.length === 0) return alert('Select text first');
+        const sec = data.folders[currentFolder].sections[currentSection];
+        const text = quill.getText();
+        const selStart = range.index;
+        const selEnd = range.index + range.length;
+        const regex = /\S+/g;
+        let match;
+        const counts = {};
+        sec.hidden = sec.hidden || [];
+        while ((match = regex.exec(text)) !== null) {
+          const word = match[0];
+          const start = match.index;
+          const end = regex.lastIndex;
+          counts[word] = (counts[word] || 0) + 1;
+          const occ = counts[word];
+          if (end <= selStart || start >= selEnd) continue;
+          const idx = sec.hidden.findIndex(e => e.word === word && e.occ === occ);
+          if (idx >= 0) sec.hidden.splice(idx, 1);
+          else sec.hidden.push({ word, occ });
+        }
+        syncCurrentSection();
+        previewSection();
+      });
       function syncCurrentSection(){
         if (currentFolder===null || currentSection===null) return;
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -3676,7 +3725,8 @@
               obj = { word, occ };
             }
           } else if (entry && typeof entry.word === 'string' && Number.isInteger(entry.occ)) {
-            obj = entry;
+            obj = { word: entry.word, occ: entry.occ };
+            if (entry.reveal) obj.reveal = entry.reveal;
           }
           if (!obj) return;
           const count = wordCounts[obj.word] || 0;
@@ -3687,15 +3737,13 @@
           }
         });
 
-        const seen = new Set();
-        const result = [];
+        const resultMap = {};
         cleaned.forEach(o => {
           const key = `${o.word}_${o.occ}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            result.push(o);
-          }
+          if (!resultMap[key]) resultMap[key] = o;
+          else if (!resultMap[key].reveal && o.reveal) resultMap[key].reveal = o.reveal;
         });
+        const result = Object.values(resultMap);
         sec.hidden = result;
         return result;
       }
@@ -4049,17 +4097,16 @@
           }
         });
 
-        // Build alternate-answer inputs for hidden words
+        // Build alternate-answer and reveal inputs for hidden words
         altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
         altContainer.style.display = 'block';
-        // For each unique hidden entry (by word+occurrence), show input
         const sortedAlts = hiddenEntries.slice().sort((a,b)=>{
           const wComp = a.word.localeCompare(b.word);
           if (wComp !== 0) return wComp;
           return a.occ - b.occ;
         });
         let altCounts = {};
-        sortedAlts.forEach(({ word, occ }) => {
+        sortedAlts.forEach(({ word, occ, reveal }) => {
           altCounts[word] = (altCounts[word] || 0) + 1;
           if (altCounts[word] === occ) {
             const key = `${word}_${occ}`;
@@ -4073,8 +4120,19 @@
               sec.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
               saveData();
             };
+            const ri = document.createElement('input');
+            ri.className = 'reveal-input';
+            ri.placeholder = 'reveal text';
+            ri.value = reveal || '';
+            ri.oninput = () => {
+              const entry = sec.hidden.find(e => e.word === word && e.occ === occ);
+              if (entry) entry.reveal = ri.value.trim() || undefined;
+              saveData();
+            };
             altContainer.appendChild(label);
             altContainer.appendChild(ai);
+            altContainer.appendChild(ri);
+            altContainer.appendChild(document.createElement('br'));
           }
         });
         if (editorArea) editorArea.scrollTop = editorScrollTop;
@@ -4091,7 +4149,7 @@
 
         const hiddenEntries = getHiddenEntries(defObj, tokens);
         previewDiv.innerHTML = '';
-        altDiv.innerHTML     = '<h4>Alternate answers (comma‑separated):</h4>';
+        altDiv.innerHTML     = '<h4>Alternate answers (comma-separated):</h4>';
 
         // clickable words
         let counts = {};
@@ -4150,8 +4208,20 @@
             defObj.alts[key] = ai.value.split(',').map(s => s.trim()).filter(Boolean);
             saveData();
           };
+          const ri = document.createElement('input');
+          ri.className = 'reveal-input';
+          ri.placeholder = 'reveal text';
+          const entry = defObj.hidden.find(e => e.word === w && e.occ === occ);
+          ri.value = entry && entry.reveal ? entry.reveal : '';
+          ri.oninput = () => {
+            const e = defObj.hidden.find(x => x.word === w && x.occ === occ);
+            if (e) e.reveal = ri.value.trim() || undefined;
+            saveData();
+          };
           altDiv.appendChild(label);
           altDiv.appendChild(ai);
+          altDiv.appendChild(ri);
+          altDiv.appendChild(document.createElement('br'));
         });
         if (editorArea) editorArea.scrollTop = editorScrollTop;
         window.scrollTo(0, pageScrollTop);
@@ -4305,16 +4375,18 @@
           if (!w) return;
           counts[w] = (counts[w] || 0) + 1;
           const occ = counts[w];
-          if (valid.some(e => e.word === w && e.occ === occ)) {
-            replacements.push({ node, word: w, occ });
+          const entry = valid.find(e => e.word === w && e.occ === occ);
+          if (entry) {
+            replacements.push({ node, word: w, occ, reveal: entry.reveal });
           }
         });
 
-        replacements.forEach(({ node, word, occ }) => {
+        replacements.forEach(({ node, word, occ, reveal }) => {
           const span = document.createElement('span');
           span.className = 'blank';
           span.dataset.word = word;
           span.dataset.occ = occ;
+          if (reveal) span.dataset.reveal = reveal;
 
           const input = document.createElement('input');
           input.type = 'text';
@@ -4416,9 +4488,11 @@
           // Attach grading and navigation to all blanks
           quizContent.querySelectorAll('.blank input').forEach(input => {
             input.addEventListener('input', () => {
+              const wrapper      = input.parentElement;
+              const revealText   = wrapper.dataset.reveal;
               const enteredRaw   = input.value.trim();
-              const correctWord  = input.parentElement.dataset.word;
-              const occ          = input.parentElement.dataset.occ;
+              const correctWord  = wrapper.dataset.word;
+              const occ          = wrapper.dataset.occ;
               const section      = data.folders[currentFolder].sections[currentSection];
               const altKey       = `${correctWord}_${occ}`;
               const alts         = section.alts[altKey] || [];
@@ -4431,12 +4505,29 @@
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
+                if (revealText) {
+                  const note = wrapper.querySelector('.reveal');
+                  if (note) note.remove();
+                }
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
+                if (revealText) {
+                  let note = wrapper.querySelector('.reveal');
+                  if (!note) {
+                    note = document.createElement('span');
+                    note.className = 'reveal';
+                    note.textContent = revealText;
+                    wrapper.appendChild(note);
+                  }
+                }
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
+                if (revealText) {
+                  const note = wrapper.querySelector('.reveal');
+                  if (note) note.remove();
+                }
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
@@ -4819,6 +4910,10 @@
               titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
+              const revealMap = {};
+              hiddenEntries.forEach(e => {
+                if (e.reveal) revealMap[`${e.word}_${e.occ}`] = e.reveal;
+              });
               let counts = {};
               tokens.forEach(tok => {
                 if (!tok.trim()) {
@@ -4828,6 +4923,8 @@
                 const w = tok.trim();
                 counts[w] = (counts[w] || 0) + 1;
                 const occ = counts[w];
+                const key = `${w}_${occ}`;
+                const revealText = revealMap[key];
                 const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
 
                 if (!isHidden) {
@@ -4835,11 +4932,11 @@
                   return;
                 }
 
-                const key = `${w}_${occ}`;
                 const answers = [w, ...(def.alts[key] || [])];
 
                 const span = document.createElement('span');
                 span.className = 'blank';
+                if (revealText) span.dataset.reveal = revealText;
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
@@ -4892,7 +4989,23 @@
                   const ok = answers.some(a => normalize(a) === val);
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
-                  if (ok) {
+
+                  const revealText = span.dataset.reveal;
+                  if (inp.value.trim().length === 0) {
+                    if (revealText) {
+                      const note = span.querySelector('.reveal');
+                      if (note) note.remove();
+                    }
+                  } else if (ok) {
+                    if (revealText) {
+                      let note = span.querySelector('.reveal');
+                      if (!note) {
+                        note = document.createElement('span');
+                        note.className = 'reveal';
+                        note.textContent = revealText;
+                        span.appendChild(note);
+                      }
+                    }
                     const nextB = para._inputs.find(b => !b.classList.contains('correct'));
                     if (nextB) {
                       setTimeout(() => nextB.focus(),0);
@@ -4900,7 +5013,13 @@
                       const nextLbl = labelOrder[dIndex+1];
                       if (nextLbl) setTimeout(() => nextLbl.focus(),0);
                     }
+                  } else {
+                    if (revealText) {
+                      const note = span.querySelector('.reveal');
+                      if (note) note.remove();
+                    }
                   }
+
                   const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
                   if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                     quizContent.style.borderColor = '#27ae60';
