@@ -7010,6 +7010,29 @@
           "rawText": "Did this new save thing work?\nTake Two?\n",
           "title": "Test    #3",
           "type": "fill"
+        },
+        {
+          "type": "label",
+          "title": "Required Inspections",
+          "rawText": "\n",
+          "hidden": [],
+          "alts": {},
+          "image": "images/8186748536de48612c22f5cace94d25c6a70cc89e13e611522627874809afcbb.jpg",
+          "labels": [
+            {
+              "x": 427,
+              "y": 29,
+              "text": "AAVIATE",
+              "fontSize": 45,
+              "w": 188,
+              "h": 62
+            }
+          ],
+          "definitions": [],
+          "arrows": [],
+          "rawHtml": "<p><br></p>",
+          "imgWidth": 1039,
+          "imgHeight": 480
         }
       ]
     }
