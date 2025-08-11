@@ -2140,7 +2140,19 @@
           alert('No local changes to sync.');
           return;
         }
-        const token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
+
+        let token = null;
+        const savedToken = localStorage.getItem('githubToken');
+        if (savedToken) {
+          const useSaved = confirm('Use saved GitHub token?\nPress OK to use saved token or Cancel to enter a new one.');
+          if (useSaved) token = savedToken;
+        }
+        if (!token) {
+          token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
+          if (token) {
+            localStorage.setItem('githubToken', token);
+          }
+        }
         if (!token) {
           const serialized = JSON.stringify(diff);
           navigator.clipboard.writeText(serialized)
