@@ -2429,7 +2429,9 @@
       const hideBtn = document.getElementById('hideBtn');
       hideBtn.addEventListener('click', () => {
         if (!ensureSelection()) return;
-        const range = lastRange;
+        // When the toolbar button is clicked Quill loses focus, so rely on
+        // Quill's "silent" selection retrieval to get the last active range.
+        const range = quill.getSelection(true) || lastRange;
         if (!range || range.length === 0) return alert('Select text first');
         quill.formatText(range.index, range.length, 'hiddenReveal', true, 'user');
         const [leaf] = quill.getLeaf(range.index);
