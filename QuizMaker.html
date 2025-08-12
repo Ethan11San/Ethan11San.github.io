@@ -1588,22 +1588,24 @@
       window.addEventListener('orientationchange', hideSafariBar);
 
       function enableSwipeToDelete(wrapper, content, deleteBtn, onDelete) {
-        let startX = 0, currentX = 0;
+        let startX = 0, currentX = 0, started = false;
         wrapper._deleteOpen = false;
         deleteBtn.style.right = '-60px';
         wrapper.addEventListener('touchstart', e => {
           startX = e.touches[0].clientX;
           content.style.transition = '';
+          started = false;
         });
         wrapper.addEventListener('touchmove', e => {
           currentX = e.touches[0].clientX;
           const diff = currentX - startX;
-          if (diff < 0) content.style.transform = `translateX(${diff}px)`;
+          if (!started && Math.abs(diff) > 10) started = true;
+          if (started && diff < 0) content.style.transform = `translateX(${diff}px)`;
         });
         wrapper.addEventListener('touchend', () => {
           const diff = currentX - startX;
           content.style.transition = 'transform 0.2s';
-          if (diff < -80) {
+          if (started && diff < -80) {
             content.style.transform = 'translateX(-60px)';
             deleteBtn.style.right = '0';
             wrapper._deleteOpen = true;
@@ -4558,6 +4560,10 @@
         // Now load that section’s data
         let sec = data.folders[currentFolder].sections[currentSection];
         ensureSectionImages(currentFolder, sec);
+        if (!sec.rawHtml && sec.rawText) {
+          sec.rawHtml = sec.rawText.split('\n').map(line => `<p>${line}</p>`).join('');
+          saveData();
+        }
         if (document.body.classList.contains('mobile')) {
           editQuestionBtn.style.display = 'inline-block';
         } else {
