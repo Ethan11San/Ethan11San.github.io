@@ -3728,6 +3728,9 @@
           } else if (entry && typeof entry.word === 'string' && Number.isInteger(entry.occ)) {
             obj = { word: entry.word, occ: entry.occ };
             if (entry.reveal) obj.reveal = true;
+            if (entry.trigger && typeof entry.trigger.word === 'string' && Number.isInteger(entry.trigger.occ)) {
+              obj.trigger = { word: entry.trigger.word, occ: entry.trigger.occ };
+            }
           }
           if (!obj) return;
           const count = wordCounts[obj.word] || 0;
@@ -3742,7 +3745,10 @@
         cleaned.forEach(o => {
           const key = `${o.word}_${o.occ}`;
           if (!resultMap[key]) resultMap[key] = o;
-          else if (!resultMap[key].reveal && o.reveal) resultMap[key].reveal = true;
+          else {
+            if (!resultMap[key].reveal && o.reveal) resultMap[key].reveal = true;
+            if (!resultMap[key].trigger && o.trigger) resultMap[key].trigger = o.trigger;
+          }
         });
         const result = Object.values(resultMap);
         sec.hidden = result;
@@ -3932,6 +3938,43 @@
         // We'll use a running count per word for the preview rendering
         let globalCounts = {};
 
+        function assignReveal(srcWord, srcOcc, tgtWord, tgtOcc) {
+          const idx = hiddenEntries.findIndex(e => e.word === srcWord && e.occ === srcOcc);
+          if (idx === -1) return;
+          hiddenEntries[idx].reveal = true;
+          hiddenEntries[idx].trigger = { word: tgtWord, occ: tgtOcc };
+          sec.hidden = hiddenEntries;
+          saveData();
+          previewSection();
+        }
+
+        function buildWordSpan(tok, w, occ, entry) {
+          const isHidden = !!entry;
+          const isReveal = entry && entry.reveal;
+          const span = document.createElement('span');
+          span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
+          span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
+          span.dataset.word = w;
+          span.dataset.occ = occ;
+          span.onclick = () => handleWordClick(w, occ);
+          if (isReveal) {
+            span.draggable = true;
+            span.addEventListener('dragstart', e => {
+              e.dataTransfer.setData('text/plain', JSON.stringify({ word: w, occ }));
+            });
+          } else if (isHidden) {
+            span.addEventListener('dragover', e => e.preventDefault());
+            span.addEventListener('drop', e => {
+              e.preventDefault();
+              try {
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                assignReveal(data.word, data.occ, w, occ);
+              } catch {}
+            });
+          }
+          return span;
+        }
+
         tempDiv.childNodes.forEach(node => {
           if (node.nodeType === Node.TEXT_NODE) {
             // Render text node tokens
@@ -3944,12 +3987,7 @@
                 globalCounts[w] = (globalCounts[w] || 0) + 1;
                 const occ = globalCounts[w];
                 const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                const isHidden = !!entry;
-                const isReveal = entry && entry.reveal;
-                const span = document.createElement('span');
-                span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                span.onclick = () => handleWordClick(w, occ);
+                const span = buildWordSpan(tok, w, occ, entry);
                 previewDiv.appendChild(span);
               }
             });
@@ -3967,12 +4005,7 @@
                   globalCounts[w] = (globalCounts[w] || 0) + 1;
                   const occ = globalCounts[w];
                   const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                  const isHidden = !!entry;
-                  const isReveal = entry && entry.reveal;
-                  const wSpan = document.createElement('span');
-                  wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                  wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                  wSpan.onclick = () => handleWordClick(w, occ);
+                  const wSpan = buildWordSpan(tok, w, occ, entry);
                   wrapper.appendChild(wSpan);
                 }
               });
@@ -3999,12 +4032,7 @@
                     globalCounts[w] = (globalCounts[w] || 0) + 1;
                     const occ = globalCounts[w];
                     const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                    const isHidden = !!entry;
-                    const isReveal = entry && entry.reveal;
-                    const span = document.createElement('span');
-                    span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                    span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ);
+                    const span = buildWordSpan(tok, w, occ, entry);
                     line.appendChild(span);
                   }
                 });
@@ -4026,15 +4054,10 @@
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
                       const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                      const isHidden = !!entry;
-                      const isReveal = entry && entry.reveal;
-                      const span = document.createElement('span');
-                      span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                      span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ);
-                    para.appendChild(span);
-                  }
-                });
+                      const span = buildWordSpan(tok, w, occ, entry);
+                      para.appendChild(span);
+                    }
+                  });
                 } else if (child.nodeType === Node.ELEMENT_NODE && child.classList && child.classList.contains('popup-word')) {
                   const wrapper = document.createElement('span');
                   wrapper.className = 'popup-word';
@@ -4048,12 +4071,7 @@
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
                       const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                      const isHidden = !!entry;
-                      const isReveal = entry && entry.reveal;
-                      const wSpan = document.createElement('span');
-                      wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                      wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      wSpan.onclick = () => handleWordClick(w, occ);
+                      const wSpan = buildWordSpan(tok, w, occ, entry);
                       wrapper.appendChild(wSpan);
                     }
                   });
@@ -4070,14 +4088,9 @@
                       const w = tok.trim();
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
-                        const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-                        const isHidden = !!entry;
-                        const isReveal = entry && entry.reveal;
-                        const span = document.createElement('span');
-                        span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
-                        span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                        span.onclick = () => handleWordClick(w, occ);
-                        para.appendChild(span);
+                      const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                      const span = buildWordSpan(tok, w, occ, entry);
+                      para.appendChild(span);
                     }
                   });
                 }
@@ -4351,12 +4364,19 @@
           const occ = counts[w];
           const entry = valid.find(e => e.word === w && e.occ === occ);
           if (entry) {
-            replacements.push({ node, word: w, occ, reveal: entry.reveal });
+            replacements.push({ node, word: w, occ, reveal: entry.reveal, trigger: entry.trigger });
           }
         });
 
-        replacements.forEach(({ node, word, occ, reveal }) => {
-          if (reveal) {
+        replacements.forEach(({ node, word, occ, reveal, trigger }) => {
+          if (reveal && trigger) {
+            const span = document.createElement('span');
+            span.className = 'hidden-reveal reveal-target';
+            span.textContent = word;
+            span.dataset.triggerWord = trigger.word;
+            span.dataset.triggerOcc = trigger.occ;
+            node.parentNode.replaceChild(span, node);
+          } else if (reveal) {
             const span = document.createElement('span');
             span.className = 'hidden-reveal reveal-only';
             span.textContent = word;
@@ -4481,15 +4501,19 @@
               const correctNorm = normalize(correctWord);
               const isCorrect   = enteredNorm === correctNorm ||
                                   alts.some(a => normalize(a) === enteredNorm);
+              const revealTargets = quizContent.querySelectorAll(`.hidden-reveal.reveal-target[data-trigger-word="${correctWord}"][data-trigger-occ="${occ}"]`);
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
+                revealTargets.forEach(s => s.style.display = 'none');
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
+                revealTargets.forEach(s => s.style.display = 'inline');
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
+                revealTargets.forEach(s => s.style.display = 'none');
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
