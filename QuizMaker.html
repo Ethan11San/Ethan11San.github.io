@@ -575,17 +575,21 @@
     }
 
     .swipe-content {
+      display: flex;
+      align-items: center;
+      width: 100%;
       transition: transform 0.2s ease;
     }
     .mobile-delete {
       position: absolute;
-      right: 0;
+      right: -60px;
       top: 0;
       bottom: 0;
       width: 60px;
       background: #e74c3c;
       color: #fff;
       border: none;
+      transition: right 0.2s;
     }
     #mobileFolderList li ul li.add-question {
       text-align: center;
@@ -1586,6 +1590,7 @@
       function enableSwipeToDelete(wrapper, content, deleteBtn, onDelete) {
         let startX = 0, currentX = 0;
         wrapper._deleteOpen = false;
+        deleteBtn.style.right = '-60px';
         wrapper.addEventListener('touchstart', e => {
           startX = e.touches[0].clientX;
           content.style.transition = '';
@@ -1598,11 +1603,13 @@
         wrapper.addEventListener('touchend', () => {
           const diff = currentX - startX;
           content.style.transition = 'transform 0.2s';
-          if (diff < -40) {
+          if (diff < -80) {
             content.style.transform = 'translateX(-60px)';
+            deleteBtn.style.right = '0';
             wrapper._deleteOpen = true;
           } else {
             content.style.transform = '';
+            deleteBtn.style.right = '-60px';
             wrapper._deleteOpen = false;
           }
         });
@@ -1726,6 +1733,7 @@
             sContent.onclick = e => {
               if (sli._deleteOpen) {
                 sContent.style.transform = '';
+                sDel.style.right = '-60px';
                 sli._deleteOpen = false;
                 return;
               }
@@ -1750,6 +1758,7 @@
           content.onclick = () => {
             if (header._deleteOpen) {
               content.style.transform = '';
+              delBtn.style.right = '-60px';
               header._deleteOpen = false;
               return;
             }
