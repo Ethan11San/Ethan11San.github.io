@@ -1511,6 +1511,7 @@
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
       let currentFolder = null, currentSection = null;
+      const mobileOpenFolders = new Set();
       // Track progress and random order per folder
       const quizProgress = {};  // { completed:Set, total, order:Array|null, pos:Number }
       let multiFolderMode = false;
@@ -1598,9 +1599,14 @@
         });
         wrapper.addEventListener('touchmove', e => {
           currentX = e.touches[0].clientX;
-          const diff = currentX - startX;
-          if (!started && Math.abs(diff) > 10) started = true;
-          if (started && diff < 0) content.style.transform = `translateX(${diff}px)`;
+          const rawDiff = currentX - startX;
+          if (!started && Math.abs(rawDiff) > 10) started = true;
+          if (started) {
+            const diff = Math.min(rawDiff, 0); // only allow swipe left
+            const translate = Math.max(diff, -60); // clamp to delete width
+            content.style.transform = `translateX(${translate}px)`;
+            deleteBtn.style.right = `${-60 - translate}px`;
+          }
         });
         wrapper.addEventListener('touchend', () => {
           const diff = currentX - startX;
@@ -1621,14 +1627,16 @@
         });
       }
 
-      function addQuestionMobile(folderIdx) {
+      async function addQuestionMobile(folderIdx) {
         currentFolder = folderIdx;
         const type = prompt('Question type? (fill, diagram, acronym)', 'fill');
         if (!type) return;
         const t = type.toLowerCase();
-        if (t.startsWith('d')) addLabelBtn.onclick();
-        else if (t.startsWith('a')) addAcronymBtn.onclick();
-        else addFillBtn.onclick();
+        if (t.startsWith('d')) await addLabelBtn.onclick();
+        else if (t.startsWith('a')) await addAcronymBtn.onclick();
+        else await addFillBtn.onclick();
+        mobileOpenFolders.add(folderIdx);
+        buildMobileFolderList();
       }
 
       function setupMobileUI() {
@@ -1683,6 +1691,7 @@
           enableSwipeToDelete(header, content, delBtn, () => {
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
               data.folders.splice(idx, 1);
+              mobileOpenFolders.clear();
               if (data.folders.length > 0) {
                 const newIdx = idx < data.folders.length ? idx : data.folders.length - 1;
                 currentFolder = newIdx;
@@ -1702,7 +1711,7 @@
             }
           });
           const secList = document.createElement('ul');
-          secList.style.display = 'none';
+          secList.style.display = mobileOpenFolders.has(idx) ? 'block' : 'none';
           f.sections.forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
             const sli = document.createElement('li');
@@ -1727,6 +1736,7 @@
                 }
                 saveData();
                 renderSections(lastSectionOrder);
+                mobileOpenFolders.add(idx);
                 buildMobileFolderList();
                 enterEdit();
                 if (currentSection !== null) loadSection();
@@ -1767,7 +1777,9 @@
             if (randomSelectMode) {
               cb.checked = !cb.checked;
             } else {
-              secList.style.display = secList.style.display === 'none' ? 'block' : 'none';
+              const isOpen = secList.style.display === 'none';
+              secList.style.display = isOpen ? 'block' : 'none';
+              if (isOpen) mobileOpenFolders.add(idx); else mobileOpenFolders.delete(idx);
             }
           };
           li.appendChild(header);
