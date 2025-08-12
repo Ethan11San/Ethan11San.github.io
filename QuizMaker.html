@@ -533,6 +533,7 @@
       padding: 12px;
       border-bottom: 1px solid #ccc;
       cursor: pointer;
+      overflow: hidden;
     }
     #mobileFolderList > li > div.folder-header .completion-counter {
       margin-left: auto;
@@ -569,6 +570,27 @@
       border-bottom: 1px solid #eee;
       cursor: pointer;
       background: #f9f9f9;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .swipe-content {
+      transition: transform 0.2s ease;
+    }
+    .mobile-delete {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+    }
+    #mobileFolderList li ul li.add-question {
+      text-align: center;
+      font-weight: bold;
+      background: #e0e0e0;
     }
     #mobileRandomBtn {
       margin-top: 12px;
@@ -1561,6 +1583,45 @@
       window.addEventListener('load', hideSafariBar);
       window.addEventListener('orientationchange', hideSafariBar);
 
+      function enableSwipeToDelete(wrapper, content, deleteBtn, onDelete) {
+        let startX = 0, currentX = 0;
+        wrapper._deleteOpen = false;
+        wrapper.addEventListener('touchstart', e => {
+          startX = e.touches[0].clientX;
+          content.style.transition = '';
+        });
+        wrapper.addEventListener('touchmove', e => {
+          currentX = e.touches[0].clientX;
+          const diff = currentX - startX;
+          if (diff < 0) content.style.transform = `translateX(${diff}px)`;
+        });
+        wrapper.addEventListener('touchend', () => {
+          const diff = currentX - startX;
+          content.style.transition = 'transform 0.2s';
+          if (diff < -40) {
+            content.style.transform = 'translateX(-60px)';
+            wrapper._deleteOpen = true;
+          } else {
+            content.style.transform = '';
+            wrapper._deleteOpen = false;
+          }
+        });
+        deleteBtn.addEventListener('click', e => {
+          e.stopPropagation();
+          onDelete();
+        });
+      }
+
+      function addQuestionMobile(folderIdx) {
+        currentFolder = folderIdx;
+        const type = prompt('Question type? (fill, diagram, acronym)', 'fill');
+        if (!type) return;
+        const t = type.toLowerCase();
+        if (t.startsWith('d')) addLabelBtn.onclick();
+        else if (t.startsWith('a')) addAcronymBtn.onclick();
+        else addFillBtn.onclick();
+      }
+
       function setupMobileUI() {
         buildMobileFolderList();
         document.getElementById('mobileSearch').addEventListener('input', handleMobileSearch);
@@ -1591,25 +1652,83 @@
           li.dataset.index = idx;
           const header = document.createElement('div');
           header.className = 'folder-header';
+          const content = document.createElement('div');
+          content.className = 'swipe-content';
           const cb = document.createElement('input');
           cb.type = 'checkbox';
           cb.className = 'folder-select';
           cb.dataset.index = idx;
           const titleSpan = document.createElement('span');
           titleSpan.textContent = f.name;
-          header.appendChild(cb);
-          header.appendChild(titleSpan);
+          content.appendChild(cb);
+          content.appendChild(titleSpan);
           const countSpan = document.createElement('span');
           countSpan.className = 'completion-counter';
           countSpan.textContent = getCompletionCount(idx);
-          header.appendChild(countSpan);
+          content.appendChild(countSpan);
+          header.appendChild(content);
+          const delBtn = document.createElement('button');
+          delBtn.className = 'mobile-delete';
+          delBtn.textContent = '🗑️';
+          header.appendChild(delBtn);
+          enableSwipeToDelete(header, content, delBtn, () => {
+            if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
+              data.folders.splice(idx, 1);
+              if (data.folders.length > 0) {
+                const newIdx = idx < data.folders.length ? idx : data.folders.length - 1;
+                currentFolder = newIdx;
+                const secs = data.folders[currentFolder].sections;
+                currentSection = secs.length > 0 ? 0 : null;
+              } else {
+                currentFolder = null;
+                currentSection = null;
+              }
+              saveData();
+              renderFolders();
+              lastSectionOrder = null;
+              renderSections(lastSectionOrder);
+              buildMobileFolderList();
+              enterEdit();
+              if (currentSection !== null) loadSection(); else updateHeader('');
+            }
+          });
           const secList = document.createElement('ul');
           secList.style.display = 'none';
           f.sections.forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
             const sli = document.createElement('li');
-            sli.textContent = title;
-            sli.onclick = e => {
+            const sContent = document.createElement('div');
+            sContent.className = 'swipe-content';
+            sContent.textContent = title;
+            sli.appendChild(sContent);
+            const sDel = document.createElement('button');
+            sDel.className = 'mobile-delete';
+            sDel.textContent = '🗑️';
+            sli.appendChild(sDel);
+            enableSwipeToDelete(sli, sContent, sDel, () => {
+              if (confirm(`Delete question "${title}"? This cannot be undone.`)) {
+                data.folders[idx].sections.splice(si, 1);
+                const secs = data.folders[idx].sections;
+                if (idx === currentFolder) {
+                  if (secs.length > 0) {
+                    currentSection = si < secs.length ? si : secs.length - 1;
+                  } else {
+                    currentSection = null;
+                  }
+                }
+                saveData();
+                renderSections(lastSectionOrder);
+                buildMobileFolderList();
+                enterEdit();
+                if (currentSection !== null) loadSection();
+              }
+            });
+            sContent.onclick = e => {
+              if (sli._deleteOpen) {
+                sContent.style.transform = '';
+                sli._deleteOpen = false;
+                return;
+              }
               e.stopPropagation();
               if (!isQuizMode) {
                 syncCurrentSection();
@@ -1623,7 +1742,17 @@
             };
             secList.appendChild(sli);
           });
-          header.onclick = () => {
+          const addLi = document.createElement('li');
+          addLi.className = 'add-question';
+          addLi.textContent = '+ Add Question';
+          addLi.onclick = e => { e.stopPropagation(); addQuestionMobile(idx); };
+          secList.appendChild(addLi);
+          content.onclick = () => {
+            if (header._deleteOpen) {
+              content.style.transform = '';
+              header._deleteOpen = false;
+              return;
+            }
             if (randomSelectMode) {
               cb.checked = !cb.checked;
             } else {
