@@ -282,18 +282,9 @@
       text-shadow: 0 0 5px #000;
       border-bottom: 1px dashed #f39c12;
     }
-    body.linking .word.hidden { background: #fff3cd; }
-    body.linking .word.hidden.linked { background: #d4edda; }
-    #editor .hidden-reveal {
-      background: #fff3cd;
-      border-bottom: 1px dashed #f39c12;
-    }
-    #editor .hidden-reveal.pending {
-      background: #ffe8a1;
-      outline: 2px solid #f39c12;
-    }
+    .word.hidden.reveal { border-bottom: 1px dotted #8e44ad; }
+    #editor .hidden-reveal, #editor .hidden-reveal.pending { display: none; }
     #preview .hidden-reveal, #quizContent .hidden-reveal { display: none; }
-    body.linking #preview .word.hidden { background: #ffe8a1; cursor: pointer; }
     .popup-word {
       cursor: pointer;
       border-bottom: 1px dashed #3498db;
@@ -654,14 +645,7 @@
       height: auto;
     }
   </style>
-  <style id="linkingStyles">
-.source-token{background:rgba(255,238,150,.65);border-radius:4px;padding:0 2px}
-#linkBtn[hidden]{display:none}
-#preview .blank{padding:0 2px;border-radius:4px}
-#preview .blank.linked{outline:2px solid #4a7;background:#d4edda}
-#preview.linking-ready .blank{cursor:crosshair;background:#ffeaa7;outline:2px dashed #f39c12}
-.source-token.linking{background:#ffe066;outline:2px dashed #f39c12}
-  </style>
+  <style id="linkingStyles"></style>
 </head>
 <body class="loading">
 
@@ -766,7 +750,6 @@
         <button id="addImageWordBtn">🖼️</button>
       </div>
       <div id="editor" style="height: 200px; background: #fff;"></div>
-      <button id="linkBtn" type="button" hidden>Link selection</button>
       <div style="margin-top:12px;">
         <button id="resumeQuizBtn" style="display:none;">Back to Quiz</button>
         <button id="addPictureBtn" style="display:none;">Add Picture</button>
@@ -2444,58 +2427,6 @@
         };
         input.click();
       });
-      quill.keyboard.addBinding({ key: 'R', shortKey: true, shiftKey: true }, () => {
-        if (!ensureSelection()) return false;
-        const range = quill.getSelection(true) || lastRange;
-        if (!range || range.length === 0) {
-          alert('Select text first');
-          return false;
-        }
-
-        // Toggle the hiddenReveal format for the selected text. If the
-        // selection already has the format applied we remove it, otherwise we
-        // apply it and mark the span as pending so the user can link it to a
-        // hidden word.
-        const formats = quill.getFormat(range);
-        const alreadyHidden = !!formats.hiddenReveal;
-        quill.formatText(
-          range.index,
-          range.length,
-          'hiddenReveal',
-          alreadyHidden ? false : true,
-          'user'
-        );
-
-        const [leaf] = quill.getLeaf(range.index);
-        const span =
-          leaf?.domNode?.closest?.('.hidden-reveal') ||
-          leaf?.domNode?.parentElement?.closest('.hidden-reveal');
-
-        if (pendingRevealSpan) {
-          pendingRevealSpan.classList.remove('pending');
-          pendingRevealSpan = null;
-        }
-
-        if (!alreadyHidden && span) {
-          pendingRevealSpan = span;
-          span.classList.add('pending');
-          document.body.classList.add('linking');
-        } else {
-          document.body.classList.remove('linking');
-        }
-
-        syncCurrentSection();
-        previewSection();
-        return false;
-      });
-      editorDiv.addEventListener('click', e => {
-        const span = e.target.closest('.hidden-reveal');
-        if (!span) return;
-        if (pendingRevealSpan) pendingRevealSpan.classList.remove('pending');
-        pendingRevealSpan = span;
-        span.classList.add('pending');
-        document.body.classList.add('linking');
-      });
       function syncCurrentSection(){
         if (currentFolder===null || currentSection===null) return;
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -3796,7 +3727,7 @@
             }
           } else if (entry && typeof entry.word === 'string' && Number.isInteger(entry.occ)) {
             obj = { word: entry.word, occ: entry.occ };
-            if (entry.reveal) obj.reveal = entry.reveal;
+            if (entry.reveal) obj.reveal = true;
           }
           if (!obj) return;
           const count = wordCounts[obj.word] || 0;
@@ -3811,7 +3742,7 @@
         cleaned.forEach(o => {
           const key = `${o.word}_${o.occ}`;
           if (!resultMap[key]) resultMap[key] = o;
-          else if (!resultMap[key].reveal && o.reveal) resultMap[key].reveal = o.reveal;
+          else if (!resultMap[key].reveal && o.reveal) resultMap[key].reveal = true;
         });
         const result = Object.values(resultMap);
         sec.hidden = result;
@@ -3927,13 +3858,7 @@
         previewDiv.innerHTML = '';
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = text;
-        const linkedReveals = new Set(Array.from(tempDiv.querySelectorAll('.hidden-reveal[data-reveal-for]')).map(s => s.dataset.revealFor));
-        const revealMap = {};
-        tempDiv.querySelectorAll('.hidden-reveal[data-reveal-for]').forEach(s => {
-          const key = s.dataset.revealFor;
-          if (key) revealMap[key] = s.textContent.trim();
-        });
-        document.body.classList.toggle('linking', !!pendingRevealSpan);
+        document.body.classList.remove('linking');
 
         let counts = {};
         sec.hidden = sec.hidden || [];
@@ -3943,24 +3868,18 @@
           return getHiddenEntries(sec, tokens);
         }
 
-        function handleWordClick(w, occ, el) {
-          if (pendingRevealSpan) {
-            pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
-            pendingRevealSpan.classList.remove('pending');
-            pendingRevealSpan = null;
-            document.body.classList.remove('linking');
-            if (el) el.classList.add('linked');
-            syncCurrentSection();
-            saveData();
-            previewSection();
+        function handleWordClick(w, occ) {
+          const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+          if (idx === -1) {
+            hiddenEntries.push({ word: w, occ });
+          } else if (!hiddenEntries[idx].reveal) {
+            hiddenEntries[idx].reveal = true;
           } else {
-            const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-            if (idx >= 0) hiddenEntries.splice(idx, 1);
-            else hiddenEntries.push({ word: w, occ });
-            sec.hidden = hiddenEntries;
-            saveData();
-            previewSection();
+            hiddenEntries.splice(idx, 1);
           }
+          sec.hidden = hiddenEntries;
+          saveData();
+          previewSection();
         }
 
         // Collect all tokens for hidden word occurrence counting
@@ -4008,11 +3927,6 @@
         // Remove empty tokens
         allTokens = allTokens.filter(t => t.length > 0);
         const hiddenEntries = getHiddenEntries(sec, allTokens);
-        hiddenEntries.forEach(e => {
-          const key = `${e.word}_${e.occ}`;
-          if (revealMap[key]) e.reveal = revealMap[key];
-          else delete e.reveal;
-        });
         sec.hidden = hiddenEntries;
         saveData();
         // We'll use a running count per word for the preview rendering
@@ -4029,13 +3943,13 @@
                 const w = tok.trim();
                 globalCounts[w] = (globalCounts[w] || 0) + 1;
                 const occ = globalCounts[w];
-                const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                const revealKey = `${w}_${occ}`;
-                const hasReveal = linkedReveals.has(revealKey);
+                const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                const isHidden = !!entry;
+                const isReveal = entry && entry.reveal;
                 const span = document.createElement('span');
-                span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                 span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                span.onclick = () => handleWordClick(w, occ, span);
+                span.onclick = () => handleWordClick(w, occ);
                 previewDiv.appendChild(span);
               }
             });
@@ -4052,13 +3966,13 @@
                   const w = tok.trim();
                   globalCounts[w] = (globalCounts[w] || 0) + 1;
                   const occ = globalCounts[w];
-                  const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                  const revealKey = `${w}_${occ}`;
-                  const hasReveal = linkedReveals.has(revealKey);
+                  const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                  const isHidden = !!entry;
+                  const isReveal = entry && entry.reveal;
                   const wSpan = document.createElement('span');
-                  wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                  wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                   wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                  wSpan.onclick = () => handleWordClick(w, occ, wSpan);
+                  wSpan.onclick = () => handleWordClick(w, occ);
                   wrapper.appendChild(wSpan);
                 }
               });
@@ -4084,14 +3998,13 @@
                     const w = tok.trim();
                     globalCounts[w] = (globalCounts[w] || 0) + 1;
                     const occ = globalCounts[w];
-                    const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                    const revealKey = `${w}_${occ}`;
-                    const hasReveal = linkedReveals.has(revealKey);
-
+                    const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                    const isHidden = !!entry;
+                    const isReveal = entry && entry.reveal;
                     const span = document.createElement('span');
-                    span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                    span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                     span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ, span);
+                    span.onclick = () => handleWordClick(w, occ);
                     line.appendChild(span);
                   }
                 });
@@ -4112,13 +4025,13 @@
                       const w = tok.trim();
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
-                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                      const revealKey = `${w}_${occ}`;
-                      const hasReveal = linkedReveals.has(revealKey);
+                      const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                      const isHidden = !!entry;
+                      const isReveal = entry && entry.reveal;
                       const span = document.createElement('span');
-                      span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                      span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                       span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                    span.onclick = () => handleWordClick(w, occ, span);
+                    span.onclick = () => handleWordClick(w, occ);
                     para.appendChild(span);
                   }
                 });
@@ -4134,13 +4047,13 @@
                       const w = tok.trim();
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
-                      const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                      const revealKey = `${w}_${occ}`;
-                      const hasReveal = linkedReveals.has(revealKey);
+                      const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                      const isHidden = !!entry;
+                      const isReveal = entry && entry.reveal;
                       const wSpan = document.createElement('span');
-                      wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                      wSpan.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                       wSpan.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                      wSpan.onclick = () => handleWordClick(w, occ, wSpan);
+                      wSpan.onclick = () => handleWordClick(w, occ);
                       wrapper.appendChild(wSpan);
                     }
                   });
@@ -4157,13 +4070,13 @@
                       const w = tok.trim();
                       globalCounts[w] = (globalCounts[w] || 0) + 1;
                       const occ = globalCounts[w];
-                        const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-                        const revealKey = `${w}_${occ}`;
-                        const hasReveal = linkedReveals.has(revealKey);
+                        const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
+                        const isHidden = !!entry;
+                        const isReveal = entry && entry.reveal;
                         const span = document.createElement('span');
-                        span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+                        span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
                         span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
-                        span.onclick = () => handleWordClick(w, occ, span);
+                        span.onclick = () => handleWordClick(w, occ);
                         para.appendChild(span);
                     }
                   });
@@ -4220,7 +4133,7 @@
         const hiddenEntries = getHiddenEntries(defObj, tokens);
         previewDiv.innerHTML = '';
         altDiv.innerHTML     = '<h4>Alternate answers (comma-separated):</h4>';
-        document.body.classList.toggle('linking', !!pendingRevealSpan);
+        document.body.classList.remove('linking');
 
         // clickable words
         let counts = {};
@@ -4241,31 +4154,20 @@
           const w = tok.trim();
           counts[w] = (counts[w] || 0) + 1;
           const occ = counts[w];
-          const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
-
           const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
-          const hasReveal = entry && entry.reveal;
+          const isHidden = !!entry;
+          const isReveal = entry && entry.reveal;
           const span = document.createElement('span');
-          span.className = 'word' + (isHidden ? ' hidden' : '') + (hasReveal ? ' linked' : '');
+          span.className = 'word' + (isHidden ? ' hidden' : '') + (isReveal ? ' reveal' : '');
           span.textContent = isHidden ? '_'.repeat(tok.length) : tok;
           span.onclick = () => {
-            if (pendingRevealSpan) {
-              pendingRevealSpan.dataset.revealFor = `${w}_${occ}`;
-              pendingRevealSpan.classList.remove('pending');
-              pendingRevealSpan = null;
-              document.body.classList.remove('linking');
-              syncCurrentSection();
-              saveData();
-              buildDefinitionPreview(defObj, previewDiv, altDiv);
-            } else {
-              const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
-              (idx >= 0)
-                ? hiddenEntries.splice(idx, 1)
-                : hiddenEntries.push({ word: w, occ });
-              defObj.hidden = hiddenEntries;
-              saveData();
-              buildDefinitionPreview(defObj, previewDiv, altDiv); // re-render
-            }
+            const idx = hiddenEntries.findIndex(e => e.word === w && e.occ === occ);
+            if (idx === -1) hiddenEntries.push({ word: w, occ });
+            else if (!hiddenEntries[idx].reveal) hiddenEntries[idx].reveal = true;
+            else hiddenEntries.splice(idx, 1);
+            defObj.hidden = hiddenEntries;
+            saveData();
+            buildDefinitionPreview(defObj, previewDiv, altDiv);
           };
           previewDiv.appendChild(span);
         });
@@ -4454,21 +4356,27 @@
         });
 
         replacements.forEach(({ node, word, occ, reveal }) => {
-          const span = document.createElement('span');
-          span.className = 'blank';
-          span.dataset.word = word;
-          span.dataset.occ = occ;
-          if (reveal) span.dataset.reveal = reveal;
+          if (reveal) {
+            const span = document.createElement('span');
+            span.className = 'hidden-reveal reveal-only';
+            span.textContent = word;
+            node.parentNode.replaceChild(span, node);
+          } else {
+            const span = document.createElement('span');
+            span.className = 'blank';
+            span.dataset.word = word;
+            span.dataset.occ = occ;
 
-          const input = document.createElement('input');
-          input.type = 'text';
-          input.className = 'blank-input';
-          const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
-          input.setAttribute('data-answer', JSON.stringify(answers));
-          input.addEventListener('focus', () => { lastHintTarget = input; });
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'blank-input';
+            const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
+            input.setAttribute('data-answer', JSON.stringify(answers));
+            input.addEventListener('focus', () => { lastHintTarget = input; });
 
-          span.appendChild(input);
-          node.parentNode.replaceChild(span, node);
+            span.appendChild(input);
+            node.parentNode.replaceChild(span, node);
+          }
         });
       }
 
@@ -4561,7 +4469,6 @@
           quizContent.querySelectorAll('.blank input').forEach(input => {
             input.addEventListener('input', () => {
               const wrapper      = input.parentElement;
-              const revealText   = wrapper.dataset.reveal;
               const enteredRaw   = input.value.trim();
               const correctWord  = wrapper.dataset.word;
               const occ          = wrapper.dataset.occ;
@@ -4574,50 +4481,25 @@
               const correctNorm = normalize(correctWord);
               const isCorrect   = enteredNorm === correctNorm ||
                                   alts.some(a => normalize(a) === enteredNorm);
-              const revealKey   = `${correctWord}_${occ}`;
 
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
-                if (revealText) {
-                  const note = wrapper.querySelector('.reveal');
-                  if (note) note.remove();
-                }
-                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
-                  s.style.display = 'none';
-                });
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
-                if (revealText) {
-                  let note = wrapper.querySelector('.reveal');
-                  if (!note) {
-                    note = document.createElement('span');
-                    note.className = 'reveal';
-                    note.textContent = revealText;
-                    wrapper.appendChild(note);
-                  }
-                }
-                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
-                  s.style.display = 'inline';
-                });
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
-                if (revealText) {
-                  const note = wrapper.querySelector('.reveal');
-                  if (note) note.remove();
-                }
-                document.querySelectorAll(`#quizContent .hidden-reveal[data-reveal-for="${revealKey}"]`).forEach(s => {
-                  s.style.display = 'none';
-                });
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
               if (allInputs.length && allInputs.every(i => i.classList.contains('correct'))) {
                 quizContent.style.borderColor = '#27ae60';
                 markQuestionCompleted();
+                quizContent.querySelectorAll('.hidden-reveal.reveal-only').forEach(s => s.style.display = 'inline');
               } else {
                 quizContent.style.borderColor = '';
+                quizContent.querySelectorAll('.hidden-reveal.reveal-only').forEach(s => s.style.display = 'none');
               }
             });
 
@@ -4992,10 +4874,7 @@
               titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
-              const revealMap = {};
-              hiddenEntries.forEach(e => {
-                if (e.reveal) revealMap[`${e.word}_${e.occ}`] = e.reveal;
-              });
+              // revealMap no longer used
               let counts = {};
               tokens.forEach(tok => {
                 if (!tok.trim()) {
@@ -5006,7 +4885,6 @@
                 counts[w] = (counts[w] || 0) + 1;
                 const occ = counts[w];
                 const key = `${w}_${occ}`;
-                const revealText = revealMap[key];
                 const isHidden = hiddenEntries.some(e => e.word === w && e.occ === occ);
 
                 if (!isHidden) {
@@ -5018,7 +4896,6 @@
 
                 const span = document.createElement('span');
                 span.className = 'blank';
-                if (revealText) span.dataset.reveal = revealText;
                 const inp = document.createElement('input');
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
@@ -5072,22 +4949,9 @@
                   inp.classList.toggle('correct', ok);
                   inp.classList.toggle('incorrect', !ok);
 
-                  const revealText = span.dataset.reveal;
                   if (inp.value.trim().length === 0) {
-                    if (revealText) {
-                      const note = span.querySelector('.reveal');
-                      if (note) note.remove();
-                    }
+                    // nothing
                   } else if (ok) {
-                    if (revealText) {
-                      let note = span.querySelector('.reveal');
-                      if (!note) {
-                        note = document.createElement('span');
-                        note.className = 'reveal';
-                        note.textContent = revealText;
-                        span.appendChild(note);
-                      }
-                    }
                     const nextB = para._inputs.find(b => !b.classList.contains('correct'));
                     if (nextB) {
                       setTimeout(() => nextB.focus(),0);
@@ -5096,10 +4960,7 @@
                       if (nextLbl) setTimeout(() => nextLbl.focus(),0);
                     }
                   } else {
-                    if (revealText) {
-                      const note = span.querySelector('.reveal');
-                      if (note) note.remove();
-                    }
+                    // nothing
                   }
 
                   const allInputs = Array.from(quizContent.querySelectorAll('input.blank-input'));
@@ -5398,239 +5259,6 @@
       alert('Unhandled error: ' + err.message);
     }
   })();
-  </script>
-  <script>
-(() => {
-  function init() {
-    const source = document.querySelector('#editor');
-    const blanks = document.querySelector('#preview');
-    const linkBtn = document.getElementById('linkBtn');
-    if (!source || !blanks || !linkBtn) { console.warn('Missing editors or button'); return; }
-    console.log('Link selection initialized', { source, blanks, linkBtn });
-
-    initBlanks();
-
-    let currentToken = null;
-    let storedRange = null;
-
-    const toggleBtn = () => {
-      const r = getRangeIn(source);
-      console.log('toggleBtn range', r);
-      linkBtn.hidden = !(r && !r.collapsed);
-      storedRange = r && !r.collapsed ? r.cloneRange() : null;
-    };
-
-    document.addEventListener('selectionchange', toggleBtn);
-
-    linkBtn.addEventListener('mousedown', e => e.preventDefault());
-
-    linkBtn.addEventListener('click', () => {
-      const r = storedRange || getRangeIn(source);
-      console.log('linkBtn click range', r);
-      if (!r || r.collapsed) return;
-      const token = wrapSelectionAsToken(r);
-      console.log('token created', token);
-      enterLinkingMode(token);
-      const after = document.createRange();
-      after.setStartAfter(token); after.collapse(true);
-      const sel = window.getSelection();
-      sel.removeAllRanges(); sel.addRange(after);
-      linkBtn.hidden = true;
-    });
-
-    blanks.addEventListener('mousedown', e => {
-      const target = e.composedPath().find(el =>
-        el instanceof HTMLElement && el.classList.contains('blank'));
-      console.log('blank clicked', { target, currentToken });
-      if (!target || !currentToken) return;
-      e.preventDefault();
-      e.stopPropagation();
-      linkTokenToBlank(currentToken, target);
-      exitLinkingMode();
-    });
-
-    source.addEventListener('mousedown', e => {
-      const t = e.composedPath().find(el =>
-        el instanceof HTMLElement && el.classList.contains('source-token'));
-      console.log('source token clicked', t);
-      if (!t) return;
-      e.preventDefault();
-      enterLinkingMode(t);
-    });
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && currentToken) exitLinkingMode();
-    });
-
-    function enterLinkingMode(token) {
-      console.log('enterLinkingMode', token);
-      if (currentToken) exitLinkingMode();
-      currentToken = token;
-      token.classList.add('linking');
-      blanks.classList.add('linking-ready');
-      document.body.classList.add('linking');
-    }
-
-    function exitLinkingMode() {
-      console.log('exitLinkingMode', currentToken);
-      if (!currentToken) return;
-      currentToken.classList.remove('linking');
-      blanks.classList.remove('linking-ready');
-      document.body.classList.remove('linking');
-      currentToken = null;
-    }
-
-    function getRangeIn(container) {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return null;
-      const r = sel.getRangeAt(0);
-      const inContainer = container.contains(r.startContainer) && container.contains(r.endContainer);
-      return inContainer ? r : null;
-    }
-
-    function wrapSelectionAsToken(range) {
-      console.log('wrapSelectionAsToken', range);
-      const commonEl = range.commonAncestorContainer.nodeType === 1
-        ? range.commonAncestorContainer
-        : range.commonAncestorContainer.parentElement;
-      const existing = commonEl && commonEl.closest('.source-token');
-      if (existing && existing.contains(range.cloneContents())) return existing;
-
-      const span = document.createElement('span');
-      span.className = 'source-token';
-      span.dataset.tokenId = span.dataset.tokenId || 't' + cryptoRandom();
-      span.tabIndex = 0;
-
-      const frag = range.extractContents();
-      trimFragmentWhitespace(frag);
-      span.appendChild(frag);
-      range.insertNode(span);
-      span.normalize();
-      return span;
-    }
-
-    function getTokenInfo(token) {
-      const target = token.textContent.trim();
-      const range = document.createRange();
-      range.setStart(source, 0);
-      range.setEnd(token, 0);
-      const before = range.toString();
-      const escaped = target.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
-      const re = new RegExp(`\b${escaped}\b`, 'g');
-      let occ = 0;
-      while (re.exec(before)) occ++;
-      return { word: target, occ: occ + 1 };
-    }
-
-    function linkTokenToBlank(token, blank) {
-      console.log('linkTokenToBlank', { token, blank });
-      if (token.dataset.blankId) {
-        const old = blanks.querySelector(`.blank[data-blank-id="${token.dataset.blankId}"]`);
-        if (old) unlinkBoth(token, old);
-      }
-      if (blank.dataset.tokenId) {
-        const old = source.querySelector(`.source-token[data-token-id="${blank.dataset.tokenId}"]`);
-        if (old) unlinkBoth(old, blank);
-      }
-
-      token.dataset.tokenId = token.dataset.tokenId || 't' + cryptoRandom();
-      blank.dataset.blankId = blank.dataset.blankId || 'b' + cryptoRandom();
-
-      token.dataset.blankId = blank.dataset.blankId;
-      blank.dataset.tokenId = token.dataset.tokenId;
-
-      token.classList.add('linked');
-      blank.classList.add('linked');
-
-      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
-        const sec = data.folders[currentFolder].sections[currentSection];
-        const info = getTokenInfo(token);
-        sec.hidden = sec.hidden || [];
-        if (!sec.hidden.some(e => e.word === info.word && e.occ === info.occ)) {
-          sec.hidden.push(info);
-          saveData();
-        }
-        syncCurrentSection();
-        previewSection();
-        console.log('hidden entries after link', sec.hidden);
-      }
-    }
-
-    function unlinkBoth(token, blank) {
-      console.log('unlinkBoth', { token, blank });
-      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
-        const sec = data.folders[currentFolder].sections[currentSection];
-        const info = getTokenInfo(token);
-        if (sec && sec.hidden) {
-          const idx = sec.hidden.findIndex(e => e.word === info.word && e.occ === info.occ);
-          if (idx >= 0) {
-            sec.hidden.splice(idx, 1);
-            saveData();
-          }
-        }
-      }
-      delete token.dataset.blankId;
-      delete blank.dataset.tokenId;
-      token.classList.remove('linked');
-      blank.classList.remove('linked');
-      syncCurrentSection();
-      previewSection();
-      if (typeof currentFolder === 'number' && typeof currentSection === 'number') {
-        console.log('hidden entries after unlink', data.folders[currentFolder].sections[currentSection].hidden);
-      }
-    }
-
-    function initBlanks() {
-      blanks.querySelectorAll('.blank').forEach((b, i) => {
-        if (!b.dataset.blankId) b.dataset.blankId = 'b' + (i + 1);
-      });
-      const walker = document.createTreeWalker(blanks, NodeFilter.SHOW_TEXT, null);
-      const toReplace = [];
-      while (walker.nextNode()) {
-        const node = walker.currentNode;
-        if (node.nodeValue && /_{3,}/.test(node.nodeValue)) toReplace.push(node);
-      }
-      toReplace.forEach(node => {
-        const parts = node.nodeValue.split(/(_{3,})/);
-        const frag = document.createDocumentFragment();
-        let blankCount = blanks.querySelectorAll('.blank').length;
-        parts.forEach(p => {
-          if (!p) return;
-          if (/_{3,}/.test(p)) {
-            const s = document.createElement('span');
-            s.className = 'blank';
-            s.dataset.blankId = 'b' + (++blankCount);
-            s.textContent = '____';
-            frag.appendChild(s);
-          } else {
-            frag.appendChild(document.createTextNode(p));
-          }
-        });
-        node.parentNode.replaceChild(frag, node);
-      });
-    }
-
-    function trimFragmentWhitespace(frag) {
-      let first = frag.firstChild, last = frag.lastChild;
-      if (first && first.nodeType === 3) first.nodeValue = first.nodeValue.replace(/^\s+/, '');
-      if (last && last.nodeType === 3) last.nodeValue = last.nodeValue.replace(/\s+$/, '');
-    }
-
-    function cryptoRandom() {
-      const a = new Uint32Array(2);
-      (window.crypto || window.msCrypto).getRandomValues(a);
-      return (a[0] >>> 0).toString(36) + (a[1] >>> 0).toString(36);
-    }
-
-    toggleBtn();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();
   </script>
 </body>
 </html>
