@@ -572,6 +572,13 @@
       background: #f9f9f9;
       position: relative;
       overflow: hidden;
+      touch-action: pan-y;
+    }
+
+    #mobileFolderList > li > .folder-header {
+      position: relative;
+      overflow: hidden;
+      touch-action: pan-y;
     }
 
     .swipe-content {
@@ -1589,37 +1596,57 @@
       window.addEventListener('orientationchange', hideSafariBar);
 
       function enableSwipeToDelete(wrapper, content, deleteBtn, onDelete) {
-        let startX = 0, currentX = 0, started = false;
+        let startX = 0, startY = 0, currentX = 0, currentY = 0;
+        let direction = null, started = false;
         wrapper._deleteOpen = false;
         deleteBtn.style.right = '-60px';
         wrapper.addEventListener('touchstart', e => {
-          startX = e.touches[0].clientX;
+          const t = e.touches[0];
+          startX = t.clientX;
+          startY = t.clientY;
+          currentX = startX;
+          currentY = startY;
           content.style.transition = '';
+          direction = null;
           started = false;
         });
         wrapper.addEventListener('touchmove', e => {
-          currentX = e.touches[0].clientX;
-          const rawDiff = currentX - startX;
-          if (!started && Math.abs(rawDiff) > 10) started = true;
-          if (started) {
-            const diff = Math.min(rawDiff, 0); // only allow swipe left
+          const t = e.touches[0];
+          currentX = t.clientX;
+          currentY = t.clientY;
+          const diffX = currentX - startX;
+          const diffY = currentY - startY;
+          if (!direction) {
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+              direction = 'x';
+              started = true;
+            } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
+              direction = 'y';
+            }
+          }
+          if (direction === 'x' && started) {
+            e.preventDefault();
+            const diff = Math.min(diffX, 0); // only allow swipe left
             const translate = Math.max(diff, -60); // clamp to delete width
             content.style.transform = `translateX(${translate}px)`;
             deleteBtn.style.right = `${-60 - translate}px`;
           }
-        });
+        }, { passive: false });
         wrapper.addEventListener('touchend', () => {
-          const diff = currentX - startX;
-          content.style.transition = 'transform 0.2s';
-          if (started && diff < -80) {
-            content.style.transform = 'translateX(-60px)';
-            deleteBtn.style.right = '0';
-            wrapper._deleteOpen = true;
-          } else {
-            content.style.transform = '';
-            deleteBtn.style.right = '-60px';
-            wrapper._deleteOpen = false;
+          if (direction === 'x') {
+            const diff = currentX - startX;
+            content.style.transition = 'transform 0.2s';
+            if (started && diff < -40) {
+              content.style.transform = 'translateX(-60px)';
+              deleteBtn.style.right = '0';
+              wrapper._deleteOpen = true;
+            } else {
+              content.style.transform = '';
+              deleteBtn.style.right = '-60px';
+              wrapper._deleteOpen = false;
+            }
           }
+          direction = null;
         });
         deleteBtn.addEventListener('click', e => {
           e.stopPropagation();
