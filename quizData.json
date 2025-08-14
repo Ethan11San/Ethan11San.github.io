@@ -892,7 +892,7 @@
             }
           ],
           "hidden": [],
-          "image": "",
+          "image": "images/dd10538f65184750edda9e107d0837f41015dc52ebc497ae10e5cc0f9c1fed7d.png",
           "imgHeight": 797,
           "imgResizable": true,
           "imgWidth": 835,
@@ -1061,8 +1061,8 @@
               "word": "Information"
             }
           ],
-          "rawHtml": "<p>FAA / Manufacturer Aircraft Notices\n\nSpecial Airworthiness Information Bulletin (SAIB) - Recommendations to improve the safety of a product, doesn't currently meet the requirements of an AD but can still become one.\n\nService Bulletins - Manufacturer posts best practice advice but not yet mandatory \n\n\n</p>",
-          "rawText": "FAA / Manufacturer Aircraft Notices\n\nSpecial Airworthiness Information Bulletin (SAIB) - Recommendations to improve the safety of a product, doesn't currently meet the requirements of an AD but can still become one.\n\nService Bulletins - Manufacturer posts best practice advice but not yet mandatory \n\n\n",
+          "rawHtml": "<p>FAA / Manufacturer Aircraft Notices</p><p><br></p><p>Special Airworthiness Information Bulletin (SAIB) - FAA Recommendations to improve the safety of a product, doesn't currently meet the requirements of an AD but can still become one.</p><p><br></p><p>Service Bulletins - Manufacturer posts best practice advice but not yet mandatory </p><p><br></p>",
+          "rawText": "FAA / Manufacturer Aircraft Notices\n\nSpecial Airworthiness Information Bulletin (SAIB) - FAA Recommendations to improve the safety of a product, doesn't currently meet the requirements of an AD but can still become one.\n\nService Bulletins - Manufacturer posts best practice advice but not yet mandatory \n\n",
           "title": "SAIB / SB",
           "type": "fill"
         },
@@ -1296,51 +1296,6 @@
           "type": "acronym"
         },
         {
-          "acronym": "AAVIATE",
-          "alts": {},
-          "entries": [
-            {
-              "answer": "Annual Inspection",
-              "extra": " ",
-              "letter": "A"
-            },
-            {
-              "answer": "Airworthiness Directives",
-              "extra": "Mandatory",
-              "letter": "A"
-            },
-            {
-              "answer": "VOR Equipment",
-              "extra": "IFR 30 days",
-              "letter": "V"
-            },
-            {
-              "answer": "100 Hour",
-              "extra": "Hire",
-              "letter": "I"
-            },
-            {
-              "answer": "Altimeter and Static",
-              "extra": "24 Months IFR",
-              "letter": "A"
-            },
-            {
-              "answer": "Transponder",
-              "extra": "24 Months",
-              "letter": "T"
-            },
-            {
-              "answer": "ELT",
-              "extra": "12 Months / 1 Hour / Half life",
-              "letter": "E"
-            }
-          ],
-          "hidden": [],
-          "rawHtml": "<p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p>",
-          "rawText": "Can register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n",
-          "type": "acronym"
-        },
-        {
           "acronym": "FLAPS",
           "alts": {},
           "entries": [
@@ -1405,8 +1360,8 @@
           ],
           "rawHtml": "<p>A plane is airworthy if it conforms to it's original type design and is in condition for safe flight</p><p>with all needed documents, inspections, and equipment. </p><p><br></p><p>It is the responsibility of the Owner / Operator to maintain it in airworthy conditions with proper maintenance records.</p>",
           "rawText": "A plane is airworthy if it conforms to it's original type design and is in condition for safe flight\nwith all needed documents, inspections, and equipment. \n\nIt is the responsibility of the Owner / Operator to maintain it in airworthy conditions with proper maintenance records.\n",
-          "title": "Aircraft Airworthiness",
-          "type": "fill"
+          "type": "fill",
+          "title": "Aircraft Airworthiness"
         },
         {
           "alts": {
@@ -1451,9 +1406,7 @@
           "type": "fill"
         },
         {
-          "alts": {
-            "indefinitely_1": []
-          },
+          "alts": {},
           "hidden": [
             {
               "occ": 1,
@@ -1614,6 +1567,10 @@
             {
               "occ": 1,
               "word": "upkeep"
+            },
+            {
+              "occ": 1,
+              "word": "43"
             }
           ],
           "rawHtml": "<p><strong><em>Part 43</em></strong></p><p>Preventative Maintenance can be performed by an owner / operator that holds at least a private pilot license.</p><p>Defined as simple or minor preservation operations or the replacement of small standard parts not involving complex assembly.</p><p>Anything not in part 43 appendix A paragraph C is not preventative maintenance,</p><p>However things like adding oil or adding air to tires is considered basic upkeep and not listed as preventative maintenance.</p><p>Must log work - Description | Date | Name, Signature, Cert Number, and kind of Cert for the person who did the work.</p>",
@@ -1638,11 +1595,11 @@
           "type": "fill"
         },
         {
-          "type": "fill",
+          "hidden": [],
+          "rawHtml": "<h4><br></h4><p>Annual Inspection</p><p><br></p><p>Airworthiness Directives</p><p><em>   Published by FAA and are Mandatory</em></p><p>VOR Equipment</p><ul><li><em>Required for IFR - 30 Days</em></li></ul><p>100 Hour</p><ul><li><em>Required for Hire</em></li></ul><p>Altimeter and Static </p><ul><li><em>Required for IFR - 24 Months</em></li></ul><p>Transponder</p><ul><li><em>24 Months</em></li></ul><p>ELT</p><ul><li><em>&lt; 50% Battery | 1 hour cumulative use | 12 Months. Can be used within 50NM for 90 days after removal.</em></li></ul>",
+          "rawText": "\nAnnual Inspection\n\nAirworthiness Directives\n   Published by FAA and are Mandatory\nVOR Equipment\nRequired for IFR - 30 Days\n100 Hour\nRequired for Hire\nAltimeter and Static \nRequired for IFR - 24 Months\nTransponder\n24 Months\nELT\n< 50% Battery | 1 hour cumulative use | 12 Months. Can be used within 50NM for 90 days after removal.\n",
           "title": "AVVIATE",
-          "rawText": "\n",
-          "rawHtml": "<h4><br></h4>",
-          "hidden": []
+          "type": "fill"
         }
       ],
       "color": "#ffb43f"
@@ -4222,6 +4179,11 @@
           "rawText": "Above 12500 MSL required use by flight crew members for more than 30 minutes\nAbove 14000 MSL required use by flight crew members any time.\nAbove 15000 MSL required to supply all occupants with supplemental oxygen.\n*At night vision it is recommended above 5000 MSL because vision erodes rapidly and pilots are more tired\n During the Day it is still recommended above 10000 MSL\nAltitudes are actually cabin pressure altitudes and can be lower than MSL with lower than standard altimeter settings\n",
           "title": "Supplemental Oxygen Requirements",
           "type": "fill"
+        },
+        {
+          "type": "fill",
+          "title": "Lost Comms",
+          "rawText": ""
         }
       ],
       "color": "#53d5fd"
@@ -4485,7 +4447,7 @@
             }
           ],
           "hidden": [],
-          "image": "",
+          "image": "images/0d33e928debf12942c05e1088e5823acd655169f5fa491512111ea4aeb6ddc9d.png",
           "labels": [
             {
               "fontSize": 20,
@@ -6971,6 +6933,11 @@
           "type": "acronym",
           "hidden": [],
           "alts": {}
+        },
+        {
+          "type": "fill",
+          "title": "Test",
+          "rawText": ""
         }
       ]
     },
@@ -6985,10 +6952,6 @@
               "occ": 1
             },
             {
-              "word": "pretty",
-              "occ": 1
-            },
-            {
               "word": "test",
               "occ": 1
             }
@@ -7000,7 +6963,21 @@
         },
         {
           "alts": {},
-          "hidden": [],
+          "hidden": [
+            {
+              "word": "Get",
+              "occ": 1
+            },
+            {
+              "word": "Tested",
+              "occ": 1
+            },
+            {
+              "word": "question.",
+              "occ": 1,
+              "reveal": true
+            }
+          ],
           "rawHtml": "<p>This is the Twooo test question.</p><p><strong style=\"color: rgb(0, 102, 204);\">Get </strong>Tested﻿</p><p>dgdfw</p>",
           "rawText": "This is the Twooo test question.\nGet Tested﻿\ndgdfw\n",
           "title": "Test Qestion #2",
@@ -7008,7 +6985,25 @@
         },
         {
           "alts": {},
-          "hidden": [],
+          "hidden": [
+            {
+              "word": "save",
+              "occ": 1
+            },
+            {
+              "word": "this",
+              "occ": 1
+            },
+            {
+              "word": "work?",
+              "occ": 1
+            },
+            {
+              "word": "Two?",
+              "occ": 1,
+              "reveal": true
+            }
+          ],
           "rawHtml": "<p>Did this new save thing work?</p><p>Take Two?</p>",
           "rawText": "Did this new save thing work?\nTake Two?\n",
           "title": "Test    #3",
@@ -7036,6 +7031,11 @@
           "rawHtml": "<p><br></p>",
           "imgWidth": 1039,
           "imgHeight": 480
+        },
+        {
+          "type": "fill",
+          "title": "How do you do?",
+          "rawText": ""
         }
       ]
     }
