@@ -461,6 +461,20 @@
       background: #71368a;
     }
 
+    #answerBank {
+      display: none;
+      margin-top: 12px;
+    }
+    #answerBank .answer-label {
+      display: inline-block;
+      margin: 4px;
+      padding: 6px 8px;
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      cursor: grab;
+    }
+
     #progressStatus {
       text-align: center;
       font-size: 1rem;
@@ -796,6 +810,8 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
+      <div id="answerBank"></div>
+      <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
       <button id="backBtn">⬅️ Back</button>
       <button id="nextBtn">Next Section ➡️</button>
       <button id="hintBtn">Hint</button>
@@ -1527,6 +1543,7 @@
       let resumeRandomBtn;
       let completionCounts = JSON.parse(localStorage.getItem('folderCompletionCounts') || '{}');
       let justCompleted = false;
+      let answersVisible = false;
 
       function getCompletionCount(idx) {
         return completionCounts[String(idx)] || 0;
@@ -1542,6 +1559,12 @@
       function updateFolderCounterDisplay(idx) {
         const el = document.querySelector(`#mobileFolderList li[data-index="${idx}"] .completion-counter`);
         if (el) el.textContent = getCompletionCount(idx);
+      }
+      function resetAnswerBank() {
+        answersVisible = false;
+        if (answerBank) answerBank.style.display = 'none';
+        if (toggleAnswersBtn) toggleAnswersBtn.textContent = 'Show Answers';
+        if (answerBank) answerBank.innerHTML = '';
       }
       // Progress is kept only for this session (no localStorage)
 
@@ -1882,6 +1905,7 @@
           if (typeof quill !== 'undefined') quill.blur();
         }
         multiFolderMode = true;
+        resetAnswerBank();
         isQuizMode = true;
         const combined = [];
         folders.forEach(f => {
@@ -2348,7 +2372,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -4414,6 +4438,7 @@
       function enterQuiz(){
           if(!isQuizMode) syncCurrentSection();
         multiFolderMode = false;
+        resetAnswerBank();
         if (currentFolder === null) {
           alert('Select a folder first');
           return;
@@ -4428,6 +4453,7 @@
       function enterRandomQuiz() {
           if(!isQuizMode) syncCurrentSection();
         multiFolderMode = false;
+        resetAnswerBank();
         isQuizMode = true;
         if (currentFolder === null) {
           alert('Select a folder first');
@@ -4470,6 +4496,7 @@
 
       function enterQuizQuestion(){
         multiFolderMode = false;
+        resetAnswerBank();
         if(!ensureSelection()) return;
         editorArea.style.display='none';
         quizArea.style.display='block';
@@ -4499,6 +4526,18 @@
         enterRandomQuiz();
       };
 
+      toggleAnswersBtn.onclick = () => {
+        answersVisible = !answersVisible;
+        if (answersVisible) {
+          buildAnswerBank(data.folders[currentFolder].sections[currentSection]);
+          answerBank.style.display = 'block';
+          toggleAnswersBtn.textContent = 'Hide Answers';
+        } else {
+          answerBank.style.display = 'none';
+          answerBank.innerHTML = '';
+          toggleAnswersBtn.textContent = 'Show Answers';
+        }
+      };
 
       function wrapQuizBlanks(container, hiddenEntries) {
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -4572,10 +4611,51 @@
             const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
             input.setAttribute('data-answer', JSON.stringify(answers));
             input.addEventListener('focus', () => { lastHintTarget = input; });
+            span.addEventListener('dragover', e => e.preventDefault());
+            span.addEventListener('drop', e => {
+              e.preventDefault();
+              const txt = e.dataTransfer.getData('text/plain');
+              if (txt) {
+                input.value = txt;
+                input.dispatchEvent(new Event('input'));
+              }
+            });
+            input.addEventListener('dragover', e => e.preventDefault());
+            input.addEventListener('drop', e => {
+              e.preventDefault();
+              const txt = e.dataTransfer.getData('text/plain');
+              if (txt) {
+                input.value = txt;
+                input.dispatchEvent(new Event('input'));
+              }
+            });
 
             span.appendChild(input);
             node.parentNode.replaceChild(span, node);
           }
+        });
+      }
+
+      function buildAnswerBank(sec) {
+        if (!answerBank) return;
+        const answers = [];
+        quizContent.querySelectorAll('.blank-input').forEach(input => {
+          try {
+            const arr = JSON.parse(input.getAttribute('data-answer') || '[]');
+            if (arr.length) answers.push(arr[0]);
+          } catch {}
+        });
+        answers.sort(() => Math.random() - 0.5);
+        answerBank.innerHTML = '';
+        answers.forEach(ans => {
+          const span = document.createElement('span');
+          span.className = 'answer-label';
+          span.textContent = ans;
+          span.draggable = true;
+          span.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', ans);
+          });
+          answerBank.appendChild(span);
         });
       }
 
@@ -4625,6 +4705,9 @@
         renderSections(lastSectionOrder);
 
         updateHeader(titleText);
+        answerBank.innerHTML = '';
+        answerBank.style.display = 'none';
+        toggleAnswersBtn.style.display = 'none';
 
         if (sec.type === 'fill') {
           // quizContent already cleared and title appended above
@@ -4728,6 +4811,18 @@
               }
             });
           });
+          if (document.body.classList.contains('mobile')) {
+            toggleAnswersBtn.style.display = 'inline-block';
+            if (answersVisible) {
+              buildAnswerBank(sec);
+              answerBank.style.display = 'block';
+              toggleAnswersBtn.textContent = 'Hide Answers';
+            } else {
+              answerBank.style.display = 'none';
+              answerBank.innerHTML = '';
+              toggleAnswersBtn.textContent = 'Show Answers';
+            }
+          }
           return;
         }
         if (sec.type === 'acronym') {
