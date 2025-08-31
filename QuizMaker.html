@@ -460,6 +460,19 @@
     #hintBtn:hover, #editQuestionBtn:hover {
       background: #71368a;
     }
+    #toggleAnswersBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #8e44ad;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #toggleAnswersBtn:hover {
+      background: #71368a;
+    }
 
     #answerBank {
       display: none;
@@ -473,6 +486,16 @@
       border: 1px solid #bdc3c7;
       border-radius: 4px;
       cursor: grab;
+      touch-action: none;
+    }
+    .drag-ghost {
+      padding: 6px 8px;
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      position: fixed;
+      pointer-events: none;
+      z-index: 1000;
     }
 
     #progressStatus {
@@ -2385,6 +2408,39 @@
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
+      let touchDrag = null;
+
+      document.addEventListener('touchmove', e => {
+        if (!touchDrag) return;
+        const t = e.touches[0];
+        touchDrag.ghost.style.left = t.clientX + 'px';
+        touchDrag.ghost.style.top = t.clientY + 'px';
+        e.preventDefault();
+      }, { passive: false });
+
+      function endTouchDrag(e) {
+        if (!touchDrag) return;
+        const t = e.changedTouches[0];
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        let input = null;
+        if (el) {
+          if (el.classList && el.classList.contains('blank-input')) {
+            input = el;
+          } else if (el.closest) {
+            const blank = el.closest('.blank');
+            if (blank) input = blank.querySelector('.blank-input');
+          }
+        }
+        if (input) {
+          input.value = touchDrag.text;
+          input.dispatchEvent(new Event('input'));
+        }
+        touchDrag.ghost.remove();
+        touchDrag = null;
+      }
+
+      document.addEventListener('touchend', endTouchDrag);
+      document.addEventListener('touchcancel', endTouchDrag);
 
       function updateResumeQuizBtn() {
         if (!resumeQuizBtn) return;
@@ -4654,6 +4710,17 @@
           span.draggable = true;
           span.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', ans);
+          });
+          span.addEventListener('touchstart', e => {
+            const t = e.touches[0];
+            const ghost = document.createElement('div');
+            ghost.className = 'drag-ghost';
+            ghost.textContent = ans;
+            ghost.style.left = t.clientX + 'px';
+            ghost.style.top = t.clientY + 'px';
+            document.body.appendChild(ghost);
+            touchDrag = { text: ans, ghost };
+            e.preventDefault();
           });
           answerBank.appendChild(span);
         });
