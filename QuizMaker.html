@@ -2413,8 +2413,8 @@
       document.addEventListener('touchmove', e => {
         if (!touchDrag) return;
         const t = e.touches[0];
-        touchDrag.ghost.style.left = t.clientX + 'px';
-        touchDrag.ghost.style.top = t.clientY + 'px';
+        touchDrag.ghost.style.left = (t.clientX - touchDrag.offsetX) + 'px';
+        touchDrag.ghost.style.top = (t.clientY - touchDrag.offsetY) + 'px';
         e.preventDefault();
       }, { passive: false });
 
@@ -4716,10 +4716,13 @@
             const ghost = document.createElement('div');
             ghost.className = 'drag-ghost';
             ghost.textContent = ans;
-            ghost.style.left = t.clientX + 'px';
-            ghost.style.top = t.clientY + 'px';
             document.body.appendChild(ghost);
-            touchDrag = { text: ans, ghost };
+            const rect = ghost.getBoundingClientRect();
+            const offsetX = rect.width;
+            const offsetY = rect.height;
+            ghost.style.left = (t.clientX - offsetX) + 'px';
+            ghost.style.top = (t.clientY - offsetY) + 'px';
+            touchDrag = { text: ans, ghost, offsetX, offsetY };
             e.preventDefault();
           });
           answerBank.appendChild(span);
