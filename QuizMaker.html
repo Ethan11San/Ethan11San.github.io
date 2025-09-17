@@ -1476,6 +1476,7 @@
             inp.style.caretColor = '#000';
             inp.addEventListener('focus', () => {
               lastHintTarget = inp;
+              activeBlankInput = inp;
               inp.style.width = getWidth(inp.value || lbl.text);
             });
             const meas = document.createElement('span');
@@ -1553,6 +1554,7 @@
       }
       let isQuizMode = true;   // start in quiz mode by default
       let lastHintTarget = null;  // track last focused blank for hint
+      let activeBlankInput = null; // track the blank input selected for answer-bank clicks
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
@@ -2432,8 +2434,19 @@
           }
         }
         if (input) {
+          lastHintTarget = input;
+          activeBlankInput = input;
           input.value = touchDrag.text;
           input.dispatchEvent(new Event('input'));
+        } else if (touchDrag.source && el && touchDrag.source.contains(el)) {
+          const target = findPreferredBlankTarget();
+          if (target) {
+            lastHintTarget = target;
+            activeBlankInput = target;
+            target.focus();
+            target.value = touchDrag.text;
+            target.dispatchEvent(new Event('input'));
+          }
         }
         touchDrag.ghost.remove();
         touchDrag = null;
@@ -4666,12 +4679,18 @@
             input.className = 'blank-input';
             const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
             input.setAttribute('data-answer', JSON.stringify(answers));
-            input.addEventListener('focus', () => { lastHintTarget = input; });
+            input.addEventListener('focus', () => {
+              lastHintTarget = input;
+              activeBlankInput = input;
+            });
             span.addEventListener('dragover', e => e.preventDefault());
             span.addEventListener('drop', e => {
               e.preventDefault();
               const txt = e.dataTransfer.getData('text/plain');
               if (txt) {
+                lastHintTarget = input;
+                activeBlankInput = input;
+                input.focus();
                 input.value = txt;
                 input.dispatchEvent(new Event('input'));
               }
@@ -4681,6 +4700,9 @@
               e.preventDefault();
               const txt = e.dataTransfer.getData('text/plain');
               if (txt) {
+                lastHintTarget = input;
+                activeBlankInput = input;
+                input.focus();
                 input.value = txt;
                 input.dispatchEvent(new Event('input'));
               }
@@ -4688,8 +4710,66 @@
 
             span.appendChild(input);
             node.parentNode.replaceChild(span, node);
+      }
+    });
+  }
+
+      function sanitizeBlankList(blanks) {
+        return Array.from(blanks || []).filter(inp =>
+          inp && inp.isConnected && inp.classList && inp.classList.contains('blank-input')
+        );
+      }
+
+      function gatherRelatedBlanks(input) {
+        if (!input || !input.isConnected) return [];
+        const para = input.closest('p');
+        if (para && Array.isArray(para._inputs)) {
+          return sanitizeBlankList(para._inputs);
+        }
+        let node = input.closest('.blank');
+        node = node ? node.parentElement : input.parentElement;
+        while (node && node !== quizContent) {
+          const blanks = sanitizeBlankList(node.querySelectorAll('input.blank-input'));
+          if (blanks.length > 1) return blanks;
+          node = node.parentElement;
+        }
+        return sanitizeBlankList([input]);
+      }
+
+      function selectFirstAvailableBlank(blanks) {
+        const clean = sanitizeBlankList(blanks);
+        if (!clean.length) return null;
+        const empty = clean.find(inp => !(inp.value || '').trim());
+        if (empty) return empty;
+        const incorrect = clean.find(inp => !inp.classList.contains('correct'));
+        if (incorrect) return incorrect;
+        return clean[0];
+      }
+
+      function blankNeedsAnswer(input) {
+        if (!input || !input.isConnected) return false;
+        const val = (input.value || '').trim();
+        return !val || !input.classList.contains('correct');
+      }
+
+      function findPreferredBlankTarget() {
+        const active = document.activeElement;
+        if (active && active.classList && active.classList.contains('blank-input') && blankNeedsAnswer(active)) {
+          return active;
+        }
+        if (activeBlankInput) {
+          if (activeBlankInput.isConnected) {
+            if (blankNeedsAnswer(activeBlankInput)) {
+              return activeBlankInput;
+            }
+            const grouped = gatherRelatedBlanks(activeBlankInput).filter(inp => inp !== activeBlankInput);
+            const candidate = selectFirstAvailableBlank(grouped);
+            if (candidate) return candidate;
+          } else {
+            activeBlankInput = null;
           }
-        });
+        }
+        return selectFirstAvailableBlank(document.querySelectorAll('#quizContent input.blank-input'));
       }
 
       function buildAnswerBank(sec) {
@@ -4711,6 +4791,15 @@
           span.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', ans);
           });
+          span.addEventListener('click', () => {
+            const target = findPreferredBlankTarget();
+            if (!target) return;
+            lastHintTarget = target;
+            activeBlankInput = target;
+            target.focus();
+            target.value = ans;
+            target.dispatchEvent(new Event('input'));
+          });
           span.addEventListener('touchstart', e => {
             const t = e.touches[0];
             const ghost = document.createElement('div');
@@ -4722,7 +4811,7 @@
             const offsetY = rect.height;
             ghost.style.left = (t.clientX - offsetX) + 'px';
             ghost.style.top = (t.clientY - offsetY) + 'px';
-            touchDrag = { text: ans, ghost, offsetX, offsetY };
+            touchDrag = { text: ans, ghost, offsetX, offsetY, source: span };
             e.preventDefault();
           });
           answerBank.appendChild(span);
@@ -4731,6 +4820,7 @@
 
         function showQuiz() {
           justCompleted = false;
+          activeBlankInput = null;
           // Advance to the correct section and folder
           let entry = quizOrder[quizPos];
           if (typeof entry === 'object') {
@@ -5071,7 +5161,10 @@
             inp.style.minWidth = '0';
             inp.style.borderRadius = '2px';
             // record focus so Hint button targets the last‑selected box
-            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            inp.addEventListener('focus', () => {
+              lastHintTarget = inp;
+              activeBlankInput = inp;
+            });
             // size width/height to match the saved label size, or fallback to measured width
             const measSpan = document.createElement('span');
             measSpan.style.visibility = 'hidden';
@@ -5097,6 +5190,8 @@
             if (document.body.classList.contains('mobile')) {
               inp.readOnly = true;
               inp.addEventListener('click', () => {
+                lastHintTarget = inp;
+                activeBlankInput = inp;
                 const resp = prompt('Enter answer:', inp.value);
                 if (resp !== null) {
                   inp.value = resp;
@@ -5272,7 +5367,10 @@
                 inp.className = 'blank-input';
                 inp.setAttribute('data-answer', JSON.stringify(answers));
                 // Track focus for definition blanks too
-                inp.addEventListener('focus', () => { lastHintTarget = inp; });
+                inp.addEventListener('focus', () => {
+                  lastHintTarget = inp;
+                  activeBlankInput = inp;
+                });
                 // keep track of blanks for this definition
                 if (!para._inputs) para._inputs = [];
                 para._inputs.push(inp);
@@ -5381,7 +5479,10 @@
             wrapper.setAttribute('data-scrambled', '_'.repeat(blankText.length || 1));
             let inp = document.createElement('input');
             inp.className = 'blank-input';
-            inp.addEventListener('focus', () => { lastHintTarget = inp; });
+            inp.addEventListener('focus', () => {
+              lastHintTarget = inp;
+              activeBlankInput = inp;
+            });
             // store correct answers for hint feature
             inp.setAttribute('data-answer', JSON.stringify(answers));
             // Match quiz section font
