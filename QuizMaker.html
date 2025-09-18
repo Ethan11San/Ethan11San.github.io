@@ -4804,7 +4804,7 @@
         if (empty) return empty;
         const incorrect = clean.find(inp => !inp.classList.contains('correct'));
         if (incorrect) return incorrect;
-        return clean[0];
+        return null;
       }
 
       function blankNeedsAnswer(input) {
