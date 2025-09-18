@@ -5594,6 +5594,18 @@
           if (sec.extraImages) {
             renderQuizExtras(sec, wrapper);
           }
+          if (document.body.classList.contains('mobile')) {
+            toggleAnswersBtn.style.display = 'inline-block';
+            if (answersVisible) {
+              buildAnswerBank(sec);
+              answerBank.style.display = 'block';
+              toggleAnswersBtn.textContent = 'Hide Answers';
+            } else {
+              answerBank.style.display = 'none';
+              answerBank.innerHTML = '';
+              toggleAnswersBtn.textContent = 'Show Answers';
+            }
+          }
           return;
         }
         // existing fill-in logic follows
