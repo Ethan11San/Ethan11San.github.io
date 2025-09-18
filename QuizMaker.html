@@ -430,6 +430,13 @@
     .blank input:focus { outline: none; border-bottom-color: #3498db; }
     .blank input.correct { border-bottom-color: #27ae60; }
     .blank input.incorrect { border-bottom-color: #c0392b; }
+    .blank input.bank-flash {
+      animation: bankFillFlash 0.24s ease-out;
+    }
+    @keyframes bankFillFlash {
+      from { background: rgba(26, 188, 156, 0.25); }
+      to { background: transparent; }
+    }
     @media (max-width: 600px) {
       #quizArea,
       #quizContent {
@@ -486,7 +493,8 @@
       border: 1px solid #bdc3c7;
       border-radius: 4px;
       cursor: grab;
-      touch-action: none;
+      touch-action: manipulation;
+      user-select: none;
     }
     .drag-ghost {
       padding: 6px 8px;
@@ -1569,6 +1577,7 @@
       let completionCounts = JSON.parse(localStorage.getItem('folderCompletionCounts') || '{}');
       let justCompleted = false;
       let answersVisible = false;
+      const wrongAnswerTimers = new WeakMap();
 
       function getCompletionCount(idx) {
         return completionCounts[String(idx)] || 0;
@@ -2411,45 +2420,103 @@
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       let touchDrag = null;
+      const TOUCH_DRAG_THRESHOLD = 8;
 
       document.addEventListener('touchmove', e => {
         if (!touchDrag) return;
+        if (e.touches.length !== 1) {
+          if (touchDrag.ghost) touchDrag.ghost.remove();
+          touchDrag = null;
+          return;
+        }
         const t = e.touches[0];
-        touchDrag.ghost.style.left = (t.clientX - touchDrag.offsetX) + 'px';
-        touchDrag.ghost.style.top = (t.clientY - touchDrag.offsetY) + 'px';
-        e.preventDefault();
+        if (!t) return;
+        const dx = t.clientX - touchDrag.startX;
+        const dy = t.clientY - touchDrag.startY;
+        if (!touchDrag.didDrag) {
+          if (Math.sqrt(dx * dx + dy * dy) < TOUCH_DRAG_THRESHOLD) {
+            return;
+          }
+          touchDrag.didDrag = true;
+          const ghost = document.createElement('div');
+          ghost.className = 'drag-ghost';
+          ghost.textContent = touchDrag.text;
+          document.body.appendChild(ghost);
+          const rect = ghost.getBoundingClientRect();
+          touchDrag.offsetX = rect.width;
+          touchDrag.offsetY = rect.height;
+          ghost.style.left = (t.clientX - touchDrag.offsetX) + 'px';
+          ghost.style.top = (t.clientY - touchDrag.offsetY) + 'px';
+          touchDrag.ghost = ghost;
+        } else if (!touchDrag.ghost) {
+          // In the unlikely case a drag started but the ghost failed, cancel the gesture.
+          touchDrag = null;
+          return;
+        }
+        if (touchDrag && touchDrag.ghost) {
+          touchDrag.ghost.style.left = (t.clientX - touchDrag.offsetX) + 'px';
+          touchDrag.ghost.style.top = (t.clientY - touchDrag.offsetY) + 'px';
+          e.preventDefault();
+        }
       }, { passive: false });
 
       function endTouchDrag(e) {
         if (!touchDrag) return;
-        const t = e.changedTouches[0];
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        let input = null;
-        if (el) {
-          if (el.classList && el.classList.contains('blank-input')) {
-            input = el;
-          } else if (el.closest) {
-            const blank = el.closest('.blank');
-            if (blank) input = blank.querySelector('.blank-input');
+        const sourceEl = touchDrag.source || null;
+        if (e.type === 'touchcancel') {
+          if (touchDrag.ghost) {
+            touchDrag.ghost.remove();
           }
+          touchDrag = null;
+          if (sourceEl) {
+            sourceEl.dataset.skipNextClick = 'false';
+          }
+          return;
         }
-        if (input) {
-          lastHintTarget = input;
-          activeBlankInput = input;
-          input.value = touchDrag.text;
-          input.dispatchEvent(new Event('input'));
-        } else if (touchDrag.source && el && touchDrag.source.contains(el)) {
+        const shouldFocus = !document.body.classList.contains('mobile');
+        const autoClear = true;
+        if (touchDrag.didDrag && touchDrag.ghost) {
+          const t = e.changedTouches[0];
+          if (t) {
+            const el = document.elementFromPoint(t.clientX, t.clientY);
+            let input = null;
+            if (el) {
+              if (el.classList && el.classList.contains('blank-input')) {
+                input = el;
+              } else if (el.closest) {
+                const blank = el.closest('.blank');
+                if (blank) input = blank.querySelector('.blank-input');
+              }
+            }
+            if (input) {
+              applyAnswerToInput(input, touchDrag.text, { focus: shouldFocus, clearOnWrong: autoClear });
+            } else if (sourceEl && el && sourceEl.contains(el)) {
+              const target = findPreferredBlankTarget();
+              if (target) {
+                applyAnswerToInput(target, touchDrag.text, { focus: shouldFocus, clearOnWrong: autoClear });
+              }
+            }
+          }
+          e.preventDefault();
+        } else {
           const target = findPreferredBlankTarget();
           if (target) {
-            lastHintTarget = target;
-            activeBlankInput = target;
-            target.focus();
-            target.value = touchDrag.text;
-            target.dispatchEvent(new Event('input'));
+            applyAnswerToInput(target, touchDrag.text, { focus: shouldFocus, clearOnWrong: autoClear });
           }
+          e.preventDefault();
         }
-        touchDrag.ghost.remove();
+        if (touchDrag.ghost) {
+          touchDrag.ghost.remove();
+        }
         touchDrag = null;
+        if (sourceEl) {
+          sourceEl.dataset.skipNextClick = 'true';
+          setTimeout(() => {
+            if (sourceEl.dataset.skipNextClick === 'true') {
+              sourceEl.dataset.skipNextClick = 'false';
+            }
+          }, 0);
+        }
       }
 
       document.addEventListener('touchend', endTouchDrag);
@@ -4688,11 +4755,8 @@
               e.preventDefault();
               const txt = e.dataTransfer.getData('text/plain');
               if (txt) {
-                lastHintTarget = input;
-                activeBlankInput = input;
-                input.focus();
-                input.value = txt;
-                input.dispatchEvent(new Event('input'));
+                const shouldFocus = !document.body.classList.contains('mobile');
+                applyAnswerToInput(input, txt, { focus: shouldFocus, clearOnWrong: true });
               }
             });
             input.addEventListener('dragover', e => e.preventDefault());
@@ -4700,11 +4764,8 @@
               e.preventDefault();
               const txt = e.dataTransfer.getData('text/plain');
               if (txt) {
-                lastHintTarget = input;
-                activeBlankInput = input;
-                input.focus();
-                input.value = txt;
-                input.dispatchEvent(new Event('input'));
+                const shouldFocus = !document.body.classList.contains('mobile');
+                applyAnswerToInput(input, txt, { focus: shouldFocus, clearOnWrong: true });
               }
             });
 
@@ -4772,6 +4833,76 @@
         return selectFirstAvailableBlank(document.querySelectorAll('#quizContent input.blank-input'));
       }
 
+      function cancelWrongAnswerTimer(input) {
+        if (!input) return;
+        const existing = wrongAnswerTimers.get(input);
+        if (existing) {
+          clearTimeout(existing);
+          wrongAnswerTimers.delete(input);
+        }
+        if (input.dataset) {
+          delete input.dataset.autoClearValue;
+        }
+      }
+
+      function flashFilledInput(input) {
+        if (!input) return;
+        input.classList.remove('bank-flash');
+        // Force reflow so the animation restarts even for the same element
+        void input.offsetWidth;
+        input.classList.add('bank-flash');
+        input.addEventListener('animationend', () => {
+          input.classList.remove('bank-flash');
+        }, { once: true });
+      }
+
+      function applyAnswerToInput(input, value, { focus = true, clearOnWrong = false } = {}) {
+        if (!input || !input.isConnected) return;
+        lastHintTarget = input;
+        activeBlankInput = input;
+        cancelWrongAnswerTimer(input);
+
+        if (focus) {
+          try {
+            input.focus({ preventScroll: true });
+          } catch (err) {
+            input.focus();
+          }
+        }
+
+        input.value = value;
+        input.dispatchEvent(new Event('input'));
+
+        if (!focus && document.activeElement === input) {
+          input.blur();
+        }
+
+        flashFilledInput(input);
+
+        if (clearOnWrong) {
+          const trimmed = (input.value || '').trim();
+          if (trimmed && input.classList.contains('incorrect')) {
+            if (input.dataset) {
+              input.dataset.autoClearValue = trimmed;
+            }
+            const timer = setTimeout(() => {
+              if (!input.isConnected) return;
+              const current = (input.value || '').trim();
+              const shouldClear = input.classList.contains('incorrect') && (!input.dataset || input.dataset.autoClearValue === current);
+              if (shouldClear) {
+                input.value = '';
+                input.dispatchEvent(new Event('input'));
+              }
+              wrongAnswerTimers.delete(input);
+              if (input.dataset) {
+                delete input.dataset.autoClearValue;
+              }
+            }, 1000);
+            wrongAnswerTimers.set(input, timer);
+          }
+        }
+      }
+
       function buildAnswerBank(sec) {
         if (!answerBank) return;
         const answers = [];
@@ -4783,36 +4914,42 @@
         });
         answers.sort(() => Math.random() - 0.5);
         answerBank.innerHTML = '';
+        const isMobile = document.body.classList.contains('mobile');
         answers.forEach(ans => {
           const span = document.createElement('span');
           span.className = 'answer-label';
           span.textContent = ans;
-          span.draggable = true;
+          span.dataset.skipNextClick = 'false';
+          span.draggable = !isMobile;
           span.addEventListener('dragstart', e => {
             e.dataTransfer.setData('text/plain', ans);
           });
           span.addEventListener('click', () => {
+            if (span.dataset.skipNextClick === 'true') {
+              span.dataset.skipNextClick = 'false';
+              return;
+            }
             const target = findPreferredBlankTarget();
             if (!target) return;
-            lastHintTarget = target;
-            activeBlankInput = target;
-            target.focus();
-            target.value = ans;
-            target.dispatchEvent(new Event('input'));
+            const shouldFocus = !document.body.classList.contains('mobile');
+            applyAnswerToInput(target, ans, { focus: shouldFocus, clearOnWrong: true });
           });
           span.addEventListener('touchstart', e => {
+            if (e.touches.length !== 1) return;
             const t = e.touches[0];
-            const ghost = document.createElement('div');
-            ghost.className = 'drag-ghost';
-            ghost.textContent = ans;
-            document.body.appendChild(ghost);
-            const rect = ghost.getBoundingClientRect();
-            const offsetX = rect.width;
-            const offsetY = rect.height;
-            ghost.style.left = (t.clientX - offsetX) + 'px';
-            ghost.style.top = (t.clientY - offsetY) + 'px';
-            touchDrag = { text: ans, ghost, offsetX, offsetY, source: span };
-            e.preventDefault();
+            if (touchDrag && touchDrag.ghost) {
+              touchDrag.ghost.remove();
+            }
+            touchDrag = {
+              text: ans,
+              source: span,
+              startX: t.clientX,
+              startY: t.clientY,
+              ghost: null,
+              offsetX: 0,
+              offsetY: 0,
+              didDrag: false
+            };
           });
           answerBank.appendChild(span);
         });
@@ -4932,14 +5069,19 @@
               if (enteredRaw.length === 0) {
                 input.classList.remove('correct', 'incorrect');
                 revealTargets.forEach(s => s.style.display = 'none');
+                cancelWrongAnswerTimer(input);
               } else if (isCorrect) {
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
                 revealTargets.forEach(s => s.style.display = 'inline');
+                cancelWrongAnswerTimer(input);
               } else {
                 input.classList.add('incorrect');
                 input.classList.remove('correct');
                 revealTargets.forEach(s => s.style.display = 'none');
+                if (input.dataset && input.dataset.autoClearValue && input.dataset.autoClearValue !== enteredRaw) {
+                  cancelWrongAnswerTimer(input);
+                }
               }
 
               const allInputs = Array.from(quizContent.querySelectorAll('.blank input'));
