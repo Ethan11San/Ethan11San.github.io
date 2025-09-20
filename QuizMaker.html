@@ -1342,7 +1342,7 @@
             const base = ex.image || '';
             img.src = base;
             if (ex.imageRef) {
-              imageURL(ex.imageRef).then(url => { if (url) img.src = url; });
+              applyImageRef(img, ex.imageRef);
             }
             img.style.display = 'block';
             img.style.userSelect = 'none';
@@ -1406,7 +1406,7 @@
           const base = ex.image || '';
           img.src = base;
           if (ex.imageRef) {
-            imageURL(ex.imageRef).then(url => { if (url) img.src = url; });
+            applyImageRef(img, ex.imageRef);
           }
           img.style.display = 'block';
           img.style.userSelect = 'none';
@@ -1577,6 +1577,7 @@
       let completionCounts = JSON.parse(localStorage.getItem('folderCompletionCounts') || '{}');
       let justCompleted = false;
       let answersVisible = false;
+      let inlineImageFallbackNotified = false;
       const wrongAnswerTimers = new WeakMap();
 
       function getCompletionCount(idx) {
@@ -2007,8 +2008,13 @@
             saveProgress();
           }
         }
-        if (document.body.classList.contains('mobile') && quizOrder.length === 1) {
-          homeBtn.style.display = 'block';
+        if (document.body.classList.contains('mobile')) {
+          const blanks = document.querySelectorAll('#quizContent input.blank-input');
+          if (quizOrder.length === 1 && blanks.length > 0) {
+            homeBtn.style.display = 'block';
+          } else {
+            homeBtn.style.display = 'none';
+          }
         }
         updateProgressIndicator();
       }
@@ -2089,31 +2095,135 @@
         });
       }
 
+      function isStorageError(err) {
+        if (!err) return false;
+        const name = err.name || '';
+        const msg = (err.message || '').toLowerCase();
+        const code = typeof err.code === 'number' ? err.code : null;
+        if (code === 22 || code === 1014) return true;
+        if (['QuotaExceededError', 'InvalidStateError', 'UnknownError', 'SecurityError'].includes(name)) return true;
+        return /quota|storage|disk|space|persist/.test(msg);
+      }
+
+      async function loadImageSource(file) {
+        if (typeof createImageBitmap === 'function') {
+          try {
+            const bmp = await createImageBitmap(file);
+            return {
+              width: bmp.width,
+              height: bmp.height,
+              draw: (ctx, w, h) => ctx.drawImage(bmp, 0, 0, w, h),
+              cleanup: () => { try { bmp.close(); } catch (_) {} }
+            };
+          } catch (err) {
+            console.warn('createImageBitmap failed, falling back to <img>', err);
+          }
+        }
+        return new Promise((resolve, reject) => {
+          const url = URL.createObjectURL(file);
+          const img = new Image();
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve({
+              width: img.naturalWidth || img.width,
+              height: img.naturalHeight || img.height,
+              draw: (ctx, w, h) => ctx.drawImage(img, 0, 0, w, h),
+              cleanup: () => {}
+            });
+          };
+          img.onerror = err => {
+            URL.revokeObjectURL(url);
+            reject(err);
+          };
+          img.src = url;
+        });
+      }
+
+      async function blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr.result);
+          fr.onerror = () => reject(fr.error);
+          fr.readAsDataURL(blob);
+        });
+      }
+
       // Compress image, hash and store
       async function compressImage(file, {max = 1600, quality = 0.75} = {}) {
-        const bmp = await createImageBitmap(file);
-        const s = Math.min(max / bmp.width, max / bmp.height, 1);
-        const w = Math.round(bmp.width * s), h = Math.round(bmp.height * s);
+        const source = await loadImageSource(file);
+        const s = Math.min(max / source.width, max / source.height, 1);
+        const w = Math.max(1, Math.round(source.width * s));
+        const h = Math.max(1, Math.round(source.height * s));
         const c = Object.assign(document.createElement('canvas'), { width: w, height: h });
-        c.getContext('2d', { alpha: false }).drawImage(bmp, 0, 0, w, h);
-        const toType = c.toDataURL('image/webp').startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
-        const blob = await new Promise(r => c.toBlob(b => r(b), toType, quality));
+        const ctx = c.getContext('2d', { alpha: false });
+        source.draw(ctx, w, h);
+        if (typeof source.cleanup === 'function') source.cleanup();
+        const preferWebp = c.toDataURL('image/webp').startsWith('data:image/webp');
+        const mime = preferWebp ? 'image/webp' : 'image/jpeg';
+        const blob = await new Promise((res, rej) => {
+          c.toBlob(b => b ? res(b) : rej(new Error('Canvas toBlob failed')), mime, quality);
+        });
         const buf = await blob.arrayBuffer();
         const digest = await crypto.subtle.digest('SHA-256', buf);
         const hash = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-        return { blob, hash, ext: toType === 'image/webp' ? 'webp' : 'jpg' };
+        return { blob, hash, ext: preferWebp ? 'webp' : 'jpg' };
       }
 
       async function addLocalImage(file) {
-        const { blob, hash, ext } = await compressImage(file);
-        await idbPut(hash, blob);
-        return { imageRef: `sha256:${hash}`, ext };
+        const attempts = [
+          { max: 1600, quality: 0.75 },
+          { max: 1400, quality: 0.72 },
+          { max: 1200, quality: 0.70 },
+          { max: 1000, quality: 0.68 },
+          { max: 800, quality: 0.65 },
+          { max: 640, quality: 0.60 },
+          { max: 512, quality: 0.55 }
+        ];
+        let fallbackBlob = null;
+        let fallbackExt = 'jpg';
+        let lastErr = null;
+        for (const opts of attempts) {
+          const { blob, hash, ext } = await compressImage(file, opts);
+          fallbackBlob = blob;
+          fallbackExt = ext;
+          try {
+            await idbPut(hash, blob);
+            return { imageRef: `sha256:${hash}`, ext };
+          } catch (err) {
+            if (!isStorageError(err)) throw err;
+            lastErr = err;
+          }
+        }
+        if (fallbackBlob) {
+          console.warn('Falling back to inline image storage', lastErr);
+          if (!inlineImageFallbackNotified) {
+            alert('Local image storage is full or unavailable. This image will be stored directly with the question instead.');
+            inlineImageFallbackNotified = true;
+          }
+          const dataUrl = await blobToDataURL(fallbackBlob);
+          return { imageRef: dataUrl, ext: fallbackExt };
+        }
+        throw lastErr || new Error('Unable to process image');
       }
 
       async function imageURL(imageRef) {
         if (!imageRef?.startsWith('sha256:')) return null;
-        const blob = await idbGet(imageRef.slice(7));
-        return blob ? URL.createObjectURL(blob) : null;
+        try {
+          const blob = await idbGet(imageRef.slice(7));
+          return blob ? URL.createObjectURL(blob) : null;
+        } catch (err) {
+          console.warn('Unable to read stored image', err);
+          return null;
+        }
+      }
+
+      function applyImageRef(imgEl, ref) {
+        if (!imgEl || !ref) return;
+        if (ref.startsWith('sha256:')) {
+          imageURL(ref).then(url => { if (url) imgEl.src = url; });
+        } else {
+          imgEl.src = ref;
+        }
       }
 
       async function uploadImageToGitHub({ owner, repo, branch = 'main', token }, hash, blob, ext = 'webp') {
@@ -2142,7 +2252,7 @@
         // Upload any pending images
         for (const folder of data.folders || []) {
           for (const sec of folder.sections || []) {
-            if (sec.imageRef) {
+            if (sec.imageRef && sec.imageRef.startsWith('sha256:')) {
               const hash = sec.imageRef.slice(7);
               const blob = await idbGet(hash);
               if (blob) {
@@ -2155,7 +2265,7 @@
             }
             if (sec.extraImages) {
               for (const ex of sec.extraImages) {
-                if (ex.imageRef) {
+                if (ex.imageRef && ex.imageRef.startsWith('sha256:')) {
                   const hash = ex.imageRef.slice(7);
                   const blob = await idbGet(hash);
                   if (blob) {
@@ -2733,7 +2843,39 @@
       addImageWordBtn.addEventListener('click', async () => {
         if (!ensureSelection()) return;
         const range = quill.getSelection(true);
-        if (!range || range.length === 0) return alert('Select text first');
+        if (!range || range.length === 0) {
+          alert('Select text first');
+          return;
+        }
+        const insert = async file => {
+          try {
+            const { imageRef } = await addLocalImage(file);
+            if (!imageRef) return;
+            quill.formatText(range.index, range.length, 'popupWord', imageRef, 'user');
+            quill.setSelection(range.index + range.length, 0, 'silent');
+            syncCurrentSection();
+          } catch (err) {
+            console.error('Failed to attach popup image', err);
+            alert('Unable to add that image. Please try a different file.');
+          }
+        };
+        const openFilePicker = () => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+            await insert(file);
+          };
+          input.click();
+        };
+        const clipboardSupported = navigator.clipboard && typeof navigator.clipboard.read === 'function';
+        const preferFilePicker = document.body.classList.contains('mobile') || !clipboardSupported;
+        if (preferFilePicker) {
+          openFilePicker();
+          return;
+        }
         async function getClipboardImage() {
           try {
             const items = await navigator.clipboard.read();
@@ -2748,23 +2890,12 @@
           }
           return null;
         }
-        const insert = async file => {
-          const { imageRef } = await addLocalImage(file);
-          quill.formatText(range.index, range.length, 'popupWord', imageRef, 'user');
-          quill.setSelection(range.index + range.length, 0, 'silent');
-          syncCurrentSection();
-        };
-        let blob = await getClipboardImage();
-        if (blob) { await insert(blob); return; }
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = async () => {
-          const file = input.files[0];
-          if (!file) return;
-          await insert(file);
-        };
-        input.click();
+        const blob = await getClipboardImage();
+        if (blob) {
+          await insert(blob);
+          return;
+        }
+        openFilePicker();
       });
       function syncCurrentSection(){
         if (currentFolder===null || currentSection===null) return;
@@ -3387,7 +3518,8 @@
               <div id="labelOverlay" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
             </div>`;
           if (sec.imageRef) {
-            imageURL(sec.imageRef).then(url => { const el = document.getElementById('labelImg'); if (url && el) el.src = url; });
+            const el = document.getElementById('labelImg');
+            if (el) applyImageRef(el, sec.imageRef);
           }
           // (rest unchanged)
           // ...rest of label editor code...
@@ -4664,15 +4796,10 @@
 
       toggleAnswersBtn.onclick = () => {
         answersVisible = !answersVisible;
-        if (answersVisible) {
-          buildAnswerBank(data.folders[currentFolder].sections[currentSection]);
-          answerBank.style.display = 'block';
-          toggleAnswersBtn.textContent = 'Hide Answers';
-        } else {
-          answerBank.style.display = 'none';
-          answerBank.innerHTML = '';
-          toggleAnswersBtn.textContent = 'Show Answers';
-        }
+        const sec = (currentFolder !== null && currentSection !== null && data.folders[currentFolder])
+          ? data.folders[currentFolder].sections[currentSection]
+          : null;
+        refreshAnswersToggle(sec);
       };
 
       function wrapQuizBlanks(container, hiddenEntries) {
@@ -4955,6 +5082,28 @@
         });
       }
 
+      function refreshAnswersToggle(sec) {
+        if (!toggleAnswersBtn || !answerBank || !quizContent) return;
+        const blankCount = quizContent.querySelectorAll('input.blank-input').length;
+        if (!blankCount) {
+          toggleAnswersBtn.style.display = 'none';
+          answerBank.style.display = 'none';
+          answerBank.innerHTML = '';
+          toggleAnswersBtn.textContent = 'Show Answers';
+          return;
+        }
+        toggleAnswersBtn.style.display = 'inline-block';
+        if (answersVisible) {
+          buildAnswerBank(sec);
+          answerBank.style.display = 'block';
+          toggleAnswersBtn.textContent = 'Hide Answers';
+        } else {
+          answerBank.style.display = 'none';
+          answerBank.innerHTML = '';
+          toggleAnswersBtn.textContent = 'Show Answers';
+        }
+      }
+
         function showQuiz() {
           justCompleted = false;
           activeBlankInput = null;
@@ -5113,18 +5262,7 @@
               }
             });
           });
-          if (document.body.classList.contains('mobile')) {
-            toggleAnswersBtn.style.display = 'inline-block';
-            if (answersVisible) {
-              buildAnswerBank(sec);
-              answerBank.style.display = 'block';
-              toggleAnswersBtn.textContent = 'Hide Answers';
-            } else {
-              answerBank.style.display = 'none';
-              answerBank.innerHTML = '';
-              toggleAnswersBtn.textContent = 'Show Answers';
-            }
-          }
+          refreshAnswersToggle(sec);
           return;
         }
         if (sec.type === 'acronym') {
@@ -5182,7 +5320,7 @@
           const base = sec.image || '';
           img.src = base;
           if (sec.imageRef) {
-            imageURL(sec.imageRef).then(url => { if (url) img.src = url; });
+            applyImageRef(img, sec.imageRef);
           }
           wrapper.appendChild(img);
           let baseWidth = 0, baseHeight = 0;
@@ -5594,18 +5732,7 @@
           if (sec.extraImages) {
             renderQuizExtras(sec, wrapper);
           }
-          if (document.body.classList.contains('mobile')) {
-            toggleAnswersBtn.style.display = 'inline-block';
-            if (answersVisible) {
-              buildAnswerBank(sec);
-              answerBank.style.display = 'block';
-              toggleAnswersBtn.textContent = 'Hide Answers';
-            } else {
-              answerBank.style.display = 'none';
-              answerBank.innerHTML = '';
-              toggleAnswersBtn.textContent = 'Show Answers';
-            }
-          }
+          refreshAnswersToggle(sec);
           return;
         }
         // existing fill-in logic follows
@@ -5700,6 +5827,7 @@
             quizContent.appendChild(document.createTextNode(tok));
           }
         });
+        refreshAnswersToggle(sec);
       }
         nextBtn.onclick = () => {
           if (justCompleted) return;
