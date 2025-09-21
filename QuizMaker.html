@@ -717,6 +717,7 @@
     body.mobile:not(.quiz-active) #main { display: none; }
     body.mobile:not(.quiz-active) #mobileStart { display: block; }
     body.mobile.quiz-active #header { cursor: pointer; }
+    body.mobile #homeBtn { display: none !important; }
     /* Ensure quiz images scale to fit smaller screens (mobile only) */
     body.mobile #quizContent img {
       max-width: 100%;
@@ -2009,12 +2010,7 @@
           }
         }
         if (document.body.classList.contains('mobile')) {
-          const blanks = document.querySelectorAll('#quizContent input.blank-input');
-          if (quizOrder.length === 1 && blanks.length > 0) {
-            homeBtn.style.display = 'block';
-          } else {
-            homeBtn.style.display = 'none';
-          }
+          homeBtn.style.display = 'none';
         }
         updateProgressIndicator();
       }
