@@ -360,6 +360,165 @@
       line-height: 1.5;
     }
 
+    .quiz-question-title {
+      margin-bottom: 22px;
+      font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+      font-weight: 700;
+      color: #2c3e50;
+      letter-spacing: 0.015em;
+      line-height: 1.28;
+    }
+    .quiz-question-title .quiz-title-word {
+      display: inline-block;
+      padding: 0.1em 0.25em;
+      border-radius: 6px;
+      background: rgba(52,152,219,0.08);
+    }
+    .quiz-question-title .quiz-title-word:nth-child(odd) {
+      background: rgba(26,188,156,0.12);
+    }
+
+    .question-section-card {
+      position: relative;
+      margin: 18px 0;
+      padding: 18px 18px 20px 28px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(44,62,80,0.09);
+      box-shadow: 0 18px 34px -24px rgba(44,62,80,0.6);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      animation: sectionCardFade 0.45s ease forwards;
+      animation-delay: calc(0.045s * (var(--section-index, 1) - 1));
+      opacity: 0;
+    }
+    .question-section-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(26,188,156,0.12), rgba(52,152,219,0.12));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .question-section-card::after {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 18px;
+      bottom: 18px;
+      width: 5px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #1abc9c, #3498db);
+      opacity: 0.9;
+    }
+    .question-section-card:hover,
+    .question-section-card:focus-within {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 36px -24px rgba(44,62,80,0.65);
+    }
+    .question-section-card:hover::before,
+    .question-section-card:focus-within::before {
+      opacity: 1;
+    }
+
+    .question-section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .question-section-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.4rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #1abc9c, #16a085);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 12px 22px -18px rgba(26,188,156,0.9);
+    }
+    .question-section-heading {
+      font-size: 1.12rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #2c3e50;
+    }
+    .question-section-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #34495e;
+    }
+    .question-section-body > * {
+      margin: 0;
+    }
+    .question-section-body ul,
+    .question-section-body ol {
+      padding-left: 1.25rem;
+    }
+    .question-section-body.empty::before {
+      content: 'No details provided for this section yet.';
+      font-style: italic;
+      color: #7f8c8d;
+    }
+
+    @keyframes sectionCardFade {
+      from {
+        transform: translateY(10px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .quiz-question-title {
+        margin-bottom: 18px;
+      }
+      .question-section-card {
+        margin: 14px 0;
+        padding: 16px 16px 18px 22px;
+        border-radius: 16px;
+      }
+      .question-section-card::after {
+        left: 10px;
+        top: 16px;
+        bottom: 16px;
+      }
+      .question-section-heading {
+        font-size: 1.02rem;
+      }
+      .question-section-body {
+        font-size: 0.98rem;
+        gap: 0.55rem;
+      }
+      .question-section-badge {
+        min-width: 2rem;
+        padding: 0.28rem 0.55rem;
+        font-size: 0.7rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .question-section-card {
+        animation: none;
+        opacity: 1;
+        transform: none !important;
+        box-shadow: 0 12px 26px -24px rgba(44,62,80,0.55);
+      }
+    }
+
     /* —— Enlarged Text & Inputs for Edit and Quiz Modes —— */
     #editor {
       font-size: 1.2rem;
@@ -4570,6 +4729,8 @@
           }
         });
 
+        enhanceQuestionSections(previewDiv);
+
         // Build alternate-answer inputs for hidden words
         altContainer.innerHTML = '<h4>Alternate answers for blanks (comma-separated):</h4>';
         altContainer.style.display = 'block';
@@ -4797,6 +4958,121 @@
           : null;
         refreshAnswersToggle(sec);
       };
+
+      function enhanceQuestionSections(container, options = {}) {
+        if (!container) return;
+        const { skipTitle = false } = options;
+        container.classList.remove('has-section-cards');
+        const headings = Array.from(container.querySelectorAll('h3'));
+        if (!headings.length) return;
+
+        let processed = 0;
+        const createdCards = [];
+        headings.forEach(heading => {
+          if (skipTitle && heading.classList.contains('quiz-question-title')) return;
+          if (heading.closest('.question-section-card')) return;
+          const originalParent = heading.parentNode;
+          if (!originalParent) return;
+
+          processed += 1;
+          const card = document.createElement('div');
+          card.className = 'question-section-card';
+          card.style.setProperty('--section-index', processed);
+
+          const header = document.createElement('div');
+          header.className = 'question-section-header';
+
+          const badge = document.createElement('span');
+          badge.className = 'question-section-badge';
+          const badgeText = processed < 10 ? `0${processed}` : String(processed);
+          badge.textContent = badgeText;
+          badge.setAttribute('aria-label', `Section ${processed}`);
+
+          const body = document.createElement('div');
+          body.className = 'question-section-body';
+
+          card.appendChild(header);
+          card.appendChild(body);
+          header.appendChild(badge);
+          heading.classList.add('question-section-heading');
+          originalParent.insertBefore(card, heading);
+          header.appendChild(heading);
+
+          let sibling = card.nextSibling;
+          while (sibling) {
+            if (sibling.nodeType === Node.ELEMENT_NODE && sibling.tagName === 'H3') {
+              if (skipTitle && sibling.classList.contains('quiz-question-title')) {
+                sibling = sibling.nextSibling;
+                continue;
+              }
+              break;
+            }
+            const next = sibling.nextSibling;
+            body.appendChild(sibling);
+            sibling = next;
+          }
+
+          const trimEdges = target => {
+            while (target.firstChild && target.firstChild.nodeType === Node.TEXT_NODE && !target.firstChild.textContent.trim()) {
+              target.removeChild(target.firstChild);
+            }
+            while (target.lastChild && target.lastChild.nodeType === Node.TEXT_NODE && !target.lastChild.textContent.trim()) {
+              target.removeChild(target.lastChild);
+            }
+          };
+          trimEdges(body);
+
+          const hasContent = Array.from(body.childNodes).some(node => {
+            if (node.nodeType === Node.TEXT_NODE) return node.textContent.trim().length > 0;
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (node.tagName === 'BR') return false;
+              if (node.classList && (node.classList.contains('blank') || node.classList.contains('hidden-reveal'))) return true;
+              return node.textContent.trim().length > 0;
+            }
+            return false;
+          });
+          if (!hasContent) body.classList.add('empty');
+
+          const cleanWhitespace = node => {
+            Array.from(node.childNodes).forEach(child => {
+              if (child.nodeType === Node.TEXT_NODE && !child.textContent.trim()) {
+                node.removeChild(child);
+              }
+            });
+          };
+
+          let currentParent = card.parentNode;
+          while (currentParent && currentParent !== container && currentParent.parentNode) {
+            cleanWhitespace(currentParent);
+            if (currentParent.childNodes.length === 1 && currentParent.firstChild === card) {
+              const host = currentParent.parentNode;
+              host.insertBefore(card, currentParent);
+              currentParent.remove();
+              currentParent = card.parentNode;
+            } else {
+              break;
+            }
+          }
+
+          createdCards.push(card);
+        });
+
+        if (!createdCards.length) return;
+
+        container.classList.add('has-section-cards');
+        requestAnimationFrame(() => {
+          createdCards.forEach((card, idx) => {
+            const order = idx + 1;
+            card.style.setProperty('--section-index', order);
+            const badge = card.querySelector('.question-section-badge');
+            if (badge) {
+              const label = order < 10 ? `0${order}` : String(order);
+              badge.textContent = label;
+              badge.setAttribute('aria-label', `Section ${order}`);
+            }
+          });
+        });
+      }
 
       function wrapQuizBlanks(container, hiddenEntries) {
         const sec = data.folders[currentFolder].sections[currentSection];
@@ -5134,11 +5410,11 @@
         // Insert consistent title at top of quizContent
         const titleText = sec.title?.trim() || sec.acronym || (sec.rawText?.split('\n')[0].trim()) || '(untitled)';
         const titleElem = document.createElement('h3');
+        titleElem.className = 'quiz-question-title';
         titleElem.innerHTML = titleText
           .split(/\s+/)
           .map(w => `<span class="quiz-title-word">${w}</span>`)
           .join(' ');
-        titleElem.style.marginBottom = '16px';
         quizContent.innerHTML = '';
         quizContent.style.borderColor = '';
         quizContent.appendChild(titleElem);
@@ -5160,6 +5436,7 @@
           const tokensArr = extractTokens(sec);
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
           wrapQuizBlanks(quizContent, hiddenEntries);
+          enhanceQuestionSections(quizContent, { skipTitle: true });
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
           const measure = document.createElement('span');
