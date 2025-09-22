@@ -1889,6 +1889,52 @@
         });
       }
 
+      function addLongPressListener(element, callback, duration = 900) {
+        let timerId = null;
+        let triggered = false;
+
+        const clearTimer = () => {
+          if (timerId !== null) {
+            clearTimeout(timerId);
+            timerId = null;
+          }
+        };
+
+        const start = event => {
+          if (event.type === 'mousedown' && event.button !== 0) return;
+          clearTimer();
+          triggered = false;
+          timerId = window.setTimeout(() => {
+            triggered = true;
+            element._longPressConsumed = true;
+            callback();
+          }, duration);
+        };
+
+        const cancel = () => {
+          clearTimer();
+          triggered = false;
+        };
+
+        const end = event => {
+          clearTimer();
+          if (triggered) {
+            if (event && typeof event.preventDefault === 'function') event.preventDefault();
+            if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+          }
+          triggered = false;
+        };
+
+        element.addEventListener('touchstart', start, { passive: true });
+        element.addEventListener('touchmove', cancel);
+        element.addEventListener('touchend', end);
+        element.addEventListener('touchcancel', cancel);
+        element.addEventListener('mousedown', start);
+        element.addEventListener('mousemove', cancel);
+        element.addEventListener('mouseup', end);
+        element.addEventListener('mouseleave', cancel);
+      }
+
       async function addQuestionMobile(folderIdx) {
         currentFolder = folderIdx;
         const type = prompt('Question type? (fill, diagram, acronym)', 'fill');
@@ -1950,6 +1996,22 @@
           delBtn.className = 'mobile-delete';
           delBtn.textContent = '🗑️';
           header.appendChild(delBtn);
+          addLongPressListener(content, () => {
+            const currentName = f.name || '';
+            const newName = prompt('Rename folder:', currentName);
+            if (newName === null) return;
+            const trimmed = newName.trim();
+            if (!trimmed) {
+              alert('Folder name cannot be empty');
+              return;
+            }
+            if (trimmed === f.name) return;
+            f.name = trimmed;
+            saveData();
+            renderFolders();
+            if (currentFolder === idx) updateHeader();
+            buildMobileFolderList();
+          });
           enableSwipeToDelete(header, content, delBtn, () => {
             if (confirm(`Delete folder "${f.name}"? This cannot be undone.`)) {
               data.folders.splice(idx, 1);
@@ -1985,6 +2047,34 @@
             sDel.className = 'mobile-delete';
             sDel.textContent = '🗑️';
             sli.appendChild(sDel);
+            addLongPressListener(sContent, () => {
+              const sec = data.folders[idx].sections[si];
+              if (!sec) return;
+              const firstLine = (sec.rawText || '').split('\n')[0].trim();
+              const fallback = sec.type === 'label'
+                ? (firstLine || 'Label Question')
+                : (firstLine || '(untitled)');
+              const currentTitle = sec.title && sec.title.trim()
+                ? sec.title
+                : (sec.type === 'acronym' ? (sec.acronym || fallback) : fallback);
+              const newTitle = prompt('Rename question:', currentTitle);
+              if (newTitle === null) return;
+              sec.title = newTitle.trim();
+              saveData();
+              if (!isQuizMode) {
+                enterEdit();
+                if (idx === currentFolder && currentSection === si) {
+                  updateHeader();
+                  loadSection();
+                }
+              } else {
+                renderSections(lastSectionOrder);
+                if (idx === currentFolder && currentSection === si) {
+                  updateHeader();
+                }
+              }
+              buildMobileFolderList();
+            });
             enableSwipeToDelete(sli, sContent, sDel, () => {
               if (confirm(`Delete question "${title}"? This cannot be undone.`)) {
                 data.folders[idx].sections.splice(si, 1);
@@ -2005,6 +2095,10 @@
               }
             });
             sContent.onclick = e => {
+              if (sContent._longPressConsumed) {
+                sContent._longPressConsumed = false;
+                return;
+              }
               if (sli._deleteOpen) {
                 sContent.style.transform = '';
                 sDel.style.right = '-60px';
@@ -2030,6 +2124,10 @@
           addLi.onclick = e => { e.stopPropagation(); addQuestionMobile(idx); };
           secList.appendChild(addLi);
           content.onclick = () => {
+            if (content._longPressConsumed) {
+              content._longPressConsumed = false;
+              return;
+            }
             if (header._deleteOpen) {
               content.style.transform = '';
               delBtn.style.right = '-60px';
