@@ -510,6 +510,26 @@
       }
     }
 
+    body.mobile #editorArea .question-section-card.whw-section {
+      margin: 20px 0;
+      padding: 18px 18px 22px 24px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section:not(:last-child) {
+      margin-bottom: 24px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section .question-section-header {
+      margin-bottom: 14px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section .question-section-body {
+      gap: 0.75rem;
+    }
+
+    #quizArea .question-section-heading.whw-heading {
+      font-size: clamp(1.22rem, 2.8vw, 1.45rem);
+      line-height: 1.3;
+      letter-spacing: 0.045em;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .question-section-card {
         animation: none;
@@ -5112,6 +5132,15 @@
           heading.classList.add('question-section-heading');
           originalParent.insertBefore(card, heading);
           header.appendChild(heading);
+
+          const headingKey = (heading.textContent || '')
+            .trim()
+            .replace(/[:\s]+$/g, '')
+            .toLowerCase();
+          if (['what', 'how', 'why'].includes(headingKey)) {
+            card.classList.add('whw-section', `whw-${headingKey}`);
+            heading.classList.add('whw-heading');
+          }
 
           let sibling = card.nextSibling;
           while (sibling) {
