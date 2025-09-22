@@ -43,8 +43,9 @@
               "word": "ID"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Required to be PIC</p><p>\t\u25ca Pilot Certificate (61.3)</p><p>\t\u25ca Government Issued Photo ID (61.3)</p><p>\t\u25ca 18 Years old for commercial license (61.123)</p><p>\t\u25ca Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t\u25ca Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRequired to be PIC\n\t\u25ca Pilot Certificate (61.3)\n\t\u25ca Government Issued Photo ID (61.3)\n\t\u25ca 18 Years old for commercial license (61.123)\n\t\u25ca Medical Certificate (2nd class for commercial privileges) (61.23)\n\t\u25ca Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\n\nHow:\n\nWhy:\n"
+          "rawHtml": "<p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p>",
+          "rawText": "What:\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\n\nHow:\n\nWhy:\n",
+          "title": "Requirements to Fly"
         },
         {
           "alts": {},
@@ -296,8 +297,8 @@
               "word": "Permit"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Required Aircraft Documents - ARROW  (91.203)</p><p>\t\u2022 Airworthiness Certificate - Visible to Passengers </p><p>\t\u2022 Registration Certificate - Expires every 7 years or if sold</p><p>\t\u2022 Radio Station License - For international Use - 10 year duration</p><p>\t\u2022 Operating Limitations - Placards, Markings, POH/AFM</p><p>\t\u2022 Weight and Balance Info - POH/AFM</p><p><br></p><p>Bonus - CAP</p><p>        \u2022 Compass Deviation Card</p><p>        \u2022 Avionics Reference Guide</p><p>        \u2022 Permit - Ferry / Special Flight Permit</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRequired Aircraft Documents - ARROW  (91.203)\n\t\u2022 Airworthiness Certificate - Visible to Passengers \n\t\u2022 Registration Certificate - Expires every 7 years or if sold\n\t\u2022 Radio Station License - For international Use - 10 year duration\n\t\u2022 Operating Limitations - Placards, Markings, POH/AFM\n\t\u2022 Weight and Balance Info - POH/AFM\n\nBonus - CAP\n        \u2022 Compass Deviation Card\n        \u2022 Avionics Reference Guide\n        \u2022 Permit - Ferry / Special Flight Permit\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Required Aircraft Documents - ARROW  (91.203)</p><p>\t• Airworthiness Certificate - Visible to Passengers </p><p>\t• Registration Certificate - Expires every 7 years or if sold</p><p>\t• Radio Station License - For international Use - 10 year duration</p><p>\t• Operating Limitations - Placards, Markings, POH/AFM</p><p>\t• Weight and Balance Info - POH/AFM</p><p><br></p><p>Bonus - CAP</p><p>        • Compass Deviation Card</p><p>        • Avionics Reference Guide</p><p>        • Permit - Ferry / Special Flight Permit</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nRequired Aircraft Documents - ARROW  (91.203)\n\t• Airworthiness Certificate - Visible to Passengers \n\t• Registration Certificate - Expires every 7 years or if sold\n\t• Radio Station License - For international Use - 10 year duration\n\t• Operating Limitations - Placards, Markings, POH/AFM\n\t• Weight and Balance Info - POH/AFM\n\nBonus - CAP\n        • Compass Deviation Card\n        • Avionics Reference Guide\n        • Permit - Ferry / Special Flight Permit\n\nHow:\n\nWhy:\n",
           "title": "Required Aircraft Documents - (91.203)"
         },
         {
@@ -336,8 +337,8 @@
               "word": "Category"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Carrying Passengers (61.57)</p><p>\t\u25ca 3 Takeoff and Landings</p><p>\t\u25ca Same Category and Class and Type if Required</p><p>\t\u25ca Within 90 Days</p><p>*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. </p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCarrying Passengers (61.57)\n\t\u25ca 3 Takeoff and Landings\n\t\u25ca Same Category and Class and Type if Required\n\t\u25ca Within 90 Days\n*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. \n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Carrying Passengers (61.57)</p><p>\t◊ 3 Takeoff and Landings</p><p>\t◊ Same Category and Class and Type if Required</p><p>\t◊ Within 90 Days</p><p>*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. </p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCarrying Passengers (61.57)\n\t◊ 3 Takeoff and Landings\n\t◊ Same Category and Class and Type if Required\n\t◊ Within 90 Days\n*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. \n\nHow:\n\nWhy:\n",
           "title": "Requirements to Carry Passengers (61.57)"
         },
         {
@@ -402,8 +403,8 @@
               "y": 12
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Category | Class | Type",
           "type": "label"
         },
@@ -473,7 +474,7 @@
               ],
               "hideUntilSolved": true,
               "labelText": "60",
-              "rawText": "Statement of Demonstrated Ability (SODA) - Can be given if you have a condition that doesn\u2019t change over time but would normally disqualify you like an amputation or hearing impairment. Doesn't Expire.\n\nSpecial Issuance Medical - Can be given if you have a condition that could get worse over time or flair back up like diabetes or previous substance abuse. Typically requires periodic reevaluations. "
+              "rawText": "Statement of Demonstrated Ability (SODA) - Can be given if you have a condition that doesn’t change over time but would normally disqualify you like an amputation or hearing impairment. Doesn't Expire.\n\nSpecial Issuance Medical - Can be given if you have a condition that could get worse over time or flair back up like diabetes or previous substance abuse. Typically requires periodic reevaluations. "
             }
           ],
           "hidden": [],
@@ -560,8 +561,8 @@
               "y": 192
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Medical Certificates",
           "type": "label"
         },
@@ -702,9 +703,10 @@
               "word": "Incidental"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Commercial Regulations</p><p>\t\u25ca 119.1e - Exceptions like flight instructor - Don't need an AOC</p><p>\t\u25ca 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC</p><p>\t\u25ca 121 - Consistently Scheduled routes , Airlines </p><p>\t\u25ca 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. </p><p>\t\u25ca 135 - Unscheduled , Charters</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCommercial Regulations\n\t\u25ca 119.1e - Exceptions like flight instructor - Don't need an AOC\n\t\u25ca 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC\n\t\u25ca 121 - Consistently Scheduled routes , Airlines \n\t\u25ca 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. \n\t\u25ca 135 - Unscheduled , Charters\n\nHow:\n\nWhy:\n",
-          "type": "fill"
+          "rawHtml": "<h3>What</h3><p>Commercial Regulations</p><p>\t◊ 119.1e - Exceptions like flight instructor - Don't need an AOC</p><p>\t◊ 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC</p><p>\t◊ 121 - Consistently Scheduled routes , Airlines </p><p>\t◊ 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. </p><p>\t◊ 135 - Unscheduled , Charters</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCommercial Regulations\n\t◊ 119.1e - Exceptions like flight instructor - Don't need an AOC\n\t◊ 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC\n\t◊ 121 - Consistently Scheduled routes , Airlines \n\t◊ 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. \n\t◊ 135 - Unscheduled , Charters\n\nHow:\n\nWhy:\n",
+          "type": "fill",
+          "title": "Commercial Regulations"
         },
         {
           "alts": {},
@@ -730,9 +732,10 @@
               "word": "Control"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Rule of Three\n\t\u25ca Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t\u25ca PIC\n\t\u25ca Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRule of Three\n\t\u25ca Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t\u25ca PIC\n\t\u25ca Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n\nHow:\n\nWhy:\n",
-          "type": "fill"
+          "rawHtml": "<h3>What</h3><p>Rule of Three\n\t◊ Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t◊ PIC\n\t◊ Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nRule of Three\n\t◊ Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t◊ PIC\n\t◊ Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n\nHow:\n\nWhy:\n",
+          "type": "fill",
+          "title": "Rule of Three"
         },
         {
           "alts": {},
@@ -786,8 +789,8 @@
               "word": "compensation"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Common Carriage</p><p>  \u25ca Holding out to transport people or property from place to place for compensation or hire. </p><p><br></p><p>Private Carriage</p><p>  \u25ca Transporting people or property from place to place for compensation or hire.</p><p>Doesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCommon Carriage\n  \u25ca Holding out to transport people or property from place to place for compensation or hire. \n\nPrivate Carriage\n  \u25ca Transporting people or property from place to place for compensation or hire.\nDoesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Common Carriage</p><p>  ◊ Holding out to transport people or property from place to place for compensation or hire. </p><p><br></p><p>Private Carriage</p><p>  ◊ Transporting people or property from place to place for compensation or hire.</p><p>Doesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCommon Carriage\n  ◊ Holding out to transport people or property from place to place for compensation or hire. \n\nPrivate Carriage\n  ◊ Transporting people or property from place to place for compensation or hire.\nDoesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.\n\nHow:\n\nWhy:\n",
           "title": "Common Carriage / Private Carriage",
           "type": "fill"
         },
@@ -805,7 +808,8 @@
           ],
           "rawHtml": "<h3>What</h3><p>Change of Address (61.60)\nMust Notify FAA within 30 Days or can no longer use pilot privileges.\nCan login and update it instantly online through FAA website.\n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nChange of Address (61.60)\nMust Notify FAA within 30 Days or can no longer use pilot privileges.\nCan login and update it instantly online through FAA website.\n\nHow:\n\nWhy:\n",
-          "type": "fill"
+          "type": "fill",
+          "title": "Change of Address"
         },
         {
           "alts": {},
@@ -849,7 +853,7 @@
             {
               "occ": 2,
               "word": "Transponder",
-              "reveal": "Required every 24 Calendar Months"
+              "reveal": true
             },
             {
               "occ": 3,
@@ -860,9 +864,10 @@
               "word": "Above"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Transponder Requirements (91.215)</p><p>\t\u25ca Class A | B | and C</p><p>\t\u25ca Above Class B and C</p><p>\t\u25ca Mode C Veil - 30 NM around Class B .</p><p>\t\u25ca All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nTransponder Requirements (91.215)\n\t\u25ca Class A | B | and C\n\t\u25ca Above Class B and C\n\t\u25ca Mode C Veil - 30 NM around Class B .\n\t\u25ca All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n\nHow:\n\nWhy:\n",
-          "type": "fill"
+          "rawHtml": "<h3>What</h3><p>Transponder Requirements (91.215)</p><p>\t◊ Class A | B | and C</p><p>\t◊ Above Class B and C</p><p>\t◊ Mode C Veil - 30 NM around Class B .</p><p>\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nTransponder Requirements (91.215)\n\t◊ Class A | B | and C\n\t◊ Above Class B and C\n\t◊ Mode C Veil - 30 NM around Class B .\n\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n\nHow:\n\nWhy:\n",
+          "type": "fill",
+          "title": "Transponder Requirements"
         },
         {
           "alts": {},
@@ -1020,8 +1025,8 @@
               "y": 524
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "VFR Weather Minimums",
           "type": "label"
         },
@@ -1108,7 +1113,8 @@
           ],
           "rawHtml": "<h3>What</h3><p>BasicMed</p><p>Maximum Certified Takeoff Weight: 12500 pounds</p><p>Maximum 7 total Occupants, 6 total passengers</p><p>Maximum Altitude 18000 feet</p><p>Maximum Airspeed 250 Knots</p><p>Can't operate for compensation or hire except flight instruction</p><p>To get it you need to take an online course every 24 Months and a medical exam every 48 months</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nBasicMed\nMaximum Certified Takeoff Weight: 12500 pounds\nMaximum 7 total Occupants, 6 total passengers\nMaximum Altitude 18000 feet\nMaximum Airspeed 250 Knots\nCan't operate for compensation or hire except flight instruction\nTo get it you need to take an online course every 24 Months and a medical exam every 48 months\n\nHow:\n\nWhy:\n",
-          "type": "fill"
+          "type": "fill",
+          "title": "BasicMed"
         },
         {
           "alts": {},
@@ -1326,8 +1332,8 @@
             }
           ],
           "hidden": [],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "type": "acronym"
         },
         {
@@ -1400,8 +1406,8 @@
               "word": "Dies"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Aircraft Registration",
           "type": "fill"
         },
@@ -1674,7 +1680,8 @@
           "labels": [],
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Axis",
-          "type": "label"
+          "type": "label",
+          "rawHtml": "<p>What:</p><p></p><p>How:</p><p></p><p>Why:</p><p></p>"
         },
         {
           "alts": {},
@@ -2228,8 +2235,8 @@
               "word": "low"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Pilot Reports depicting real-time weather conditions, Altitudes in MSL.</p><p>Include the location, time, and type of plane. </p><p>Labelled either UA for routine or UUA for Urgent. </p><p>Urgent reports are for things like tornados | severe turbulence | low level wind shear etc.</p><p>Can be submitted to ATC by radio or to a FSS . </p><p>Can be accessed from foreflight on the ground or ATC/FSS in the air.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nPilot Reports depicting real-time weather conditions, Altitudes in MSL.\nInclude the location, time, and type of plane. \nLabelled either UA for routine or UUA for Urgent. \nUrgent reports are for things like tornados | severe turbulence | low level wind shear etc.\nCan be submitted to ATC by radio or to a FSS . \nCan be accessed from foreflight on the ground or ATC/FSS in the air.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Pilot Reports depicting real-time weather conditions, Altitudes in MSL.</p><p>Include the location, time, and type of plane. </p><p>Labelled either UA for routine or UUA for Urgent. </p><p>Urgent reports are for things like tornados | severe turbulence | low level wind shear etc.</p><p>Can be submitted to ATC by radio or to a FSS . </p><p>Can be accessed from foreflight on the ground or ATC/FSS in the air.</p><h3>How</h3><p>Do people do it</p><h3>Why</h3>",
+          "rawText": "What\nPilot Reports depicting real-time weather conditions, Altitudes in MSL.\nInclude the location, time, and type of plane. \nLabelled either UA for routine or UUA for Urgent. \nUrgent reports are for things like tornados | severe turbulence | low level wind shear etc.\nCan be submitted to ATC by radio or to a FSS . \nCan be accessed from foreflight on the ground or ATC/FSS in the air.\nHow\nDo people do it\nWhy\n",
           "title": "PIREPs",
           "type": "fill"
         },
@@ -3746,8 +3753,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p><strong style=\"color: rgb(0, 71, 178);\">S</strong><strong>t</strong><strong style=\"color: rgb(0, 71, 178);\">a</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">da</strong><strong>r</strong><strong style=\"color: rgb(0, 71, 178);\">d </strong><strong style=\"color: rgb(0, 41, 102);\">D</strong><strong>i</strong><strong style=\"color: rgb(0, 71, 178);\">me</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">si</strong><strong>on</strong><strong style=\"color: rgb(0, 71, 178);\">s</strong></p><ul><li>4 NM Radius | 2500 AGL</li></ul><p><strong>Tower Closure</strong> \u2014</p><p>Airspace reverts to class E or G.</p><p><strong>Entry Requirements</strong> \u2014</p><ul><li>Two Way radios (Tail #)</li><li><em>Speed limit</em> for D and C within 2500 AGL and 4 NM is 200 KIAS.</li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nStandard Dimensions\n4 NM Radius | 2500 AGL\nTower Closure \u2014\nAirspace reverts to class E or G.\nEntry Requirements \u2014\nTwo Way radios (Tail #)\nSpeed limit for D and C within 2500 AGL and 4 NM is 200 KIAS.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p><strong style=\"color: rgb(0, 71, 178);\">S</strong><strong>t</strong><strong style=\"color: rgb(0, 71, 178);\">a</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">da</strong><strong>r</strong><strong style=\"color: rgb(0, 71, 178);\">d </strong><strong style=\"color: rgb(0, 41, 102);\">D</strong><strong>i</strong><strong style=\"color: rgb(0, 71, 178);\">me</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">si</strong><strong>on</strong><strong style=\"color: rgb(0, 71, 178);\">s</strong></p><ul><li>4 NM Radius | 2500 AGL</li></ul><p><strong>Tower Closure</strong> —</p><p>Airspace reverts to class E or G.</p><p><strong>Entry Requirements</strong> —</p><ul><li>Two Way radios (Tail #)</li><li><em>Speed limit</em> for D and C within 2500 AGL and 4 NM is 200 KIAS.</li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nStandard Dimensions\n4 NM Radius | 2500 AGL\nTower Closure —\nAirspace reverts to class E or G.\nEntry Requirements —\nTwo Way radios (Tail #)\nSpeed limit for D and C within 2500 AGL and 4 NM is 200 KIAS.\n\nHow:\n\nWhy:\n",
           "title": "Class D Airspace",
           "type": "fill"
         },
@@ -4243,8 +4250,8 @@
               "word": "orientation"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Gyroscopic Instruments</p><p>Power Sources/Principles</p><p>\t\u2022 Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator</p><p>\t\u2022 Precession / Electricity : Turn Coordinator (also rigidity in space)</p><p>Rigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.</p><p>Precession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nGyroscopic Instruments\nPower Sources/Principles\n\t\u2022 Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator\n\t\u2022 Precession / Electricity : Turn Coordinator (also rigidity in space)\nRigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.\nPrecession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Gyroscopic Instruments</p><p>Power Sources/Principles</p><p>\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator</p><p>\t• Precession / Electricity : Turn Coordinator (also rigidity in space)</p><p>Rigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.</p><p>Precession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nGyroscopic Instruments\nPower Sources/Principles\n\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator\n\t• Precession / Electricity : Turn Coordinator (also rigidity in space)\nRigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.\nPrecession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.\n\nHow:\n\nWhy:\n",
           "title": "",
           "type": "fill"
         },
@@ -5701,7 +5708,7 @@
         {
           "alts": {},
           "hidden": [],
-          "rawHtml": "<h3>What</h3><p>Carbon Monoxide is odorless, tasteless, and colorless.</p><p>There is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.</p><p>If the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.</p><p>Carbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.</p><p>Symptoms can be headaches, blurred vision, drowsiness, loss of muscle power.</p><p>Mitigated by turning heaters off, opening vents and windows, supplemental oxygen.</p><p>Compared to other hypoxias this one you usually don't feel euphoric just crappy.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawHtml": "<p>Carbon <span class=\"popup-word\" data-img=\"images/ee158a491bd59e1a2f03478306f6563f688fc5c490916fae156b3085d65286e5.jpg\">Monoxide</span> is odorless, tasteless, and colorless.</p><p>There is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.</p><p>If the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.</p><p>Carbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.</p><p>Symptoms can be headaches, blurred vision, drowsiness, loss of muscle power.</p><p>Mitigated by turning heaters off, opening vents and windows, supplemental oxygen.</p><p>Compared to other hypoxias this one you usually don't feel euphoric just crappy.</p>",
           "rawText": "What:\nCarbon Monoxide is odorless, tasteless, and colorless.\nThere is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.\nIf the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.\nCarbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.\nSymptoms can be headaches, blurred vision, drowsiness, loss of muscle power.\nMitigated by turning heaters off, opening vents and windows, supplemental oxygen.\nCompared to other hypoxias this one you usually don't feel euphoric just crappy.\n\nHow:\n\nWhy:\n",
           "title": "Carbon Monoxide",
           "type": "fill"
@@ -5824,8 +5831,8 @@
               "word": "nasal"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>You should not fly while congested</p><p>It can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.</p><p>This can create a vacuum effect on descents that can cause severe ear pain, or a rupture.</p><p>Can be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. </p><p>Flying while congested can also lead to a sinus block in the nasal passages.</p><p>These can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.</p><p>These can both be mitigated in flight by descending slowly.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nYou should not fly while congested\nIt can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.\nThis can create a vacuum effect on descents that can cause severe ear pain, or a rupture.\nCan be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. \nFlying while congested can also lead to a sinus block in the nasal passages.\nThese can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.\nThese can both be mitigated in flight by descending slowly.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<p>You should not fly while congested</p><p>It can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.</p><p>This can create a vacuum effect during descents that can cause severe ear pain, or a rupture.</p><p>Can be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. </p><p>Flying while congested can also lead to a sinus block in the nasal passages.</p><p>These can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.</p><p>These can both be mitigated in flight by descending slowly.</p>",
+          "rawText": "You should not fly while congested\nIt can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.\nThis can create a vacuum effect during descents that can cause severe ear pain, or a rupture.\nCan be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. \nFlying while congested can also lead to a sinus block in the nasal passages.\nThese can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.\nThese can both be mitigated in flight by descending slowly.\n",
           "title": "Inner Ear / Sinus",
           "type": "fill"
         },
@@ -6021,7 +6028,11 @@
           "type": "fill"
         },
         {
-          "alts": {},
+          "alts": {
+            "Recognize_1": [
+              "Acknowledge"
+            ]
+          },
           "hidden": [
             {
               "occ": 1,
@@ -6339,8 +6350,8 @@
               "word": "Steep"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Steep Turns</p><p>Altitude: +/- 100 ft</p><p>Entry Speed: 95 Knots +/- 10 Knots</p><p>Bank Angle: 50 \u00b0 +/- 5\u00b0</p><p>At 30 \u00b0 start to increase back pressure and add power</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nSteep Turns\nAltitude: +/- 100 ft\nEntry Speed: 95 Knots +/- 10 Knots\nBank Angle: 50 \u00b0 +/- 5\u00b0\nAt 30 \u00b0 start to increase back pressure and add power\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Steep Turns</p><p>Altitude: +/- 100 ft</p><p>Entry Speed: 95 Knots +/- 10 Knots</p><p>Bank Angle: 50 ° +/- 5°</p><p>At 30 ° start to increase back pressure and add power</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nSteep Turns\nAltitude: +/- 100 ft\nEntry Speed: 95 Knots +/- 10 Knots\nBank Angle: 50 ° +/- 5°\nAt 30 ° start to increase back pressure and add power\n\nHow:\n\nWhy:\n",
           "title": "Steep Turns",
           "type": "fill"
         },
@@ -6421,8 +6432,8 @@
               "word": "idle"
             }
           ],
-          "rawHtml": "<h3>What</h3><p> \t\u25ca Never go to full break </p><p>Why: Show the danger of adding too much bank on base to final and stall spins </p><p><br></p><p>Clean configuration</p><p>85 knots </p><p>No lower than 3000 ft AGL</p><p>No airspeed or heading requirements</p><p>Start</p><p>Power idle </p><p>Bank 45 degrees</p><p>Nose up/Hold Altitude to induce stall</p><p>At first indication - Acknowledge it</p><p>Go wings level and max power</p><p>Right rudder on recovery to the right  </p><p>Climb out Vx or Vy</p><p>Level to Cruise</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\n \t\u25ca Never go to full break \nWhy: Show the danger of adding too much bank on base to final and stall spins \n\nClean configuration\n85 knots \nNo lower than 3000 ft AGL\nNo airspeed or heading requirements\nStart\nPower idle \nBank 45 degrees\nNose up/Hold Altitude to induce stall\nAt first indication - Acknowledge it\nGo wings level and max power\nRight rudder on recovery to the right  \nClimb out Vx or Vy\nLevel to Cruise\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p> \t◊ Never go to full break </p><p>Why: Show the danger of adding too much bank on base to final and stall spins </p><p><br></p><p>Clean configuration</p><p>85 knots </p><p>No lower than 3000 ft AGL</p><p>No airspeed or heading requirements</p><p>Start</p><p>Power idle </p><p>Bank 45 degrees</p><p>Nose up/Hold Altitude to induce stall</p><p>At first indication - Acknowledge it</p><p>Go wings level and max power</p><p>Right rudder on recovery to the right  </p><p>Climb out Vx or Vy</p><p>Level to Cruise</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\n \t◊ Never go to full break \nWhy: Show the danger of adding too much bank on base to final and stall spins \n\nClean configuration\n85 knots \nNo lower than 3000 ft AGL\nNo airspeed or heading requirements\nStart\nPower idle \nBank 45 degrees\nNose up/Hold Altitude to induce stall\nAt first indication - Acknowledge it\nGo wings level and max power\nRight rudder on recovery to the right  \nClimb out Vx or Vy\nLevel to Cruise\n\nHow:\n\nWhy:\n",
           "title": "Accelerated Stall",
           "type": "fill"
         },
@@ -6543,8 +6554,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Eights on Pylons</p><p>Pivotal altitude: Ground speed squared divided by 11.3 + elevation </p><p>Clean configuration </p><p>Doesn\u2019t have the altitude restriction of 1500 AGL</p><p>Start at 2500 MSL</p><p>95 knots </p><p><br></p><p>Find two points </p><p>Get to pivotal altitude </p><p>Position for 45 degrees quartering tailwind </p><p>Bug heading. - entry heading is also exit heading </p><p>Fly until first point is abeam your shoulder</p><p>This has to be done with a crosswind from the points  </p><p>When ground speed goes down pitch goes down and vice versa</p><p>You fly about 5 seconds when you level out </p><p>If the point starts to get in front of your wing you push forward and if it moves back you pull back</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nEights on Pylons\nPivotal altitude: Ground speed squared divided by 11.3 + elevation \nClean configuration \nDoesn\u2019t have the altitude restriction of 1500 AGL\nStart at 2500 MSL\n95 knots \n\nFind two points \nGet to pivotal altitude \nPosition for 45 degrees quartering tailwind \nBug heading. - entry heading is also exit heading \nFly until first point is abeam your shoulder\nThis has to be done with a crosswind from the points  \nWhen ground speed goes down pitch goes down and vice versa\nYou fly about 5 seconds when you level out \nIf the point starts to get in front of your wing you push forward and if it moves back you pull back\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Eights on Pylons</p><p>Pivotal altitude: Ground speed squared divided by 11.3 + elevation </p><p>Clean configuration </p><p>Doesn’t have the altitude restriction of 1500 AGL</p><p>Start at 2500 MSL</p><p>95 knots </p><p><br></p><p>Find two points </p><p>Get to pivotal altitude </p><p>Position for 45 degrees quartering tailwind </p><p>Bug heading. - entry heading is also exit heading </p><p>Fly until first point is abeam your shoulder</p><p>This has to be done with a crosswind from the points  </p><p>When ground speed goes down pitch goes down and vice versa</p><p>You fly about 5 seconds when you level out </p><p>If the point starts to get in front of your wing you push forward and if it moves back you pull back</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nEights on Pylons\nPivotal altitude: Ground speed squared divided by 11.3 + elevation \nClean configuration \nDoesn’t have the altitude restriction of 1500 AGL\nStart at 2500 MSL\n95 knots \n\nFind two points \nGet to pivotal altitude \nPosition for 45 degrees quartering tailwind \nBug heading. - entry heading is also exit heading \nFly until first point is abeam your shoulder\nThis has to be done with a crosswind from the points  \nWhen ground speed goes down pitch goes down and vice versa\nYou fly about 5 seconds when you level out \nIf the point starts to get in front of your wing you push forward and if it moves back you pull back\n\nHow:\n\nWhy:\n",
           "title": "Eights on Pylons",
           "type": "fill"
         },
@@ -6580,8 +6591,8 @@
               "word": "70"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Pattern is the same until abeam the touchdown point then</p><p>Power idle </p><p>Continue downwind and turn base half the normal distance </p><p>When you level make sure you aren\u2019t low </p><p>You want to start final high</p><p><br></p><p>If you have less than 10 total knots of wind in any direction go flaps 10 at power idle </p><p>If more than 10 knots don\u2019t go flaps 10</p><p>Aim for 70 knots don\u2019t force it though let it happen and hold it</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nPattern is the same until abeam the touchdown point then\nPower idle \nContinue downwind and turn base half the normal distance \nWhen you level make sure you aren\u2019t low \nYou want to start final high\n\nIf you have less than 10 total knots of wind in any direction go flaps 10 at power idle \nIf more than 10 knots don\u2019t go flaps 10\nAim for 70 knots don\u2019t force it though let it happen and hold it\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Pattern is the same until abeam the touchdown point then</p><p>Power idle </p><p>Continue downwind and turn base half the normal distance </p><p>When you level make sure you aren’t low </p><p>You want to start final high</p><p><br></p><p>If you have less than 10 total knots of wind in any direction go flaps 10 at power idle </p><p>If more than 10 knots don’t go flaps 10</p><p>Aim for 70 knots don’t force it though let it happen and hold it</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nPattern is the same until abeam the touchdown point then\nPower idle \nContinue downwind and turn base half the normal distance \nWhen you level make sure you aren’t low \nYou want to start final high\n\nIf you have less than 10 total knots of wind in any direction go flaps 10 at power idle \nIf more than 10 knots don’t go flaps 10\nAim for 70 knots don’t force it though let it happen and hold it\n\nHow:\n\nWhy:\n",
           "title": "Power Off 180",
           "type": "fill"
         },
@@ -6937,104 +6948,6 @@
         {
           "type": "fill",
           "title": "Test",
-          "rawText": "What:\n\nHow:\n\nWhy:\n"
-        }
-      ]
-    },
-    {
-      "name": "Test Folder",
-      "sections": [
-        {
-          "alts": {},
-          "hidden": [
-            {
-              "word": "123",
-              "occ": 1
-            },
-            {
-              "word": "test",
-              "occ": 1
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Testing tester 123 </p><p>Test me Please pretty</p><p>hello test</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nTesting tester 123 \nTest me Please pretty\nhello test\n\nHow:\n\nWhy:\n",
-          "title": "Test Question #1",
-          "type": "fill"
-        },
-        {
-          "alts": {},
-          "hidden": [
-            {
-              "word": "Get",
-              "occ": 1
-            },
-            {
-              "word": "Tested",
-              "occ": 1
-            },
-            {
-              "word": "question.",
-              "occ": 1,
-              "reveal": true
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>This is the Twooo test question.</p><p><strong style=\"color: rgb(0, 102, 204);\">Get </strong>Tested\ufeff</p><p>dgdfw</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nThis is the Twooo test question.\nGet Tested\ufeff\ndgdfw\n\nHow:\n\nWhy:\n",
-          "title": "Test Qestion #2",
-          "type": "fill"
-        },
-        {
-          "alts": {},
-          "hidden": [
-            {
-              "word": "save",
-              "occ": 1
-            },
-            {
-              "word": "this",
-              "occ": 1
-            },
-            {
-              "word": "work?",
-              "occ": 1
-            },
-            {
-              "word": "Two?",
-              "occ": 1,
-              "reveal": true
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Did this new save thing work?</p><p>Take Two?</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nDid this new save thing work?\nTake Two?\n\nHow:\n\nWhy:\n",
-          "title": "Test    #3",
-          "type": "fill"
-        },
-        {
-          "type": "label",
-          "title": "Required Inspections",
-          "rawText": "\n",
-          "hidden": [],
-          "alts": {},
-          "image": "images/8186748536de48612c22f5cace94d25c6a70cc89e13e611522627874809afcbb.jpg",
-          "labels": [
-            {
-              "x": 427,
-              "y": 29,
-              "text": "AAVIATE",
-              "fontSize": 45,
-              "w": 188,
-              "h": 62
-            }
-          ],
-          "definitions": [],
-          "arrows": [],
-          "rawHtml": "<h3>What</h3><p><br></p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "imgWidth": 1039,
-          "imgHeight": 480
-        },
-        {
-          "type": "fill",
-          "title": "How do you do?",
           "rawText": "What:\n\nHow:\n\nWhy:\n"
         }
       ]
