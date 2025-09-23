@@ -2730,6 +2730,18 @@
         }
       }
 
+      const normalizeSection = section => {
+        if (!section || typeof section !== 'object') return;
+        if (!section.type) {
+          section.type = 'fill';
+        }
+      };
+
+      (data.folders || []).forEach(folder => {
+        if (!folder.sections) return;
+        folder.sections.forEach(normalizeSection);
+      });
+
       originalData = JSON.parse(JSON.stringify(data));
 
       // Load legacy image data for backward compatibility
@@ -6354,21 +6366,30 @@
 
       function removeImagePopup() {
         const existing = document.getElementById('imageWordPopup');
-        if (existing) existing.remove();
+        if (!existing) return;
+        if (typeof existing._cleanup === 'function') {
+          try {
+            existing._cleanup();
+          } catch (err) {
+            console.warn('Image popup cleanup failed', err);
+          }
+        }
+        existing.remove();
       }
 
       function showPopupFor(target) {
         removeImagePopup();
         const popup = document.createElement('div');
+        const cleanupFns = [];
+        const registerCleanup = fn => cleanupFns.push(fn);
+        popup._cleanup = () => {
+          while (cleanupFns.length) {
+            const fn = cleanupFns.pop();
+            try { fn(); } catch (err) { console.warn('Popup cleanup handler failed', err); }
+          }
+        };
         popup.id = 'imageWordPopup';
         popup.style.position = 'fixed';
-        const rect = target.getBoundingClientRect();
-        const left = rect.left + rect.width / 2;
-        const top = rect.top;
-        popup.style.left = `${left}px`;
-        popup.style.top = `${top}px`;
-        popup.style.transform = 'translate(-50%, -100%)';
-        popup.style.transformOrigin = 'bottom center';
         popup.style.background = '#fff';
         popup.style.border = '1px solid #7f8c8d';
         popup.style.borderRadius = '4px';
@@ -6376,6 +6397,63 @@
         popup.style.zIndex = '10000';
         popup.style.maxWidth = '90vw';
         popup.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
+        popup.style.cursor = 'grab';
+        popup.style.userSelect = 'none';
+
+        const stopPropagation = e => e.stopPropagation();
+        popup.addEventListener('click', stopPropagation);
+        registerCleanup(() => popup.removeEventListener('click', stopPropagation));
+
+        const isMobilePopup = document.body.classList.contains('mobile') || (isTouchEnvironment && window.innerWidth <= 900);
+        let userMovedPopup = false;
+        const margin = 12;
+
+        const clampWithin = (value, min, max) => {
+          if (!isFinite(value)) return min;
+          if (max < min) return min;
+          return Math.min(Math.max(value, min), max);
+        };
+
+        const clampToViewport = () => {
+          if (!popup.isConnected) return;
+          const width = popup.offsetWidth || 0;
+          const height = popup.offsetHeight || 0;
+          let left = parseFloat(popup.style.left) || 0;
+          let top = parseFloat(popup.style.top) || 0;
+          const maxLeft = window.innerWidth - width - margin;
+          const maxTop = window.innerHeight - height - margin;
+          left = clampWithin(left, margin, maxLeft);
+          top = clampWithin(top, margin, maxTop);
+          popup.style.left = `${left}px`;
+          popup.style.top = `${top}px`;
+        };
+
+        const reposition = ({ forceCenter = false } = {}) => {
+          if (!popup.isConnected) return;
+          const width = popup.offsetWidth || 0;
+          const height = popup.offsetHeight || 0;
+          if (userMovedPopup && !forceCenter) {
+            clampToViewport();
+            return;
+          }
+          if (isMobilePopup || forceCenter) {
+            let left = (window.innerWidth - width) / 2;
+            let top = (window.innerHeight - height) / 2;
+            popup.style.left = `${left}px`;
+            popup.style.top = `${top}px`;
+          } else {
+            const rect = target.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - width / 2;
+            let top = rect.top - height - margin;
+            if (top < margin) {
+              top = rect.bottom + margin;
+            }
+            popup.style.left = `${left}px`;
+            popup.style.top = `${top}px`;
+          }
+          clampToViewport();
+        };
+
         const img = document.createElement('img');
         img.alt = target.textContent || 'Image';
         const ref = target.dataset.img;
@@ -6447,18 +6525,88 @@
           note.style.color = '#7f8c8d';
           popup.appendChild(note);
         }
-        popup.addEventListener('click', e => e.stopPropagation());
+
+        const startDrag = e => {
+          if (e.type === 'mousedown' && e.button !== 0) return;
+          if (e.touches && e.touches.length !== 1) return;
+          if (e.target && e.target.tagName === 'IMG') return;
+          const point = e.touches ? e.touches[0] : e;
+          if (!point) return;
+          e.preventDefault();
+          const rect = popup.getBoundingClientRect();
+          dragOffsetX = point.clientX - rect.left;
+          dragOffsetY = point.clientY - rect.top;
+          popup.style.cursor = 'grabbing';
+          dragging = true;
+          document.addEventListener('mousemove', onDragMove);
+          document.addEventListener('mouseup', endDrag);
+          document.addEventListener('touchmove', onDragMove, { passive: false });
+          document.addEventListener('touchend', endDrag);
+        };
+
+        let dragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        const onDragMove = e => {
+          if (!dragging) return;
+          const point = e.touches ? e.touches[0] : e;
+          if (!point) return;
+          e.preventDefault();
+          const left = point.clientX - dragOffsetX;
+          const top = point.clientY - dragOffsetY;
+          popup.style.left = `${left}px`;
+          popup.style.top = `${top}px`;
+          clampToViewport();
+        };
+
+        const endDrag = () => {
+          if (!dragging) return;
+          dragging = false;
+          popup.style.cursor = 'grab';
+          userMovedPopup = true;
+          document.removeEventListener('mousemove', onDragMove);
+          document.removeEventListener('mouseup', endDrag);
+          document.removeEventListener('touchmove', onDragMove);
+          document.removeEventListener('touchend', endDrag);
+          clampToViewport();
+        };
+
+        popup.addEventListener('mousedown', startDrag);
+        popup.addEventListener('touchstart', startDrag, { passive: false });
+        registerCleanup(() => {
+          popup.removeEventListener('mousedown', startDrag);
+          popup.removeEventListener('touchstart', startDrag);
+          endDrag();
+        });
+
         document.body.appendChild(popup);
+
+        const handleResize = () => reposition();
+        window.addEventListener('resize', handleResize);
+        registerCleanup(() => window.removeEventListener('resize', handleResize));
+
+        const onImageLoad = () => reposition();
+        img.addEventListener('load', onImageLoad);
+        registerCleanup(() => img.removeEventListener('load', onImageLoad));
+
         const remove = evt => {
           if (evt && evt.target.closest && evt.target.closest('#imageWordPopup')) return;
           removeImagePopup();
           document.removeEventListener('click', remove, true);
           document.removeEventListener('touchstart', remove, true);
         };
+        registerCleanup(() => {
+          document.removeEventListener('click', remove, true);
+          document.removeEventListener('touchstart', remove, true);
+        });
+
         setTimeout(() => {
           document.addEventListener('click', remove, true);
           document.addEventListener('touchstart', remove, true);
         }, 0);
+
+        requestAnimationFrame(() => reposition({ forceCenter: isMobilePopup }));
       }
 
       function handlePopupTrigger(evt) {
