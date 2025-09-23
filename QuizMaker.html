@@ -6480,18 +6480,29 @@
         img.style.maxWidth = '200px';
         img.style.maxHeight = '200px';
         img.dataset.zoomed = '0';
+
+        const applyZoomState = zoomed => {
+          if (zoomed) {
+            img.style.maxWidth = '80vw';
+            img.style.maxHeight = '80vh';
+            img.dataset.zoomed = '1';
+          } else {
+            img.style.maxWidth = '200px';
+            img.style.maxHeight = '200px';
+            img.dataset.zoomed = '0';
+          }
+          requestAnimationFrame(() => reposition({ forceCenter: zoomed }));
+        };
+
+        const toggleZoom = () => {
+          const zoomed = img.dataset.zoomed === '1';
+          applyZoomState(!zoomed);
+        };
+
         if (isTouchEnvironment) {
           img.addEventListener('click', evt2 => {
             evt2.stopPropagation();
-            if (img.dataset.zoomed === '1') {
-              img.style.maxWidth = '200px';
-              img.style.maxHeight = '200px';
-              img.dataset.zoomed = '0';
-            } else {
-              img.style.maxWidth = '80vw';
-              img.style.maxHeight = '80vh';
-              img.dataset.zoomed = '1';
-            }
+            toggleZoom();
           });
           img.style.touchAction = 'none';
           if (typeof Panzoom === 'function') {
@@ -6504,15 +6515,7 @@
         } else {
           img.addEventListener('dblclick', evt2 => {
             evt2.stopPropagation();
-            if (img.dataset.zoomed === '1') {
-              img.style.maxWidth = '200px';
-              img.style.maxHeight = '200px';
-              img.dataset.zoomed = '0';
-            } else {
-              img.style.maxWidth = '80vw';
-              img.style.maxHeight = '80vh';
-              img.dataset.zoomed = '1';
-            }
+            toggleZoom();
           });
         }
         popup.appendChild(img);
