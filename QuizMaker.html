@@ -5207,7 +5207,15 @@
         const { skipTitle = false } = options;
         container.classList.remove('has-section-cards');
 
-        const normalizeLegacyText = text => (text || '').toLowerCase().replace(/[^a-z]/g, '');
+        const detectSectionKeyword = text => {
+          if (!text) return '';
+          const normalized = text
+            .toLowerCase()
+            .replace(/^[^a-z]+/, '')
+            .trim();
+          const match = normalized.match(/^(what|how|why)(?=$|[^a-z])/);
+          return match ? match[1] : '';
+        };
         const promoteLegacyHeading = el => {
           if (!el || el === container) return;
           if (!(el.tagName === 'P' || el.tagName === 'DIV')) return;
@@ -5215,12 +5223,18 @@
           if (!el.parentNode) return;
           const rawText = (el.textContent || '').trim();
           if (!rawText) return;
-          const normalized = normalizeLegacyText(rawText);
-          if (!['what', 'how', 'why'].includes(normalized)) return;
-          const hasOtherChildren = Array.from(el.children).some(child => child.tagName !== 'BR');
-          if (hasOtherChildren) return;
+          const keyword = detectSectionKeyword(rawText);
+          if (!keyword) return;
           const heading = document.createElement('h3');
-          heading.textContent = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+          let sourceHTML = el.innerHTML;
+          if (
+            el.tagName === 'DIV' &&
+            el.children.length === 1 &&
+            el.children[0].tagName === 'P'
+          ) {
+            sourceHTML = el.children[0].innerHTML;
+          }
+          heading.innerHTML = sourceHTML;
           if (el.id) heading.id = el.id;
           if (el.className) heading.className = el.className;
           Array.from(el.attributes).forEach(attr => {
@@ -5228,6 +5242,7 @@
               heading.setAttribute(attr.name, attr.value);
             }
           });
+          heading.dataset.sectionKeyword = keyword;
           el.parentNode.replaceChild(heading, el);
         };
         Array.from(container.querySelectorAll('p, div')).forEach(promoteLegacyHeading);
@@ -5267,12 +5282,12 @@
           originalParent.insertBefore(card, heading);
           header.appendChild(heading);
 
-          const headingKey = (heading.textContent || '')
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z]+$/g, '');
-          if (['what', 'how', 'why'].includes(headingKey)) {
-            card.classList.add('whw-section', `whw-${headingKey}`);
+          const keyword = heading.dataset.sectionKeyword || detectSectionKeyword(heading.textContent || '');
+          if (keyword) {
+            heading.dataset.sectionKeyword = keyword;
+          }
+          if (['what', 'how', 'why'].includes(keyword)) {
+            card.classList.add('whw-section', `whw-${keyword}`);
             heading.classList.add('whw-heading');
           }
 
