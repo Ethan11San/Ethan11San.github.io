@@ -43,7 +43,7 @@
               "word": "ID"
             }
           ],
-          "rawHtml": "<p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p>",
+          "rawHtml": "<h3>What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\n\nHow:\n\nWhy:\n",
           "title": "Requirements to Fly"
         },
@@ -1681,7 +1681,7 @@
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Axis",
           "type": "label",
-          "rawHtml": "<p>What:</p><p></p><p>How:</p><p></p><p>Why:</p><p></p>"
+          "rawHtml": "<h3>What</h3><p></p><h3>How</h3><p></p><h3>Why</h3><p></p>"
         },
         {
           "alts": {},
@@ -5708,7 +5708,7 @@
         {
           "alts": {},
           "hidden": [],
-          "rawHtml": "<p>Carbon <span class=\"popup-word\" data-img=\"images/ee158a491bd59e1a2f03478306f6563f688fc5c490916fae156b3085d65286e5.jpg\">Monoxide</span> is odorless, tasteless, and colorless.</p><p>There is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.</p><p>If the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.</p><p>Carbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.</p><p>Symptoms can be headaches, blurred vision, drowsiness, loss of muscle power.</p><p>Mitigated by turning heaters off, opening vents and windows, supplemental oxygen.</p><p>Compared to other hypoxias this one you usually don't feel euphoric just crappy.</p>",
+          "rawHtml": "<h3>What</h3><p>Carbon <span class=\"popup-word\" data-img=\"images/ee158a491bd59e1a2f03478306f6563f688fc5c490916fae156b3085d65286e5.jpg\">Monoxide</span> is odorless, tasteless, and colorless.</p><p>There is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.</p><p>If the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.</p><p>Carbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.</p><p>Symptoms can be headaches, blurred vision, drowsiness, loss of muscle power.</p><p>Mitigated by turning heaters off, opening vents and windows, supplemental oxygen.</p><p>Compared to other hypoxias this one you usually don't feel euphoric just crappy.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nCarbon Monoxide is odorless, tasteless, and colorless.\nThere is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.\nIf the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.\nCarbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.\nSymptoms can be headaches, blurred vision, drowsiness, loss of muscle power.\nMitigated by turning heaters off, opening vents and windows, supplemental oxygen.\nCompared to other hypoxias this one you usually don't feel euphoric just crappy.\n\nHow:\n\nWhy:\n",
           "title": "Carbon Monoxide",
           "type": "fill"
@@ -5831,8 +5831,8 @@
               "word": "nasal"
             }
           ],
-          "rawHtml": "<p>You should not fly while congested</p><p>It can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.</p><p>This can create a vacuum effect during descents that can cause severe ear pain, or a rupture.</p><p>Can be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. </p><p>Flying while congested can also lead to a sinus block in the nasal passages.</p><p>These can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.</p><p>These can both be mitigated in flight by descending slowly.</p>",
-          "rawText": "You should not fly while congested\nIt can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.\nThis can create a vacuum effect during descents that can cause severe ear pain, or a rupture.\nCan be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. \nFlying while congested can also lead to a sinus block in the nasal passages.\nThese can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.\nThese can both be mitigated in flight by descending slowly.\n",
+          "rawHtml": "<h3>What</h3><p>You should not fly while congested</p><p>It can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.</p><p>This can create a vacuum effect during descents that can cause severe ear pain, or a rupture.</p><p>Can be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. </p><p>Flying while congested can also lead to a sinus block in the nasal passages.</p><p>These can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.</p><p>These can both be mitigated in flight by descending slowly.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nYou should not fly while congested\nIt can lead to mucus blocks in the Eustachian tube that allows pressure to equalize in and out of the ear.\nThis can create a vacuum effect during descents that can cause severe ear pain, or a rupture.\nCan be mitigated by pinching the nose and blowing, swallowing, chewing gum, and yawning. \nFlying while congested can also lead to a sinus block in the nasal passages.\nThese can lead to excruciating pain, bloody mucus, teeth pain and occur on descents also.\nThese can both be mitigated in flight by descending slowly.\n\nHow:\n\nWhy:\n",
           "title": "Inner Ear / Sinus",
           "type": "fill"
         },
