@@ -290,6 +290,13 @@
       border-bottom: 1px dashed #3498db;
     }
     .popup-word:hover { background: #dfe6e9; }
+    .popup-word .blank input {
+      border-bottom-color: #3498db;
+      border-bottom-style: dashed;
+    }
+    .popup-word .blank input:focus {
+      border-bottom-color: #2980b9;
+    }
     #addPictureBtn, #resumeQuizBtn {
       margin-top: 12px;
       margin-right: 8px;
@@ -6342,15 +6349,19 @@
       };
 
       // --- Popup word click handler ---
-      document.addEventListener('click', evt => {
-        const target = evt.target.closest('.popup-word');
-        if (!target) return;
-        evt.stopPropagation();
+      const isTouchEnvironment = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+      let lastTouchPopup = 0;
+
+      function removeImagePopup() {
         const existing = document.getElementById('imageWordPopup');
         if (existing) existing.remove();
+      }
+
+      function showPopupFor(target) {
+        removeImagePopup();
         const popup = document.createElement('div');
         popup.id = 'imageWordPopup';
-        popup.style.position = 'absolute';
+        popup.style.position = 'fixed';
         const rect = target.getBoundingClientRect();
         const left = rect.left + rect.width / 2;
         const top = rect.top;
@@ -6363,18 +6374,35 @@
         popup.style.borderRadius = '4px';
         popup.style.padding = '8px';
         popup.style.zIndex = '10000';
+        popup.style.maxWidth = '90vw';
+        popup.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
         const img = document.createElement('img');
+        img.alt = target.textContent || 'Image';
         const ref = target.dataset.img;
-        if (ref && ref.startsWith('sha256:')) {
-          imageURL(ref).then(url => { if (url) img.src = url; });
-        } else {
-          img.src = ref || '';
+        if (ref) {
+          if (ref.startsWith('sha256:')) {
+            imageURL(ref).then(url => {
+              if (url) {
+                img.src = url;
+              } else {
+                console.warn('Local image missing from IndexedDB', ref);
+                img.style.display = 'none';
+                const note = document.createElement('div');
+                note.textContent = 'Image unavailable on this device';
+                note.style.marginTop = '6px';
+                note.style.fontSize = '0.85rem';
+                note.style.color = '#c0392b';
+                popup.appendChild(note);
+              }
+            });
+          } else {
+            applyImageRef(img, ref);
+          }
         }
         img.style.maxWidth = '200px';
         img.style.maxHeight = '200px';
         img.dataset.zoomed = '0';
-        const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        if (isTouch) {
+        if (isTouchEnvironment) {
           img.addEventListener('click', evt2 => {
             evt2.stopPropagation();
             if (img.dataset.zoomed === '1') {
@@ -6388,7 +6416,13 @@
             }
           });
           img.style.touchAction = 'none';
-          Panzoom(img, { maxScale: 5, minScale: 1 });
+          if (typeof Panzoom === 'function') {
+            try {
+              Panzoom(img, { maxScale: 5, minScale: 1 });
+            } catch (err) {
+              console.warn('Panzoom init failed', err);
+            }
+          }
         } else {
           img.addEventListener('dblclick', evt2 => {
             evt2.stopPropagation();
@@ -6404,14 +6438,43 @@
           });
         }
         popup.appendChild(img);
+        if (!ref) {
+          img.style.display = 'none';
+          const note = document.createElement('div');
+          note.textContent = 'No image attached to this word yet';
+          note.style.marginTop = '6px';
+          note.style.fontSize = '0.85rem';
+          note.style.color = '#7f8c8d';
+          popup.appendChild(note);
+        }
         popup.addEventListener('click', e => e.stopPropagation());
         document.body.appendChild(popup);
-        const remove = () => {
-          popup.remove();
-          document.removeEventListener('click', remove);
+        const remove = evt => {
+          if (evt && evt.target.closest && evt.target.closest('#imageWordPopup')) return;
+          removeImagePopup();
+          document.removeEventListener('click', remove, true);
+          document.removeEventListener('touchstart', remove, true);
         };
-        setTimeout(() => document.addEventListener('click', remove), 0);
-      });
+        setTimeout(() => {
+          document.addEventListener('click', remove, true);
+          document.addEventListener('touchstart', remove, true);
+        }, 0);
+      }
+
+      function handlePopupTrigger(evt) {
+        if (evt.type === 'touchend') {
+          lastTouchPopup = Date.now();
+        } else if (evt.type === 'click' && lastTouchPopup && Date.now() - lastTouchPopup < 400) {
+          return;
+        }
+        const target = evt.target.closest && evt.target.closest('.popup-word');
+        if (!target) return;
+        evt.stopPropagation();
+        showPopupFor(target);
+      }
+
+      document.addEventListener('click', handlePopupTrigger);
+      document.addEventListener('touchend', handlePopupTrigger);
 
       // --- Keyboard shortcuts for quiz navigation and hints ---
       document.addEventListener('keydown', e => {
