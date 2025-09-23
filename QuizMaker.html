@@ -428,6 +428,13 @@
     .question-section-card:focus-within::before {
       opacity: 1;
     }
+    body.mobile .question-section-card.mobile-answer-active {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 36px -24px rgba(26,188,156,0.65);
+    }
+    body.mobile .question-section-card.mobile-answer-active::before {
+      opacity: 1;
+    }
 
     .question-section-header {
       display: flex;
@@ -686,6 +693,16 @@
 
     #answerBank {
       display: none;
+      margin-top: 12px;
+    }
+    body.mobile #quizContent .mobile-floating-answer-bank {
+      width: 100%;
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+    body.mobile #quizContent .mobile-floating-toggle {
+      width: 100%;
+      box-sizing: border-box;
       margin-top: 12px;
     }
     #answerBank .answer-label {
@@ -1783,6 +1800,9 @@
       let answersVisible = false;
       let inlineImageFallbackNotified = false;
       const wrongAnswerTimers = new WeakMap();
+      let answerControlsHome = null;
+      let currentAnswerAnchorCard = null;
+      let selectionMoveTimer = null;
 
       function getCompletionCount(idx) {
         return completionCounts[String(idx)] || 0;
@@ -1799,11 +1819,78 @@
         const el = document.querySelector(`#mobileFolderList li[data-index="${idx}"] .completion-counter`);
         if (el) el.textContent = getCompletionCount(idx);
       }
+      function ensureAnswerControlsHome() {
+        if (!answerBank || !toggleAnswersBtn) return;
+        if (answerControlsHome && answerControlsHome.isConnected) return;
+        answerControlsHome = document.createElement('div');
+        answerControlsHome.id = 'answer-controls-home';
+        answerControlsHome.style.display = 'none';
+        answerBank.parentNode.insertBefore(answerControlsHome, answerBank);
+      }
+      function resetAnswerControlsPosition() {
+        if (!answerBank || !toggleAnswersBtn) return;
+        ensureAnswerControlsHome();
+        const parent = answerControlsHome ? answerControlsHome.parentNode : null;
+        if (!parent) return;
+        parent.insertBefore(answerBank, answerControlsHome.nextSibling);
+        parent.insertBefore(toggleAnswersBtn, answerBank.nextSibling);
+        answerBank.classList.remove('mobile-floating-answer-bank');
+        toggleAnswersBtn.classList.remove('mobile-floating-toggle');
+        if (currentAnswerAnchorCard && currentAnswerAnchorCard.classList) {
+          currentAnswerAnchorCard.classList.remove('mobile-answer-active');
+        }
+        if (selectionMoveTimer) {
+          clearTimeout(selectionMoveTimer);
+          selectionMoveTimer = null;
+        }
+        currentAnswerAnchorCard = null;
+      }
+      function moveAnswerControlsBelowCard(card) {
+        if (!document.body.classList.contains('mobile')) return;
+        if (!answerBank || !toggleAnswersBtn || !card) return;
+        if (!quizContent || !quizContent.contains(card)) return;
+        if (!card.classList.contains('whw-section')) {
+          if (quizContent.querySelector('.question-section-card.whw-section')) {
+            return;
+          }
+        }
+        if (currentAnswerAnchorCard === card) return;
+        ensureAnswerControlsHome();
+        if (currentAnswerAnchorCard && currentAnswerAnchorCard.classList) {
+          currentAnswerAnchorCard.classList.remove('mobile-answer-active');
+        }
+        const parent = card.parentNode;
+        if (!parent) return;
+        const reference = card.nextSibling;
+        parent.insertBefore(answerBank, reference);
+        parent.insertBefore(toggleAnswersBtn, answerBank.nextSibling);
+        answerBank.classList.add('mobile-floating-answer-bank');
+        toggleAnswersBtn.classList.add('mobile-floating-toggle');
+        card.classList.add('mobile-answer-active');
+        currentAnswerAnchorCard = card;
+      }
+      function setupMobileAnswerBankHandlers() {
+        if (!document.body.classList.contains('mobile')) return;
+        if (!quizContent) return;
+        const cards = Array.from(quizContent.querySelectorAll('.question-section-card'));
+        cards.forEach(card => {
+          if (card.dataset.mobileAnswerBound === 'true') return;
+          const handleClick = () => moveAnswerControlsBelowCard(card);
+          const handleTouch = e => {
+            if (e.touches && e.touches.length > 1) return;
+            moveAnswerControlsBelowCard(card);
+          };
+          card.addEventListener('click', handleClick);
+          card.addEventListener('touchstart', handleTouch, { passive: true });
+          card.dataset.mobileAnswerBound = 'true';
+        });
+      }
       function resetAnswerBank() {
         answersVisible = false;
         if (answerBank) answerBank.style.display = 'none';
         if (toggleAnswersBtn) toggleAnswersBtn.textContent = 'Show Answers';
         if (answerBank) answerBank.innerHTML = '';
+        resetAnswerControlsPosition();
       }
       // Progress is kept only for this session (no localStorage)
 
@@ -2840,6 +2927,8 @@
       const headerElem = document.getElementById('header');
       let touchDrag = null;
       const TOUCH_DRAG_THRESHOLD = 8;
+
+      ensureAnswerControlsHome();
 
       document.addEventListener('touchmove', e => {
         if (!touchDrag) return;
@@ -5117,6 +5206,32 @@
         if (!container) return;
         const { skipTitle = false } = options;
         container.classList.remove('has-section-cards');
+
+        const normalizeLegacyText = text => (text || '').toLowerCase().replace(/[^a-z]/g, '');
+        const promoteLegacyHeading = el => {
+          if (!el || el === container) return;
+          if (!(el.tagName === 'P' || el.tagName === 'DIV')) return;
+          if (el.closest('.question-section-card')) return;
+          if (!el.parentNode) return;
+          const rawText = (el.textContent || '').trim();
+          if (!rawText) return;
+          const normalized = normalizeLegacyText(rawText);
+          if (!['what', 'how', 'why'].includes(normalized)) return;
+          const hasOtherChildren = Array.from(el.children).some(child => child.tagName !== 'BR');
+          if (hasOtherChildren) return;
+          const heading = document.createElement('h3');
+          heading.textContent = normalized.charAt(0).toUpperCase() + normalized.slice(1);
+          if (el.id) heading.id = el.id;
+          if (el.className) heading.className = el.className;
+          Array.from(el.attributes).forEach(attr => {
+            if (attr.name.startsWith('data-')) {
+              heading.setAttribute(attr.name, attr.value);
+            }
+          });
+          el.parentNode.replaceChild(heading, el);
+        };
+        Array.from(container.querySelectorAll('p, div')).forEach(promoteLegacyHeading);
+
         const headings = Array.from(container.querySelectorAll('h3'));
         if (!headings.length) return;
 
@@ -5154,8 +5269,8 @@
 
           const headingKey = (heading.textContent || '')
             .trim()
-            .replace(/[:\s]+$/g, '')
-            .toLowerCase();
+            .toLowerCase()
+            .replace(/[^a-z]+$/g, '');
           if (['what', 'how', 'why'].includes(headingKey)) {
             card.classList.add('whw-section', `whw-${headingKey}`);
             heading.classList.add('whw-heading');
@@ -5311,6 +5426,10 @@
             input.addEventListener('focus', () => {
               lastHintTarget = input;
               activeBlankInput = input;
+              if (document.body.classList.contains('mobile')) {
+                const card = input.closest('.question-section-card');
+                if (card) moveAnswerControlsBelowCard(card);
+              }
             });
             span.addEventListener('dragover', e => e.preventDefault());
             span.addEventListener('drop', e => {
@@ -5589,6 +5708,7 @@
         answerBank.innerHTML = '';
         answerBank.style.display = 'none';
         toggleAnswersBtn.style.display = 'none';
+        resetAnswerControlsPosition();
 
         if (sec.type === 'fill') {
           // quizContent already cleared and title appended above
@@ -5600,6 +5720,7 @@
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
           wrapQuizBlanks(quizContent, hiddenEntries);
           enhanceQuestionSections(quizContent, { skipTitle: true });
+          setupMobileAnswerBankHandlers();
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
           const measure = document.createElement('span');
@@ -6626,6 +6747,29 @@
 
       document.addEventListener('click', handlePopupTrigger);
       document.addEventListener('touchend', handlePopupTrigger);
+
+      document.addEventListener('selectionchange', () => {
+        if (!document.body.classList.contains('mobile')) return;
+        if (!isQuizMode) return;
+        if (!quizArea || quizArea.style.display === 'none') return;
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const anchorNode = sel.anchorNode;
+        if (!anchorNode) return;
+        if (answerBank && answerBank.contains(anchorNode)) return;
+        if (toggleAnswersBtn && toggleAnswersBtn.contains && toggleAnswersBtn.contains(anchorNode)) return;
+        let element = anchorNode.nodeType === Node.ELEMENT_NODE ? anchorNode : anchorNode.parentElement;
+        if (!element) return;
+        if (answerBank && answerBank.contains(element)) return;
+        if (toggleAnswersBtn && toggleAnswersBtn.contains && toggleAnswersBtn.contains(element)) return;
+        if (!quizContent || !quizContent.contains(element)) return;
+        const card = element.closest('.question-section-card');
+        if (!card) return;
+        if (selectionMoveTimer) clearTimeout(selectionMoveTimer);
+        selectionMoveTimer = setTimeout(() => {
+          moveAnswerControlsBelowCard(card);
+        }, 40);
+      });
 
       // --- Keyboard shortcuts for quiz navigation and hints ---
       document.addEventListener('keydown', e => {
