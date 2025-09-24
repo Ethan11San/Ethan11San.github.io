@@ -2068,6 +2068,85 @@
         mobileRandomGo.addEventListener('click', startSelectedRandomQuiz);
       }
 
+      function getMobileRandomFolderCheckboxes(list = document.getElementById('mobileFolderList')) {
+        if (!list) return [];
+        return Array.from(list.querySelectorAll('.folder-select')).filter(cb => cb.dataset.all !== 'true');
+      }
+
+      function updateMobileSelectAllState(list = document.getElementById('mobileFolderList')) {
+        if (!randomSelectMode || !list) return;
+        const selectAllCb = list.querySelector('.folder-select-all');
+        if (!selectAllCb) return;
+        const checkboxes = getMobileRandomFolderCheckboxes(list);
+        if (!checkboxes.length) {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = false;
+          return;
+        }
+        const selected = checkboxes.filter(cb => cb.checked).length;
+        if (selected === 0) {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = false;
+        } else if (selected === checkboxes.length) {
+          selectAllCb.checked = true;
+          selectAllCb.indeterminate = false;
+        } else {
+          selectAllCb.checked = false;
+          selectAllCb.indeterminate = true;
+        }
+      }
+
+      function setAllMobileRandomCheckboxes(list, checked) {
+        getMobileRandomFolderCheckboxes(list).forEach(cb => {
+          cb.checked = checked;
+        });
+      }
+
+      function appendMobileSelectAllOption(list) {
+        if (!list) return;
+        const li = document.createElement('li');
+        li.className = 'select-all-folder';
+        const header = document.createElement('div');
+        header.className = 'folder-header';
+        const content = document.createElement('div');
+        content.className = 'swipe-content';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.className = 'folder-select folder-select-all';
+        cb.dataset.all = 'true';
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = 'Quiz All';
+        const countSpan = document.createElement('span');
+        countSpan.className = 'completion-counter';
+        countSpan.textContent = 'ALL';
+        content.appendChild(cb);
+        content.appendChild(titleSpan);
+        content.appendChild(countSpan);
+        header.appendChild(content);
+        li.appendChild(header);
+
+        const toggleAll = checked => {
+          setAllMobileRandomCheckboxes(list, checked);
+          updateMobileSelectAllState(list);
+        };
+
+        cb.addEventListener('click', e => {
+          e.stopPropagation();
+          cb.indeterminate = false;
+          toggleAll(cb.checked);
+        });
+
+        content.addEventListener('click', () => {
+          if (!randomSelectMode) return;
+          const next = cb.indeterminate ? true : !cb.checked;
+          cb.checked = next;
+          cb.indeterminate = false;
+          toggleAll(next);
+        });
+
+        list.appendChild(li);
+      }
+
       function buildMobileFolderList() {
         const list = document.getElementById('mobileFolderList');
         list.innerHTML = '';
@@ -2250,24 +2329,38 @@
             }
             if (randomSelectMode) {
               cb.checked = !cb.checked;
+              updateMobileSelectAllState(list);
             } else {
               const isOpen = secList.style.display === 'none';
               secList.style.display = isOpen ? 'block' : 'none';
               if (isOpen) mobileOpenFolders.add(idx); else mobileOpenFolders.delete(idx);
             }
           };
+          cb.addEventListener('click', e => {
+            if (!randomSelectMode) return;
+            e.stopPropagation();
+            window.requestAnimationFrame(() => updateMobileSelectAllState(list));
+          });
           li.appendChild(header);
           li.appendChild(secList);
           list.appendChild(li);
         });
+        if (randomSelectMode) {
+          appendMobileSelectAllOption(list);
+          updateMobileSelectAllState(list);
+        }
       }
 
       function setRandomSelectMode(on) {
         randomSelectMode = on;
+        buildMobileFolderList();
         const list = document.getElementById('mobileFolderList');
         list.classList.toggle('random-select', on);
         const checkboxes = list.querySelectorAll('.folder-select');
-        checkboxes.forEach(cb => { cb.checked = false; });
+        checkboxes.forEach(cb => {
+          cb.checked = false;
+          cb.indeterminate = false;
+        });
         mobileRandomGo.style.display = on ? 'block' : 'none';
         if (on) {
           list.style.display = 'block';
@@ -2280,7 +2373,12 @@
       }
 
       function startSelectedRandomQuiz() {
-        const selected = Array.from(document.querySelectorAll('#mobileFolderList .folder-select:checked')).map(c => parseInt(c.dataset.index));
+        const list = document.getElementById('mobileFolderList');
+        const selectAllCb = list ? list.querySelector('.folder-select-all') : null;
+        const useAll = !!(selectAllCb && selectAllCb.checked && !selectAllCb.indeterminate);
+        const selected = useAll
+          ? data.folders.map((_, idx) => idx)
+          : getMobileRandomFolderCheckboxes(list).filter(cb => cb.checked).map(cb => parseInt(cb.dataset.index, 10));
         if (selected.length) {
           enterRandomQuizAcrossFolders(selected);
         }
