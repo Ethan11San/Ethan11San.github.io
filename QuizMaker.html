@@ -943,6 +943,67 @@
       max-width: 100%;
       height: auto;
     }
+
+    /* Desktop toggle for mobile experience */
+    #mobileToggleContainer {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9999;
+    }
+    #mobileViewToggleBtn {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      background: rgba(44, 62, 80, 0.9);
+      color: #ecf0f1;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    #mobileViewToggleBtn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    #mobileViewToggleBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    body.mobile:not(.mobile-simulated) #mobileToggleContainer {
+      display: none;
+    }
+
+    body.mobile.mobile-simulated {
+      background: linear-gradient(160deg, #dfe6e9 0%, #f8f9fa 100%);
+      padding-top: 72px;
+    }
+    body.mobile.mobile-simulated #mobileStart,
+    body.mobile.mobile-simulated #main {
+      width: min(540px, 100%);
+      margin: 0 auto 32px auto;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.12);
+      border-radius: 16px;
+    }
+    body.mobile.mobile-simulated #mobileStart {
+      background: #ffffff;
+      padding: 24px;
+    }
+    body.mobile.mobile-simulated #mobileStart button,
+    body.mobile.mobile-simulated #mobileStart input {
+      font-size: 1rem;
+    }
+    body.mobile.mobile-simulated.quiz-active #main {
+      display: flex;
+    }
+    body.mobile.mobile-simulated #header {
+      border-radius: 16px 16px 0 0;
+    }
+    body.mobile.mobile-simulated #quizArea,
+    body.mobile.mobile-simulated #editorArea {
+      border-radius: 0 0 16px 16px;
+      background: #ffffff;
+    }
   </style>
   <style id="linkingStyles"></style>
 </head>
@@ -960,6 +1021,10 @@
     });
   </script>
   <div id="loadingScreen">Loading...</div>
+
+  <div id="mobileToggleContainer">
+    <button id="mobileViewToggleBtn" type="button" aria-pressed="false">📱 Mobile View</button>
+  </div>
 
   <div id="mobileStart">
     <input type="text" id="mobileSearch" placeholder="Search questions...">
@@ -1934,7 +1999,7 @@
       }
 
       function isMobileDevice() {
-        return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        return document.body.classList.contains('mobile') || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
       }
 
       function hideSafariBar() {
@@ -2062,6 +2127,8 @@
       }
 
       function setupMobileUI() {
+        if (mobileUIInitialized) return;
+        mobileUIInitialized = true;
         buildMobileFolderList();
         document.getElementById('mobileSearch').addEventListener('input', handleMobileSearch);
         mobileRandomBtn.addEventListener('click', () => toggleRandomSelectMode());
@@ -2994,6 +3061,7 @@
       }
 
       let resumeQuizBtn;
+      let mobileUIInitialized = false;
       let waitingForImagePaste = null; // {target:'main'|'extra', index?:number}
       let isAddingDefinition = false;
       const foldersUL = document.getElementById('folders'), sectionsUL = document.getElementById('sections'),
@@ -3010,7 +3078,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -3023,6 +3091,47 @@
       const folderBadge = document.getElementById('folderBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
+      const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      function updateMobileToggleButton() {
+        if (!mobileViewToggleBtn) return;
+        const hasMobileClass = document.body.classList.contains('mobile');
+        const simulated = document.body.classList.contains('mobile-simulated');
+        const showExit = hasMobileClass && (!nativeMobileExperience || simulated);
+        if (showExit) {
+          mobileViewToggleBtn.textContent = '💻 Exit Mobile View';
+          mobileViewToggleBtn.setAttribute('aria-pressed', 'true');
+          mobileViewToggleBtn.title = 'Return to the desktop layout';
+        } else {
+          mobileViewToggleBtn.textContent = '📱 Mobile View';
+          mobileViewToggleBtn.setAttribute('aria-pressed', 'false');
+          mobileViewToggleBtn.title = 'Preview the mobile experience on desktop';
+        }
+      }
+
+      if (mobileViewToggleBtn) {
+        if (nativeMobileExperience) {
+          if (mobileToggleContainer) mobileToggleContainer.style.display = 'none';
+        } else {
+          updateMobileToggleButton();
+          mobileViewToggleBtn.addEventListener('click', () => {
+            const hasMobileClass = document.body.classList.contains('mobile');
+            const simulated = document.body.classList.contains('mobile-simulated');
+            if (hasMobileClass && !simulated) {
+              document.body.classList.remove('mobile');
+            } else if (simulated) {
+              document.body.classList.remove('mobile-simulated');
+              document.body.classList.remove('mobile');
+            } else {
+              document.body.classList.add('mobile', 'mobile-simulated');
+              setupMobileUI();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            updateMobileToggleButton();
+          });
+        }
+      }
+
       let touchDrag = null;
       const TOUCH_DRAG_THRESHOLD = 8;
 
