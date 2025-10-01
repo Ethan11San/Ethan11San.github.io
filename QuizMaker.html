@@ -3366,19 +3366,50 @@
                 prevWasSpace = false;
               }
             });
-            while (collapsed.length && collapsed[0].char === ' ') {
-              collapsed.shift();
-            }
-            while (collapsed.length && collapsed[collapsed.length - 1].char === ' ') {
-              collapsed.pop();
-            }
-            for (let i = collapsed.length - 2; i >= 0; i--) {
-              if (collapsed[i].char === ' ' && /[.,!?;:]/.test(collapsed[i + 1].char)) {
-                collapsed.splice(i, 1);
+            const sanitized = [];
+            const punctuationPattern = /[.,!?;:()\[\]{}]/;
+            const dashPattern = /[-–—]/;
+            const quotePattern = /["“”]/;
+            const isDigitChar = value => typeof value === 'string' && /\d/.test(value);
+            const addSpaceEntry = sourceEntry => {
+              if (!sanitized.length || sanitized[sanitized.length - 1].char !== ' ') {
+                sanitized.push({ ...sourceEntry, char: ' ', rawChar: ' ' });
               }
+            };
+            collapsed.forEach((entry, index) => {
+              const char = entry.char;
+              const prevChar = index > 0 ? collapsed[index - 1].char : '';
+              const nextChar = index < collapsed.length - 1 ? collapsed[index + 1].char : '';
+              if (quotePattern.test(char)) {
+                return;
+              }
+              if (punctuationPattern.test(char)) {
+                const surroundsDigits = char === '.' && isDigitChar(prevChar) && isDigitChar(nextChar);
+                if (surroundsDigits) {
+                  sanitized.push({ ...entry, char, rawChar: char });
+                } else {
+                  addSpaceEntry(entry);
+                }
+                return;
+              }
+              if (dashPattern.test(char)) {
+                addSpaceEntry(entry);
+                return;
+              }
+              if (char === ' ') {
+                addSpaceEntry(entry);
+                return;
+              }
+              sanitized.push({ ...entry, char, rawChar: char });
+            });
+            while (sanitized.length && sanitized[0].char === ' ') {
+              sanitized.shift();
             }
-            const text = collapsed.map(entry => entry.char).join('');
-            return { text, charMap: collapsed };
+            while (sanitized.length && sanitized[sanitized.length - 1].char === ' ') {
+              sanitized.pop();
+            }
+            const text = sanitized.map(entry => entry.char).join('');
+            return { text, charMap: sanitized };
           }
         };
       }
@@ -3650,13 +3681,25 @@
           updateVoiceControlsVisibility(false);
           return;
         }
-        availableTtsVoices = [...voices].sort((a, b) => {
-          const aEn = /^en/i.test(a.lang) ? 0 : 1;
-          const bEn = /^en/i.test(b.lang) ? 0 : 1;
-          if (aEn !== bEn) return aEn - bEn;
-          if (a.default !== b.default) return a.default ? -1 : 1;
+        const sortVoices = list => [...list].sort((a, b) => {
+          const aDefaultBoost = a.default ? -1 : 0;
+          const bDefaultBoost = b.default ? -1 : 0;
+          if (aDefaultBoost !== bDefaultBoost) return aDefaultBoost - bDefaultBoost;
           return a.name.localeCompare(b.name);
         });
+        const isUsEnglishVoice = voice => {
+          const lang = (voice.lang || '').toLowerCase();
+          return /^en([-_])?us\b/.test(lang);
+        };
+        const isEnglishVoice = voice => /^en/i.test(voice.lang || '');
+        const usVoices = voices.filter(isUsEnglishVoice);
+        const englishVoices = voices.filter(isEnglishVoice);
+        const prioritized = usVoices.length ? usVoices : (englishVoices.length ? englishVoices : voices);
+        availableTtsVoices = sortVoices(prioritized);
+        if (!availableTtsVoices.length) {
+          updateVoiceControlsVisibility(false);
+          return;
+        }
         let storedVoiceUri = null;
         try {
           storedVoiceUri = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
@@ -3667,10 +3710,14 @@
           ? availableTtsVoices.find(voice => voice.voiceURI === storedVoiceUri)
           : null;
         if (!preferredVoice) {
-          const englishVoices = availableTtsVoices.filter(voice => /^en/i.test(voice.lang));
-          preferredVoice = englishVoices.find(voice => /neural|natural/i.test(voice.name))
-            || englishVoices.find(voice => voice.default)
-            || englishVoices[0]
+          const usPreferred = availableTtsVoices.filter(isUsEnglishVoice);
+          const englishPreferred = availableTtsVoices.filter(isEnglishVoice);
+          preferredVoice = usPreferred.find(voice => /neural|natural/i.test(voice.name))
+            || usPreferred.find(voice => voice.default)
+            || usPreferred[0]
+            || englishPreferred.find(voice => /neural|natural/i.test(voice.name))
+            || englishPreferred.find(voice => voice.default)
+            || englishPreferred[0]
             || availableTtsVoices.find(voice => voice.default)
             || availableTtsVoices[0]
             || null;
@@ -3715,6 +3762,9 @@
         const voice = ttsSelectedVoice || fallbackVoice;
         if (voice) {
           ttsUtterance.voice = voice;
+          ttsUtterance.lang = voice.lang || 'en-US';
+        } else {
+          ttsUtterance.lang = 'en-US';
         }
         ttsUtterance.rate = ttsRate || 1;
         ttsUtterance.onboundary = event => {
