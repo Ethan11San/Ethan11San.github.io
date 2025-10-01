@@ -733,6 +733,27 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
+    #ttsControls select,
+    #ttsControls input[type="range"] {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(44, 62, 80, 0.25);
+      background: #fff;
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+    #ttsControls label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: #2c3e50;
+    }
+    #ttsRateValue {
+      font-variant-numeric: tabular-nums;
+      min-width: 3.5ch;
+      text-align: right;
+    }
     #ttsHint {
       font-size: 0.85rem;
       color: #2c3e50;
@@ -754,6 +775,28 @@
       font-size: 0.85rem;
       color: #8e44ad;
       box-shadow: 0 0 0 2px #fff;
+    }
+    #quizContent {
+      position: relative;
+    }
+    #ttsHighlightLayer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .tts-highlight-box {
+      position: absolute;
+      border: 2px solid rgba(142, 68, 173, 0.55);
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(142, 68, 173, 0.3);
+    }
+    .quiz-tts-outline {
+      outline: 2px solid rgba(142, 68, 173, 0.45);
+      outline-offset: 4px;
+      transition: outline 0.15s ease;
     }
 
     #answerBank {
@@ -1196,6 +1239,15 @@
         <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
         <button id="ttsPauseBtn" type="button" disabled>⏸️ Pause</button>
         <button id="ttsStopBtn" type="button" disabled>⏹️ Stop</button>
+        <label id="ttsVoiceLabel" style="display:none;">
+          Voice
+          <select id="ttsVoiceSelect"></select>
+        </label>
+        <label id="ttsRateLabel" style="display:none;">
+          Speed
+          <input id="ttsRateSlider" type="range" min="0.7" max="1.3" step="0.05" value="1">
+          <span id="ttsRateValue">1.0×</span>
+        </label>
         <span id="ttsHint"></span>
       </div>
       <div id="answerBank"></div>
@@ -3150,7 +3202,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsHint = document.getElementById('ttsHint');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -3166,8 +3218,16 @@
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
       const supportsSpeechSynthesis = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+      const TTS_VOICE_STORAGE_KEY = 'quizmaker-tts-voice';
+      const TTS_RATE_STORAGE_KEY = 'quizmaker-tts-rate';
       let ttsUtterance = null;
       let ttsStartElement = null;
+      let ttsSpeechState = null;
+      let ttsHighlightLayer = null;
+      let ttsHighlightElements = [];
+      let availableTtsVoices = [];
+      let ttsSelectedVoice = null;
+      let ttsRate = 1;
 
       function updateTtsHint() {
         if (!ttsHint) return;
@@ -3229,6 +3289,8 @@
           window.speechSynthesis.cancel();
         }
         ttsUtterance = null;
+        ttsSpeechState = null;
+        clearSpeechHighlight();
         if (clearStart) {
           clearTtsStartElement();
         } else {
@@ -3237,94 +3299,460 @@
         updateTtsButtons();
       }
 
-      function buildQuizSpeechText(startEl = null) {
-        if (!quizContent) return '';
-        const markerAttr = 'data-tts-marker';
-        let markerValue = '';
-        let activeStart = null;
-        if (startEl && quizContent.contains(startEl)) {
-          markerValue = `tts-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-          startEl.setAttribute(markerAttr, markerValue);
-          activeStart = startEl;
+      function elementIsHidden(el) {
+        while (el && el !== quizContent) {
+          if (el.classList && el.classList.contains('hidden-reveal')) return true;
+          if (el.hasAttribute('aria-hidden') && el.getAttribute('aria-hidden') !== 'false') return true;
+          if (el.hidden) return true;
+          el = el.parentElement;
         }
-        const clone = quizContent.cloneNode(true);
-        const container = document.createElement('div');
-        container.appendChild(clone);
-        let cloneStart = null;
-        if (markerValue) {
-          cloneStart = container.querySelector(`[${markerAttr}="${markerValue}"]`);
-        }
-        if (activeStart) {
-          activeStart.removeAttribute(markerAttr);
-        }
-
-        container.querySelectorAll('.hidden-reveal').forEach(el => el.remove());
-        container.querySelectorAll('[aria-hidden="true"],[hidden]').forEach(el => el.remove());
-        container.querySelectorAll('input.blank-input').forEach(input => {
-          const span = document.createElement('span');
-          const typed = input.value.trim();
-          span.textContent = typed ? ` ${typed} ` : ' blank ';
-          input.replaceWith(span);
-        });
-
-        if (cloneStart) {
-          cloneStart.removeAttribute(markerAttr);
-          const range = document.createRange();
-          range.setStart(container, 0);
-          range.setEndBefore(cloneStart);
-          range.deleteContents();
-          if (typeof range.detach === 'function') {
-            range.detach();
-          }
-        }
-
-        const text = (container.textContent || '')
-          .replace(/\s+/g, ' ')
-          .replace(/\s+([.,!?;:])/g, '$1')
-          .trim();
-        return text;
+        return false;
       }
 
-      function getSelectedQuizText() {
-        if (!quizContent) return '';
+      function createSpeechBuilder() {
+        const rawEntries = [];
+        return {
+          appendText(text, node, startOffset = 0) {
+            if (!text) return;
+            for (let i = 0; i < text.length; i++) {
+              const rawChar = text[i];
+              const normalizedChar = /\s/.test(rawChar) ? ' ' : rawChar;
+              rawEntries.push({
+                char: normalizedChar,
+                rawChar,
+                node,
+                offset: startOffset + i,
+                type: 'text'
+              });
+            }
+          },
+          appendBlank(input) {
+            const filler = ' blank ';
+            for (let i = 0; i < filler.length; i++) {
+              const ch = filler[i];
+              rawEntries.push({
+                char: ch === ' ' ? ' ' : ch,
+                rawChar: ch,
+                node: input,
+                offset: null,
+                type: 'element'
+              });
+            }
+          },
+          appendSpace(node) {
+            rawEntries.push({
+              char: ' ',
+              rawChar: ' ',
+              node,
+              offset: null,
+              type: 'space'
+            });
+          },
+          finalize() {
+            if (!rawEntries.length) {
+              return { text: '', charMap: [] };
+            }
+            const collapsed = [];
+            let prevWasSpace = false;
+            rawEntries.forEach(entry => {
+              const char = entry.char;
+              if (char === ' ') {
+                if (!prevWasSpace) {
+                  collapsed.push({ ...entry, char: ' ' });
+                  prevWasSpace = true;
+                }
+              } else {
+                collapsed.push({ ...entry, char });
+                prevWasSpace = false;
+              }
+            });
+            while (collapsed.length && collapsed[0].char === ' ') {
+              collapsed.shift();
+            }
+            while (collapsed.length && collapsed[collapsed.length - 1].char === ' ') {
+              collapsed.pop();
+            }
+            for (let i = collapsed.length - 2; i >= 0; i--) {
+              if (collapsed[i].char === ' ' && /[.,!?;:]/.test(collapsed[i + 1].char)) {
+                collapsed.splice(i, 1);
+              }
+            }
+            const text = collapsed.map(entry => entry.char).join('');
+            return { text, charMap: collapsed };
+          }
+        };
+      }
+
+      function rangeIntersects(range, node) {
+        if (!range || !node) return false;
+        if (typeof range.intersectsNode === 'function') {
+          try {
+            return range.intersectsNode(node);
+          } catch (err) {
+            // fall back to manual calculation
+          }
+        }
+        const testRange = document.createRange();
+        try {
+          if (node.nodeType === Node.TEXT_NODE) {
+            testRange.selectNodeContents(node);
+          } else {
+            testRange.selectNode(node);
+          }
+        } catch (err) {
+          if (typeof testRange.detach === 'function') testRange.detach();
+          return false;
+        }
+        const endBeforeOrTouchingStart = range.compareBoundaryPoints(Range.END_TO_START, testRange) <= 0;
+        const startAfterOrTouchingEnd = range.compareBoundaryPoints(Range.START_TO_END, testRange) >= 0;
+        const intersects = !(endBeforeOrTouchingStart || startAfterOrTouchingEnd);
+        if (typeof testRange.detach === 'function') testRange.detach();
+        return intersects;
+      }
+
+      function collectSpeechFromNode(node, builder) {
+        if (!node) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (elementIsHidden(node.parentElement)) return;
+          builder.appendText(node.nodeValue, node, 0);
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) return;
+        const el = node;
+        if (elementIsHidden(el)) return;
+        if (el.matches('script, style')) return;
+        if (el.matches('br')) {
+          builder.appendSpace(el);
+          return;
+        }
+        if (el.matches('input.blank-input')) {
+          builder.appendBlank(el);
+          return;
+        }
+        let child = el.firstChild;
+        while (child) {
+          collectSpeechFromNode(child, builder);
+          child = child.nextSibling;
+        }
+      }
+
+      function collectSpeechFromStartElement(startEl, builder) {
+        if (!quizContent) return;
+        if (startEl && quizContent.contains(startEl)) {
+          collectSpeechFromNode(startEl, builder);
+          let sibling = startEl.nextSibling;
+          while (sibling) {
+            collectSpeechFromNode(sibling, builder);
+            sibling = sibling.nextSibling;
+          }
+        } else {
+          let child = quizContent.firstChild;
+          while (child) {
+            collectSpeechFromNode(child, builder);
+            child = child.nextSibling;
+          }
+        }
+      }
+
+      function collectSpeechFromRange(range, builder) {
+        if (!range || !quizContent) return;
+        const whatToShow = NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT;
+        const walker = document.createTreeWalker(range.commonAncestorContainer, whatToShow, {
+          acceptNode(node) {
+            if (!quizContent.contains(node)) return NodeFilter.FILTER_REJECT;
+            if (node.nodeType === Node.TEXT_NODE) {
+              if (!rangeIntersects(range, node)) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              if (elementIsHidden(node.parentElement)) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              if (elementIsHidden(node)) return NodeFilter.FILTER_REJECT;
+              if (!rangeIntersects(range, node)) {
+                return NodeFilter.FILTER_SKIP;
+              }
+              if (node.matches('input.blank-input') || node.matches('br')) {
+                return NodeFilter.FILTER_ACCEPT;
+              }
+              if (node.matches('script, style')) {
+                return NodeFilter.FILTER_REJECT;
+              }
+              return NodeFilter.FILTER_SKIP;
+            }
+            return NodeFilter.FILTER_SKIP;
+          }
+        });
+        while (walker.nextNode()) {
+          const current = walker.currentNode;
+          if (current.nodeType === Node.TEXT_NODE) {
+            const node = current;
+            const startOffset = node === range.startContainer ? range.startOffset : 0;
+            const endOffset = node === range.endContainer ? range.endOffset : node.nodeValue.length;
+            if (endOffset <= startOffset) continue;
+            builder.appendText(node.nodeValue.slice(startOffset, endOffset), node, startOffset);
+          } else if (current.nodeType === Node.ELEMENT_NODE) {
+            const el = current;
+            if (el.matches('input.blank-input')) {
+              builder.appendBlank(el);
+            } else if (el.matches('br')) {
+              builder.appendSpace(el);
+            }
+          }
+        }
+      }
+
+      function buildQuizSpeechData({ startEl = null, range = null } = {}) {
+        const builder = createSpeechBuilder();
+        if (range) {
+          collectSpeechFromRange(range, builder);
+        } else {
+          collectSpeechFromStartElement(startEl, builder);
+        }
+        return builder.finalize();
+      }
+
+      function getSelectedQuizRange() {
+        if (!quizContent) return null;
         const selection = window.getSelection();
-        if (!selection || !selection.rangeCount) return '';
-        const anchorInQuiz = selection.anchorNode && quizContent.contains(selection.anchorNode);
-        const focusInQuiz = selection.focusNode && quizContent.contains(selection.focusNode);
-        if (!anchorInQuiz && !focusInQuiz) return '';
+        if (!selection || !selection.rangeCount) return null;
+        const range = selection.getRangeAt(0);
+        if (!quizContent.contains(range.commonAncestorContainer)) return null;
         const selectedText = selection.toString().trim();
-        if (!selectedText) return '';
-        return selectedText.replace(/\s+/g, ' ').replace(/\s+([.,!?;:])/g, '$1').trim();
+        if (!selectedText) return null;
+        return range.cloneRange();
+      }
+
+      function ensureHighlightLayer() {
+        if (ttsHighlightLayer && document.body.contains(ttsHighlightLayer)) {
+          return ttsHighlightLayer;
+        }
+        if (!quizContent) return null;
+        ttsHighlightLayer = document.getElementById('ttsHighlightLayer');
+        if (!ttsHighlightLayer) {
+          ttsHighlightLayer = document.createElement('div');
+          ttsHighlightLayer.id = 'ttsHighlightLayer';
+          quizContent.appendChild(ttsHighlightLayer);
+        }
+        return ttsHighlightLayer;
+      }
+
+      function clearSpeechHighlight() {
+        if (ttsHighlightLayer && ttsHighlightLayer.parentNode) {
+          ttsHighlightLayer.innerHTML = '';
+        }
+        if (ttsHighlightElements.length) {
+          ttsHighlightElements.forEach(el => el.classList.remove('quiz-tts-outline'));
+          ttsHighlightElements = [];
+        }
+      }
+
+      function highlightSpeechAt(charIndex, charLength = 0) {
+        if (!ttsSpeechState || !ttsSpeechState.charMap || !ttsSpeechState.charMap.length) return;
+        if (typeof charIndex !== 'number' || charIndex < 0) return;
+        const map = ttsSpeechState.charMap;
+        if (charIndex >= map.length) return;
+        let start = charIndex;
+        let end = charLength ? charIndex + charLength : charIndex;
+        if (!charLength) {
+          while (end < map.length && map[end].char !== ' ') {
+            end++;
+          }
+        } else {
+          end = Math.min(end, map.length);
+        }
+        while (start < map.length && map[start].char === ' ') start++;
+        while (end < map.length && map[end].char === ' ') end++;
+        if (end <= start) {
+          end = start;
+          while (end < map.length && map[end].char !== ' ') end++;
+        }
+        if (start >= map.length) return;
+        const slice = map.slice(start, Math.min(end, map.length));
+        if (!slice.length) return;
+        clearSpeechHighlight();
+        const textEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.TEXT_NODE);
+        const elementEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.ELEMENT_NODE);
+        if (textEntries.length) {
+          const range = document.createRange();
+          const first = textEntries[0];
+          const last = textEntries[textEntries.length - 1];
+          const endOffset = Math.min(last.node.nodeValue.length, last.offset + 1);
+          range.setStart(first.node, first.offset);
+          range.setEnd(last.node, endOffset);
+          const layer = ensureHighlightLayer();
+          if (layer) {
+            layer.innerHTML = '';
+            const rects = Array.from(range.getClientRects());
+            const containerRect = quizContent.getBoundingClientRect();
+            rects.forEach(rect => {
+              const box = document.createElement('div');
+              box.className = 'tts-highlight-box';
+              box.style.top = `${rect.top - containerRect.top}px`;
+              box.style.left = `${rect.left - containerRect.left}px`;
+              box.style.width = `${rect.width}px`;
+              box.style.height = `${rect.height}px`;
+              layer.appendChild(box);
+            });
+          }
+          if (typeof range.detach === 'function') range.detach();
+        }
+        elementEntries.forEach(entry => {
+          const el = entry.node;
+          if (el && el.classList) {
+            el.classList.add('quiz-tts-outline');
+            ttsHighlightElements.push(el);
+          }
+        });
+      }
+
+      function updateVoiceControlsVisibility(show) {
+        const displayValue = show ? 'flex' : 'none';
+        if (ttsVoiceLabel) {
+          ttsVoiceLabel.style.display = displayValue;
+        }
+        if (ttsRateLabel) {
+          ttsRateLabel.style.display = displayValue;
+        }
+      }
+
+      function updateRateValueDisplay() {
+        if (!ttsRateValue) return;
+        const formatted = `${ttsRate.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}×`;
+        ttsRateValue.textContent = formatted;
+      }
+
+      function initializeTtsRate() {
+        if (!ttsRateSlider) return;
+        const sliderMin = parseFloat(ttsRateSlider.min || '0.7');
+        const sliderMax = parseFloat(ttsRateSlider.max || '1.3');
+        let stored = null;
+        try {
+          stored = localStorage.getItem(TTS_RATE_STORAGE_KEY);
+        } catch (err) {
+          stored = null;
+        }
+        let rateValue = stored !== null ? parseFloat(stored) : NaN;
+        if (Number.isNaN(rateValue)) {
+          rateValue = parseFloat(ttsRateSlider.value || '1') || 1;
+        }
+        rateValue = Math.min(Math.max(rateValue, sliderMin), sliderMax);
+        ttsRate = rateValue;
+        ttsRateSlider.value = String(rateValue);
+        updateRateValueDisplay();
+      }
+
+      function populateVoiceOptions() {
+        if (!supportsSpeechSynthesis || !ttsVoiceSelect) return;
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || !voices.length) {
+          availableTtsVoices = [];
+          updateVoiceControlsVisibility(false);
+          return;
+        }
+        availableTtsVoices = [...voices].sort((a, b) => {
+          const aEn = /^en/i.test(a.lang) ? 0 : 1;
+          const bEn = /^en/i.test(b.lang) ? 0 : 1;
+          if (aEn !== bEn) return aEn - bEn;
+          if (a.default !== b.default) return a.default ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
+        let storedVoiceUri = null;
+        try {
+          storedVoiceUri = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
+        } catch (err) {
+          storedVoiceUri = null;
+        }
+        let preferredVoice = storedVoiceUri
+          ? availableTtsVoices.find(voice => voice.voiceURI === storedVoiceUri)
+          : null;
+        if (!preferredVoice) {
+          const englishVoices = availableTtsVoices.filter(voice => /^en/i.test(voice.lang));
+          preferredVoice = englishVoices.find(voice => /neural|natural/i.test(voice.name))
+            || englishVoices.find(voice => voice.default)
+            || englishVoices[0]
+            || availableTtsVoices.find(voice => voice.default)
+            || availableTtsVoices[0]
+            || null;
+        }
+        ttsVoiceSelect.innerHTML = '';
+        availableTtsVoices.forEach(voice => {
+          const option = document.createElement('option');
+          option.value = voice.voiceURI;
+          const badge = voice.default ? ' ⭐' : '';
+          option.textContent = `${voice.name} (${voice.lang})${badge}`;
+          ttsVoiceSelect.appendChild(option);
+        });
+        ttsSelectedVoice = preferredVoice || null;
+        if (ttsSelectedVoice) {
+          ttsVoiceSelect.value = ttsSelectedVoice.voiceURI;
+        } else if (availableTtsVoices.length) {
+          ttsVoiceSelect.value = availableTtsVoices[0].voiceURI;
+          ttsSelectedVoice = availableTtsVoices[0];
+        }
+        updateVoiceControlsVisibility(true);
       }
 
       function speakQuizText() {
         if (!supportsSpeechSynthesis) return;
-        const selectedText = getSelectedQuizText();
-        const text = selectedText || buildQuizSpeechText(ttsStartElement);
+        const selectionRange = getSelectedQuizRange();
+        const speechData = selectionRange
+          ? buildQuizSpeechData({ range: selectionRange })
+          : buildQuizSpeechData({ startEl: ttsStartElement });
+        if (selectionRange && typeof selectionRange.detach === 'function') {
+          selectionRange.detach();
+        }
+        const text = speechData.text;
         if (!text) {
           alert('No readable text found. Try selecting the text you want to hear first.');
           return;
         }
         window.speechSynthesis.cancel();
+        clearSpeechHighlight();
+        ttsSpeechState = speechData;
         ttsUtterance = new SpeechSynthesisUtterance(text);
+        const fallbackVoice = availableTtsVoices.find(v => v.default) || availableTtsVoices[0];
+        const voice = ttsSelectedVoice || fallbackVoice;
+        if (voice) {
+          ttsUtterance.voice = voice;
+        }
+        ttsUtterance.rate = ttsRate || 1;
+        ttsUtterance.onboundary = event => {
+          if (!event) return;
+          if (event.name && event.name !== 'word') return;
+          highlightSpeechAt(typeof event.charIndex === 'number' ? event.charIndex : 0, event.charLength || 0);
+        };
         ttsUtterance.onend = () => {
           ttsUtterance = null;
+          ttsSpeechState = null;
+          clearSpeechHighlight();
           updateTtsButtons();
         };
         ttsUtterance.onerror = () => {
           ttsUtterance = null;
+          ttsSpeechState = null;
+          clearSpeechHighlight();
           updateTtsButtons();
         };
         window.speechSynthesis.speak(ttsUtterance);
         if (window.speechSynthesis.paused) {
           window.speechSynthesis.resume();
         }
+        highlightSpeechAt(0, 0);
         updateTtsButtons();
       }
 
       if (ttsControls) {
         if (supportsSpeechSynthesis) {
           ttsControls.style.display = 'flex';
+          updateVoiceControlsVisibility(false);
+          initializeTtsRate();
+          populateVoiceOptions();
+          if (typeof window.speechSynthesis.addEventListener === 'function') {
+            window.speechSynthesis.addEventListener('voiceschanged', populateVoiceOptions);
+          } else {
+            window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
+          }
           updateTtsHint();
           updateTtsButtons();
         } else {
@@ -3332,6 +3760,7 @@
           if (ttsSpeakBtn) ttsSpeakBtn.style.display = 'none';
           if (ttsPauseBtn) ttsPauseBtn.style.display = 'none';
           if (ttsStopBtn) ttsStopBtn.style.display = 'none';
+          updateVoiceControlsVisibility(false);
           updateTtsHint();
         }
       }
@@ -3352,6 +3781,39 @@
         }
         if (ttsStopBtn) {
           ttsStopBtn.addEventListener('click', () => stopSpeech());
+        }
+        if (ttsVoiceSelect) {
+          ttsVoiceSelect.addEventListener('change', () => {
+            const chosen = availableTtsVoices.find(voice => voice.voiceURI === ttsVoiceSelect.value) || null;
+            ttsSelectedVoice = chosen;
+            try {
+              if (chosen) {
+                localStorage.setItem(TTS_VOICE_STORAGE_KEY, chosen.voiceURI);
+              } else {
+                localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
+              }
+            } catch (err) {
+              // ignore storage errors
+            }
+          });
+        }
+        if (ttsRateSlider) {
+          ttsRateSlider.addEventListener('input', () => {
+            const sliderMin = parseFloat(ttsRateSlider.min || '0.7');
+            const sliderMax = parseFloat(ttsRateSlider.max || '1.3');
+            const value = parseFloat(ttsRateSlider.value);
+            if (Number.isNaN(value)) return;
+            ttsRate = Math.min(Math.max(value, sliderMin), sliderMax);
+            updateRateValueDisplay();
+            try {
+              localStorage.setItem(TTS_RATE_STORAGE_KEY, String(ttsRate));
+            } catch (err) {
+              // ignore storage errors
+            }
+            if (ttsUtterance) {
+              ttsUtterance.rate = ttsRate;
+            }
+          });
         }
         if (quizContent) {
           quizContent.addEventListener('click', event => {
