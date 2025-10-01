@@ -710,6 +710,52 @@
       background: #71368a;
     }
 
+    #ttsControls {
+      display: none;
+      margin-top: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #ttsControls button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #8e44ad;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    #ttsControls button:hover:not(:disabled) {
+      background: #71368a;
+    }
+    #ttsControls button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    #ttsHint {
+      font-size: 0.85rem;
+      color: #2c3e50;
+      flex-basis: 100%;
+    }
+    .tts-start-marker {
+      outline: 2px dashed #8e44ad;
+      outline-offset: 6px;
+      position: relative;
+    }
+    .tts-start-marker::after {
+      content: '🔊';
+      position: absolute;
+      top: -0.9rem;
+      right: -0.9rem;
+      background: #fff;
+      border-radius: 50%;
+      padding: 2px 4px;
+      font-size: 0.85rem;
+      color: #8e44ad;
+      box-shadow: 0 0 0 2px #fff;
+    }
+
     #answerBank {
       display: none;
       margin-top: 12px;
@@ -1146,6 +1192,12 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
+      <div id="ttsControls">
+        <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
+        <button id="ttsPauseBtn" type="button" disabled>⏸️ Pause</button>
+        <button id="ttsStopBtn" type="button" disabled>⏹️ Stop</button>
+        <span id="ttsHint"></span>
+      </div>
       <div id="answerBank"></div>
       <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
       <button id="backBtn">⬅️ Back</button>
@@ -2507,6 +2559,7 @@
       }
 
       function enterRandomQuizAcrossFolders(folders) {
+        stopSpeech({ clearStart: true });
         if (!folders.length) return;
         if (!isQuizMode) {
           syncCurrentSection();
@@ -3097,7 +3150,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsHint = document.getElementById('ttsHint');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -3111,6 +3164,217 @@
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      const supportsSpeechSynthesis = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+      let ttsUtterance = null;
+      let ttsStartElement = null;
+
+      function updateTtsHint() {
+        if (!ttsHint) return;
+        if (!supportsSpeechSynthesis) {
+          ttsHint.textContent = 'Text-to-speech is not supported in this browser.';
+          return;
+        }
+        if (ttsStartElement) {
+          ttsHint.textContent = 'Listening will begin at the highlighted paragraph. Alt+Click it again to reset.';
+        } else {
+          ttsHint.textContent = 'Tip: Select text (or Alt+Click a paragraph) before pressing Listen to start there.';
+        }
+      }
+
+      function clearTtsStartElement() {
+        if (ttsStartElement) {
+          ttsStartElement.classList.remove('tts-start-marker');
+          ttsStartElement = null;
+        }
+        updateTtsHint();
+      }
+
+      function setTtsStartElement(el) {
+        if (!supportsSpeechSynthesis) return;
+        if (el === null) {
+          clearTtsStartElement();
+          return;
+        }
+        if (!quizContent || !quizContent.contains(el)) {
+          clearTtsStartElement();
+          return;
+        }
+        if (ttsStartElement === el) {
+          clearTtsStartElement();
+          return;
+        }
+        if (ttsStartElement) {
+          ttsStartElement.classList.remove('tts-start-marker');
+        }
+        ttsStartElement = el;
+        ttsStartElement.classList.add('tts-start-marker');
+        updateTtsHint();
+      }
+
+      function updateTtsButtons() {
+        if (!supportsSpeechSynthesis) return;
+        if (!ttsSpeakBtn || !ttsPauseBtn || !ttsStopBtn) return;
+        const speaking = window.speechSynthesis.speaking;
+        const paused = window.speechSynthesis.paused;
+        const hasUtterance = !!ttsUtterance && (speaking || paused);
+        ttsPauseBtn.disabled = !hasUtterance;
+        ttsPauseBtn.textContent = paused ? '▶️ Resume' : '⏸️ Pause';
+        ttsStopBtn.disabled = !hasUtterance;
+      }
+
+      function stopSpeech({ clearStart = false } = {}) {
+        if (!supportsSpeechSynthesis) return;
+        if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+          window.speechSynthesis.cancel();
+        }
+        ttsUtterance = null;
+        if (clearStart) {
+          clearTtsStartElement();
+        } else {
+          updateTtsHint();
+        }
+        updateTtsButtons();
+      }
+
+      function buildQuizSpeechText(startEl = null) {
+        if (!quizContent) return '';
+        const markerAttr = 'data-tts-marker';
+        let markerValue = '';
+        let activeStart = null;
+        if (startEl && quizContent.contains(startEl)) {
+          markerValue = `tts-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          startEl.setAttribute(markerAttr, markerValue);
+          activeStart = startEl;
+        }
+        const clone = quizContent.cloneNode(true);
+        const container = document.createElement('div');
+        container.appendChild(clone);
+        let cloneStart = null;
+        if (markerValue) {
+          cloneStart = container.querySelector(`[${markerAttr}="${markerValue}"]`);
+        }
+        if (activeStart) {
+          activeStart.removeAttribute(markerAttr);
+        }
+
+        container.querySelectorAll('.hidden-reveal').forEach(el => el.remove());
+        container.querySelectorAll('[aria-hidden="true"],[hidden]').forEach(el => el.remove());
+        container.querySelectorAll('input.blank-input').forEach(input => {
+          const span = document.createElement('span');
+          const typed = input.value.trim();
+          span.textContent = typed ? ` ${typed} ` : ' blank ';
+          input.replaceWith(span);
+        });
+
+        if (cloneStart) {
+          cloneStart.removeAttribute(markerAttr);
+          const range = document.createRange();
+          range.setStart(container, 0);
+          range.setEndBefore(cloneStart);
+          range.deleteContents();
+          if (typeof range.detach === 'function') {
+            range.detach();
+          }
+        }
+
+        const text = (container.textContent || '')
+          .replace(/\s+/g, ' ')
+          .replace(/\s+([.,!?;:])/g, '$1')
+          .trim();
+        return text;
+      }
+
+      function getSelectedQuizText() {
+        if (!quizContent) return '';
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return '';
+        const anchorInQuiz = selection.anchorNode && quizContent.contains(selection.anchorNode);
+        const focusInQuiz = selection.focusNode && quizContent.contains(selection.focusNode);
+        if (!anchorInQuiz && !focusInQuiz) return '';
+        const selectedText = selection.toString().trim();
+        if (!selectedText) return '';
+        return selectedText.replace(/\s+/g, ' ').replace(/\s+([.,!?;:])/g, '$1').trim();
+      }
+
+      function speakQuizText() {
+        if (!supportsSpeechSynthesis) return;
+        const selectedText = getSelectedQuizText();
+        const text = selectedText || buildQuizSpeechText(ttsStartElement);
+        if (!text) {
+          alert('No readable text found. Try selecting the text you want to hear first.');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        ttsUtterance = new SpeechSynthesisUtterance(text);
+        ttsUtterance.onend = () => {
+          ttsUtterance = null;
+          updateTtsButtons();
+        };
+        ttsUtterance.onerror = () => {
+          ttsUtterance = null;
+          updateTtsButtons();
+        };
+        window.speechSynthesis.speak(ttsUtterance);
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        updateTtsButtons();
+      }
+
+      if (ttsControls) {
+        if (supportsSpeechSynthesis) {
+          ttsControls.style.display = 'flex';
+          updateTtsHint();
+          updateTtsButtons();
+        } else {
+          ttsControls.style.display = 'block';
+          if (ttsSpeakBtn) ttsSpeakBtn.style.display = 'none';
+          if (ttsPauseBtn) ttsPauseBtn.style.display = 'none';
+          if (ttsStopBtn) ttsStopBtn.style.display = 'none';
+          updateTtsHint();
+        }
+      }
+
+      if (supportsSpeechSynthesis) {
+        if (ttsSpeakBtn) {
+          ttsSpeakBtn.addEventListener('click', speakQuizText);
+        }
+        if (ttsPauseBtn) {
+          ttsPauseBtn.addEventListener('click', () => {
+            if (window.speechSynthesis.paused) {
+              window.speechSynthesis.resume();
+            } else if (window.speechSynthesis.speaking) {
+              window.speechSynthesis.pause();
+            }
+            updateTtsButtons();
+          });
+        }
+        if (ttsStopBtn) {
+          ttsStopBtn.addEventListener('click', () => stopSpeech());
+        }
+        if (quizContent) {
+          quizContent.addEventListener('click', event => {
+            if (!event.altKey) return;
+            const target = event.target;
+            if (!target) return;
+            let el = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
+            while (el && el !== quizContent) {
+              if (el.matches('p, li, h1, h2, h3, h4, h5, h6, .question-section-card, .question-section-body, .question-section-header, .quiz-question-title')) {
+                break;
+              }
+              el = el.parentElement;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            if (!el || el === quizContent) {
+              clearTtsStartElement();
+              return;
+            }
+            setTtsStartElement(el);
+          });
+        }
+      }
 
       function updateMobileToggleButton() {
         if (!mobileViewToggleBtn) return;
@@ -3364,6 +3628,7 @@
       };
 
       homeBtn.onclick = () => {
+        stopSpeech({ clearStart: true });
         document.body.classList.remove('quiz-active');
         isQuizMode = false;
         quizArea.style.display = 'none';
@@ -5321,6 +5586,7 @@
       };
 
       function enterEdit(){
+        stopSpeech({ clearStart: true });
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
         altContainer.style.display = 'none';
@@ -5330,6 +5596,7 @@
         updateResumeQuizBtn();
       }
       function enterQuiz(){
+        stopSpeech({ clearStart: true });
           if(!isQuizMode) syncCurrentSection();
         multiFolderMode = false;
         resetAnswerBank();
@@ -5345,6 +5612,7 @@
 
       // Starts a random-order quiz across all sections in the current folder
       function enterRandomQuiz() {
+        stopSpeech({ clearStart: true });
           if(!isQuizMode) syncCurrentSection();
         multiFolderMode = false;
         resetAnswerBank();
@@ -5389,6 +5657,7 @@
       }
 
       function enterQuizQuestion(){
+        stopSpeech({ clearStart: true });
         multiFolderMode = false;
         resetAnswerBank();
         if(!ensureSelection()) return;
@@ -5902,6 +6171,8 @@
         function showQuiz() {
           justCompleted = false;
           activeBlankInput = null;
+          stopSpeech();
+          clearTtsStartElement();
           // Advance to the correct section and folder
           let entry = quizOrder[quizPos];
           if (typeof entry === 'object') {
