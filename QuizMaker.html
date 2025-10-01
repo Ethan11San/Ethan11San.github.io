@@ -789,12 +789,11 @@
     }
     .tts-highlight-box {
       position: absolute;
-      border: 2px solid rgba(142, 68, 173, 0.55);
-      border-radius: 6px;
-      box-shadow: 0 0 8px rgba(142, 68, 173, 0.3);
+      background: rgba(52, 152, 219, 0.28);
+      border-radius: 4px;
     }
     .quiz-tts-outline {
-      outline: 2px solid rgba(142, 68, 173, 0.45);
+      outline: 2px solid rgba(52, 152, 219, 0.4);
       outline-offset: 4px;
       transition: outline 0.15s ease;
     }
@@ -3229,6 +3228,18 @@
       let ttsSelectedVoice = null;
       let ttsRate = 1;
 
+      function nodeMarkedForSpeechSkip(node) {
+        while (node && node !== quizContent) {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.hasAttribute('data-tts-skip')) return true;
+            const ariaHidden = node.getAttribute && node.getAttribute('aria-hidden');
+            if (ariaHidden && ariaHidden !== 'false') return true;
+          }
+          node = node.parentNode;
+        }
+        return false;
+      }
+
       function updateTtsHint() {
         if (!ttsHint) return;
         if (!supportsSpeechSynthesis) {
@@ -3314,6 +3325,7 @@
         return {
           appendText(text, node, startOffset = 0) {
             if (!text) return;
+            if (nodeMarkedForSpeechSkip(node)) return;
             for (let i = 0; i < text.length; i++) {
               const rawChar = text[i];
               const normalizedChar = /\s/.test(rawChar) ? ' ' : rawChar;
@@ -3327,6 +3339,7 @@
             }
           },
           appendBlank(input) {
+            if (nodeMarkedForSpeechSkip(input)) return;
             const filler = ' blank ';
             for (let i = 0; i < filler.length; i++) {
               const ch = filler[i];
@@ -3340,6 +3353,7 @@
             }
           },
           appendSpace(node) {
+            if (nodeMarkedForSpeechSkip(node)) return;
             rawEntries.push({
               char: ' ',
               rawChar: ' ',
@@ -3444,12 +3458,14 @@
       function collectSpeechFromNode(node, builder) {
         if (!node) return;
         if (node.nodeType === Node.TEXT_NODE) {
+          if (nodeMarkedForSpeechSkip(node.parentElement)) return;
           if (elementIsHidden(node.parentElement)) return;
           builder.appendText(node.nodeValue, node, 0);
           return;
         }
         if (node.nodeType !== Node.ELEMENT_NODE) return;
         const el = node;
+        if (nodeMarkedForSpeechSkip(el)) return;
         if (elementIsHidden(el)) return;
         if (el.matches('script, style')) return;
         if (el.matches('br')) {
@@ -3492,6 +3508,7 @@
           acceptNode(node) {
             if (!quizContent.contains(node)) return NodeFilter.FILTER_REJECT;
             if (node.nodeType === Node.TEXT_NODE) {
+              if (nodeMarkedForSpeechSkip(node.parentElement)) return NodeFilter.FILTER_REJECT;
               if (!rangeIntersects(range, node)) {
                 return NodeFilter.FILTER_REJECT;
               }
@@ -3499,6 +3516,7 @@
               return NodeFilter.FILTER_ACCEPT;
             }
             if (node.nodeType === Node.ELEMENT_NODE) {
+              if (nodeMarkedForSpeechSkip(node)) return NodeFilter.FILTER_REJECT;
               if (elementIsHidden(node)) return NodeFilter.FILTER_REJECT;
               if (!rangeIntersects(range, node)) {
                 return NodeFilter.FILTER_SKIP;
@@ -3563,6 +3581,8 @@
         if (!ttsHighlightLayer) {
           ttsHighlightLayer = document.createElement('div');
           ttsHighlightLayer.id = 'ttsHighlightLayer';
+          ttsHighlightLayer.setAttribute('data-tts-skip', 'true');
+          ttsHighlightLayer.setAttribute('aria-hidden', 'true');
           quizContent.appendChild(ttsHighlightLayer);
         }
         return ttsHighlightLayer;
@@ -3601,6 +3621,10 @@
         if (start >= map.length) return;
         const slice = map.slice(start, Math.min(end, map.length));
         if (!slice.length) return;
+        const wordPattern = /[A-Za-z0-9]/;
+        if (!slice.some(entry => wordPattern.test(entry.char))) {
+          return;
+        }
         clearSpeechHighlight();
         const textEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.TEXT_NODE);
         const elementEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.ELEMENT_NODE);
@@ -3681,11 +3705,60 @@
           updateVoiceControlsVisibility(false);
           return;
         }
+        const qualityPatterns = [
+          /neural/i,
+          /natural/i,
+          /studio/i,
+          /wavenet/i,
+          /premium/i,
+          /expressive/i
+        ];
+        const favoredNamePatterns = [
+          /aria/i,
+          /jenny/i,
+          /guy/i,
+          /davis/i,
+          /amber/i,
+          /ashley/i,
+          /michelle/i,
+          /brandon/i,
+          /emma/i,
+          /sara/i
+        ];
+        const scoreVoice = voice => {
+          let score = 0;
+          const name = voice.name || '';
+          const lang = (voice.lang || '').toLowerCase();
+          if (/^en([-_])?us\b/.test(lang)) {
+            score -= 220;
+          } else if (/^en\b/.test(lang)) {
+            score -= 120;
+          } else {
+            score += 80;
+          }
+          if (voice.default) score -= 40;
+          qualityPatterns.forEach((pattern, index) => {
+            if (pattern.test(name)) {
+              score -= (90 - index * 8);
+            }
+          });
+          favoredNamePatterns.forEach((pattern, index) => {
+            if (pattern.test(name)) {
+              score -= (45 - index * 4);
+            }
+          });
+          if (/online/i.test(name) && !qualityPatterns.some(pattern => pattern.test(name))) {
+            score += 12;
+          }
+          if (/preview/i.test(name)) {
+            score += 30;
+          }
+          return score;
+        };
         const sortVoices = list => [...list].sort((a, b) => {
-          const aDefaultBoost = a.default ? -1 : 0;
-          const bDefaultBoost = b.default ? -1 : 0;
-          if (aDefaultBoost !== bDefaultBoost) return aDefaultBoost - bDefaultBoost;
-          return a.name.localeCompare(b.name);
+          const diff = scoreVoice(a) - scoreVoice(b);
+          if (diff !== 0) return diff;
+          return (a.name || '').localeCompare(b.name || '');
         });
         const isUsEnglishVoice = voice => {
           const lang = (voice.lang || '').toLowerCase();
@@ -3706,16 +3779,19 @@
         } catch (err) {
           storedVoiceUri = null;
         }
+        const recommendedVoiceUris = new Set(
+          availableTtsVoices.slice(0, Math.min(5, availableTtsVoices.length)).map(v => v.voiceURI)
+        );
         let preferredVoice = storedVoiceUri
           ? availableTtsVoices.find(voice => voice.voiceURI === storedVoiceUri)
           : null;
         if (!preferredVoice) {
           const usPreferred = availableTtsVoices.filter(isUsEnglishVoice);
           const englishPreferred = availableTtsVoices.filter(isEnglishVoice);
-          preferredVoice = usPreferred.find(voice => /neural|natural/i.test(voice.name))
+          preferredVoice = usPreferred.find(voice => /neural|natural|studio|wavenet|premium/i.test(voice.name))
             || usPreferred.find(voice => voice.default)
             || usPreferred[0]
-            || englishPreferred.find(voice => /neural|natural/i.test(voice.name))
+            || englishPreferred.find(voice => /neural|natural|studio|wavenet|premium/i.test(voice.name))
             || englishPreferred.find(voice => voice.default)
             || englishPreferred[0]
             || availableTtsVoices.find(voice => voice.default)
@@ -3727,7 +3803,8 @@
           const option = document.createElement('option');
           option.value = voice.voiceURI;
           const badge = voice.default ? ' ⭐' : '';
-          option.textContent = `${voice.name} (${voice.lang})${badge}`;
+          const recommended = recommendedVoiceUris.has(voice.voiceURI) ? ' 🎧' : '';
+          option.textContent = `${voice.name} (${voice.lang})${badge}${recommended}`;
           ttsVoiceSelect.appendChild(option);
         });
         ttsSelectedVoice = preferredVoice || null;
@@ -3772,6 +3849,15 @@
           if (event.name && event.name !== 'word') return;
           highlightSpeechAt(typeof event.charIndex === 'number' ? event.charIndex : 0, event.charLength || 0);
         };
+        ttsUtterance.onpause = () => {
+          updateTtsButtons();
+        };
+        ttsUtterance.onresume = () => {
+          updateTtsButtons();
+        };
+        ttsUtterance.onstart = () => {
+          updateTtsButtons();
+        };
         ttsUtterance.onend = () => {
           ttsUtterance = null;
           ttsSpeechState = null;
@@ -3800,8 +3886,14 @@
           populateVoiceOptions();
           if (typeof window.speechSynthesis.addEventListener === 'function') {
             window.speechSynthesis.addEventListener('voiceschanged', populateVoiceOptions);
+            window.speechSynthesis.addEventListener('pause', updateTtsButtons);
+            window.speechSynthesis.addEventListener('resume', updateTtsButtons);
+            window.speechSynthesis.addEventListener('end', updateTtsButtons);
           } else {
             window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
+            window.speechSynthesis.onpause = updateTtsButtons;
+            window.speechSynthesis.onresume = updateTtsButtons;
+            window.speechSynthesis.onend = updateTtsButtons;
           }
           updateTtsHint();
           updateTtsButtons();
@@ -3827,6 +3919,7 @@
               window.speechSynthesis.pause();
             }
             updateTtsButtons();
+            setTimeout(updateTtsButtons, 120);
           });
         }
         if (ttsStopBtn) {
@@ -7118,7 +7211,10 @@
                 // Reveal corresponding definition title now that this label is correct
                 entry = titleMap[lbl.text];
                 if (entry && !entry.revealed) {
-                  entry.el.textContent = (entry.idx + 1) + '. ' + lbl.text + ': ';
+                  if (entry.numberEl) {
+                    entry.numberEl.textContent = (entry.idx + 1) + '. ';
+                  }
+                  entry.el.textContent = lbl.text + ': ';
                   entry.revealed = true;
                   if (entry.hide) entry.para.style.display = '';
                 }
@@ -7173,6 +7269,8 @@
               badge.style.alignItems = 'center';
               badge.style.justifyContent = 'center';
               badge.style.pointerEvents = 'none';
+              badge.setAttribute('aria-hidden', 'true');
+              badge.setAttribute('data-tts-skip', 'true');
               badge.dataset.origX = lbl.x - 18;
               badge.dataset.origY = lbl.y;
               badge.dataset.origW = 16;
@@ -7195,11 +7293,24 @@
               const para = document.createElement('p');
               para.style.marginBottom = '12px';
               if (def.hideUntilSolved) para.style.display = 'none';
+              const numberSpan = document.createElement('span');
+              numberSpan.className = 'definition-number';
+              numberSpan.textContent = (dIndex + 1) + '. ';
+              numberSpan.setAttribute('aria-hidden', 'true');
+              numberSpan.setAttribute('data-tts-skip', 'true');
+              para.appendChild(numberSpan);
               const title = document.createElement('strong');
-              title.textContent = (dIndex + 1) + '. ';
+              title.textContent = '';
               para.appendChild(title);
               // Register this definition's title for reveal
-              titleMap[def.labelText] = { el: title, idx: dIndex, para, hide:def.hideUntilSolved, revealed:false };
+              titleMap[def.labelText] = {
+                el: title,
+                idx: dIndex,
+                para,
+                hide: def.hideUntilSolved,
+                revealed: false,
+                numberEl: numberSpan
+              };
               const tokens = (def.rawText || '').split(/(\s+)/);
               const hiddenEntries = getHiddenEntries(def, tokens);
               // revealMap no longer used
