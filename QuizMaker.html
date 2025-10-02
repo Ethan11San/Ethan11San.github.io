@@ -3749,6 +3749,8 @@
             uniqueVoices.push(voice);
           }
         });
+        const englishVoices = uniqueVoices.filter(voice => /^en/i.test(voice.lang || ''));
+        const filteredVoices = englishVoices.length ? englishVoices : uniqueVoices;
         const qualityPatterns = [
           /neural/i,
           /natural/i,
@@ -3809,7 +3811,7 @@
           return /^en([-_])?us\b/.test(lang);
         };
         const isEnglishVoice = voice => /^en/i.test(voice.lang || '');
-        availableTtsVoices = sortVoices(uniqueVoices);
+        availableTtsVoices = sortVoices(filteredVoices);
         if (!availableTtsVoices.length) {
           updateVoiceControlsVisibility(false);
           updateTtsHint();
