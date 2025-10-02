@@ -1238,6 +1238,7 @@
         <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
         <button id="ttsPauseBtn" type="button" disabled>⏸️ Pause</button>
         <button id="ttsStopBtn" type="button" disabled>⏹️ Stop</button>
+        <button id="ttsRefreshBtn" type="button">🔄 Refresh Voices</button>
         <label id="ttsVoiceLabel" style="display:none;">
           Voice
           <select id="ttsVoiceSelect"></select>
@@ -3201,7 +3202,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -3228,6 +3229,15 @@
       let ttsSelectedVoice = null;
       let ttsRate = 1;
 
+      const getVoiceKey = voice => {
+        if (!voice) return '';
+        const { voiceURI, name = '', lang = '' } = voice;
+        if (voiceURI && typeof voiceURI === 'string') {
+          return voiceURI;
+        }
+        return `${name}:::${lang}`;
+      };
+
       function nodeMarkedForSpeechSkip(node) {
         while (node && node !== quizContent) {
           if (node.nodeType === Node.ELEMENT_NODE) {
@@ -3246,10 +3256,13 @@
           ttsHint.textContent = 'Text-to-speech is not supported in this browser.';
           return;
         }
+        const refreshTip = supportsSpeechSynthesis && ttsRefreshBtn
+          ? ' Installed new system voices? Click “Refresh Voices” to reload the menu.'
+          : '';
         if (ttsStartElement) {
-          ttsHint.textContent = 'Listening will begin at the highlighted paragraph. Alt+Click it again to reset.';
+          ttsHint.textContent = 'Listening will begin at the highlighted paragraph. Alt+Click it again to reset.' + refreshTip;
         } else {
-          ttsHint.textContent = 'Tip: Select text (or Alt+Click a paragraph) before pressing Listen to start there.';
+          ttsHint.textContent = 'Tip: Select text (or Alt+Click a paragraph) before pressing Listen to start there.' + refreshTip;
         }
       }
 
@@ -3702,9 +3715,21 @@
         const voices = window.speechSynthesis.getVoices();
         if (!voices || !voices.length) {
           availableTtsVoices = [];
+          ttsSelectedVoice = null;
+          ttsVoiceSelect.innerHTML = '';
           updateVoiceControlsVisibility(false);
+          updateTtsHint();
           return;
         }
+        const seenKeys = new Set();
+        const uniqueVoices = [];
+        voices.forEach(voice => {
+          const key = getVoiceKey(voice);
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            uniqueVoices.push(voice);
+          }
+        });
         const qualityPatterns = [
           /neural/i,
           /natural/i,
@@ -3765,26 +3790,25 @@
           return /^en([-_])?us\b/.test(lang);
         };
         const isEnglishVoice = voice => /^en/i.test(voice.lang || '');
-        const usVoices = voices.filter(isUsEnglishVoice);
-        const englishVoices = voices.filter(isEnglishVoice);
-        const prioritized = usVoices.length ? usVoices : (englishVoices.length ? englishVoices : voices);
-        availableTtsVoices = sortVoices(prioritized);
+        availableTtsVoices = sortVoices(uniqueVoices);
         if (!availableTtsVoices.length) {
           updateVoiceControlsVisibility(false);
+          updateTtsHint();
           return;
         }
-        let storedVoiceUri = null;
+        let storedVoiceKey = null;
         try {
-          storedVoiceUri = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
+          storedVoiceKey = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
         } catch (err) {
-          storedVoiceUri = null;
+          storedVoiceKey = null;
         }
-        const recommendedVoiceUris = new Set(
-          availableTtsVoices.slice(0, Math.min(5, availableTtsVoices.length)).map(v => v.voiceURI)
-        );
-        let preferredVoice = storedVoiceUri
-          ? availableTtsVoices.find(voice => voice.voiceURI === storedVoiceUri)
-          : null;
+        const currentVoiceKey = ttsSelectedVoice ? getVoiceKey(ttsSelectedVoice) : null;
+        const preferredKeys = [currentVoiceKey, storedVoiceKey].filter(Boolean);
+        let preferredVoice = null;
+        for (const key of preferredKeys) {
+          preferredVoice = availableTtsVoices.find(voice => getVoiceKey(voice) === key) || null;
+          if (preferredVoice) break;
+        }
         if (!preferredVoice) {
           const usPreferred = availableTtsVoices.filter(isUsEnglishVoice);
           const englishPreferred = availableTtsVoices.filter(isEnglishVoice);
@@ -3799,19 +3823,24 @@
             || null;
         }
         ttsVoiceSelect.innerHTML = '';
+        const recommendedVoiceKeys = new Set(
+          availableTtsVoices.slice(0, Math.min(5, availableTtsVoices.length)).map(getVoiceKey)
+        );
         availableTtsVoices.forEach(voice => {
           const option = document.createElement('option');
-          option.value = voice.voiceURI;
+          const voiceKey = getVoiceKey(voice);
+          option.value = voiceKey;
           const badge = voice.default ? ' ⭐' : '';
-          const recommended = recommendedVoiceUris.has(voice.voiceURI) ? ' 🎧' : '';
+          const recommended = recommendedVoiceKeys.has(voiceKey) ? ' 🎧' : '';
           option.textContent = `${voice.name} (${voice.lang})${badge}${recommended}`;
           ttsVoiceSelect.appendChild(option);
         });
         ttsSelectedVoice = preferredVoice || null;
         if (ttsSelectedVoice) {
-          ttsVoiceSelect.value = ttsSelectedVoice.voiceURI;
+          ttsVoiceSelect.value = getVoiceKey(ttsSelectedVoice);
         } else if (availableTtsVoices.length) {
-          ttsVoiceSelect.value = availableTtsVoices[0].voiceURI;
+          const firstVoice = availableTtsVoices[0];
+          ttsVoiceSelect.value = getVoiceKey(firstVoice);
           ttsSelectedVoice = availableTtsVoices[0];
         }
         updateVoiceControlsVisibility(true);
@@ -3884,6 +3913,9 @@
           updateVoiceControlsVisibility(false);
           initializeTtsRate();
           populateVoiceOptions();
+          if (typeof window.speechSynthesis.getVoices === 'function' && !window.speechSynthesis.getVoices().length) {
+            setTimeout(populateVoiceOptions, 750);
+          }
           if (typeof window.speechSynthesis.addEventListener === 'function') {
             window.speechSynthesis.addEventListener('voiceschanged', populateVoiceOptions);
             window.speechSynthesis.addEventListener('pause', updateTtsButtons);
@@ -3895,6 +3927,21 @@
             window.speechSynthesis.onresume = updateTtsButtons;
             window.speechSynthesis.onend = updateTtsButtons;
           }
+          if (ttsRefreshBtn) {
+            ttsRefreshBtn.style.display = '';
+            ttsRefreshBtn.disabled = false;
+            ttsRefreshBtn.addEventListener('click', () => {
+              if (!supportsSpeechSynthesis) return;
+              ttsRefreshBtn.disabled = true;
+              try {
+                populateVoiceOptions();
+              } finally {
+                setTimeout(() => {
+                  ttsRefreshBtn.disabled = false;
+                }, 250);
+              }
+            });
+          }
           updateTtsHint();
           updateTtsButtons();
         } else {
@@ -3902,6 +3949,7 @@
           if (ttsSpeakBtn) ttsSpeakBtn.style.display = 'none';
           if (ttsPauseBtn) ttsPauseBtn.style.display = 'none';
           if (ttsStopBtn) ttsStopBtn.style.display = 'none';
+          if (ttsRefreshBtn) ttsRefreshBtn.style.display = 'none';
           updateVoiceControlsVisibility(false);
           updateTtsHint();
         }
@@ -3927,11 +3975,11 @@
         }
         if (ttsVoiceSelect) {
           ttsVoiceSelect.addEventListener('change', () => {
-            const chosen = availableTtsVoices.find(voice => voice.voiceURI === ttsVoiceSelect.value) || null;
+            const chosen = availableTtsVoices.find(voice => getVoiceKey(voice) === ttsVoiceSelect.value) || null;
             ttsSelectedVoice = chosen;
             try {
               if (chosen) {
-                localStorage.setItem(TTS_VOICE_STORAGE_KEY, chosen.voiceURI);
+                localStorage.setItem(TTS_VOICE_STORAGE_KEY, getVoiceKey(chosen));
               } else {
                 localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
               }
