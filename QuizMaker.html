@@ -3229,13 +3229,32 @@
       let ttsSelectedVoice = null;
       let ttsRate = 1;
 
-      const getVoiceKey = voice => {
-        if (!voice) return '';
-        const { voiceURI, name = '', lang = '' } = voice;
-        if (voiceURI && typeof voiceURI === 'string') {
-          return voiceURI;
-        }
-        return `${name}:::${lang}`;
+      const buildVoiceKey = (...parts) => parts
+        .filter(part => typeof part === 'string' && part !== '')
+        .join(':::');
+
+      const getVoiceKeyVariants = voice => {
+        if (!voice) return [''];
+        const voiceURI = typeof voice.voiceURI === 'string' ? voice.voiceURI : '';
+        const name = typeof voice.name === 'string' ? voice.name : '';
+        const lang = typeof voice.lang === 'string' ? voice.lang : '';
+        const variants = [];
+        const compositeKey = buildVoiceKey(voiceURI, name, lang);
+        if (compositeKey) variants.push(compositeKey);
+        const voiceUriAndName = buildVoiceKey(voiceURI, name);
+        if (voiceUriAndName) variants.push(voiceUriAndName);
+        if (voiceURI) variants.push(voiceURI);
+        const nameAndLang = buildVoiceKey(name, lang);
+        if (nameAndLang) variants.push(nameAndLang);
+        if (!variants.length) variants.push('');
+        return [...new Set(variants)];
+      };
+
+      const getVoiceKey = voice => getVoiceKeyVariants(voice)[0] || '';
+
+      const voiceMatchesKey = (voice, key) => {
+        if (!voice || !key) return false;
+        return getVoiceKeyVariants(voice).includes(key);
       };
 
       function nodeMarkedForSpeechSkip(node) {
@@ -3806,7 +3825,7 @@
         const preferredKeys = [currentVoiceKey, storedVoiceKey].filter(Boolean);
         let preferredVoice = null;
         for (const key of preferredKeys) {
-          preferredVoice = availableTtsVoices.find(voice => getVoiceKey(voice) === key) || null;
+          preferredVoice = availableTtsVoices.find(voice => voiceMatchesKey(voice, key)) || null;
           if (preferredVoice) break;
         }
         if (!preferredVoice) {
@@ -3975,7 +3994,7 @@
         }
         if (ttsVoiceSelect) {
           ttsVoiceSelect.addEventListener('change', () => {
-            const chosen = availableTtsVoices.find(voice => getVoiceKey(voice) === ttsVoiceSelect.value) || null;
+            const chosen = availableTtsVoices.find(voice => voiceMatchesKey(voice, ttsVoiceSelect.value)) || null;
             ttsSelectedVoice = chosen;
             try {
               if (chosen) {
