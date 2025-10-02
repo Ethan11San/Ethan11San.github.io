@@ -3226,7 +3226,7 @@
       let ttsHighlightLayer = null;
       let ttsHighlightElements = [];
       let availableTtsVoices = [];
-      let ttsSelectedVoice = null;
+      let ttsSelectedVoiceKey = null;
       let ttsRate = 1;
 
       const buildVoiceKey = (...parts) => parts
@@ -3734,7 +3734,7 @@
         const voices = window.speechSynthesis.getVoices();
         if (!voices || !voices.length) {
           availableTtsVoices = [];
-          ttsSelectedVoice = null;
+          ttsSelectedVoiceKey = null;
           ttsVoiceSelect.innerHTML = '';
           updateVoiceControlsVisibility(false);
           updateTtsHint();
@@ -3821,12 +3821,16 @@
         } catch (err) {
           storedVoiceKey = null;
         }
-        const currentVoiceKey = ttsSelectedVoice ? getVoiceKey(ttsSelectedVoice) : null;
+        const currentVoiceKey = ttsSelectedVoiceKey;
         const preferredKeys = [currentVoiceKey, storedVoiceKey].filter(Boolean);
         let preferredVoice = null;
+        let preferredVoiceKey = null;
         for (const key of preferredKeys) {
           preferredVoice = availableTtsVoices.find(voice => voiceMatchesKey(voice, key)) || null;
-          if (preferredVoice) break;
+          if (preferredVoice) {
+            preferredVoiceKey = getVoiceKey(preferredVoice);
+            break;
+          }
         }
         if (!preferredVoice) {
           const usPreferred = availableTtsVoices.filter(isUsEnglishVoice);
@@ -3840,6 +3844,7 @@
             || availableTtsVoices.find(voice => voice.default)
             || availableTtsVoices[0]
             || null;
+          preferredVoiceKey = preferredVoice ? getVoiceKey(preferredVoice) : null;
         }
         ttsVoiceSelect.innerHTML = '';
         const recommendedVoiceKeys = new Set(
@@ -3854,13 +3859,28 @@
           option.textContent = `${voice.name} (${voice.lang})${badge}${recommended}`;
           ttsVoiceSelect.appendChild(option);
         });
-        ttsSelectedVoice = preferredVoice || null;
-        if (ttsSelectedVoice) {
-          ttsVoiceSelect.value = getVoiceKey(ttsSelectedVoice);
-        } else if (availableTtsVoices.length) {
-          const firstVoice = availableTtsVoices[0];
-          ttsVoiceSelect.value = getVoiceKey(firstVoice);
-          ttsSelectedVoice = availableTtsVoices[0];
+        let finalVoiceKey = preferredVoiceKey;
+        if (finalVoiceKey && !availableTtsVoices.some(voice => voiceMatchesKey(voice, finalVoiceKey))) {
+          finalVoiceKey = null;
+        }
+        if (!finalVoiceKey && availableTtsVoices.length) {
+          finalVoiceKey = getVoiceKey(availableTtsVoices[0]);
+        }
+        if (finalVoiceKey) {
+          ttsVoiceSelect.value = finalVoiceKey;
+          ttsSelectedVoiceKey = finalVoiceKey;
+        } else {
+          ttsVoiceSelect.selectedIndex = -1;
+          ttsSelectedVoiceKey = null;
+        }
+        try {
+          if (ttsSelectedVoiceKey) {
+            localStorage.setItem(TTS_VOICE_STORAGE_KEY, ttsSelectedVoiceKey);
+          } else {
+            localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
+          }
+        } catch (err) {
+          // ignore storage errors
         }
         updateVoiceControlsVisibility(true);
       }
@@ -3883,8 +3903,32 @@
         clearSpeechHighlight();
         ttsSpeechState = speechData;
         ttsUtterance = new SpeechSynthesisUtterance(text);
-        const fallbackVoice = availableTtsVoices.find(v => v.default) || availableTtsVoices[0];
-        const voice = ttsSelectedVoice || fallbackVoice;
+        const currentVoices = window.speechSynthesis.getVoices();
+        const resolveVoiceByKey = key => {
+          if (!key) return null;
+          return currentVoices.find(v => voiceMatchesKey(v, key))
+            || availableTtsVoices.find(v => voiceMatchesKey(v, key))
+            || null;
+        };
+        let voice = resolveVoiceByKey(ttsSelectedVoiceKey);
+        if (!voice) {
+          const fallback = availableTtsVoices.find(v => v.default) || availableTtsVoices[0] || null;
+          if (fallback) {
+            const fallbackKey = getVoiceKey(fallback);
+            voice = resolveVoiceByKey(fallbackKey) || fallback;
+            if (voice) {
+              ttsSelectedVoiceKey = fallbackKey;
+              if (ttsVoiceSelect) {
+                ttsVoiceSelect.value = fallbackKey;
+              }
+              try {
+                localStorage.setItem(TTS_VOICE_STORAGE_KEY, fallbackKey);
+              } catch (err) {
+                // ignore storage errors
+              }
+            }
+          }
+        }
         if (voice) {
           ttsUtterance.voice = voice;
           ttsUtterance.lang = voice.lang || 'en-US';
@@ -3994,11 +4038,16 @@
         }
         if (ttsVoiceSelect) {
           ttsVoiceSelect.addEventListener('change', () => {
-            const chosen = availableTtsVoices.find(voice => voiceMatchesKey(voice, ttsVoiceSelect.value)) || null;
-            ttsSelectedVoice = chosen;
+            const selectedKey = ttsVoiceSelect.value || '';
+            const chosen = availableTtsVoices.find(voice => voiceMatchesKey(voice, selectedKey)) || null;
+            const canonicalKey = chosen ? getVoiceKey(chosen) : (selectedKey || null);
+            if (canonicalKey && canonicalKey !== ttsVoiceSelect.value) {
+              ttsVoiceSelect.value = canonicalKey;
+            }
+            ttsSelectedVoiceKey = canonicalKey || null;
             try {
-              if (chosen) {
-                localStorage.setItem(TTS_VOICE_STORAGE_KEY, getVoiceKey(chosen));
+              if (ttsSelectedVoiceKey) {
+                localStorage.setItem(TTS_VOICE_STORAGE_KEY, ttsSelectedVoiceKey);
               } else {
                 localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
               }
