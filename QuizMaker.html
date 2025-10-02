@@ -6486,6 +6486,7 @@
 
           const badge = document.createElement('span');
           badge.className = 'question-section-badge';
+          badge.setAttribute('data-tts-skip', 'true');
           const badgeText = processed < 10 ? `0${processed}` : String(processed);
           badge.textContent = badgeText;
           badge.setAttribute('aria-label', `Section ${processed}`);
@@ -6503,6 +6504,10 @@
           const keyword = heading.dataset.sectionKeyword || detectSectionKeyword(heading.textContent || '');
           if (keyword) {
             heading.dataset.sectionKeyword = keyword;
+            const headingText = (heading.textContent || '').trim().toLowerCase();
+            if (headingText === keyword) {
+              heading.setAttribute('data-tts-skip', 'true');
+            }
           }
           if (['what', 'how', 'why'].includes(keyword)) {
             card.classList.add('whw-section', `whw-${keyword}`);
