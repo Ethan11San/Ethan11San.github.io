@@ -3231,19 +3231,11 @@
 
       const getVoiceKey = voice => {
         if (!voice) return '';
-        const voiceURI = typeof voice.voiceURI === 'string' ? voice.voiceURI : '';
-        const name = typeof voice.name === 'string' ? voice.name : '';
-        const lang = typeof voice.lang === 'string' ? voice.lang : '';
-        if (voiceURI && name) {
-          return `${voiceURI}:::${name}`;
-        }
-        if (voiceURI) {
+        const { voiceURI, name = '', lang = '' } = voice;
+        if (voiceURI && typeof voiceURI === 'string') {
           return voiceURI;
         }
-        if (name || lang) {
-          return `${name}:::${lang}`;
-        }
-        return '';
+        return `${name}:::${lang}`;
       };
 
       function nodeMarkedForSpeechSkip(node) {
