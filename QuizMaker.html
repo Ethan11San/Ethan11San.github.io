@@ -105,6 +105,98 @@
       flex-direction: column;
       height: 100vh;
     }
+    #folderSection {
+      margin-bottom: 16px;
+    }
+    #folderSection.collapsed {
+      margin-bottom: 6px;
+    }
+    #folderToggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: #ecf0f1;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: .5px;
+      padding: 0;
+      cursor: pointer;
+      transition: color .2s ease;
+    }
+    #folderToggle .title {
+      flex: 1;
+      text-align: left;
+    }
+    #folderToggle:hover {
+      color: #ffffff;
+    }
+    #folderToggle:hover .chevron {
+      border-color: rgba(236,240,241,0.5);
+      background: rgba(236,240,241,0.12);
+    }
+    #folderToggle:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 4px;
+    }
+    #folderToggle .chevron {
+      flex: 0 0 auto;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(236,240,241,0.35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    #folderToggle .chevron::before {
+      content: '\25BC';
+      display: inline-block;
+      transition: transform .25s ease;
+    }
+    #folderSection.collapsed #folderToggle .chevron::before {
+      transform: rotate(-90deg);
+    }
+    #folderSection.collapsed #folderToggle .chevron {
+      background: rgba(236,240,241,0.1);
+      border-color: rgba(236,240,241,0.2);
+    }
+    #folderSection.collapsed #folderToggle:hover .chevron {
+      border-color: rgba(236,240,241,0.35);
+      background: rgba(236,240,241,0.16);
+    }
+    #folderSection .collapsible-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      overflow: hidden;
+      transition: grid-template-rows .28s ease, opacity .2s ease;
+      opacity: 1;
+    }
+    #folderSection .collapsible-body.no-animate {
+      transition: none !important;
+    }
+    #folderSection.collapsed .collapsible-body {
+      grid-template-rows: 0fr;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #folderSection .collapsible-content {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 10px;
+    }
+    #folderSection .folder-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
     /* QuestionControls button accents */
     #addFillBtn { border-left: 4px solid #1abc9c; }
     #addLabelBtn { border-left: 4px solid #e67e22; }
@@ -183,6 +275,11 @@
       border: none;
       border-radius: 4px;
     }
+    #folderSection .folder-actions #newFolderName {
+      flex: 1;
+      width: auto;
+      margin-bottom: 0;
+    }
     #addFolderBtn, #addSectionBtn {
       padding: 6px 12px;
       border: none;
@@ -192,7 +289,16 @@
       cursor: pointer;
       transition: background .2s;
     }
+    #folderSection .folder-actions #addFolderBtn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
     #addFolderBtn:hover, #addSectionBtn:hover { background: #d35400; }
+    #folderSection .folder-divider {
+      border: 1px solid #34495e;
+      opacity: .2;
+      margin: 12px 0 4px;
+    }
 
     /* —— Main Area & Header —— */
     #main { flex: 1; display: flex; flex-direction: column; }
@@ -1178,15 +1284,26 @@
   </div>
 
   <div id="sidebar">
-    <h3>Folders</h3>
-    <ul id="folders" class="nav"></ul>
-    <input id="newFolderName" placeholder="New folder name">
-    <button id="addFolderBtn">Add Folder</button>
-    <div id="desktopLocalBtns">
-      <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
-      <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
+    <div id="folderSection" class="collapsible expanded">
+      <button id="folderToggle" type="button" aria-expanded="true" aria-controls="foldersSectionBody">
+        <span class="title">Folders</span>
+        <span class="chevron" aria-hidden="true"></span>
+      </button>
+      <div id="foldersSectionBody" class="collapsible-body">
+        <div class="collapsible-content">
+          <ul id="folders" class="nav"></ul>
+          <div class="folder-actions">
+            <input id="newFolderName" placeholder="New folder name">
+            <button id="addFolderBtn">Add Folder</button>
+          </div>
+          <div id="desktopLocalBtns">
+            <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
+            <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
+          </div>
+          <hr class="folder-divider">
+        </div>
+      </div>
     </div>
-    <hr style="border:1px solid #34495e;opacity:.2;margin:20px 0;">
     <h3>Questions</h3>
     <div style="position: relative; margin-bottom: 8px;">
       <input type="text" id="sectionSearch"
@@ -3247,6 +3364,62 @@
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const folderSection = document.getElementById('folderSection');
+      const folderToggle = document.getElementById('folderToggle');
+      const folderCollapseBody = folderSection ? folderSection.querySelector('.collapsible-body') : null;
+      const FOLDER_COLLAPSE_STORAGE_KEY = 'quizmaker-folders-collapsed';
+
+      const isDesktopLayout = () => !document.body.classList.contains('mobile');
+
+      const setFolderCollapsed = (collapsed, { persist = true, immediate = false } = {}) => {
+        if (!folderSection || !folderToggle) return;
+        if (!isDesktopLayout()) {
+          collapsed = false;
+        }
+        folderSection.classList.toggle('collapsed', collapsed);
+        folderSection.classList.toggle('expanded', !collapsed);
+        folderToggle.setAttribute('aria-expanded', String(!collapsed));
+        folderToggle.setAttribute('title', collapsed ? 'Expand folders' : 'Collapse folders');
+        if (folderCollapseBody && immediate) {
+          folderCollapseBody.classList.add('no-animate');
+          requestAnimationFrame(() => folderCollapseBody.classList.remove('no-animate'));
+        }
+        if (persist && isDesktopLayout()) {
+          try {
+            localStorage.setItem(FOLDER_COLLAPSE_STORAGE_KEY, collapsed ? 'true' : 'false');
+          } catch (err) {
+            // ignore storage errors
+          }
+        }
+      };
+
+      const readFolderCollapsePreference = () => {
+        try {
+          return localStorage.getItem(FOLDER_COLLAPSE_STORAGE_KEY) === 'true';
+        } catch (err) {
+          return false;
+        }
+      };
+
+      const syncFolderCollapseForEnvironment = (immediate = false) => {
+        if (!folderSection || !folderToggle) return;
+        if (isDesktopLayout()) {
+          setFolderCollapsed(readFolderCollapsePreference(), { persist: false, immediate });
+        } else {
+          setFolderCollapsed(false, { persist: false, immediate });
+        }
+      };
+
+      if (folderSection && folderToggle) {
+        syncFolderCollapseForEnvironment(true);
+        folderToggle.addEventListener('click', () => {
+          if (!isDesktopLayout()) return;
+          const nextState = !folderSection.classList.contains('collapsed');
+          setFolderCollapsed(nextState);
+        });
+        const bodyClassObserver = new MutationObserver(() => syncFolderCollapseForEnvironment(true));
+        bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      }
 
       const supportsSpeechSynthesis = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
       const TTS_VOICE_STORAGE_KEY = 'quizmaker-tts-voice';
