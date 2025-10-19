@@ -2623,7 +2623,12 @@
                 mobileOpenFolders.add(idx);
                 buildMobileFolderList();
                 enterEdit();
-                if (currentSection !== null) loadSection();
+                if (currentSection !== null) {
+                  loadSection();
+                } else {
+                  updateHeader('');
+                  showEmptyFolderState();
+                }
               }
             });
             sContent.onclick = e => {
@@ -4924,6 +4929,7 @@
                 loadSection();
               } else {
                 updateHeader('');
+                showEmptyFolderState();
               }
             }
           };
@@ -4965,6 +4971,7 @@
                 loadSection();
               } else {
                 updateHeader('');
+                showEmptyFolderState();
               }
             }
           };
@@ -5080,6 +5087,26 @@
           li.appendChild(delS);
           sectionsUL.appendChild(li);
         });
+      }
+
+      function showEmptyFolderState() {
+        if (currentFolder === null || isQuizMode) return;
+        if (typeof quill !== 'undefined') {
+          quill.setContents([]);
+          quill.history.clear();
+          adjustEditorHeight();
+        }
+        if (editorDiv) editorDiv.style.display = 'none';
+        if (labelEditor) labelEditor.style.display = 'none';
+        if (previewDiv) {
+          previewDiv.style.display = 'block';
+          previewDiv.innerHTML = '<p style="color:#7f8c8d;font-style:italic;">No questions in this folder yet. Use the buttons below to add one.</p>';
+        }
+        if (altContainer) {
+          altContainer.style.display = 'none';
+          altContainer.innerHTML = '';
+        }
+        if (addPictureBtn) addPictureBtn.style.display = 'none';
       }
 
       // Filter and reorder sections based on search input
@@ -6520,6 +6547,9 @@
         altContainer.style.display = 'none';
         altContainer.innerHTML = '';
         renderSections(lastSectionOrder);
+        if (currentFolder !== null && currentSection === null) {
+          showEmptyFolderState();
+        }
         updateProgressIndicator();
         updateResumeQuizBtn();
       }
