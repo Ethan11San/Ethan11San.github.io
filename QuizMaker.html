@@ -834,6 +834,23 @@
     #hintBtn:hover, #editQuestionBtn:hover {
       background: #71368a;
     }
+    #ttsToggleBtn {
+      margin-top: 20px;
+      padding: 6px 18px;
+      border: none;
+      border-radius: 4px;
+      background: #8e44ad;
+      color: #fff;
+      cursor: pointer;
+      transition: background .2s;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    #ttsToggleBtn:hover {
+      background: #71368a;
+    }
     #toggleAnswersBtn {
       margin-top: 20px;
       padding: 6px 18px;
@@ -1383,6 +1400,7 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
+      <button id="ttsToggleBtn" type="button">🎤 Voice Options</button>
       <div id="ttsControls">
         <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
         <button id="ttsPauseBtn" type="button" disabled>⏸️ Pause</button>
@@ -3356,7 +3374,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsToggleBtn = document.getElementById('ttsToggleBtn'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -3438,6 +3456,13 @@
       let availableTtsVoices = [];
       let ttsSelectedVoiceKey = null;
       let ttsRate = 1;
+      let ttsControlsVisible = false;
+      let ttsControlsDisplayMode = supportsSpeechSynthesis ? 'flex' : 'block';
+      const ttsToggleShowText = ttsToggleBtn && ttsToggleBtn.textContent
+        ? ttsToggleBtn.textContent.trim()
+        : '🎤 Voice Options';
+      const ttsToggleHideText = (ttsToggleBtn && ttsToggleBtn.getAttribute('data-hide-label'))
+        || '🙈 Hide Voice Options';
 
       const buildVoiceKey = (...parts) => parts
         .filter(part => typeof part === 'string' && part !== '')
@@ -3913,6 +3938,17 @@
         }
       }
 
+      function setTtsControlsVisibility(visible) {
+        if (!ttsControls) return;
+        ttsControlsVisible = !!visible;
+        const targetDisplay = ttsControlsVisible ? ttsControlsDisplayMode : 'none';
+        ttsControls.style.display = targetDisplay;
+        if (ttsToggleBtn) {
+          ttsToggleBtn.setAttribute('aria-expanded', ttsControlsVisible ? 'true' : 'false');
+          ttsToggleBtn.textContent = ttsControlsVisible ? ttsToggleHideText : ttsToggleShowText;
+        }
+      }
+
       function updateRateValueDisplay() {
         if (!ttsRateValue) return;
         const formatted = `${ttsRate.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}×`;
@@ -4183,8 +4219,21 @@
       }
 
       if (ttsControls) {
+        ttsControlsDisplayMode = supportsSpeechSynthesis ? 'flex' : 'block';
+        if (ttsToggleBtn) {
+          ttsToggleBtn.style.display = 'inline-flex';
+          ttsToggleBtn.setAttribute('aria-controls', 'ttsControls');
+        }
+        setTtsControlsVisibility(false);
+        if (ttsToggleBtn) {
+          ttsToggleBtn.addEventListener('click', () => {
+            setTtsControlsVisibility(!ttsControlsVisible);
+            if (ttsControlsVisible && supportsSpeechSynthesis) {
+              updateTtsButtons();
+            }
+          });
+        }
         if (supportsSpeechSynthesis) {
-          ttsControls.style.display = 'flex';
           updateVoiceControlsVisibility(false);
           initializeTtsRate();
           populateVoiceOptions();
@@ -4220,7 +4269,6 @@
           updateTtsHint();
           updateTtsButtons();
         } else {
-          ttsControls.style.display = 'block';
           if (ttsSpeakBtn) ttsSpeakBtn.style.display = 'none';
           if (ttsPauseBtn) ttsPauseBtn.style.display = 'none';
           if (ttsStopBtn) ttsStopBtn.style.display = 'none';
