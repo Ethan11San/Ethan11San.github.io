@@ -11,41 +11,42 @@
           },
           "hidden": [
             {
-              "occ": 1,
-              "word": "Pilot"
+              "word": "Pilot",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Certificate"
+              "word": "Certificate",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "18"
+              "word": "18",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Photo"
+              "word": "Photo",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "Medical"
+              "word": "Medical",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "24"
+              "word": "24",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "NWKRAFT"
+              "word": "NWKRAFT",
+              "occ": 1
             },
             {
-              "occ": 1,
-              "word": "ID"
+              "word": "ID",
+              "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\n\nHow:\n\nWhy:\n",
-          "title": "Requirements to Fly"
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>﻿What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "﻿What\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\nHow\nWhy\n",
+          "title": "Requirements to Fly",
+          "type": "fill"
         },
         {
           "alts": {},
@@ -299,7 +300,8 @@
           ],
           "rawHtml": "<h3>What</h3><p>Required Aircraft Documents - ARROW  (91.203)</p><p>\t• Airworthiness Certificate - Visible to Passengers </p><p>\t• Registration Certificate - Expires every 7 years or if sold</p><p>\t• Radio Station License - For international Use - 10 year duration</p><p>\t• Operating Limitations - Placards, Markings, POH/AFM</p><p>\t• Weight and Balance Info - POH/AFM</p><p><br></p><p>Bonus - CAP</p><p>        • Compass Deviation Card</p><p>        • Avionics Reference Guide</p><p>        • Permit - Ferry / Special Flight Permit</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nRequired Aircraft Documents - ARROW  (91.203)\n\t• Airworthiness Certificate - Visible to Passengers \n\t• Registration Certificate - Expires every 7 years or if sold\n\t• Radio Station License - For international Use - 10 year duration\n\t• Operating Limitations - Placards, Markings, POH/AFM\n\t• Weight and Balance Info - POH/AFM\n\nBonus - CAP\n        • Compass Deviation Card\n        • Avionics Reference Guide\n        • Permit - Ferry / Special Flight Permit\n\nHow:\n\nWhy:\n",
-          "title": "Required Aircraft Documents - (91.203)"
+          "title": "Required Aircraft Documents - (91.203)",
+          "type": "fill"
         },
         {
           "alts": {},
@@ -339,7 +341,8 @@
           ],
           "rawHtml": "<h3>What</h3><p>Carrying Passengers (61.57)</p><p>\t◊ 3 Takeoff and Landings</p><p>\t◊ Same Category and Class and Type if Required</p><p>\t◊ Within 90 Days</p><p>*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. </p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nCarrying Passengers (61.57)\n\t◊ 3 Takeoff and Landings\n\t◊ Same Category and Class and Type if Required\n\t◊ Within 90 Days\n*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. \n\nHow:\n\nWhy:\n",
-          "title": "Requirements to Carry Passengers (61.57)"
+          "title": "Requirements to Carry Passengers (61.57)",
+          "type": "fill"
         },
         {
           "alts": {},
@@ -374,7 +377,7 @@
             }
           ],
           "hidden": [],
-          "image": "",
+          "image": "images/8ae9c150f07ff2eef7fbc6f143a5f98ae9da21273960d7e8293517b98031569c.png",
           "imgHeight": 566,
           "imgWidth": 1072,
           "labels": [
@@ -806,8 +809,8 @@
               "word": "Days"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Change of Address (61.60)\nMust Notify FAA within 30 Days or can no longer use pilot privileges.\nCan login and update it instantly online through FAA website.\n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nChange of Address (61.60)\nMust Notify FAA within 30 Days or can no longer use pilot privileges.\nCan login and update it instantly online through FAA website.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Change of Address (61.60)</p><p>Must Notify FAA within 30 Days or can no longer use pilot privileges.</p><p>Can login and update it instantly online through FAA website.</p><h3>How</h3><p><br></p><h3>Why</h3>",
+          "rawText": "What\nChange of Address (61.60)\nMust Notify FAA within 30 Days or can no longer use pilot privileges.\nCan login and update it instantly online through FAA website.\nHow\n\nWhy\n",
           "type": "fill",
           "title": "Change of Address"
         },
@@ -864,8 +867,8 @@
               "word": "Above"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Transponder Requirements (91.215)</p><p>\t◊ Class A | B | and C</p><p>\t◊ Above Class B and C</p><p>\t◊ Mode C Veil - 30 NM around Class B .</p><p>\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nTransponder Requirements (91.215)\n\t◊ Class A | B | and C\n\t◊ Above Class B and C\n\t◊ Mode C Veil - 30 NM around Class B .\n\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Transponder Requirements (91.215)</p><p>\t◊ Class A | B | and C</p><p>\t◊ Above Class B and C</p><p>\t◊ Mode C Veil - 30 NM around Class B .</p><p>\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p>",
+          "rawText": "﻿Transponder Requirements (91.215)\n\t◊ Class A | B | and C\n\t◊ Above Class B and C\n\t◊ Mode C Veil - 30 NM around Class B .\n\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n",
           "type": "fill",
           "title": "Transponder Requirements"
         },
@@ -1606,6 +1609,24 @@
           "rawText": "What:\n\nAnnual Inspection\n\nAirworthiness Directives\n   Published by FAA and are Mandatory\nVOR Equipment\nRequired for IFR - 30 Days\n100 Hour\nRequired for Hire\nAltimeter and Static \nRequired for IFR - 24 Months\nTransponder\n24 Months\nELT\n< 50% Battery | 1 hour cumulative use | 12 Months. Can be used within 50NM for 90 days after removal.\n\nHow:\n\nWhy:\n",
           "title": "AVVIATE",
           "type": "fill"
+        },
+        {
+          "title": "Required Inspections (AVVIATE)",
+          "rawText": "﻿﻿﻿Required Inspections - AAVIATE\nAnnual\nAirworthiness Directives\nVOR Equipment\n100 Hour\nAltimeter and Static Systems \nTransponder \nELT\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿Required Inspections - AAVIATE</p><p>Annual</p><p>Airworthiness Directives</p><p>VOR Equipment</p><p>100 Hour</p><p>Altimeter and Static Systems </p><p>Transponder </p><p>ELT</p>",
+          "hidden": {
+            "0": {
+              "word": "Transponder",
+              "occ": 1,
+              "reveal": "- Required every 24 Calendar Months"
+            },
+            "1": {
+              "word": "Altimeter",
+              "occ": 1,
+              "reveal": "testing test 123 123"
+            },
+            "length": 2
+          }
         }
       ],
       "color": "#ffb43f"
@@ -2019,8 +2040,8 @@
               "word": "descents"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Four Left Turning Tendencies</p><p><strong>1:</strong> Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.</p><p>The action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.</p><p><strong>2:</strong> <span class=\"popup-word\">*Gyroscopic Precession</span> - When you pitch up force is applied to the bottom of the spinning propeller,</p><p>this then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,</p><p>It is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nFour Left Turning Tendencies\n1: Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.\nThe action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.\n2: P Factor - In High angles of attack the downward moving blade is facing into the wind more so it has a higher angle of attack also.\nThis means it's generating more thrust on the right downward moving side generating more thrust and making a yaw to the left.\n3: Spiraling Slipstream - At High power settings and low airspeeds the wind from the propeller spirals around the plane.\nThis eventually hits the vertical stabilizer on the left side pushing it creating a yaw to the left.\n4: *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,\nthis then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,\nIt is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Four Left Turning Tendencies</p><p><strong>1:</strong> Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.</p><p>The action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.</p><p><strong>2:</strong> *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,</p><p>this then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,</p><p>It is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.</p>",
+          "rawText": "Four Left Turning Tendencies\n1: Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.\nThe action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.\n2: *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,\nthis then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,\nIt is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.\n",
           "title": "Left Turning Tendencies",
           "type": "fill"
         },
@@ -2271,7 +2292,8 @@
               "alts": {},
               "hidden": [],
               "labelText": "Extra",
-              "rawText": "Chart is issued every 3 hours\n"
+              "rawText": "Chart is issued every 3 hours\n",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
@@ -2286,49 +2308,57 @@
                 }
               ],
               "labelText": "Cold Front",
-              "rawText": "A line of fast moving cold air the pushes warmer air upward aggressively leading to thunderstorms and bad weather. Signs of one are a high dew point and falling barometric pressure.\nWeather it can cause included cumulonimbus clouds, unstable air, heavy showers, temperature and dew point and pressure drop, after passage weather clears quickly. "
+              "rawText": "A line of fast moving cold air the pushes warmer air upward aggressively leading to thunderstorms and bad weather. Signs of one are a high dew point and falling barometric pressure.\nWeather it can cause included cumulonimbus clouds, unstable air, heavy showers, temperature and dew point and pressure drop, after passage weather clears quickly. ",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Warm Front",
-              "rawText": "Warm air gradually slides over top of a colder air mass leading to warmer temperatures, low ceilings and visibility, steady rain, weather can linger longer than in a cold front. "
+              "rawText": "Warm air gradually slides over top of a colder air mass leading to warmer temperatures, low ceilings and visibility, steady rain, weather can linger longer than in a cold front. ",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Stationary Front",
-              "rawText": "Occurs when two air masses of similar strength meet and leads to a mixture of weather from both fronts."
+              "rawText": "Occurs when two air masses of similar strength meet and leads to a mixture of weather from both fronts.",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Occluded Front",
-              "rawText": "A fast moving cold front catches up to a slower moving warm front, as it approaches expect warm front weather followed immediately by cold front weather.\nCan be either a cold or warm front occlusion based on if the air in front of the warm front is warmer or colder than the cold front. Warm Front Occlusions can be severe and convective. "
+              "rawText": "A fast moving cold front catches up to a slower moving warm front, as it approaches expect warm front weather followed immediately by cold front weather.\nCan be either a cold or warm front occlusion based on if the air in front of the warm front is warmer or colder than the cold front. Warm Front Occlusions can be severe and convective. ",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Isobar",
-              "rawText": "Connect lines of equal pressure - Lines closer together indicate a steep pressure gradient which makes air more inclined to move"
+              "rawText": "Connect lines of equal pressure - Lines closer together indicate a steep pressure gradient which makes air more inclined to move",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Trough",
-              "rawText": "An elongated area of low pressure"
+              "rawText": "An elongated area of low pressure",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "Low Pressure System",
-              "rawText": "Air flows Counter Clockwise, Inward, and Upward, which generally leads to worse weather and unstable air."
+              "rawText": "Air flows Counter Clockwise, Inward, and Upward, which generally leads to worse weather and unstable air.",
+              "hideUntilSolved": true
             },
             {
               "alts": {},
               "hidden": [],
               "labelText": "High Pressure System",
-              "rawText": "Air flows Clockwise, Outward, and Downward which generally leads to more stable conditions."
+              "rawText": "Air flows Clockwise, Outward, and Downward which generally leads to more stable conditions.",
+              "hideUntilSolved": true
             }
           ],
           "hidden": [],
@@ -2409,8 +2439,8 @@
               "y": 31
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can be indicated by ice pellets or freezing rain.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan be indicated by ice pellets or freezing rain.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<p><br></p>",
+          "rawText": "\n",
           "title": "Surface Analysis Chart",
           "type": "label"
         },
@@ -2633,39 +2663,12 @@
               "word": "Shear"
             },
             {
-              "word": "Surface"
-            },
-            {
-              "word": "Winds"
-            },
-            {
-              "word": "30"
-            },
-            {
-              "word": "1000"
-            },
-            {
-              "word": "3"
-            },
-            {
-              "word": "50"
-            },
-            {
-              "occ": 2,
-              "word": "Moderate"
-            },
-            {
-              "occ": 1,
-              "word": "Icing"
-            },
-            {
-              "word": "moderate"
-            },
-            {
-              "word": "6"
-            },
-            {
+              "word": "Moderate",
               "occ": 2
+            },
+            {
+              "word": "Icing",
+              "occ": 1
             }
           ],
           "rawHtml": "<h3>What</h3><p><strong>Airmen's Meteorological Information</strong></p><p>AIRMETs are forecast weather advisories depicting where moderate hazards may occur.</p><p>Issued every 6 hours and valid for 6 hours</p><p>Three Types:</p><p>Tango - Moderate Turbulence | Low Level Wind Shear | Sustained Surface Winds of 30 Knots or more.</p><p>Sierra - Ceilings Less than 1000 ft and/or visibility less than 3 SM affecting over 50 % of the area.</p><p>Zulu - Moderate Icing | Provides Freezing Level Heights</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
@@ -3893,11 +3896,8 @@
               "word": "Military"
             },
             {
-              "word": "Operation"
-            },
-            {
-              "occ": 4,
-              "word": "Area"
+              "word": "Area",
+              "occ": 4
             },
             {
               "occ": 1,
@@ -3912,38 +3912,20 @@
               "word": "Controlled"
             },
             {
-              "word": "Firing"
-            },
-            {
-              "word": "Areas"
-            },
-            {
               "occ": 2,
               "word": "National"
             },
             {
-              "occ": 1,
-              "word": "Security"
+              "word": "Security",
+              "occ": 1
             },
             {
-              "occ": 6,
-              "word": "Area"
+              "word": "Area",
+              "occ": 6
             },
             {
               "occ": 1,
               "word": "Flight"
-            },
-            {
-              "word": "Restrictions"
-            },
-            {
-              "word": "MCPRAWN"
-            },
-            {
-              "word": "TTS"
-            },
-            {
-              "word": "Special"
             },
             {
               "occ": 2,
@@ -3958,17 +3940,8 @@
               "word": "Area,"
             },
             {
-              "occ": 1,
-              "word": "Terminal"
-            },
-            {
-              "word": "Radar"
-            },
-            {
-              "word": "Service"
-            },
-            {
-              "word": "Area,"
+              "word": "Terminal",
+              "occ": 1
             }
           ],
           "rawHtml": "<h3>What</h3><p>Acronyms - MCPRAWN TTS</p><ul><li>Military Operation Area (MOA) - Used to separate IFR traffic from military operations and warn VFR traffic of possible high speed military activity.</li><li>Controlled Firing Areas (CFA) - Not Charted because there is a spotter looking out for aircraft to stop the potentially hazardous activities. </li><li>Prohibited Area - (P-40) Aircraft are prohibited to enter, examples include Camp David, National Mall, Heightened national security areas.</li><li>Restricted Area - (R-41) While active aircraft cannot enter, need permission from controlling agency when active. Contains activities hazardous to non participating aircraft. </li><li>Alert Area - Used to warn pilots of large volumes of training activity or unusual aerial activity.</li><li>Warning Area - (W-42) Extends starting 3 NM off the coast outwards and warns pilots of hazardous activity, use cation when entering.</li><li>National Security Area (NSA) - Where increased security is required for ground facilities, Pilots requested to avoid and sometimes prohibited based on NOTAMs.</li></ul><p>Intercept Procedures if you accidentally bust restricted airspace -</p><p>Squawk 7700, communicate on 121.5, rock wings to acknowledge instructions, follow the interceptor aircraft. </p><p>*Bonus <strong>ADIZ</strong> - Air Defense Identification Zone, must have to way radio and mode C transponder to identify yourself and be on flight plan.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>RSA - Terminal Radar Service Area, Pilots encouraged to contact radio and get radar services.</p><p> <span style=\"color: rgb(230, 0, 0);\">T</span>emporary Flight Restrictions (TFR) - Avoid traffic congestion over sporting events, protect President, etc.</p><p> <strong style=\"color: rgb(230, 0, 0);\">S</strong><strong>FRA</strong> - Special Flight Rules Area, Unique air traffic control rules apply here.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
@@ -4644,7 +4617,7 @@
             }
           ],
           "rawHtml": "<h3>What</h3><p>Attitude Heading Reference System (AHRS)</p><p>Replaces the Gyroscopic System with micro-electronic Gyros that use vibrations, accelerometers that use gravitational force, and a magnetometer or flux valve that measures the Earth's magnetic field strength and direction. Rate and tilt sensors.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nAttitude Heading Reference System (AHRS)\nReplaces the Gyroscopic System with micro-electronic Gyros that use vibrations, accelerometers that use gravitational force, and a magnetometer or flux valve that measures the Earth's magnetic field strength and direction. Rate and tilt sensors.\n\nHow:\n\nWhy:\n",
+          "rawText": "Attitude Heading Reference System (AHRS)\nReplaces the Gyroscopic System with micro-electronic Gyros that use vibrations, accelerometers that use gravitational force, and a magnetometer or flux valve that measures the Earth's magnetic field strength and direction. Rate and tilt sensors.\n",
           "title": "",
           "type": "fill"
         },
@@ -5325,8 +5298,8 @@
               "y": 36
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Single disc, hydraulically actuated brake on each main gear wheel, </p><p>Each brake is connected by a small hydraulic line going to a master cylinder connected to the brake pedals.</p><p>There are two <span class=\"popup-word\">master cylinders</span> one on each of the left seats brake pedals.</p><p>The Right seat breaks are mechanically linked to the left seats and push down on the master cylinders as well.</p><p>Pushing on the break pushes down on the master cylinders which sends hydraulic fluid through the lines </p><p>into the break assembly which then pushes against another piston that clamps the break pads</p><p>against the steel wheel disc that spin with the wheel, this creates friction slowing the rotation.</p><p><br></p><p>Hydraulic Fluid color is a light red</p><p>If the brakes feel spongy on landing you can try pumping them to build up pressure with the fluid.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nSingle disc, hydraulically actuated brake on each main gear wheel, \nEach brake is connected by a small hydraulic line going to a master cylinder connected to the brake pedals.\nThere are two master cylinders one on each of the left seats brake pedals.\nThe Right seat breaks are mechanically linked to the left seats and push down on the master cylinders as well.\nPushing on the break pushes down on the master cylinders which sends hydraulic fluid through the lines \ninto the break assembly which then pushes against another piston that clamps the break pads\nagainst the steel wheel disc that spin with the wheel, this creates friction slowing the rotation.\n\nHydraulic Fluid color is a light red\nIf the brakes feel spongy on landing you can try pumping them to build up pressure with the fluid.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<p><br></p>",
+          "rawText": "\n",
           "title": "Electrical System",
           "type": "label"
         },
@@ -6943,7 +6916,8 @@
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "type": "acronym",
           "hidden": [],
-          "alts": {}
+          "alts": {},
+          "rawHtml": "<p>What:</p><p></p><p>How:</p><p></p><p>Why:</p><p></p>"
         },
         {
           "type": "fill",
@@ -6954,7 +6928,85 @@
     },
     {
       "name": "Instruction",
-      "sections": []
+      "sections": [
+        {
+          "type": "fill",
+          "title": "Principles of Learning",
+          "rawText": "Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
+          "hidden": [
+            {
+              "word": "Readiness",
+              "occ": 1
+            },
+            {
+              "word": "Exercise",
+              "occ": 1
+            },
+            {
+              "word": "Effect",
+              "occ": 1
+            },
+            {
+              "word": "Primacy",
+              "occ": 1
+            },
+            {
+              "word": "Intensity",
+              "occ": 1
+            },
+            {
+              "word": "Recency",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
+        },
+        {
+          "type": "fill",
+          "title": "Types of Motivation",
+          "rawText": "Tangible Motivation - Students want their efforts to be noticeably rewarded.\n\nWant to mostly avoid Negative Motivations as well.\n",
+          "rawHtml": "<p>Tangible Motivation - Students want their efforts to be noticeably rewarded.</p><p><br></p><p>Want to mostly avoid Negative Motivations as well.</p>"
+        },
+        {
+          "type": "fill",
+          "title": "Perception",
+          "rawText": "Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. \n\nLearning has been seen to occur more rapidly when info is received from more than one sense. \n",
+          "rawHtml": "<p>Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. </p><p><br></p><p>Learning has been seen to occur more rapidly when info is received from more than one sense. </p>"
+        },
+        {
+          "type": "fill",
+          "title": "Four Levels of Learning",
+          "rawText": "﻿Rote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>"
+        },
+        {
+          "type": "fill",
+          "title": "Three Domains of Learning",
+          "rawText": "﻿﻿Cognitive Domain - Mental Skills, Reasoning, Memory, Understanding.\n\nAffective Domain - Emotions, values, attitudes. \n\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and Characterization.\n\nPsychomotor Domain - Coordination, Physical Movement, Muscle Memory. \n",
+          "hidden": [
+            {
+              "word": "Affective",
+              "occ": 1
+            },
+            {
+              "word": "Psychomotor",
+              "occ": 1
+            },
+            {
+              "word": "Cognitive",
+              "occ": 1
+            }
+          ],
+          "rawHtml": "<p>﻿<strong>﻿Cognitive Domain</strong> - Mental Skills, Reasoning, Memory, Understanding.</p><p><br></p><p><strong>Affective Domain </strong>- Emotions, values, attitudes. </p><p>\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and <strong>Characterization</strong>.</p><p><br></p><p><strong>Psychomotor Domain</strong> - Coordination, Physical Movement, Muscle Memory. </p>"
+        },
+        {
+          "type": "fill",
+          "title": "Theoring of Learning",
+          "rawText": "Fading - A person forgets information not used for an extended period of time.\n\n",
+          "rawHtml": "<p>Fading - A person forgets information not used for an extended period of time.</p><p><br></p>"
+        }
+      ],
+      "color": "#004d65"
     }
   ]
 }
