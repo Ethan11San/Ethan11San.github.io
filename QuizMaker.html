@@ -100,10 +100,30 @@
       width: 240px;
       background: #2c3e50;
       color: #ecf0f1;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       height: 100vh;
+      position: relative;
+      overflow: visible;
+      transition: width .25s ease, padding .25s ease;
+      padding: 0;
+    }
+    #sidebarMainContent {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 20px;
+      gap: 12px;
+      height: 100%;
+    }
+    #sidebarMainContent > h3 {
+      margin-top: 8px;
+    }
+    .folder-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
     }
     #folderSection {
       margin-bottom: 16px;
@@ -158,6 +178,65 @@
       content: '\25BC';
       display: inline-block;
       transition: transform .25s ease;
+    }
+    #sidebarModeMenuBtn {
+      flex: 0 0 auto;
+      background: rgba(236,240,241,0.12);
+      border: 1px solid rgba(236,240,241,0.2);
+      color: #ecf0f1;
+      border-radius: 6px;
+      padding: 4px 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background .2s ease, border-color .2s ease, color .2s ease;
+    }
+    #sidebarModeMenuBtn:hover {
+      background: rgba(236,240,241,0.25);
+      border-color: rgba(236,240,241,0.45);
+      color: #ffffff;
+    }
+    #sidebarModeMenuBtn:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 3px;
+    }
+    #sidebarModeMenu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      background: #34495e;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      min-width: 190px;
+      z-index: 40;
+    }
+    #sidebarModeMenu.open {
+      display: flex;
+    }
+    #sidebarModeMenu button {
+      background: none;
+      border: none;
+      color: #ecf0f1;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background .2s ease, color .2s ease;
+    }
+    #sidebarModeMenu button:hover {
+      background: rgba(236,240,241,0.12);
+      color: #ffffff;
+    }
+    #sidebarModeMenu button.active {
+      background: rgba(26,188,156,0.28);
+      color: #ffffff;
+    }
+    #sidebarModeMenu button:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 2px;
     }
     #folderSection.collapsed #folderToggle .chevron::before {
       transform: rotate(-90deg);
@@ -299,6 +378,160 @@
       border: 1px solid #34495e;
       opacity: .2;
       margin: 12px 0 4px;
+    }
+    #miniSidebarRail {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+      padding: 20px 0;
+    }
+    #miniFolderRail {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .mini-folder-chip {
+      width: 100%;
+      height: 32px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background: #1abc9c;
+      cursor: pointer;
+      position: relative;
+      transition: transform .2s ease, border-color .2s ease;
+    }
+    .mini-folder-chip:hover {
+      transform: translateX(4px);
+    }
+    .mini-folder-chip.selected {
+      border-color: rgba(236,240,241,0.9);
+    }
+    .mini-folder-chip:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 2px;
+    }
+    .mini-folder-chip::after {
+      content: attr(data-initial);
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translate(6px, -50%);
+      background: rgba(236,240,241,0.9);
+      color: #2c3e50;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+      letter-spacing: 0.05em;
+    }
+    .mini-folder-chip:hover::after,
+    .mini-folder-chip:focus-visible::after,
+    .mini-folder-chip.selected::after {
+      opacity: 1;
+      transform: translate(12px, -50%);
+    }
+    #miniUtilities {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+    .mini-utility {
+      background: rgba(236,240,241,0.12);
+      border: 1px solid rgba(236,240,241,0.25);
+      border-radius: 12px;
+      padding: 10px;
+      color: #ecf0f1;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    }
+    .mini-utility:hover {
+      background: rgba(236,240,241,0.25);
+      border-color: rgba(236,240,241,0.45);
+      transform: translateX(4px);
+    }
+    .mini-utility:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 3px;
+    }
+    #miniAddMenu {
+      position: absolute;
+      left: 72px;
+      bottom: 32px;
+      background: #34495e;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.35);
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 190px;
+      z-index: 50;
+    }
+    #miniAddMenu.open {
+      display: flex;
+    }
+    #miniAddMenu button {
+      background: none;
+      border: none;
+      color: #ecf0f1;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background .2s ease, color .2s ease;
+    }
+    #miniAddMenu button:hover {
+      background: rgba(236,240,241,0.12);
+      color: #ffffff;
+    }
+    #miniAddMenu button:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 2px;
+    }
+    #sidebar.mini {
+      width: 72px;
+      padding: 20px 14px;
+      align-items: stretch;
+    }
+    #sidebar.mini #miniSidebarRail {
+      display: flex;
+    }
+    #sidebar.mini #sidebarMainContent {
+      position: absolute;
+      top: 0;
+      left: 72px;
+      height: 100%;
+      width: 240px;
+      background: #2c3e50;
+      padding: 20px;
+      box-shadow: 10px 0 28px rgba(0,0,0,0.35);
+      display: none;
+      z-index: 45;
+    }
+    #sidebar.mini.drawer-open #sidebarMainContent {
+      display: flex;
+    }
+    #sidebar.mini.drawer-open::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.25);
+      pointer-events: none;
+      z-index: 30;
+    }
+    #sidebar:not(.mini) #miniAddMenu {
+      display: none !important;
+    }
+    #sidebar:not(.mini) #miniSidebarRail {
+      display: none;
     }
 
     /* —— Main Area & Header —— */
@@ -1302,48 +1535,71 @@
   </div>
 
   <div id="sidebar">
-    <div id="folderSection" class="collapsible expanded">
-      <button id="folderToggle" type="button" aria-expanded="true" aria-controls="foldersSectionBody">
-        <span class="title">Folders</span>
-        <span class="chevron" aria-hidden="true"></span>
-      </button>
-      <div id="foldersSectionBody" class="collapsible-body">
-        <div class="collapsible-content">
-          <ul id="folders" class="nav"></ul>
-          <div class="folder-actions">
-            <input id="newFolderName" placeholder="New folder name">
-            <button id="addFolderBtn">Add Folder</button>
-          </div>
-          <div id="desktopLocalBtns">
-            <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
-            <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
-          </div>
-          <hr class="folder-divider">
-        </div>
+    <div id="miniSidebarRail" aria-hidden="true">
+      <div id="miniFolderRail"></div>
+      <div id="miniUtilities">
+        <button id="miniExpandBtn" class="mini-utility" type="button" title="Peek full sidebar">☰</button>
+        <button id="miniSearchBtn" class="mini-utility" type="button" title="Search questions">🔍</button>
+        <button id="miniAddBtn" class="mini-utility" type="button" title="Quick add question">＋</button>
       </div>
     </div>
-    <h3>Questions</h3>
-    <div style="position: relative; margin-bottom: 8px;">
-      <input type="text" id="sectionSearch"
-             placeholder="Search questions..."
-             style="width: calc(100% - 30px);
-                    padding: 6px;
-                    border: none;
-                    border-radius: 4px;">
-      <span id="clearSearchBtn"
-            style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-                   cursor: pointer; font-size: 14px; display: none; color: #ecf0f1;">✖</span>
+    <div id="miniAddMenu">
+      <button type="button" data-action="fill">+ Fill-In Question</button>
+      <button type="button" data-action="diagram">+ Diagram Question</button>
+      <button type="button" data-action="acronym">+ Acronym Question</button>
     </div>
-    <!-- Scrollable questions list -->
-    <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
-      <ul id="sections" class="nav"></ul>
-    </div>
-    <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-      <button id="addFillBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Fill-In</button>
-      <button id="addLabelBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Diagram</button>
-      <button id="addAcronymBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Acronym</button>
-      <button id="toggleDeleteBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">🗑️ Delete</button>
-      <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
+    <div id="sidebarMainContent">
+      <div id="folderSection" class="collapsible expanded">
+        <div class="folder-toggle-row">
+          <button id="folderToggle" type="button" aria-expanded="true" aria-controls="foldersSectionBody">
+            <span class="title">Folders</span>
+            <span class="chevron" aria-hidden="true"></span>
+          </button>
+          <button id="sidebarModeMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" title="Sidebar display options">⋯</button>
+          <div id="sidebarModeMenu" role="menu">
+            <button type="button" data-mode="expand" role="menuitem">Show folders</button>
+            <button type="button" data-mode="collapse" role="menuitem">Hide folders</button>
+            <button type="button" data-mode="mini" role="menuitem">Color palette</button>
+          </div>
+        </div>
+        <div id="foldersSectionBody" class="collapsible-body">
+          <div class="collapsible-content">
+            <ul id="folders" class="nav"></ul>
+            <div class="folder-actions">
+              <input id="newFolderName" placeholder="New folder name">
+              <button id="addFolderBtn">Add Folder</button>
+            </div>
+            <div id="desktopLocalBtns">
+              <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
+              <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
+            </div>
+            <hr class="folder-divider">
+          </div>
+        </div>
+      </div>
+      <h3>Questions</h3>
+      <div style="position: relative; margin-bottom: 8px;">
+        <input type="text" id="sectionSearch"
+               placeholder="Search questions..."
+               style="width: calc(100% - 30px);
+                      padding: 6px;
+                      border: none;
+                      border-radius: 4px;">
+        <span id="clearSearchBtn"
+              style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                     cursor: pointer; font-size: 14px; display: none; color: #ecf0f1;">✖</span>
+      </div>
+      <!-- Scrollable questions list -->
+      <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
+        <ul id="sections" class="nav"></ul>
+      </div>
+      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+        <button id="addFillBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Fill-In</button>
+        <button id="addLabelBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Diagram</button>
+        <button id="addAcronymBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Acronym</button>
+        <button id="toggleDeleteBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">🗑️ Delete</button>
+        <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
+      </div>
     </div>
   </div>
 
@@ -3388,12 +3644,61 @@
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      const sidebar = document.getElementById('sidebar');
+      const sidebarMainContent = document.getElementById('sidebarMainContent');
+      const sidebarModeMenuBtn = document.getElementById('sidebarModeMenuBtn');
+      const sidebarModeMenu = document.getElementById('sidebarModeMenu');
+      const miniSidebarRail = document.getElementById('miniSidebarRail');
+      const miniFolderRail = document.getElementById('miniFolderRail');
+      const miniExpandBtn = document.getElementById('miniExpandBtn');
+      const miniSearchBtn = document.getElementById('miniSearchBtn');
+      const miniAddBtn = document.getElementById('miniAddBtn');
+      const miniAddMenu = document.getElementById('miniAddMenu');
       const folderSection = document.getElementById('folderSection');
       const folderToggle = document.getElementById('folderToggle');
       const folderCollapseBody = folderSection ? folderSection.querySelector('.collapsible-body') : null;
       const FOLDER_COLLAPSE_STORAGE_KEY = 'quizmaker-folders-collapsed';
+      const SIDEBAR_MODE_STORAGE_KEY = 'quizmaker-sidebar-display';
+      let sidebarDisplayMode = 'standard';
+      let previousFolderCollapsed = false;
 
       const isDesktopLayout = () => !document.body.classList.contains('mobile');
+
+      const readSidebarModePreference = () => {
+        try {
+          return localStorage.getItem(SIDEBAR_MODE_STORAGE_KEY) === 'mini' ? 'mini' : 'standard';
+        } catch (err) {
+          return 'standard';
+        }
+      };
+
+      function updateSidebarModeMenuState() {
+        if (!sidebarModeMenu) return;
+        const buttons = sidebarModeMenu.querySelectorAll('button[data-mode]');
+        buttons.forEach(btn => {
+          const mode = btn.dataset.mode;
+          let active = false;
+          if (mode === 'mini') {
+            active = sidebarDisplayMode === 'mini';
+          } else if (mode === 'collapse') {
+            active = sidebarDisplayMode !== 'mini' && folderSection && folderSection.classList.contains('collapsed');
+          } else if (mode === 'expand') {
+            active = sidebarDisplayMode !== 'mini' && folderSection && !folderSection.classList.contains('collapsed');
+          }
+          btn.classList.toggle('active', !!active);
+        });
+      }
+
+      function closeSidebarModeMenu() {
+        if (!sidebarModeMenu || !sidebarModeMenuBtn) return;
+        sidebarModeMenu.classList.remove('open');
+        sidebarModeMenuBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      function closeMiniAddMenu() {
+        if (!miniAddMenu) return;
+        miniAddMenu.classList.remove('open');
+      }
 
       const setFolderCollapsed = (collapsed, { persist = true, immediate = false } = {}) => {
         if (!folderSection || !folderToggle) return;
@@ -3415,7 +3720,98 @@
             // ignore storage errors
           }
         }
+        if (sidebar && !sidebar.classList.contains('mini')) {
+          previousFolderCollapsed = collapsed;
+        }
+        updateSidebarModeMenuState();
       };
+
+      function updateMiniFolderSelection() {
+        if (!miniFolderRail) return;
+        Array.from(miniFolderRail.querySelectorAll('.mini-folder-chip')).forEach(chip => {
+          const idx = Number(chip.dataset.index);
+          chip.classList.toggle('selected', idx === currentFolder);
+        });
+      }
+
+      function buildMiniFolderRail() {
+        if (!miniFolderRail) return;
+        miniFolderRail.innerHTML = '';
+        if (!Array.isArray(data?.folders)) return;
+        data.folders.forEach((folder, idx) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'mini-folder-chip';
+          chip.style.background = folder?.color || '#1abc9c';
+          const name = folder?.name || `Folder ${idx + 1}`;
+          chip.setAttribute('aria-label', name);
+          chip.title = name;
+          chip.dataset.index = String(idx);
+          chip.dataset.initial = name.slice(0, 2).toUpperCase();
+          chip.addEventListener('click', evt => {
+            evt.preventDefault();
+            evt.stopPropagation();
+            const li = foldersUL && foldersUL.children ? foldersUL.children[idx] : null;
+            if (li && typeof li.click === 'function') {
+              li.click();
+            }
+            updateMiniFolderSelection();
+            if (sidebar && sidebar.classList.contains('mini')) {
+              sidebar.classList.remove('drawer-open');
+            }
+          });
+          miniFolderRail.appendChild(chip);
+        });
+        updateMiniFolderSelection();
+      }
+
+      function setSidebarDisplayMode(mode, { persist = true } = {}) {
+        if (!sidebar) return;
+        const targetMode = mode || 'standard';
+        if (targetMode === 'mini') {
+          if (sidebarDisplayMode !== 'mini') {
+            previousFolderCollapsed = folderSection ? folderSection.classList.contains('collapsed') : false;
+          }
+          sidebarDisplayMode = 'mini';
+          sidebar.classList.add('mini');
+          sidebar.classList.remove('drawer-open');
+          closeSidebarModeMenu();
+          closeMiniAddMenu();
+          if (persist) {
+            try { localStorage.setItem(SIDEBAR_MODE_STORAGE_KEY, 'mini'); } catch (err) {}
+          }
+          updateSidebarModeMenuState();
+          buildMiniFolderRail();
+          return;
+        }
+
+        const exitingMini = sidebarDisplayMode === 'mini';
+        sidebar.classList.remove('mini');
+        sidebar.classList.remove('drawer-open');
+        closeMiniAddMenu();
+        closeSidebarModeMenu();
+        sidebarDisplayMode = 'standard';
+
+        let shouldUpdateCollapse = false;
+        let collapseValue = folderSection ? folderSection.classList.contains('collapsed') : false;
+        if (targetMode === 'collapse' || targetMode === 'expand') {
+          shouldUpdateCollapse = true;
+          collapseValue = targetMode === 'collapse';
+        } else if (exitingMini) {
+          shouldUpdateCollapse = true;
+          collapseValue = previousFolderCollapsed;
+        }
+        if (shouldUpdateCollapse) {
+          setFolderCollapsed(collapseValue, { persist: true });
+        } else {
+          updateSidebarModeMenuState();
+        }
+
+        if (persist) {
+          try { localStorage.setItem(SIDEBAR_MODE_STORAGE_KEY, 'standard'); } catch (err) {}
+        }
+        buildMiniFolderRail();
+      }
 
       const readFolderCollapsePreference = () => {
         try {
@@ -3427,6 +3823,7 @@
 
       const syncFolderCollapseForEnvironment = (immediate = false) => {
         if (!folderSection || !folderToggle) return;
+        if (sidebar && sidebar.classList.contains('mini')) return;
         if (isDesktopLayout()) {
           setFolderCollapsed(readFolderCollapsePreference(), { persist: false, immediate });
         } else {
@@ -3444,6 +3841,141 @@
         const bodyClassObserver = new MutationObserver(() => syncFolderCollapseForEnvironment(true));
         bodyClassObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
       }
+
+      if (folderSection) {
+        previousFolderCollapsed = folderSection.classList.contains('collapsed');
+      }
+
+      const storedSidebarMode = readSidebarModePreference();
+      if (storedSidebarMode === 'mini') {
+        setSidebarDisplayMode('mini', { persist: false });
+      } else {
+        buildMiniFolderRail();
+        updateSidebarModeMenuState();
+      }
+
+      if (sidebarModeMenuBtn && sidebarModeMenu) {
+        sidebarModeMenuBtn.addEventListener('click', evt => {
+          evt.stopPropagation();
+          if (!isDesktopLayout()) {
+            setSidebarDisplayMode(sidebarDisplayMode === 'mini' ? 'expand' : 'mini');
+            return;
+          }
+          const willOpen = !sidebarModeMenu.classList.contains('open');
+          if (willOpen) {
+            sidebarModeMenu.classList.add('open');
+            sidebarModeMenuBtn.setAttribute('aria-expanded', 'true');
+            updateSidebarModeMenuState();
+          } else {
+            closeSidebarModeMenu();
+          }
+        });
+        sidebarModeMenu.addEventListener('click', evt => {
+          const target = evt.target.closest('button[data-mode]');
+          if (!target) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          const mode = target.dataset.mode;
+          if (mode === 'mini') setSidebarDisplayMode('mini');
+          else if (mode === 'collapse') setSidebarDisplayMode('collapse');
+          else setSidebarDisplayMode('expand');
+          closeSidebarModeMenu();
+        });
+      }
+
+      if (miniExpandBtn) {
+        miniExpandBtn.addEventListener('click', evt => {
+          if (!sidebar) return;
+          if (!sidebar.classList.contains('mini')) {
+            setSidebarDisplayMode('mini');
+            return;
+          }
+          evt.stopPropagation();
+          const willOpen = !sidebar.classList.contains('drawer-open');
+          sidebar.classList.toggle('drawer-open', willOpen);
+          closeMiniAddMenu();
+          if (willOpen && sectionSearch) {
+            setTimeout(() => sectionSearch.focus(), 150);
+          }
+        });
+      }
+
+      if (miniSearchBtn) {
+        miniSearchBtn.addEventListener('click', evt => {
+          if (!sidebar || !sidebar.classList.contains('mini')) return;
+          evt.stopPropagation();
+          sidebar.classList.add('drawer-open');
+          closeMiniAddMenu();
+          if (sectionSearch) {
+            setTimeout(() => sectionSearch.focus(), 120);
+          }
+        });
+      }
+
+      if (miniAddBtn && miniAddMenu) {
+        miniAddBtn.addEventListener('click', evt => {
+          if (!sidebar || !sidebar.classList.contains('mini')) return;
+          evt.stopPropagation();
+          const willOpen = !miniAddMenu.classList.contains('open');
+          closeMiniAddMenu();
+          if (willOpen) {
+            miniAddMenu.classList.add('open');
+            sidebar.classList.add('drawer-open');
+          }
+        });
+
+        miniAddMenu.addEventListener('click', evt => {
+          const btn = evt.target.closest('button[data-action]');
+          if (!btn) return;
+          evt.preventDefault();
+          const action = btn.dataset.action;
+          sidebar.classList.add('drawer-open');
+          closeMiniAddMenu();
+          if (action === 'fill' && addFillBtn) addFillBtn.click();
+          else if (action === 'diagram' && addLabelBtn) addLabelBtn.click();
+          else if (action === 'acronym' && addAcronymBtn) addAcronymBtn.click();
+        });
+      }
+
+      document.addEventListener('click', evt => {
+        if (sidebarModeMenu && sidebarModeMenu.classList.contains('open')) {
+          if (!sidebarModeMenu.contains(evt.target) && evt.target !== sidebarModeMenuBtn) {
+            closeSidebarModeMenu();
+          }
+        }
+        if (miniAddMenu && miniAddMenu.classList.contains('open')) {
+          if (!miniAddMenu.contains(evt.target) && evt.target !== miniAddBtn) {
+            closeMiniAddMenu();
+          }
+        }
+        if (sidebar && sidebar.classList.contains('mini') && sidebar.classList.contains('drawer-open')) {
+          if (!sidebar.contains(evt.target)) {
+            sidebar.classList.remove('drawer-open');
+            closeMiniAddMenu();
+          }
+        }
+      });
+
+      document.addEventListener('keydown', evt => {
+        if (evt.key !== 'Escape') return;
+        let handled = false;
+        if (sidebarModeMenu && sidebarModeMenu.classList.contains('open')) {
+          closeSidebarModeMenu();
+          handled = true;
+        }
+        if (miniAddMenu && miniAddMenu.classList.contains('open')) {
+          closeMiniAddMenu();
+          handled = true;
+        }
+        if (sidebar && sidebar.classList.contains('mini') && sidebar.classList.contains('drawer-open')) {
+          sidebar.classList.remove('drawer-open');
+          handled = true;
+        }
+        if (handled) {
+          evt.preventDefault();
+          evt.stopPropagation();
+        }
+      });
 
       const supportsSpeechSynthesis = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
       const TTS_VOICE_STORAGE_KEY = 'quizmaker-tts-voice';
@@ -5026,6 +5558,7 @@
           li.appendChild(delF);
           foldersUL.appendChild(li);
         });
+        buildMiniFolderRail();
       }
       function renderSections(order){
         sectionsUL.innerHTML = '';
@@ -6142,15 +6675,22 @@
                 toks.push('\n');
               } else if (node.tagName === 'BR') {
                 toks.push('\n');
-              } else if (node.tagName === 'UL') {
+              } else if (node.tagName === 'UL' || node.tagName === 'OL') {
+                const orderedList = node.tagName === 'OL';
                 node.childNodes.forEach(li => {
                   if (li.nodeType !== Node.ELEMENT_NODE || li.tagName !== 'LI') return;
                   const liTokens = (li.innerText || '').split(/(\s+)/);
                   liTokens.forEach(t => {
                     const trimmed = t.trim();
-                    if (!trimmed || trimmed === '•') return;
+                    if (!trimmed) {
+                      toks.push(t);
+                      return;
+                    }
+                    if (!orderedList && trimmed === '•') return;
+                    if (orderedList && /^[0-9]+[.)]?$/.test(trimmed)) return;
                     toks.push(t);
                   });
+                  toks.push('\n');
                 });
               } else {
                 toks.push(...(node.innerText || '').split(/(\s+)/));
@@ -6277,16 +6817,22 @@
               allTokens.push('\n');
             } else if (node.tagName === 'BR') {
               allTokens.push('\n');
-            } else if (node.tagName === 'UL') {
-              // Add tokens from each list item, skipping the leading bullet glyph
+            } else if (node.tagName === 'UL' || node.tagName === 'OL') {
+              const orderedList = node.tagName === 'OL';
               node.childNodes.forEach(liNode => {
                 if (liNode.nodeType !== Node.ELEMENT_NODE || liNode.tagName !== 'LI') return;
                 const toks = (liNode.innerText || '').split(/(\s+)/);
                 toks.forEach(t => {
                   const trimmed = t.trim();
-                  if (!trimmed || trimmed === '•') return;
+                  if (!trimmed) {
+                    allTokens.push(t);
+                    return;
+                  }
+                  if (!orderedList && trimmed === '•') return;
+                  if (orderedList && /^[0-9]+[.)]?$/.test(trimmed)) return;
                   allTokens.push(t);
                 });
+                allTokens.push('\n');
               });
             } else {
               allTokens.push(...(node.innerText||'').split(/(\s+)/));
@@ -6373,25 +6919,43 @@
                 }
               });
               previewDiv.appendChild(wrapper);
-            } else if (node.tagName === 'UL') {
-              // Flatten each list item into its own preview line with a bullet
+            } else if (node.tagName === 'UL' || node.tagName === 'OL') {
+              const orderedList = node.tagName === 'OL';
+              let nextMarker = orderedList ? parseInt(node.getAttribute('start') || '1', 10) : 1;
+              if (!Number.isFinite(nextMarker)) nextMarker = 1;
               node.childNodes.forEach(liNode => {
                 if (liNode.nodeType !== Node.ELEMENT_NODE || liNode.tagName !== 'LI') return;
 
                 const line = document.createElement('p');
                 line.className = 'preview-line';
 
-                // Actual bullet character
-                const bulletSpan = document.createElement('span');
-                bulletSpan.textContent = '• ';
-                line.appendChild(bulletSpan);
+                const markerSpan = document.createElement('span');
+                if (orderedList) {
+                  const explicit = liNode.getAttribute('value');
+                  let markerValue = nextMarker;
+                  if (explicit) {
+                    const parsed = parseInt(explicit, 10);
+                    if (Number.isFinite(parsed)) {
+                      markerValue = parsed;
+                      nextMarker = parsed;
+                    }
+                  }
+                  markerSpan.textContent = `${Number.isFinite(markerValue) ? markerValue : nextMarker}. `;
+                  nextMarker = (Number.isFinite(markerValue) ? markerValue : nextMarker) + 1;
+                } else {
+                  markerSpan.textContent = '• ';
+                }
+                line.appendChild(markerSpan);
 
                 const liTokens = (liNode.innerText || '').split(/(\s+)/);
                 liTokens.forEach(tok => {
                   if (!tok.trim()) {
                     line.appendChild(document.createTextNode(tok));
                   } else {
-                    const w = tok.trim();
+                    const trimmed = tok.trim();
+                    if (!orderedList && trimmed === '•') return;
+                    if (orderedList && /^[0-9]+[.)]?$/.test(trimmed)) return;
+                    const w = trimmed;
                     globalCounts[w] = (globalCounts[w] || 0) + 1;
                     const occ = globalCounts[w];
                     const entry = hiddenEntries.find(e => e.word === w && e.occ === occ);
