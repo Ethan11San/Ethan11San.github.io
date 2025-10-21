@@ -314,14 +314,14 @@
     .sidebar-icon-action {
       background: rgba(236,240,241,0.12);
       border: 1px solid rgba(236,240,241,0.25);
-      border-radius: 14px;
+      border-radius: 12px;
       color: #ecf0f1;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      min-height: 54px;
+      min-height: 48px;
       width: 100%;
       padding: 0;
       position: relative;
@@ -329,7 +329,7 @@
     }
     .sidebar-icon-action::after {
       content: attr(data-icon);
-      font-size: 1.9rem;
+      font-size: 1.65rem;
       line-height: 1;
     }
     .sidebar-icon-action:hover {
@@ -817,6 +817,18 @@
       line-height: 1.5;
       position: relative;
       overflow: hidden;
+    }
+    #quizContent p {
+      margin: 0 0 0.65em;
+    }
+    #quizContent p:last-child {
+      margin-bottom: 0;
+    }
+    .quiz-line-gap {
+      display: block;
+      width: 100%;
+      height: 0.85em;
+      pointer-events: none;
     }
     #quizContent::before {
       content: '';
@@ -1855,11 +1867,14 @@
         const mainImg = cont.querySelector('#labelImg, .main-image');
         const extras = Array.from(cont.querySelectorAll('div.extra-wrapper'));
         if (!mainImg) return;
-        let left = mainImg.offsetWidth + EXTRA_GAP;
+        const baseWidth = parseFloat(mainImg.dataset.baseWidth || '') || mainImg.naturalWidth || mainImg.offsetWidth;
+        const scale = baseWidth ? (mainImg.offsetWidth / baseWidth) : 1;
+        const gap = EXTRA_GAP * (scale || 1);
+        let left = mainImg.offsetWidth + gap;
         extras.forEach(wrap => {
           wrap.style.left = left + 'px';
           wrap.style.top = '0px';
-          left += wrap.offsetWidth + EXTRA_GAP;
+          left += wrap.offsetWidth + gap;
         });
       }
       function positionExtraImages() {
@@ -2348,6 +2363,8 @@
             wrap.appendChild(del);
             cont.appendChild(wrap);
             img.onload = () => {
+              wrap.dataset.baseWidth = ex.imgWidth || img.naturalWidth;
+              wrap.dataset.baseHeight = ex.imgHeight || img.naturalHeight;
               if (!ex.imgWidth || !ex.imgHeight) {
                 wrap.style.width = img.naturalWidth + 'px';
                 wrap.style.height = img.naturalHeight + 'px';
@@ -2418,12 +2435,25 @@
             });
           }
           const scaleThis = () => {
+            const mainImg = container.querySelector('#labelImg, .main-image');
+            if (mainImg && baseW && baseH) {
+              const mainBaseWidth = parseFloat(mainImg.dataset.baseWidth || '') || mainImg.naturalWidth || mainImg.clientWidth;
+              const ratio = mainBaseWidth ? (mainImg.clientWidth / mainBaseWidth) : 1;
+              if (ratio > 0) {
+                wrap.style.width = (baseW * ratio) + 'px';
+                wrap.style.height = (baseH * ratio) + 'px';
+                img.style.width = '100%';
+                img.style.height = 'auto';
+              }
+            }
             scaleLabels(wrap, baseW, baseH);
             positionExtras(container);
           };
           img.onload = () => {
             baseW = ex.imgWidth || img.naturalWidth;
             baseH = ex.imgHeight || img.naturalHeight;
+            wrap.dataset.baseWidth = baseW;
+            wrap.dataset.baseHeight = baseH;
             if (!ex.imgWidth || !ex.imgHeight) {
               wrap.style.width = img.naturalWidth + 'px';
               wrap.style.height = img.naturalHeight + 'px';
@@ -6288,6 +6318,8 @@
           img.onload = () => {
             baseWidth  = sec.imgWidth || img.naturalWidth;
             baseHeight = sec.imgHeight || img.naturalHeight;
+            img.dataset.baseWidth = baseWidth;
+            img.dataset.baseHeight = baseHeight;
             editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
             const dispW = baseWidth * editScale;
             const dispH = baseHeight * editScale;
@@ -8205,9 +8237,11 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           const wrapper = document.createElement('div');
+          wrapper.className = 'quiz-diagram-wrapper';
           wrapper.style.position = 'relative';
           wrapper.style.maxWidth = '100%';
-          wrapper.style.display = 'inline-block';
+          wrapper.style.display = 'block';
+          wrapper.style.margin = '0 auto';
           const img = document.createElement('img');
           img.className = 'main-image';
           const base = sec.image || '';
@@ -8217,56 +8251,57 @@
           }
           wrapper.appendChild(img);
           let baseWidth = 0, baseHeight = 0;
+          const computeAvailableDiagramWidth = () => {
+            if (!quizContent) return baseWidth || 0;
+            const style = window.getComputedStyle(quizContent);
+            const padding = (parseFloat(style.paddingLeft || '0') + parseFloat(style.paddingRight || '0')) || 0;
+            const raw = quizContent.clientWidth || quizContent.offsetWidth || baseWidth || 0;
+            let available = raw - padding;
+            if (!Number.isFinite(available) || available <= 0) {
+              available = raw || baseWidth || 0;
+            }
+            return available;
+          };
+          const updateDiagramScale = () => {
+            if (!baseWidth || !baseHeight) return;
+            const availableWidth = computeAvailableDiagramWidth();
+            const widthCandidate = availableWidth > 0 ? availableWidth : baseWidth;
+            const targetWidth = Math.min(baseWidth, widthCandidate);
+            wrapper.style.width = targetWidth + 'px';
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            const currentWidth = wrapper.clientWidth || targetWidth || baseWidth;
+            const ratio = baseWidth ? (currentWidth / baseWidth) : 1;
+            img.dataset.baseWidth = baseWidth;
+            img.dataset.baseHeight = baseHeight;
+            scaleLabels(wrapper, baseWidth, baseHeight);
+            if (ratio > 0) {
+              const extras = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
+              extras.forEach(extraWrap => {
+                const baseW = parseFloat(extraWrap.dataset.baseWidth || '');
+                const baseH = parseFloat(extraWrap.dataset.baseHeight || '');
+                if (!baseW || !baseH) return;
+                extraWrap.style.width = (baseW * ratio) + 'px';
+                extraWrap.style.height = (baseH * ratio) + 'px';
+                const extraImg = extraWrap.querySelector('img');
+                if (extraImg) {
+                  extraImg.style.width = '100%';
+                  extraImg.style.height = 'auto';
+                }
+                scaleLabels(extraWrap, baseW, baseH);
+              });
+            }
+            positionExtras(wrapper);
+          };
           img.onload = () => {
             baseWidth = sec.imgWidth || img.naturalWidth;
             baseHeight = sec.imgHeight || img.naturalHeight;
-            if (!isMobileDevice()) {
-              wrapper.style.width = baseWidth + 'px';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            } else {
-              wrapper.style.width = '100%';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            }
+            img.dataset.baseWidth = baseWidth;
+            img.dataset.baseHeight = baseHeight;
             svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
-            positionExtras(wrapper);
-            scaleLabels(wrapper, baseWidth, baseHeight);
-            if (sec.extraImages) {
-              const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
-              wraps.forEach((w, idx) => {
-                const ex = sec.extraImages[idx];
-                const exImg = w.querySelector('img');
-                const bw = ex.imgWidth || exImg.naturalWidth;
-                const bh = ex.imgHeight || exImg.naturalHeight;
-                scaleLabels(w, bw, bh);
-              });
-            }
+            updateDiagramScale();
           };
-          window.addEventListener('resize', () => {
-            if (!baseWidth || !baseHeight) return;
-            if (!isMobileDevice()) {
-              wrapper.style.width = baseWidth + 'px';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            } else {
-              wrapper.style.width = '100%';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            }
-            scaleLabels(wrapper, baseWidth, baseHeight);
-            if (sec.extraImages) {
-              const wraps = Array.from(wrapper.querySelectorAll('div.extra-wrapper'));
-              wraps.forEach((w, idx) => {
-                const ex = sec.extraImages[idx];
-                const exImg = w.querySelector('img');
-                const bw = ex.imgWidth || exImg.naturalWidth;
-                const bh = ex.imgHeight || exImg.naturalHeight;
-                scaleLabels(w, bw, bh);
-              });
-            }
-            positionExtras(wrapper);
-          });
+          window.addEventListener('resize', updateDiagramScale);
 
           // Create SVG overlay for arrows
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -8642,6 +8677,7 @@
           labelOrder = sec.definitions.map(d => labelInputs[d.labelText]).filter(Boolean);
           if (sec.extraImages) {
             renderQuizExtras(sec, wrapper);
+            updateDiagramScale();
           }
           refreshAnswersToggle(sec);
           return;
@@ -8652,11 +8688,36 @@
         const tokensArr = extractTokens(sec);
         const hiddenEntries = getHiddenEntries(sec, tokensArr);
         let counts = {};
-        tokensArr.forEach((tok, i) => {
-          if (!tok.trim()) {
-            quizContent.appendChild(document.createTextNode(tok));
+        let pendingNewlines = 0;
+        const flushPendingNewlines = (atEnd = false) => {
+          if (!pendingNewlines) return;
+          if (!quizContent.lastChild || atEnd) {
+            pendingNewlines = 0;
             return;
           }
+          const lines = Math.min(pendingNewlines, 3);
+          const gap = document.createElement('span');
+          gap.className = 'quiz-line-gap';
+          gap.setAttribute('aria-hidden', 'true');
+          gap.setAttribute('data-tts-skip', 'true');
+          gap.dataset.lines = String(lines);
+          const height = 0.85 + (lines - 1) * 0.5;
+          gap.style.height = `${height}em`;
+          quizContent.appendChild(gap);
+          pendingNewlines = 0;
+        };
+        tokensArr.forEach((tok, i) => {
+          if (!tok.trim()) {
+            const segments = tok.split('\n');
+            segments.forEach((segment, idx) => {
+              if (idx > 0) pendingNewlines++;
+              if (!segment) return;
+              if (pendingNewlines) flushPendingNewlines();
+              quizContent.appendChild(document.createTextNode(segment));
+            });
+            return;
+          }
+          if (pendingNewlines) flushPendingNewlines();
           const w = tok.trim();
           counts[w] = (counts[w] || 0) + 1;
           const occ = counts[w];
@@ -8738,6 +8799,7 @@
             quizContent.appendChild(document.createTextNode(tok));
           }
         });
+        flushPendingNewlines(true);
         refreshAnswersToggle(sec);
       }
         nextBtn.onclick = () => {
