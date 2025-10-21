@@ -115,6 +115,7 @@
       padding: 20px;
       gap: 12px;
       height: 100%;
+      position: relative;
     }
     #sidebarMainContent > h3 {
       margin-top: 8px;
@@ -300,6 +301,9 @@
     #questionControls button:hover {
       background: #ecf0f1;
     }
+    #hiddenQuestionAdders {
+      display: none;
+    }
 
     /* Mode switch button accents */
     #editModeBtn { border-left: 4px solid #1abc9c; }
@@ -414,27 +418,7 @@
       outline-offset: 2px;
     }
     .mini-folder-chip::after {
-      content: attr(data-initial);
-      position: absolute;
-      right: -8px;
-      top: 50%;
-      transform: translate(6px, -50%);
-      background: rgba(236,240,241,0.9);
-      color: #2c3e50;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 999px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .2s ease, transform .2s ease;
-      letter-spacing: 0.05em;
-    }
-    .mini-folder-chip:hover::after,
-    .mini-folder-chip:focus-visible::after,
-    .mini-folder-chip.selected::after {
-      opacity: 1;
-      transform: translate(12px, -50%);
+      display: none;
     }
     #miniUtilities {
       display: flex;
@@ -496,6 +480,42 @@
       outline: 2px solid #f1c40f;
       outline-offset: 2px;
     }
+    #questionAddMenu {
+      position: absolute;
+      left: 20px;
+      bottom: 74px;
+      background: #34495e;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.35);
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 190px;
+      z-index: 35;
+    }
+    #questionAddMenu.open {
+      display: flex;
+    }
+    #questionAddMenu button {
+      background: none;
+      border: none;
+      color: #ecf0f1;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background .2s ease, color .2s ease;
+    }
+    #questionAddMenu button:hover {
+      background: rgba(236,240,241,0.12);
+      color: #ffffff;
+    }
+    #questionAddMenu button:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 2px;
+    }
     #sidebar.mini {
       width: 72px;
       padding: 20px 14px;
@@ -526,6 +546,16 @@
       background: rgba(0,0,0,0.25);
       pointer-events: none;
       z-index: 30;
+    }
+    #sidebar.mini.drawer-open #folderSection .collapsible-body,
+    #sidebar.mini.drawer-open #folderToggle {
+      display: none !important;
+    }
+    #sidebar.mini.drawer-open #folderSection {
+      margin-bottom: 8px;
+    }
+    #sidebar.mini.drawer-open .folder-toggle-row {
+      justify-content: flex-end;
     }
     #sidebar:not(.mini) #miniAddMenu {
       display: none !important;
@@ -805,6 +835,19 @@
     }
     body.mobile .question-section-card.mobile-answer-active::before {
       opacity: 1;
+    }
+
+    .question-section-card.whw-merged {
+      padding-left: 24px;
+    }
+    .question-section-card.whw-merged::after {
+      display: none;
+    }
+    .question-section-card.whw-merged .question-section-body {
+      gap: 0.9rem;
+    }
+    .question-section-card.whw-merged .question-section-body > .whw-merged-section + .whw-merged-section {
+      margin-top: 0.5rem;
     }
 
     .question-section-header {
@@ -1538,7 +1581,7 @@
     <div id="miniSidebarRail" aria-hidden="true">
       <div id="miniFolderRail"></div>
       <div id="miniUtilities">
-        <button id="miniExpandBtn" class="mini-utility" type="button" title="Peek full sidebar">☰</button>
+        <button id="miniExpandBtn" class="mini-utility" type="button" title="View questions">☰</button>
         <button id="miniSearchBtn" class="mini-utility" type="button" title="Search questions">🔍</button>
         <button id="miniAddBtn" class="mini-utility" type="button" title="Quick add question">＋</button>
       </div>
@@ -1593,12 +1636,20 @@
       <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
         <ul id="sections" class="nav"></ul>
       </div>
-      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-        <button id="addFillBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Fill-In</button>
-        <button id="addLabelBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Diagram</button>
-        <button id="addAcronymBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">+ Acronym</button>
-        <button id="toggleDeleteBtn" style="padding: 2px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">🗑️ Delete</button>
+      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-items: stretch;">
+        <button type="button" id="questionAddMainBtn" aria-haspopup="true" aria-expanded="false" style="padding: 6px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;">＋ Add Question</button>
+        <button type="button" id="toggleDeleteBtn" style="padding: 6px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">🗑️ Delete</button>
+        <div id="hiddenQuestionAdders">
+          <button type="button" id="addFillBtn" style="padding: 2px 10px;">+ Fill-In</button>
+          <button type="button" id="addLabelBtn" style="padding: 2px 10px;">+ Diagram</button>
+          <button type="button" id="addAcronymBtn" style="padding: 2px 10px;">+ Acronym</button>
+        </div>
         <input type="file" id="labelImageInput" accept="image/*" style="display:none;">
+      </div>
+      <div id="questionAddMenu" role="menu">
+        <button type="button" data-action="fill" role="menuitem">+ Fill-In Question</button>
+        <button type="button" data-action="diagram" role="menuitem">+ Diagram Question</button>
+        <button type="button" data-action="acronym" role="menuitem">+ Acronym Question</button>
       </div>
     </div>
   </div>
@@ -3622,6 +3673,8 @@
             addFillBtn = document.getElementById('addFillBtn'),
             addLabelBtn = document.getElementById('addLabelBtn'),
             addAcronymBtn = document.getElementById('addAcronymBtn'),
+            questionAddMainBtn = document.getElementById('questionAddMainBtn'),
+            questionAddMenu = document.getElementById('questionAddMenu'),
             labelImageInput = document.getElementById('labelImageInput'),
             labelEditor = document.getElementById('labelEditor'),
             editModeBtn = document.getElementById('editModeBtn'),
@@ -3700,6 +3753,12 @@
         miniAddMenu.classList.remove('open');
       }
 
+      function closeQuestionAddMenu() {
+        if (!questionAddMenu) return;
+        questionAddMenu.classList.remove('open');
+        if (questionAddMainBtn) questionAddMainBtn.setAttribute('aria-expanded', 'false');
+      }
+
       const setFolderCollapsed = (collapsed, { persist = true, immediate = false } = {}) => {
         if (!folderSection || !folderToggle) return;
         if (!isDesktopLayout()) {
@@ -3747,7 +3806,6 @@
           chip.setAttribute('aria-label', name);
           chip.title = name;
           chip.dataset.index = String(idx);
-          chip.dataset.initial = name.slice(0, 2).toUpperCase();
           chip.addEventListener('click', evt => {
             evt.preventDefault();
             evt.stopPropagation();
@@ -3767,6 +3825,7 @@
 
       function setSidebarDisplayMode(mode, { persist = true } = {}) {
         if (!sidebar) return;
+        closeQuestionAddMenu();
         const targetMode = mode || 'standard';
         if (targetMode === 'mini') {
           if (sidebarDisplayMode !== 'mini') {
@@ -3857,6 +3916,10 @@
       if (sidebarModeMenuBtn && sidebarModeMenu) {
         sidebarModeMenuBtn.addEventListener('click', evt => {
           evt.stopPropagation();
+          if (sidebar && sidebar.classList.contains('mini')) {
+            setSidebarDisplayMode('expand');
+            return;
+          }
           if (!isDesktopLayout()) {
             setSidebarDisplayMode(sidebarDisplayMode === 'mini' ? 'expand' : 'mini');
             return;
@@ -3894,6 +3957,7 @@
           const willOpen = !sidebar.classList.contains('drawer-open');
           sidebar.classList.toggle('drawer-open', willOpen);
           closeMiniAddMenu();
+          closeQuestionAddMenu();
           if (willOpen && sectionSearch) {
             setTimeout(() => sectionSearch.focus(), 150);
           }
@@ -3906,6 +3970,7 @@
           evt.stopPropagation();
           sidebar.classList.add('drawer-open');
           closeMiniAddMenu();
+          closeQuestionAddMenu();
           if (sectionSearch) {
             setTimeout(() => sectionSearch.focus(), 120);
           }
@@ -3918,6 +3983,7 @@
           evt.stopPropagation();
           const willOpen = !miniAddMenu.classList.contains('open');
           closeMiniAddMenu();
+          closeQuestionAddMenu();
           if (willOpen) {
             miniAddMenu.classList.add('open');
             sidebar.classList.add('drawer-open');
@@ -3937,6 +4003,30 @@
         });
       }
 
+      if (questionAddMainBtn && questionAddMenu) {
+        questionAddMainBtn.addEventListener('click', evt => {
+          evt.preventDefault();
+          evt.stopPropagation();
+          const willOpen = !questionAddMenu.classList.contains('open');
+          closeQuestionAddMenu();
+          closeMiniAddMenu();
+          if (willOpen) {
+            questionAddMenu.classList.add('open');
+            questionAddMainBtn.setAttribute('aria-expanded', 'true');
+          }
+        });
+        questionAddMenu.addEventListener('click', evt => {
+          const btn = evt.target.closest('button[data-action]');
+          if (!btn) return;
+          evt.preventDefault();
+          const action = btn.dataset.action;
+          closeQuestionAddMenu();
+          if (action === 'fill' && addFillBtn) addFillBtn.click();
+          else if (action === 'diagram' && addLabelBtn) addLabelBtn.click();
+          else if (action === 'acronym' && addAcronymBtn) addAcronymBtn.click();
+        });
+      }
+
       document.addEventListener('click', evt => {
         if (sidebarModeMenu && sidebarModeMenu.classList.contains('open')) {
           if (!sidebarModeMenu.contains(evt.target) && evt.target !== sidebarModeMenuBtn) {
@@ -3948,10 +4038,16 @@
             closeMiniAddMenu();
           }
         }
+        if (questionAddMenu && questionAddMenu.classList.contains('open')) {
+          if (!questionAddMenu.contains(evt.target) && !evt.target.closest('#questionAddMainBtn')) {
+            closeQuestionAddMenu();
+          }
+        }
         if (sidebar && sidebar.classList.contains('mini') && sidebar.classList.contains('drawer-open')) {
           if (!sidebar.contains(evt.target)) {
             sidebar.classList.remove('drawer-open');
             closeMiniAddMenu();
+            closeQuestionAddMenu();
           }
         }
       });
@@ -3965,6 +4061,10 @@
         }
         if (miniAddMenu && miniAddMenu.classList.contains('open')) {
           closeMiniAddMenu();
+          handled = true;
+        }
+        if (questionAddMenu && questionAddMenu.classList.contains('open')) {
+          closeQuestionAddMenu();
           handled = true;
         }
         if (sidebar && sidebar.classList.contains('mini') && sidebar.classList.contains('drawer-open')) {
@@ -7421,6 +7521,45 @@
         });
 
         if (!createdCards.length) return;
+
+        const allWhw = createdCards.length > 0 && createdCards.every(card => card.classList.contains('whw-section'));
+        if (allWhw) {
+          const primary = createdCards[0];
+          const primaryBody = primary.querySelector('.question-section-body');
+          const primaryHeader = primary.querySelector('.question-section-header');
+          if (primaryHeader) primaryHeader.remove();
+
+          const wrapBodyIntoSection = body => {
+            if (!body) return null;
+            if (body.querySelector('.whw-merged-section')) return body.querySelector('.whw-merged-section');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'whw-merged-section';
+            while (body.firstChild) {
+              wrapper.appendChild(body.firstChild);
+            }
+            body.appendChild(wrapper);
+            return wrapper;
+          };
+
+          wrapBodyIntoSection(primaryBody);
+
+          createdCards.slice(1).forEach(card => {
+            const body = card.querySelector('.question-section-body');
+            if (body && primaryBody) {
+              const section = document.createElement('div');
+              section.className = 'whw-merged-section';
+              while (body.firstChild) {
+                section.appendChild(body.firstChild);
+              }
+              primaryBody.appendChild(section);
+            }
+            card.remove();
+          });
+
+          primary.classList.add('whw-merged');
+          primary.classList.remove('whw-section', 'whw-what', 'whw-how', 'whw-why');
+          createdCards.splice(0, createdCards.length, primary);
+        }
 
         container.classList.add('has-section-cards');
         requestAnimationFrame(() => {
