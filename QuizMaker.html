@@ -41,6 +41,17 @@
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #ecf0f1; color: #333;
     }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
     body.loading {
       display: block;
     }
@@ -283,10 +294,9 @@
     #addFillBtn { border-left: 4px solid #1abc9c; }
     #addLabelBtn { border-left: 4px solid #e67e22; }
     #addAcronymBtn { border-left: 4px solid #8e44ad; }
-    #toggleDeleteBtn { border-left: 4px solid #c0392b; }
 
     /* QuestionControls buttons base styling */
-    #questionControls button {
+    #questionControls button:not(.sidebar-icon-action) {
       padding: 5px 10px;
       line-height: 1.25;
       border-top: none;
@@ -298,8 +308,46 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #questionControls button:hover {
+    #questionControls button:not(.sidebar-icon-action):hover {
       background: #ecf0f1;
+    }
+    .sidebar-icon-action {
+      background: rgba(236,240,241,0.12);
+      border: 1px solid rgba(236,240,241,0.25);
+      border-radius: 14px;
+      color: #ecf0f1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 54px;
+      width: 100%;
+      padding: 0;
+      position: relative;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease, color .2s ease;
+    }
+    .sidebar-icon-action::after {
+      content: attr(data-icon);
+      font-size: 1.9rem;
+      line-height: 1;
+    }
+    .sidebar-icon-action:hover {
+      background: rgba(236,240,241,0.25);
+      border-color: rgba(236,240,241,0.45);
+      transform: translateY(-1px);
+    }
+    .sidebar-icon-action:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 3px;
+    }
+    .sidebar-icon-action.delete-active {
+      background: rgba(192,57,43,0.2);
+      border-color: rgba(231,76,60,0.6);
+      color: #e74c3c;
+    }
+    .sidebar-icon-action.delete-active::after {
+      color: inherit;
     }
     #hiddenQuestionAdders {
       display: none;
@@ -760,12 +808,35 @@
     #quizContent {
       white-space: pre-wrap;
       word-break: break-word;
-      padding: 24px;
-      background: #fff;
-      border: 2px solid #bdc3c7;
-      border-radius: 4px;
+      padding: clamp(24px, 4vw, 40px);
+      background: #ffffff;
+      border: 1px solid rgba(44,62,80,0.08);
+      border-radius: 28px;
+      box-shadow: 0 26px 58px -36px rgba(44,62,80,0.6);
       font-size: 1.1rem;
       line-height: 1.5;
+      position: relative;
+      overflow: hidden;
+    }
+    #quizContent::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: radial-gradient(circle at top left, rgba(26,188,156,0.08), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(52,152,219,0.08), transparent 55%);
+    }
+    #quizContent.has-section-cards {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(18px, 3vw, 28px);
+    }
+    #quizContent.has-section-cards > .question-section-card {
+      margin: 0;
+    }
+    #quizContent.has-section-cards > .quiz-question-title {
+      margin-bottom: 0;
     }
 
     .quiz-question-title {
@@ -838,16 +909,26 @@
     }
 
     .question-section-card.whw-merged {
-      padding-left: 24px;
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
     }
+    .question-section-card.whw-merged::before,
     .question-section-card.whw-merged::after {
       display: none;
     }
     .question-section-card.whw-merged .question-section-body {
-      gap: 0.9rem;
+      padding: 0;
+      gap: clamp(1rem, 2vw, 1.4rem);
     }
-    .question-section-card.whw-merged .question-section-body > .whw-merged-section + .whw-merged-section {
-      margin-top: 0.5rem;
+    .question-section-card.whw-merged .whw-merged-section {
+      padding: 0;
+    }
+    .question-section-card.whw-merged .whw-merged-section + .whw-merged-section {
+      border-top: 1px solid rgba(44,62,80,0.08);
+      padding-top: clamp(0.9rem, 1.8vw, 1.3rem);
     }
 
     .question-section-header {
@@ -1072,7 +1153,8 @@
         padding: 18px 12px;
       }
       #quizContent {
-        padding: 18px 14px;
+        padding: 20px 18px;
+        border-radius: 22px;
       }
       .question-section-card {
         margin: 12px 0;
@@ -1578,7 +1660,8 @@
   </div>
 
   <div id="sidebar">
-    <div id="miniSidebarRail" aria-hidden="true">
+    <div id="miniSidebarRail">
+      <button id="miniSidebarModeBtn" class="mini-utility" type="button" title="Sidebar display options" aria-label="Sidebar display options">⋯</button>
       <div id="miniFolderRail"></div>
       <div id="miniUtilities">
         <button id="miniExpandBtn" class="mini-utility" type="button" title="View questions">☰</button>
@@ -1636,9 +1719,13 @@
       <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
         <ul id="sections" class="nav"></ul>
       </div>
-      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; align-items: stretch;">
-        <button type="button" id="questionAddMainBtn" aria-haspopup="true" aria-expanded="false" style="padding: 6px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600;">＋ Add Question</button>
-        <button type="button" id="toggleDeleteBtn" style="padding: 6px 10px; white-space: nowrap; overflow: hidden; text-align: center; line-height: 1.1; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">🗑️ Delete</button>
+      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: center;">
+        <button type="button" id="questionAddMainBtn" class="sidebar-icon-action" aria-haspopup="true" aria-expanded="false" data-icon="＋" title="Add question">
+          <span class="sr-only">Add question</span>
+        </button>
+        <button type="button" id="toggleDeleteBtn" class="sidebar-icon-action" data-icon="🗑" title="Toggle delete mode" aria-pressed="false">
+          <span class="sr-only">Toggle delete mode</span>
+        </button>
         <div id="hiddenQuestionAdders">
           <button type="button" id="addFillBtn" style="padding: 2px 10px;">+ Fill-In</button>
           <button type="button" id="addLabelBtn" style="padding: 2px 10px;">+ Diagram</button>
@@ -3703,6 +3790,7 @@
       const sidebarModeMenu = document.getElementById('sidebarModeMenu');
       const miniSidebarRail = document.getElementById('miniSidebarRail');
       const miniFolderRail = document.getElementById('miniFolderRail');
+      const miniSidebarModeBtn = document.getElementById('miniSidebarModeBtn');
       const miniExpandBtn = document.getElementById('miniExpandBtn');
       const miniSearchBtn = document.getElementById('miniSearchBtn');
       const miniAddBtn = document.getElementById('miniAddBtn');
@@ -3943,6 +4031,19 @@
           else if (mode === 'collapse') setSidebarDisplayMode('collapse');
           else setSidebarDisplayMode('expand');
           closeSidebarModeMenu();
+        });
+      }
+
+      if (miniSidebarModeBtn) {
+        miniSidebarModeBtn.addEventListener('click', evt => {
+          if (!sidebar) return;
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (sidebar.classList.contains('mini')) {
+            setSidebarDisplayMode('expand');
+          } else if (sidebarModeMenuBtn) {
+            sidebarModeMenuBtn.click();
+          }
         });
       }
 
@@ -5833,12 +5934,21 @@
         clearSearchBtn.style.display = 'none';
       };
 
+      const updateDeleteModeButtonState = () => {
+        if (!toggleDeleteBtn) return;
+        toggleDeleteBtn.classList.toggle('delete-active', deleteMode);
+        toggleDeleteBtn.setAttribute('aria-pressed', deleteMode ? 'true' : 'false');
+      };
+
       // Toggle delete icons in folder and question lists
       toggleDeleteBtn.onclick = () => {
         deleteMode = !deleteMode;
+        updateDeleteModeButtonState();
         renderFolders();
         renderSections(lastSectionOrder);
       };
+
+      updateDeleteModeButtonState();
 
       addFolderBtn.onclick = async () => {
         let name = newFolderName.value.trim();
