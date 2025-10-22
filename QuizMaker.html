@@ -827,7 +827,7 @@
     .quiz-line-gap {
       display: block;
       width: 100%;
-      height: 0.85em;
+      height: 1em;
       pointer-events: none;
     }
     #quizContent::before {
@@ -7777,10 +7777,24 @@
         paragraphs.forEach(p => {
           const text = (p.textContent || '').replace(/[\s\u200B\uFEFF]/g, '');
           const onlyBreaks = !text.length && Array.from(p.childNodes).every(node => {
-            return node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR';
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              return node.tagName === 'BR';
+            }
+            if (node.nodeType === Node.TEXT_NODE) {
+              return !(node.textContent || '').trim();
+            }
+            return false;
           });
           if (onlyBreaks) {
-            p.remove();
+            const brCount = Math.max(1, p.querySelectorAll('br').length);
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < brCount; i++) {
+              const gap = document.createElement('span');
+              gap.className = 'quiz-line-gap';
+              gap.setAttribute('aria-hidden', 'true');
+              fragment.appendChild(gap);
+            }
+            p.replaceWith(fragment);
           } else {
             p.classList.add('quiz-paragraph');
           }
