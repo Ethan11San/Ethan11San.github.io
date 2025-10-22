@@ -814,15 +814,15 @@
       border-radius: 28px;
       box-shadow: 0 26px 58px -36px rgba(44,62,80,0.6);
       font-size: 1.1rem;
-      line-height: 1.5;
+      line-height: 1.2;
       position: relative;
       overflow: hidden;
     }
     #quizContent p {
-      margin: 0 0 0.65em;
+      margin: 0;
     }
-    #quizContent p:last-child {
-      margin-bottom: 0;
+    #quizContent .quiz-paragraph + .quiz-paragraph {
+      margin-top: 0.35em;
     }
     .quiz-line-gap {
       display: block;
@@ -840,6 +840,10 @@
                   radial-gradient(circle at bottom right, rgba(52,152,219,0.08), transparent 55%);
     }
     #quizContent.has-section-cards {
+      display: block;
+      gap: 0;
+    }
+    #quizContent.has-section-cards:has(.question-section-card) {
       display: flex;
       flex-direction: column;
       gap: clamp(18px, 3vw, 28px);
@@ -6905,16 +6909,29 @@
               toks.push(...node.textContent.split(/(\s+)/));
             } else if (node.nodeType === Node.ELEMENT_NODE) {
               if (node.tagName === 'P' || node.tagName === 'DIV') {
+                let hasTextContent = false;
+                let sawBreak = false;
                 node.childNodes.forEach(child => {
                   if (child.nodeType === Node.TEXT_NODE) {
-                    toks.push(...child.textContent.split(/(\s+)/));
+                    const text = child.textContent || '';
+                    if (text.replace(/[\u200B\uFEFF]/g, '').trim().length > 0) {
+                      hasTextContent = true;
+                    }
+                    toks.push(...text.split(/(\s+)/));
                   } else if (child.nodeType === Node.ELEMENT_NODE && child.tagName === 'BR') {
+                    sawBreak = true;
                     toks.push('\n');
                   } else if (child.nodeType === Node.ELEMENT_NODE) {
-                    toks.push(...(child.innerText || '').split(/(\s+)/));
+                    const inner = child.innerText || '';
+                    if (inner.replace(/[\u200B\uFEFF]/g, '').trim().length > 0) {
+                      hasTextContent = true;
+                    }
+                    toks.push(...inner.split(/(\s+)/));
                   }
                 });
-                toks.push('\n');
+                if (hasTextContent || !sawBreak) {
+                  toks.push('\n');
+                }
               } else if (node.tagName === 'BR') {
                 toks.push('\n');
               } else if (node.tagName === 'UL' || node.tagName === 'OL') {
@@ -7755,6 +7772,21 @@
         });
       }
 
+      function normalizeQuizParagraphSpacing(container) {
+        const paragraphs = Array.from(container.querySelectorAll('p'));
+        paragraphs.forEach(p => {
+          const text = (p.textContent || '').replace(/[\s\u200B\uFEFF]/g, '');
+          const onlyBreaks = !text.length && Array.from(p.childNodes).every(node => {
+            return node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR';
+          });
+          if (onlyBreaks) {
+            p.remove();
+          } else {
+            p.classList.add('quiz-paragraph');
+          }
+        });
+      }
+
       function wrapQuizBlanks(container, hiddenEntries) {
         const sec = data.folders[currentFolder].sections[currentSection];
 
@@ -8121,10 +8153,18 @@
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
           quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
+          normalizeQuizParagraphSpacing(quizContent);
           const tokensArr = extractTokens(sec);
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
           wrapQuizBlanks(quizContent, hiddenEntries);
           enhanceQuestionSections(quizContent, { skipTitle: true });
+          const syncSectionCardState = () => {
+            if (!quizContent.querySelector('.question-section-card')) {
+              quizContent.classList.remove('has-section-cards');
+            }
+          };
+          syncSectionCardState();
+          requestAnimationFrame(syncSectionCardState);
           setupMobileAnswerBankHandlers();
           // --- Improved blank sizing using text width measurement ---
           // Create a hidden span for measuring text width
@@ -8733,14 +8773,11 @@
             return;
           }
           const lines = Math.min(pendingNewlines, 3);
-          const gap = document.createElement('span');
-          gap.className = 'quiz-line-gap';
-          gap.setAttribute('aria-hidden', 'true');
-          gap.setAttribute('data-tts-skip', 'true');
-          gap.dataset.lines = String(lines);
-          const height = 0.85 + (lines - 1) * 0.5;
-          gap.style.height = `${height}em`;
-          quizContent.appendChild(gap);
+          if (lines <= 0) {
+            pendingNewlines = 0;
+            return;
+          }
+          quizContent.appendChild(document.createTextNode('\n'));
           pendingNewlines = 0;
         };
         tokensArr.forEach((tok, i) => {
