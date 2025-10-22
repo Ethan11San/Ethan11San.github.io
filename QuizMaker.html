@@ -7514,6 +7514,28 @@
         const { skipTitle = false } = options;
         container.classList.remove('has-section-cards');
 
+        const nodeHasMeaningfulContent = node => {
+          if (!node) return false;
+          return Array.from(node.childNodes).some(child => {
+            if (child.nodeType === Node.TEXT_NODE) {
+              return child.textContent.trim().length > 0;
+            }
+            if (child.nodeType === Node.ELEMENT_NODE) {
+              if (child.tagName === 'BR') return false;
+              if (child.matches('img, video, audio, svg, canvas, iframe')) return true;
+              if (child.classList && (
+                child.classList.contains('blank') ||
+                child.classList.contains('hidden-reveal') ||
+                child.classList.contains('popup-word')
+              )) {
+                return true;
+              }
+              return nodeHasMeaningfulContent(child);
+            }
+            return false;
+          });
+        };
+
         const detectSectionKeyword = text => {
           if (!text) return '';
           const normalized = text
@@ -7627,15 +7649,7 @@
           };
           trimEdges(body);
 
-          const hasContent = Array.from(body.childNodes).some(node => {
-            if (node.nodeType === Node.TEXT_NODE) return node.textContent.trim().length > 0;
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              if (node.tagName === 'BR') return false;
-              if (node.classList && (node.classList.contains('blank') || node.classList.contains('hidden-reveal'))) return true;
-              return node.textContent.trim().length > 0;
-            }
-            return false;
-          });
+          const hasContent = nodeHasMeaningfulContent(body);
           if (!hasContent) body.classList.add('empty');
 
           const cleanWhitespace = node => {
@@ -7673,7 +7687,15 @@
 
           const wrapBodyIntoSection = body => {
             if (!body) return null;
-            if (body.querySelector('.whw-merged-section')) return body.querySelector('.whw-merged-section');
+            const existing = body.querySelector('.whw-merged-section');
+            if (existing) {
+              if (!nodeHasMeaningfulContent(existing)) {
+                existing.remove();
+                return null;
+              }
+              return existing;
+            }
+            if (!nodeHasMeaningfulContent(body)) return null;
             const wrapper = document.createElement('div');
             wrapper.className = 'whw-merged-section';
             while (body.firstChild) {
@@ -7683,20 +7705,35 @@
             return wrapper;
           };
 
-          wrapBodyIntoSection(primaryBody);
+          const primarySection = wrapBodyIntoSection(primaryBody);
+          if (primarySection) primaryBody.classList.remove('empty');
 
           createdCards.slice(1).forEach(card => {
             const body = card.querySelector('.question-section-body');
             if (body && primaryBody) {
-              const section = document.createElement('div');
-              section.className = 'whw-merged-section';
-              while (body.firstChild) {
-                section.appendChild(body.firstChild);
+              if (nodeHasMeaningfulContent(body)) {
+                const section = document.createElement('div');
+                section.className = 'whw-merged-section';
+                while (body.firstChild) {
+                  section.appendChild(body.firstChild);
+                }
+                if (nodeHasMeaningfulContent(section)) {
+                  primaryBody.appendChild(section);
+                }
               }
-              primaryBody.appendChild(section);
             }
             card.remove();
           });
+
+          Array.from(primaryBody.querySelectorAll('.whw-merged-section')).forEach(section => {
+            if (!nodeHasMeaningfulContent(section)) {
+              section.remove();
+            }
+          });
+
+          if (!primaryBody.querySelector('.whw-merged-section')) {
+            primaryBody.classList.add('empty');
+          }
 
           primary.classList.add('whw-merged');
           primary.classList.remove('whw-section', 'whw-what', 'whw-how', 'whw-why');
