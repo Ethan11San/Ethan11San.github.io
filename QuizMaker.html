@@ -827,8 +827,9 @@
     .quiz-line-gap {
       display: block;
       width: 100%;
-      height: 0.85em;
       pointer-events: none;
+      line-height: 0;
+      margin: 0;
     }
     #quizContent::before {
       content: '';
@@ -8726,22 +8727,50 @@
         const hiddenEntries = getHiddenEntries(sec, tokensArr);
         let counts = {};
         let pendingNewlines = 0;
+        let lastOutputWasGap = false;
+        let cachedQuizLineHeightPx = null;
+        const getQuizLineHeightPx = () => {
+          if (cachedQuizLineHeightPx && cachedQuizLineHeightPx > 0) {
+            return cachedQuizLineHeightPx;
+          }
+          const qcStyle = window.getComputedStyle(quizContent);
+          const raw = qcStyle.lineHeight || '';
+          let parsed = parseFloat(raw);
+          if (!Number.isNaN(parsed)) {
+            if (/px$/i.test(raw.trim())) {
+              cachedQuizLineHeightPx = parsed;
+            } else {
+              const fontSize = parseFloat(qcStyle.fontSize) || 16;
+              cachedQuizLineHeightPx = parsed > 0 ? parsed * fontSize : fontSize * 1.5;
+            }
+            return cachedQuizLineHeightPx;
+          }
+          const fontSize = parseFloat(qcStyle.fontSize) || 16;
+          cachedQuizLineHeightPx = fontSize * 1.5;
+          return cachedQuizLineHeightPx;
+        };
         const flushPendingNewlines = (atEnd = false) => {
           if (!pendingNewlines) return;
           if (!quizContent.lastChild || atEnd) {
             pendingNewlines = 0;
+            lastOutputWasGap = false;
             return;
           }
-          const lines = Math.min(pendingNewlines, 3);
+          if (lastOutputWasGap) {
+            pendingNewlines = 0;
+            return;
+          }
+          const lines = Math.min(Math.max(pendingNewlines, 1), 2);
           const gap = document.createElement('span');
           gap.className = 'quiz-line-gap';
           gap.setAttribute('aria-hidden', 'true');
           gap.setAttribute('data-tts-skip', 'true');
           gap.dataset.lines = String(lines);
-          const height = 0.85 + (lines - 1) * 0.5;
-          gap.style.height = `${height}em`;
+          const heightPx = getQuizLineHeightPx() * lines;
+          gap.style.height = `${heightPx}px`;
           quizContent.appendChild(gap);
           pendingNewlines = 0;
+          lastOutputWasGap = true;
         };
         tokensArr.forEach((tok, i) => {
           if (!tok.trim()) {
@@ -8751,6 +8780,7 @@
               if (!segment) return;
               if (pendingNewlines) flushPendingNewlines();
               quizContent.appendChild(document.createTextNode(segment));
+              lastOutputWasGap = false;
             });
             return;
           }
@@ -8832,8 +8862,10 @@
             };
             wrapper.appendChild(inp);
             quizContent.appendChild(wrapper);
+            lastOutputWasGap = false;
           } else {
             quizContent.appendChild(document.createTextNode(tok));
+            lastOutputWasGap = false;
           }
         });
         flushPendingNewlines(true);
