@@ -3711,6 +3711,23 @@
         if (!section.type) {
           section.type = 'fill';
         }
+        if (!Array.isArray(section.hidden)) {
+          section.hidden = [];
+        }
+        if (!section.alts || typeof section.alts !== 'object') {
+          section.alts = {};
+        }
+        if (Array.isArray(section.definitions)) {
+          section.definitions.forEach(def => {
+            if (!def || typeof def !== 'object') return;
+            if (!Array.isArray(def.hidden)) {
+              def.hidden = [];
+            }
+            if (!def.alts || typeof def.alts !== 'object') {
+              def.alts = {};
+            }
+          });
+        }
       };
 
       (data.folders || []).forEach(folder => {
