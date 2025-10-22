@@ -8726,6 +8726,34 @@
         const hiddenEntries = getHiddenEntries(sec, tokensArr);
         let counts = {};
         let pendingNewlines = 0;
+        let lineGapEm = null;
+        const getLineGapEm = () => {
+          if (lineGapEm) return lineGapEm;
+          const style = window.getComputedStyle(quizContent);
+          const fontSize = parseFloat(style.fontSize) || 16;
+          let raw = style.lineHeight;
+          if (raw == null) raw = '';
+          raw = String(raw);
+          if (!raw || raw === 'normal') {
+            lineGapEm = 1.5; // sensible default
+            return lineGapEm;
+          }
+          if (raw.endsWith('px')) {
+            lineGapEm = (parseFloat(raw) || (1.5 * fontSize)) / fontSize;
+            return lineGapEm;
+          }
+          if (raw.endsWith('em')) {
+            lineGapEm = parseFloat(raw) || 1.5;
+            return lineGapEm;
+          }
+          const numeric = parseFloat(raw);
+          if (!Number.isNaN(numeric) && numeric > 0) {
+            lineGapEm = numeric;
+            return lineGapEm;
+          }
+          lineGapEm = 1.5;
+          return lineGapEm;
+        };
         const flushPendingNewlines = (atEnd = false) => {
           if (!pendingNewlines) return;
           if (!quizContent.lastChild || atEnd) {
@@ -8738,8 +8766,10 @@
           gap.setAttribute('aria-hidden', 'true');
           gap.setAttribute('data-tts-skip', 'true');
           gap.dataset.lines = String(lines);
-          const height = 0.85 + (lines - 1) * 0.5;
+          const baseEm = getLineGapEm();
+          const height = Math.max(1, lines) * baseEm;
           gap.style.height = `${height}em`;
+          gap.style.margin = '0';
           quizContent.appendChild(gap);
           pendingNewlines = 0;
         };
