@@ -7015,25 +7015,38 @@
           "type": "fill",
           "title": "Transfer of Learning",
           "rawText": "﻿﻿﻿﻿Two Types\nPositive Transfer - When prior learning helps forward new learnings.\nNegative Transfer - When prior learning interferes or hinders new learnings. \n",
-          "rawHtml": "<p><span class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\"><span class=\"ql-cursor\">﻿</span>﻿﻿﻿</span><strong class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\">﻿Two Types</strong></p><p><strong>Positive Transfer</strong> - When prior learning helps forward new learnings.</p><p><strong>Negative Transfer</strong> - When prior learning interferes or hinders new learnings. </p>"
+          "rawHtml": "<p><span class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\"><span class=\"ql-cursor\">﻿</span>﻿﻿﻿</span><strong class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\">﻿Two Types</strong></p><p><strong>Positive Transfer</strong> - When prior learning helps forward new learnings.</p><p><strong>Negative Transfer</strong> - When prior learning interferes or hinders new learnings. </p>",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Maslows Hiearchy of Needs",
           "rawText": "﻿Physiological (Biological) - Food, Water, Sleep\n\nSafety - Security, Shelter\n\nLove / Belonging - Friendship, Family, Teams\n\nEsteem - Respect, Recognition\n\nSelf-Actualization - The need to reach your full potential and purpose.\n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Physiological (Biological)</strong> - Food, Water, Sleep</li></ul><p><br></p><ul><li><strong>Safety </strong>- Security, Shelter</li></ul><p><br></p><ul><li><strong>Love / Belonging</strong> - Friendship, Family, Teams</li></ul><p><br></p><ul><li><strong>Esteem</strong> - Respect, Recognition</li></ul><p><br></p><ul><li><strong>Self-Actualization</strong> - The need to reach your full potential and purpose.</li></ul>"
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Physiological (Biological)</strong> - Food, Water, Sleep</li></ul><p><br></p><ul><li><strong>Safety </strong>- Security, Shelter</li></ul><p><br></p><ul><li><strong>Love / Belonging</strong> - Friendship, Family, Teams</li></ul><p><br></p><ul><li><strong>Esteem</strong> - Respect, Recognition</li></ul><p><br></p><ul><li><strong>Self-Actualization</strong> - The need to reach your full potential and purpose.</li></ul>",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Defense Mechanisms",
-          "rawText": "﻿﻿﻿Denial - Refusing to Accept Reality\nRationalization - Making Excuses to justify Errors\nProjection - Blaming others for your own faults\nMinimization - Downplaying a safety problem\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\nDisplacement - Shifting feelings or anger onto somebody else.\nFantasy - Student escapes into wishful thinking instead of facing the facts.\nRepression - Unconscious blocking of memory or feelings.\nAggression - Becoming Angry or hostile towards someone sometimes subtly. \n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li><li><strong>Projection </strong>- Blaming others for your own faults</li><li><strong>Minimization</strong> - Downplaying a safety problem</li><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li><li><strong>Aggression</strong> - Becoming Angry or hostile towards someone sometimes subtly. </li></ul>"
+          "rawText": "﻿﻿﻿﻿Denial - Refusing to Accept Reality\nRationalization - Making Excuses to justify Errors\nProjection - Blaming others for your own faults\nMinimization - Downplaying a safety problem\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\nDisplacement - Shifting feelings or anger onto somebody else.\nFantasy - Student escapes into wishful thinking instead of facing the facts.\nRepression - Unconscious blocking of memory or feelings.\nAggression - Becoming Angry or hostile towards someone sometimes subtly. \n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li><li><strong>Projection </strong>- Blaming others for your own faults</li><li><strong>Minimization</strong> - Downplaying a safety problem</li><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li><li><strong>Aggression</strong> - Becoming Angry or hostile towards someone sometimes subtly. </li></ul>",
+          "hidden": [
+            {
+              "word": "Denial",
+              "occ": 1
+            }
+          ],
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Stress",
           "rawText": "An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.\n",
-          "rawHtml": "<p>An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.<span class=\"ql-cursor\">﻿</span></p>"
+          "rawHtml": "<p>An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.<span class=\"ql-cursor\">﻿</span></p>",
+          "hidden": [],
+          "alts": {}
         }
       ],
       "color": "#004d65"
