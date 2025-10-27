@@ -123,13 +123,13 @@
       display: flex;
       flex-direction: column;
       flex: 1;
-      padding: 20px;
-      gap: 12px;
+      padding: 18px 20px 16px;
+      gap: 10px;
       height: 100%;
       position: relative;
     }
     #sidebarMainContent > h3 {
-      margin-top: 8px;
+      margin: 4px 0 6px;
     }
     .folder-toggle-row {
       display: flex;
@@ -138,10 +138,10 @@
       position: relative;
     }
     #folderSection {
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
     #folderSection.collapsed {
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     #folderToggle {
       width: 100%;
@@ -303,8 +303,8 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      padding-top: 10px;
+      gap: 8px;
+      padding-top: 8px;
     }
     #folderSection .folder-actions {
       display: grid;
@@ -320,7 +320,7 @@
 
     /* QuestionControls buttons base styling */
     #questionControls button:not(.sidebar-icon-action) {
-      padding: 5px 10px;
+      padding: 4px 9px;
       line-height: 1.25;
       border-top: none;
       border-right: none;
@@ -343,8 +343,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      min-height: 48px;
+      gap: 5px;
+      min-height: 42px;
       width: 100%;
       padding: 0;
       position: relative;
@@ -352,7 +352,7 @@
     }
     .sidebar-icon-action::after {
       content: attr(data-icon);
-      font-size: 1.65rem;
+      font-size: 1.5rem;
       line-height: 1;
     }
     .sidebar-icon-action:hover {
@@ -452,7 +452,7 @@
     #folderSection .folder-divider {
       border: 1px solid #34495e;
       opacity: .2;
-      margin: 12px 0 4px;
+      margin: 8px 0 2px;
     }
     #miniSidebarRail {
       display: none;
@@ -1696,7 +1696,7 @@
         </div>
       </div>
       <h3>Questions</h3>
-      <div style="position: relative; margin-bottom: 8px;">
+      <div style="position: relative; margin: 4px 0 6px;">
         <input type="text" id="sectionSearch"
                placeholder="Search questions..."
                style="width: calc(100% - 30px);
@@ -1711,7 +1711,7 @@
       <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
         <ul id="sections" class="nav"></ul>
       </div>
-      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: center;">
+      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: center;">
         <button type="button" id="questionAddMainBtn" class="sidebar-icon-action" aria-haspopup="true" aria-expanded="false" data-icon="＋" title="Add question">
           <span class="sr-only">Add question</span>
         </button>
@@ -5289,17 +5289,37 @@
 
         let token = localStorage.getItem('githubToken');
         if (token) {
-          const reuse = confirm('Reuse saved GitHub token?\nPress OK to reuse, or Cancel to enter a new token.');
-          if (!reuse) {
-            token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
-            if (token) {
+          const reuseEntry = prompt(
+            'A saved GitHub token was found. You can reuse it or replace it below.\n\n' +
+            'To copy the token, select the value that appears in the field. Leave it blank to skip using a token.',
+            token
+          );
+          if (reuseEntry === null) {
+            token = '';
+          } else {
+            const trimmedEntry = reuseEntry.trim();
+            if (trimmedEntry) {
+              token = trimmedEntry;
               localStorage.setItem('githubToken', token);
+            } else {
+              token = '';
+              localStorage.removeItem('githubToken');
             }
           }
-        } else {
-          token = prompt('GitHub token (leave blank to copy JSON to clipboard)');
-          if (token) {
-            localStorage.setItem('githubToken', token);
+        }
+        if (!token) {
+          const manualEntry = prompt('GitHub token (leave blank to copy JSON to clipboard)');
+          if (manualEntry === null) {
+            token = '';
+          } else {
+            const trimmedManual = manualEntry.trim();
+            if (trimmedManual) {
+              token = trimmedManual;
+              localStorage.setItem('githubToken', token);
+            } else {
+              token = '';
+              localStorage.removeItem('githubToken');
+            }
           }
         }
         if (!token) {
