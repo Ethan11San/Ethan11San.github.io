@@ -6928,7 +6928,7 @@
         {
           "type": "fill",
           "title": "Principles of Learning",
-          "rawText": "Acronym: REEPIR\n﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
+          "rawText": "﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
           "hidden": [
             {
               "word": "Readiness",
@@ -6953,13 +6953,9 @@
             {
               "word": "Recency",
               "occ": 1
-            },
-            {
-              "word": "REEPIR",
-              "occ": 1
             }
           ],
-          "rawHtml": "<p>Acronym: REEPIR</p><p>﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>",
           "alts": {}
         },
         {
@@ -6981,30 +6977,9 @@
         {
           "type": "fill",
           "title": "Four Levels of Learning",
-          "rawText": "Acronym - RUAC\n\n﻿﻿Rote - Memorization without deeper understanding \n\nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\n\nApplication - Using what you know in real world situations.\n\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
-          "rawHtml": "<p>Acronym - RUAC</p><p><br></p><ul><li>﻿﻿<strong>Rote</strong> - Memorization without deeper understanding </li></ul><p><br></p><ul><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li></ul><p><br></p><ul><li><strong>Application</strong> - Using what you know in real world situations.</li></ul><p><br></p><ul><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
-          "hidden": [
-            {
-              "word": "Rote",
-              "occ": 1
-            },
-            {
-              "word": "Understanding",
-              "occ": 1
-            },
-            {
-              "word": "Application",
-              "occ": 1
-            },
-            {
-              "word": "Correlation",
-              "occ": 1
-            },
-            {
-              "word": "RUAC",
-              "occ": 1
-            }
-          ],
+          "rawText": "﻿Rote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
+          "hidden": [],
           "alts": {}
         },
         {
@@ -7055,9 +7030,62 @@
         {
           "type": "fill",
           "title": "Defense Mechanisms",
-          "rawText": "﻿﻿﻿Denial - Refusing to Accept Reality\nRationalization - Making Excuses to justify Errors\nProjection - Blaming others for your own faults\nMinimization - Downplaying a safety problem\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\nDisplacement - Shifting feelings or anger onto somebody else.\nFantasy - Student escapes into wishful thinking instead of facing the facts.\nRepression - Unconscious blocking of memory or feelings.\nAggression - Becoming Angry or hostile towards someone sometimes subtly. \n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li><li><strong>Projection </strong>- Blaming others for your own faults</li><li><strong>Minimization</strong> - Downplaying a safety problem</li><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li><li><strong>Aggression</strong> - Becoming Angry or hostile towards someone sometimes subtly. </li></ul>",
-          "hidden": [],
+          "rawText": "﻿﻿Acronym - DR, DR, CPR FAST!\n\n﻿﻿﻿﻿﻿﻿Denial - Refusing to Accept Reality\n\nRepression - Unconscious blocking of memory or feelings.\n\nDisplacement - Shifting feelings or anger onto somebody else.\n\nRationalization - Making Excuses to justify Errors\n\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\n\nProjection - Blaming others for your own faults\n\nReaction Formation - Faking a belief opposite to your actual belief.\n\nFantasy - Student escapes into wishful thinking instead of facing the facts.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿Acronym - DR, DR, CPR FAST!</p><p><br></p><ul><li>﻿﻿﻿﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li></ul><p><br></p><ul><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li></ul><p><br></p><ul><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li></ul><p><br></p><ul><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li></ul><p><br></p><ul><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li></ul><p><br></p><ul><li><strong>Projection </strong>- Blaming others for your own faults</li></ul><p><br></p><ul><li><strong>Reaction Formation </strong>- Faking a belief opposite to your actual belief.</li></ul><p><br></p><ul><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li></ul>",
+          "hidden": [
+            {
+              "word": "Denial",
+              "occ": 1
+            },
+            {
+              "word": "Repression",
+              "occ": 1
+            },
+            {
+              "word": "Displacement",
+              "occ": 1
+            },
+            {
+              "word": "Rationalization",
+              "occ": 1
+            },
+            {
+              "word": "Compensation",
+              "occ": 1
+            },
+            {
+              "word": "Projection",
+              "occ": 1
+            },
+            {
+              "word": "Reaction",
+              "occ": 1
+            },
+            {
+              "word": "Fantasy",
+              "occ": 1
+            },
+            {
+              "word": "Formation",
+              "occ": 1
+            },
+            {
+              "word": "DR,",
+              "occ": 1
+            },
+            {
+              "word": "DR,",
+              "occ": 2
+            },
+            {
+              "word": "CPR",
+              "occ": 1
+            },
+            {
+              "word": "FAST!",
+              "occ": 1
+            }
+          ],
           "alts": {}
         },
         {
