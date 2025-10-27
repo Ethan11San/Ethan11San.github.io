@@ -238,6 +238,10 @@
       font-weight: 500;
       transition: background .2s ease, color .2s ease;
     }
+    #sidebarModeMenu button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
     #sidebarModeMenu button:hover {
       background: rgba(236,240,241,0.12);
       color: #ffffff;
@@ -249,6 +253,25 @@
     #sidebarModeMenu button:focus-visible {
       outline: 2px solid #f1c40f;
       outline-offset: 2px;
+    }
+    #sidebarModeMenu .menu-divider {
+      border: none;
+      border-top: 1px solid rgba(236,240,241,0.18);
+      margin: 6px 0;
+    }
+    #sidebarModeMenu button.copy-local-btn {
+      color: #d8c9ff;
+    }
+    #sidebarModeMenu button.copy-local-btn:hover:not(:disabled) {
+      background: rgba(142,68,173,0.25);
+      color: #ffffff;
+    }
+    #sidebarModeMenu button.clear-local-btn {
+      color: #ffc9c2;
+    }
+    #sidebarModeMenu button.clear-local-btn:hover:not(:disabled) {
+      background: rgba(231,76,60,0.25);
+      color: #ffffff;
     }
     #folderSection.collapsed #folderToggle .chevron::before {
       transform: rotate(-90deg);
@@ -1514,48 +1537,6 @@
       color: #fff;
       font-weight: 500;
     }
-    .copy-local-btn {
-      margin-top: 12px;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 4px;
-      background: #8e44ad;
-      color: #fff;
-      font-weight: 500;
-    }
-    .clear-local-btn {
-      margin-top: 12px;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 4px;
-      background: #e74c3c;
-      color: #fff;
-      font-weight: 500;
-    }
-
-    /* Compact side-by-side local storage buttons for desktop and mobile */
-    #desktopLocalBtns,
-    #mobileLocalBtns {
-      margin-top: 8px;
-      display: flex;
-      gap: 8px;
-    }
-    #desktopLocalBtns .copy-local-btn,
-    #desktopLocalBtns .clear-local-btn {
-      flex: 1;
-      padding: 6px;
-      margin-top: 0;
-      width: auto;
-    }
-    #mobileLocalBtns .copy-local-btn,
-    #mobileLocalBtns .clear-local-btn {
-      flex: 1;
-      padding: 10px;
-      margin-top: 0;
-      width: auto;
-    }
     #resumeRandomBtn,
     #mobileRandomGo {
       margin-top: 12px;
@@ -1667,10 +1648,6 @@
     <ul id="mobileFolderList"><li class="loading">Loading folders...</li></ul>
     <ul id="mobileSearchResults" style="display:none;"></ul>
     <button id="mobileRandomBtn">Random Quiz</button>
-    <div id="mobileLocalBtns">
-      <button id="copyLocalBtn" class="copy-local-btn">Copy Local Changes</button>
-      <button id="clearLocalBtn" class="clear-local-btn">Clear Local Storage</button>
-    </div>
     <button id="resumeRandomBtn" style="display:none;">Resume</button>
     <button id="mobileRandomGo">Go</button>
   </div>
@@ -1702,6 +1679,9 @@
             <button type="button" data-mode="expand" role="menuitem">Show folders</button>
             <button type="button" data-mode="collapse" role="menuitem">Hide folders</button>
             <button type="button" data-mode="mini" role="menuitem">Color palette</button>
+            <hr class="menu-divider" role="separator">
+            <button type="button" class="copy-local-btn" role="menuitem">Copy Local Changes</button>
+            <button type="button" class="clear-local-btn" role="menuitem">Clear Local Storage</button>
           </div>
         </div>
         <div id="foldersSectionBody" class="collapsible-body">
@@ -1710,10 +1690,6 @@
             <div class="folder-actions">
               <input id="newFolderName" placeholder="New folder name">
               <button id="addFolderBtn">Add Folder</button>
-            </div>
-            <div id="desktopLocalBtns">
-              <button id="copyLocalBtnDesktop" class="copy-local-btn">Copy Local Changes</button>
-              <button id="clearLocalBtnDesktop" class="clear-local-btn">Clear Local Storage</button>
             </div>
             <hr class="folder-divider">
           </div>
@@ -5300,7 +5276,10 @@
       updateResumeButton();
 
       updateLocalButtons();
-      copyLocalBtns.forEach(btn => btn.onclick = async () => {
+      copyLocalBtns.forEach(btn => btn.onclick = async evt => {
+        evt.preventDefault();
+        evt.stopPropagation();
+        closeSidebarModeMenu();
         let diff = computeDiff(originalData, data);
         if (diff) diff = stripImageData(diff);
         if (!diff || !Object.keys(diff).length) {
@@ -5344,7 +5323,10 @@
         }
       });
 
-      clearLocalBtns.forEach(btn => btn.onclick = () => {
+      clearLocalBtns.forEach(btn => btn.onclick = evt => {
+        evt.preventDefault();
+        evt.stopPropagation();
+        closeSidebarModeMenu();
         if (!unsyncedChanges) return;
         if (confirm('Clear all local changes?')) {
           localStorage.removeItem('lastRandomQuiz');
