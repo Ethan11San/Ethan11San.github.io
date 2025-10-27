@@ -43,8 +43,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>﻿What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><h3>Why</h3>",
-          "rawText": "﻿What\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\nHow\nWhy\n",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>﻿﻿What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "﻿﻿What\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\nHow\nWhy\n",
           "title": "Requirements to Fly",
           "type": "fill"
         },
@@ -185,8 +185,8 @@
               "word": "reputation"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can fly for compensation or hire and can carry people or property for compensation or hire .</p><p>Need an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .</p><p><br></p><p>Can Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire</p><p>or you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. </p><p><br></p><p>Can't \"Hold Out\" - Advertise or build a reputation for flying the public.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan fly for compensation or hire and can carry people or property for compensation or hire .\nNeed an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .\n\nCan Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire\nor you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. \n\nCan't \"Hold Out\" - Advertise or build a reputation for flying the public.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Can fly for compensation or hire and can carry people or property for compensation or hire .</p><p>Need an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .</p><p><br></p><p>Can Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire</p><p>or you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. </p><p><br></p><p>Can't \"Hold Out\" - Advertise or build a reputation for flying the public.</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nCan fly for compensation or hire and can carry people or property for compensation or hire .\nNeed an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .\n\nCan Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire\nor you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. \n\nCan't \"Hold Out\" - Advertise or build a reputation for flying the public.\nHow\nWhy\n",
           "title": "Commercial Priveleges",
           "type": "fill"
         },
@@ -1608,25 +1608,16 @@
           "rawHtml": "<h3>What</h3><h4><br></h4><p>Annual Inspection</p><p><br></p><p>Airworthiness Directives</p><p><em>   Published by FAA and are Mandatory</em></p><p>VOR Equipment</p><ul><li><em>Required for IFR - 30 Days</em></li></ul><p>100 Hour</p><ul><li><em>Required for Hire</em></li></ul><p>Altimeter and Static </p><ul><li><em>Required for IFR - 24 Months</em></li></ul><p>Transponder</p><ul><li><em>24 Months</em></li></ul><p>ELT</p><ul><li><em>&lt; 50% Battery | 1 hour cumulative use | 12 Months. Can be used within 50NM for 90 days after removal.</em></li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\n\nAnnual Inspection\n\nAirworthiness Directives\n   Published by FAA and are Mandatory\nVOR Equipment\nRequired for IFR - 30 Days\n100 Hour\nRequired for Hire\nAltimeter and Static \nRequired for IFR - 24 Months\nTransponder\n24 Months\nELT\n< 50% Battery | 1 hour cumulative use | 12 Months. Can be used within 50NM for 90 days after removal.\n\nHow:\n\nWhy:\n",
           "title": "AVVIATE",
-          "type": "fill"
+          "type": "fill",
+          "alts": {}
         },
         {
           "title": "Required Inspections (AVVIATE)",
           "rawText": "﻿﻿﻿Required Inspections - AAVIATE\nAnnual\nAirworthiness Directives\nVOR Equipment\n100 Hour\nAltimeter and Static Systems \nTransponder \nELT\n",
           "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿Required Inspections - AAVIATE</p><p>Annual</p><p>Airworthiness Directives</p><p>VOR Equipment</p><p>100 Hour</p><p>Altimeter and Static Systems </p><p>Transponder </p><p>ELT</p>",
-          "hidden": {
-            "0": {
-              "word": "Transponder",
-              "occ": 1,
-              "reveal": "- Required every 24 Calendar Months"
-            },
-            "1": {
-              "word": "Altimeter",
-              "occ": 1,
-              "reveal": "testing test 123 123"
-            },
-            "length": 2
-          }
+          "hidden": [],
+          "type": "fill",
+          "alts": {}
         }
       ],
       "color": "#ffb43f"
@@ -1685,7 +1676,7 @@
               "y": 435
             }
           ],
-          "rawHtml": "<h3>What</h3><p><br></p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawHtml": "<p><br></p>",
           "rawText": "\n",
           "title": "Camber / Chord Lines",
           "type": "label"
@@ -3522,8 +3513,8 @@
               "word": "ATC."
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Regulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.</p><p>Non Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.</p><p>Four Types of Airspace - Controlled, Uncontrolled, Special Use, Other.</p><p>Controlled airspace Is that under the jurisdiction of ATC.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRegulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.\nNon Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.\nFour Types of Airspace - Controlled, Uncontrolled, Special Use, Other.\nControlled airspace Is that under the jurisdiction of ATC.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Regulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.</p><p>Non Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.</p><p>Four Types of Airspace - Controlled, Uncontrolled, Special Use, Other.</p><p>Controlled airspace Is that under the jurisdiction of ATC.</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nRegulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.\nNon Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.\nFour Types of Airspace - Controlled, Uncontrolled, Special Use, Other.\nControlled airspace Is that under the jurisdiction of ATC.\nHow\nWhy\n",
           "title": "General Airspace",
           "type": "fill"
         },
@@ -4082,9 +4073,10 @@
         {
           "alts": {},
           "hidden": [],
-          "rawText": "What:\n\nHow:\n\nWhy:\n",
+          "rawText": "﻿What:\nHow:\nWhy:\n",
           "title": "V Speeds",
-          "type": "fill"
+          "type": "fill",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿What:</p><p>How:</p><p>Why:</p>"
         },
         {
           "alts": {},
@@ -4163,7 +4155,9 @@
         {
           "type": "fill",
           "title": "Lost Comms",
-          "rawText": "What:\n\nHow:\n\nWhy:\n"
+          "rawText": "What:\n\nHow:\n\nWhy:\n",
+          "hidden": [],
+          "alts": {}
         }
       ],
       "color": "#53d5fd"
@@ -4314,7 +4308,7 @@
             }
           ],
           "hidden": [],
-          "image": "",
+          "image": "images/d74ca2061ab4393b160ccaaff28456ae85db408b557ed1a04f2809d4d7834e19.png",
           "labels": [
             {
               "fontSize": 16,
@@ -4571,8 +4565,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.</p><p><br></p><p>Avoids precession errors by having pendulous vanes that swing and cover air holes.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nUses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.\n\nAvoids precession errors by having pendulous vanes that swing and cover air holes.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.</p><p><br></p><p>Avoids precession errors by having pendulous vanes that swing and cover air holes.</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nUses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.\n\nAvoids precession errors by having pendulous vanes that swing and cover air holes.\nHow\nWhy\n",
           "title": "Attitude Indicator",
           "type": "fill"
         },
@@ -6913,16 +6907,18 @@
               "letter": "S"
             }
           ],
-          "rawText": "What:\n\nHow:\n\nWhy:\n",
+          "rawText": "﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
           "type": "acronym",
           "hidden": [],
           "alts": {},
-          "rawHtml": "<p>What:</p><p></p><p>How:</p><p></p><p>Why:</p><p></p>"
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
         },
         {
           "type": "fill",
           "title": "Test",
-          "rawText": "What:\n\nHow:\n\nWhy:\n"
+          "rawText": "What:\n\nHow:\n\nWhy:\n",
+          "hidden": [],
+          "alts": {}
         }
       ]
     },
@@ -6932,7 +6928,7 @@
         {
           "type": "fill",
           "title": "Principles of Learning",
-          "rawText": "Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
+          "rawText": "﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
           "hidden": [
             {
               "word": "Readiness",
@@ -6959,25 +6955,32 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>",
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Types of Motivation",
-          "rawText": "Tangible Motivation - Students want their efforts to be noticeably rewarded.\n\nWant to mostly avoid Negative Motivations as well.\n",
-          "rawHtml": "<p>Tangible Motivation - Students want their efforts to be noticeably rewarded.</p><p><br></p><p>Want to mostly avoid Negative Motivations as well.</p>"
+          "rawText": "﻿Tangible Motivation - Students want their efforts to be noticeably rewarded.\n\nWant to mostly avoid Negative Motivations as well.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Tangible Motivation - Students want their efforts to be noticeably rewarded.</p><p><br></p><p>Want to mostly avoid Negative Motivations as well.</p>",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Perception",
-          "rawText": "Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. \n\nLearning has been seen to occur more rapidly when info is received from more than one sense. \n",
-          "rawHtml": "<p>Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. </p><p><br></p><p>Learning has been seen to occur more rapidly when info is received from more than one sense. </p>"
+          "rawText": "﻿Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. \n\nLearning has been seen to occur more rapidly when info is received from more than one sense. \n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. </p><p><br></p><p>Learning has been seen to occur more rapidly when info is received from more than one sense. </p>",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Four Levels of Learning",
           "rawText": "﻿Rote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>"
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "fill",
@@ -6997,13 +7000,40 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<p>﻿<strong>﻿Cognitive Domain</strong> - Mental Skills, Reasoning, Memory, Understanding.</p><p><br></p><p><strong>Affective Domain </strong>- Emotions, values, attitudes. </p><p>\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and <strong>Characterization</strong>.</p><p><br></p><p><strong>Psychomotor Domain</strong> - Coordination, Physical Movement, Muscle Memory. </p>"
+          "rawHtml": "<p>﻿<strong>﻿Cognitive Domain</strong> - Mental Skills, Reasoning, Memory, Understanding.</p><p><br></p><p><strong>Affective Domain </strong>- Emotions, values, attitudes. </p><p>\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and <strong>Characterization</strong>.</p><p><br></p><p><strong>Psychomotor Domain</strong> - Coordination, Physical Movement, Muscle Memory. </p>",
+          "alts": {}
         },
         {
           "type": "fill",
           "title": "Theoring of Learning",
-          "rawText": "Fading - A person forgets information not used for an extended period of time.\n\n",
-          "rawHtml": "<p>Fading - A person forgets information not used for an extended period of time.</p><p><br></p>"
+          "rawText": "Fading - A person forgets information not used for an extended period of time.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Fading - A person forgets information not used for an extended period of time.</p>",
+          "hidden": [],
+          "alts": {}
+        },
+        {
+          "type": "fill",
+          "title": "Transfer of Learning",
+          "rawText": "﻿﻿﻿﻿Two Types\nPositive Transfer - When prior learning helps forward new learnings.\nNegative Transfer - When prior learning interferes or hinders new learnings. \n",
+          "rawHtml": "<p><span class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\"><span class=\"ql-cursor\">﻿</span>﻿﻿﻿</span><strong class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\">﻿Two Types</strong></p><p><strong>Positive Transfer</strong> - When prior learning helps forward new learnings.</p><p><strong>Negative Transfer</strong> - When prior learning interferes or hinders new learnings. </p>"
+        },
+        {
+          "type": "fill",
+          "title": "Maslows Hiearchy of Needs",
+          "rawText": "﻿Physiological (Biological) - Food, Water, Sleep\n\nSafety - Security, Shelter\n\nLove / Belonging - Friendship, Family, Teams\n\nEsteem - Respect, Recognition\n\nSelf-Actualization - The need to reach your full potential and purpose.\n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Physiological (Biological)</strong> - Food, Water, Sleep</li></ul><p><br></p><ul><li><strong>Safety </strong>- Security, Shelter</li></ul><p><br></p><ul><li><strong>Love / Belonging</strong> - Friendship, Family, Teams</li></ul><p><br></p><ul><li><strong>Esteem</strong> - Respect, Recognition</li></ul><p><br></p><ul><li><strong>Self-Actualization</strong> - The need to reach your full potential and purpose.</li></ul>"
+        },
+        {
+          "type": "fill",
+          "title": "Defense Mechanisms",
+          "rawText": "﻿﻿﻿Denial - Refusing to Accept Reality\nRationalization - Making Excuses to justify Errors\nProjection - Blaming others for your own faults\nMinimization - Downplaying a safety problem\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\nDisplacement - Shifting feelings or anger onto somebody else.\nFantasy - Student escapes into wishful thinking instead of facing the facts.\nRepression - Unconscious blocking of memory or feelings.\nAggression - Becoming Angry or hostile towards someone sometimes subtly. \n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li><li><strong>Projection </strong>- Blaming others for your own faults</li><li><strong>Minimization</strong> - Downplaying a safety problem</li><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li><li><strong>Aggression</strong> - Becoming Angry or hostile towards someone sometimes subtly. </li></ul>"
+        },
+        {
+          "type": "fill",
+          "title": "Stress",
+          "rawText": "An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.\n",
+          "rawHtml": "<p>An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.<span class=\"ql-cursor\">﻿</span></p>"
         }
       ],
       "color": "#004d65"
