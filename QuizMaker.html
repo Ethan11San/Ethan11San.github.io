@@ -1136,10 +1136,280 @@
       color: #555;
       font-style: italic;
     }
-    /* —— Acronym Quiz Font & Width —— */
-    #quizContent input[type="text"] {
-      font-family: Arial, sans-serif;
-      min-width: 0ch;
+    /* —— Acronym Quiz Revamp —— */
+    .acronym-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid rgba(44, 62, 80, 0.12);
+      padding: 20px 24px;
+      box-shadow: 0 14px 35px rgba(22, 31, 39, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .acronym-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: center;
+    }
+    .acronym-heading-title {
+      font-size: clamp(1.6rem, 2.2vw + 1rem, 2.4rem);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #1f2d3d;
+    }
+    .acronym-heading-sub {
+      color: #5f6f7f;
+      font-size: 0.95rem;
+    }
+    .acronym-entries {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .acronym-entry {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(236, 240, 241, 0.35);
+      border: 1px solid transparent;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.18s ease;
+    }
+    .acronym-entry.has-guess:not(.is-correct) {
+      border-color: rgba(192, 57, 43, 0.35);
+      background: rgba(192, 57, 43, 0.08);
+    }
+    .acronym-entry.is-correct {
+      border-color: #27ae60;
+      background: rgba(39, 174, 96, 0.12);
+      transform: translateY(-1px);
+    }
+    .acronym-letter {
+      flex: 0 0 auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #2c3e50, #2980b9);
+      color: #ecf0f1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.2);
+    }
+    .acronym-field {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .acronym-input {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      border: 1.5px solid #d0d7de;
+      background: #ffffff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      font-family: inherit;
+      min-width: 0;
+    }
+    .acronym-input:focus {
+      outline: none;
+      border-color: #2980b9;
+      box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.18);
+    }
+    .acronym-hint {
+      font-size: 0.85rem;
+      color: #6b7a89;
+    }
+    .acronym-status {
+      flex: 0 0 auto;
+      font-size: 1.4rem;
+      line-height: 1;
+      width: 1.5em;
+      text-align: center;
+      color: #27ae60;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      opacity: 0;
+    }
+    .acronym-entry.is-correct .acronym-status {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+    .acronym-entry.has-guess:not(.is-correct) .acronym-status {
+      opacity: 1;
+      color: #c0392b;
+      transform: scale(1);
+    }
+    .acronym-extra-panel {
+      display: none;
+      border-radius: 14px;
+      border: 1px solid rgba(41, 128, 185, 0.25);
+      background: linear-gradient(160deg, rgba(41, 128, 185, 0.08), rgba(39, 174, 96, 0.08));
+      padding: 16px 18px;
+      color: #1f2d3d;
+      gap: 10px;
+    }
+    .acronym-extra-panel h5 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1f2d3d;
+    }
+    .acronym-extra-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .acronym-extra-item {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    .acronym-extra-item strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: #2c3e50;
+    }
+    .acronym-extra-panel.is-visible {
+      display: block;
+      animation: fadeInUp 0.3s ease;
+    }
+    .acronym-editor-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+    .acronym-editor-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #1f2d3d;
+    }
+    .acronym-editor-sub {
+      color: #6b7a89;
+      font-size: 0.95rem;
+    }
+    .acronym-editor-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .acronym-editor-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(44,62,80,0.12);
+      background: rgba(236, 240, 241, 0.6);
+    }
+    .acronym-editor-letter {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2c3e50, #3498db);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.04em;
+    }
+    .acronym-editor-fields {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .acronym-editor-answer,
+    .acronym-editor-extra {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccd6dd;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      background: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .acronym-editor-extra {
+      min-height: 70px;
+      resize: vertical;
+      font-size: 0.95rem;
+    }
+    .acronym-editor-answer:focus,
+    .acronym-editor-extra:focus {
+      outline: none;
+      border-color: #2980b9;
+      box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.18);
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @media (max-width: 720px) {
+      .acronym-card {
+        padding: 16px 18px;
+      }
+      .acronym-entry {
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px;
+      }
+      .acronym-letter {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+      .acronym-status {
+        align-self: center;
+      }
+    }
+    @media (max-width: 560px) {
+      .acronym-entry {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .acronym-letter {
+        margin-bottom: 4px;
+      }
+      .acronym-status {
+        width: auto;
+        align-self: flex-end;
+      }
+      .acronym-editor-row {
+        flex-direction: column;
+      }
+      .acronym-editor-letter {
+        width: 38px;
+        height: 38px;
+      }
     }
 
     /* Definition wrapper styling and drag-and-drop container */
@@ -1176,7 +1446,8 @@
     .blank input:focus { outline: none; border-bottom-color: #3498db; }
     .blank input.correct { border-bottom-color: #27ae60; }
     .blank input.incorrect { border-bottom-color: #c0392b; }
-    .blank input.bank-flash {
+    .blank input.bank-flash,
+    .acronym-input.bank-flash {
       animation: bankFillFlash 0.24s ease-out;
     }
     @keyframes bankFillFlash {
@@ -6166,31 +6437,62 @@
 
         if (sec.type === 'acronym') {
           labelEditor.style.display = 'block';
-          labelEditor.innerHTML = '<h4 style="font-size:1.5rem; margin-bottom:0.75rem;">' + sec.acronym + '</h4><div id="acroEditor"></div>';
-          // (rest unchanged)
-          // ...acronym editor code...
-          const baseCh = 12;
-          const answerLengths = sec.entries.map(e => (e.answer||'').length + 2);
-          const maxAnswerCh = Math.max(baseCh, ...answerLengths);
-          const extraLengths = sec.entries.map(e => (e.extra||'').length + 2);
-          const maxExtraCh = Math.max(baseCh, ...extraLengths);
-          const acroEditor = document.getElementById('acroEditor');
-          acroEditor.innerHTML = '';
-          sec.entries.forEach((e, i) => {
+          labelEditor.innerHTML = '';
+
+          const header = document.createElement('div');
+          header.className = 'acronym-editor-header';
+          const title = document.createElement('h4');
+          title.className = 'acronym-editor-title';
+          title.textContent = sec.acronym;
+          header.appendChild(title);
+          const sub = document.createElement('p');
+          sub.className = 'acronym-editor-sub';
+          sub.textContent = 'Update the words for each letter and optional extra context shown after the question is solved.';
+          header.appendChild(sub);
+          labelEditor.appendChild(header);
+
+          const list = document.createElement('div');
+          list.id = 'acronymEditList';
+          list.className = 'acronym-editor-list';
+          labelEditor.appendChild(list);
+
+          (sec.entries || []).forEach((entry, i) => {
             const row = document.createElement('div');
-            row.style.marginBottom = '8px';
-            row.innerHTML = `
-              <strong style="display:inline-block; width:1.5em; text-align:center; margin-right:0.75em; font-size:1.2rem; line-height:1.2;">${e.letter}:</strong>
-              <input type="text" placeholder="Answer" id="ans${i}" value="${e.answer}" style="font-size:1.2rem; line-height:1.2; padding:4px; width:${maxAnswerCh}ch;">
-              <input type="text" placeholder="Extra info" id="ext${i}" value="${e.extra}" style="font-size:1.2rem; line-height:1.2; padding:4px; margin-left:0.75em; width:${maxExtraCh}ch;">
-            `;
-            acroEditor.appendChild(row);
-            ['ans','ext'].forEach(pref => {
-              document.getElementById(pref + i).oninput = evt => {
-                if (pref === 'ans') sec.entries[i].answer = evt.target.value;
-                else sec.entries[i].extra = evt.target.value;
-                saveData();
-              };
+            row.className = 'acronym-editor-row';
+
+            const badge = document.createElement('span');
+            badge.className = 'acronym-editor-letter';
+            badge.textContent = entry.letter || '';
+            row.appendChild(badge);
+
+            const fields = document.createElement('div');
+            fields.className = 'acronym-editor-fields';
+            row.appendChild(fields);
+
+            const answerInput = document.createElement('input');
+            answerInput.type = 'text';
+            answerInput.className = 'acronym-editor-answer';
+            answerInput.value = entry.answer || '';
+            const placeholderLetter = entry.letter ? entry.letter.toUpperCase() : 'this letter';
+            answerInput.placeholder = 'Answer for ' + placeholderLetter;
+            fields.appendChild(answerInput);
+
+            const extraArea = document.createElement('textarea');
+            extraArea.className = 'acronym-editor-extra';
+            extraArea.rows = 2;
+            extraArea.placeholder = 'Extra context (optional)';
+            extraArea.value = entry.extra || '';
+            fields.appendChild(extraArea);
+
+            list.appendChild(row);
+
+            answerInput.addEventListener('input', evt => {
+              sec.entries[i].answer = evt.target.value;
+              saveData();
+            });
+            extraArea.addEventListener('input', evt => {
+              sec.entries[i].extra = evt.target.value;
+              saveData();
             });
           });
           return;
@@ -8303,44 +8605,173 @@
         if (sec.type === 'acronym') {
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
-          quizContent.innerHTML += '<h4 style="font-size:1.5rem; margin-bottom:0.75rem;">' + sec.acronym + '</h4>';
-          // Compute uniform widths for acronym inputs based on base and longest answer/extra
-          const baseCh = 12;
-          const answerLengths = sec.entries.map(e => (e.answer||'').length + 2);
-          const maxAnswerCh = Math.max(baseCh, ...answerLengths);
-          const extraLengths = sec.entries.map(e => (e.extra||'').length + 2);
-          const maxExtraCh = Math.max(baseCh, ...extraLengths);
-          sec.entries.forEach((e, i) => {
-            const div = document.createElement('div');
-            div.style.display = 'flex';
-            div.style.alignItems = 'center';
-            div.style.margin = '4px 0';
-            // Build inputs array
-            let html = `<strong style="display:inline-block; width:1.5em; text-align:center; margin-right:0.75em; font-size:1.2rem; line-height:1.2;">${e.letter}:</strong>
-              <input type="text" placeholder="Answer" id="qans${i}" style="padding:4px; font-size:1.2rem; line-height:1.2;">`;
-            if (e.extra && e.extra.trim()) {
-              html += `<input type="text" placeholder="Extra info" id="qext${i}" style="margin-left:8px; padding:4px; font-size:1.2rem; line-height:1.2;">`;
+          const card = document.createElement('section');
+          card.className = 'acronym-card';
+
+          const heading = document.createElement('div');
+          heading.className = 'acronym-heading';
+          const headingTitle = document.createElement('div');
+          headingTitle.className = 'acronym-heading-title';
+          headingTitle.textContent = sec.acronym || '';
+          const headingSub = document.createElement('div');
+          headingSub.className = 'acronym-heading-sub';
+          headingSub.textContent = 'Type what each letter stands for to unlock the details.';
+          heading.appendChild(headingTitle);
+          heading.appendChild(headingSub);
+          card.appendChild(heading);
+
+          const entriesWrap = document.createElement('div');
+          entriesWrap.className = 'acronym-entries';
+          card.appendChild(entriesWrap);
+
+          const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const inputs = [];
+          let extraPanel = null;
+          const extraEntries = [];
+
+          const updateCompletion = () => {
+            if (!inputs.length) return;
+            const allCorrect = inputs.every(inp => inp.classList.contains('correct'));
+            if (allCorrect) {
+              quizContent.style.borderColor = '#27ae60';
+              markQuestionCompleted();
+              if (extraPanel) {
+                extraPanel.classList.add('is-visible');
+                extraPanel.setAttribute('aria-hidden', 'false');
+              }
+            } else {
+              quizContent.style.borderColor = '';
+              if (extraPanel) {
+                extraPanel.classList.remove('is-visible');
+                extraPanel.setAttribute('aria-hidden', 'true');
+              }
             }
-            div.innerHTML = html;
-            quizContent.appendChild(div);
-            const inp = document.getElementById('qans' + i);
-            inp.style.width = maxAnswerCh + 'ch';
-            inp.oninput = () => {
-              const ok = inp.value.trim().toLowerCase() === e.answer.trim().toLowerCase();
-              inp.classList.toggle('correct', ok);
-              inp.classList.toggle('incorrect', !ok);
-            };
-            let extInp = null;
-            if (e.extra && e.extra.trim()) {
-              extInp = document.getElementById('qext' + i);
-              extInp.style.width = maxExtraCh + 'ch';
-              extInp.oninput = () => {
-                const okX = extInp.value.trim().toLowerCase() === e.extra.trim().toLowerCase();
-                extInp.classList.toggle('correct', okX);
-                extInp.classList.toggle('incorrect', !okX);
-              };
+          };
+
+          (sec.entries || []).forEach((entry, idx) => {
+            const row = document.createElement('div');
+            row.className = 'acronym-entry';
+            row.dataset.letter = entry.letter || '';
+
+            const letter = document.createElement('span');
+            letter.className = 'acronym-letter';
+            letter.textContent = (entry.letter || '?').toUpperCase();
+            row.appendChild(letter);
+
+            const field = document.createElement('div');
+            field.className = 'acronym-field';
+            row.appendChild(field);
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = `acronymInput${idx}`;
+            input.className = 'acronym-input';
+            input.placeholder = 'Word or phrase';
+            input.autocomplete = 'off';
+            input.spellcheck = false;
+            input.inputMode = 'text';
+            input.setAttribute('enterkeyhint', 'next');
+            input.dataset.answer = JSON.stringify([entry.answer || '']);
+            input.dataset.letter = entry.letter || '';
+            field.appendChild(input);
+
+            const helper = document.createElement('span');
+            helper.className = 'acronym-hint';
+            helper.textContent = '';
+            field.appendChild(helper);
+
+            const status = document.createElement('span');
+            status.className = 'acronym-status';
+            status.setAttribute('aria-hidden', 'true');
+            row.appendChild(status);
+
+            inputs.push(input);
+
+            input.addEventListener('focus', () => {
+              lastHintTarget = input;
+              activeBlankInput = input;
+            });
+
+            input.addEventListener('keydown', e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const index = inputs.indexOf(input);
+                if (index > -1 && index < inputs.length - 1) {
+                  inputs[index + 1].focus();
+                } else {
+                  input.blur();
+                }
+              }
+            });
+
+            input.addEventListener('input', () => {
+              const value = input.value.trim();
+              const normalizedValue = normalize(value);
+              const answers = [entry.answer || ''];
+              const isCorrect = answers.some(ans => normalize(ans) === normalizedValue);
+              const hasGuess = value.length > 0;
+
+              input.classList.toggle('correct', isCorrect);
+              input.classList.toggle('incorrect', hasGuess && !isCorrect);
+              row.classList.toggle('is-correct', isCorrect);
+              row.classList.toggle('has-guess', hasGuess);
+
+              if (isCorrect) {
+                status.textContent = '✓';
+                helper.textContent = 'Looks good!';
+              } else if (hasGuess) {
+                status.textContent = '…';
+                helper.textContent = 'Keep going…';
+              } else {
+                status.textContent = '';
+                helper.textContent = '';
+              }
+
+              updateCompletion();
+            });
+
+            entriesWrap.appendChild(row);
+
+            if (entry.extra && entry.extra.trim()) {
+              extraEntries.push({
+                letter: entry.letter || '',
+                answer: entry.answer || '',
+                extra: entry.extra.trim()
+              });
             }
           });
+
+          if (extraEntries.length) {
+            extraPanel = document.createElement('aside');
+            extraPanel.className = 'acronym-extra-panel';
+            extraPanel.setAttribute('aria-hidden', 'true');
+
+            const panelTitle = document.createElement('h5');
+            panelTitle.textContent = 'Extra context';
+            extraPanel.appendChild(panelTitle);
+
+            const list = document.createElement('ul');
+            list.className = 'acronym-extra-list';
+            extraEntries.forEach(info => {
+              const item = document.createElement('li');
+              item.className = 'acronym-extra-item';
+
+              const headingLine = document.createElement('strong');
+              headingLine.textContent = `${info.letter.toUpperCase()} — ${info.answer}`.trim();
+              item.appendChild(headingLine);
+
+              const body = document.createElement('span');
+              body.textContent = info.extra;
+              item.appendChild(body);
+
+              list.appendChild(item);
+            });
+            extraPanel.appendChild(list);
+            card.appendChild(extraPanel);
+          }
+
+          quizContent.appendChild(card);
+          updateCompletion();
           return;
         }
         if (sec.type === 'label') {
@@ -8971,11 +9402,14 @@
           target = lastHintTarget;
         } else {
           const active = document.activeElement;
-          if (active && active.classList.contains('blank-input') && active.dataset.answer) {
+          if (active && active.dataset && active.dataset.answer) {
             target = active;
           } else {
-            const inputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
-            target = inputs.find(i => !i.classList.contains('correct')) || null;
+            const blankInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
+            const acronymInputs = Array.from(document.querySelectorAll('#quizContent input.acronym-input'));
+            target = blankInputs.find(i => i.dataset.answer && !i.classList.contains('correct')) ||
+                     acronymInputs.find(i => i.dataset.answer && !i.classList.contains('correct')) ||
+                     null;
           }
         }
         if (target && target.dataset.answer) {
