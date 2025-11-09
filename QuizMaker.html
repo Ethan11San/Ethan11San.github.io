@@ -1231,6 +1231,11 @@
       font-size: 0.85rem;
       color: #6b7a89;
     }
+    .acronym-hint.has-extra {
+      color: #1f2d3d;
+      font-weight: 500;
+      white-space: pre-wrap;
+    }
     .acronym-status {
       flex: 0 0 auto;
       font-size: 1.4rem;
@@ -1249,46 +1254,6 @@
       opacity: 1;
       color: #c0392b;
       transform: scale(1);
-    }
-    .acronym-extra-panel {
-      display: none;
-      border-radius: 14px;
-      border: 1px solid rgba(41, 128, 185, 0.25);
-      background: linear-gradient(160deg, rgba(41, 128, 185, 0.08), rgba(39, 174, 96, 0.08));
-      padding: 16px 18px;
-      color: #1f2d3d;
-      gap: 10px;
-    }
-    .acronym-extra-panel h5 {
-      font-size: 1.05rem;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #1f2d3d;
-    }
-    .acronym-extra-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .acronym-extra-item {
-      background: rgba(255, 255, 255, 0.6);
-      border-radius: 10px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
-    .acronym-extra-item strong {
-      display: block;
-      font-size: 0.95rem;
-      margin-bottom: 4px;
-      color: #2c3e50;
-    }
-    .acronym-extra-panel.is-visible {
-      display: block;
-      animation: fadeInUp 0.3s ease;
     }
     .acronym-editor-header {
       display: flex;
@@ -8626,8 +8591,6 @@
 
           const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const inputs = [];
-          let extraPanel = null;
-          const extraEntries = [];
 
           const updateCompletion = () => {
             if (!inputs.length) return;
@@ -8635,16 +8598,27 @@
             if (allCorrect) {
               quizContent.style.borderColor = '#27ae60';
               markQuestionCompleted();
-              if (extraPanel) {
-                extraPanel.classList.add('is-visible');
-                extraPanel.setAttribute('aria-hidden', 'false');
-              }
+              inputs.forEach(inp => {
+                const helperEl = inp.parentElement.querySelector('.acronym-hint');
+                if (helperEl && helperEl.dataset.extra) {
+                  helperEl.textContent = helperEl.dataset.extra;
+                  helperEl.classList.add('has-extra');
+                }
+              });
             } else {
               quizContent.style.borderColor = '';
-              if (extraPanel) {
-                extraPanel.classList.remove('is-visible');
-                extraPanel.setAttribute('aria-hidden', 'true');
-              }
+              inputs.forEach(inp => {
+                const helperEl = inp.parentElement.querySelector('.acronym-hint');
+                if (!helperEl) return;
+                helperEl.classList.remove('has-extra');
+                if (inp.classList.contains('correct')) {
+                  helperEl.textContent = helperEl.dataset.defaultCorrect || '';
+                } else if (inp.value.trim()) {
+                  helperEl.textContent = helperEl.dataset.defaultIncorrect || '';
+                } else {
+                  helperEl.textContent = '';
+                }
+              });
             }
           };
 
@@ -8678,6 +8652,11 @@
             const helper = document.createElement('span');
             helper.className = 'acronym-hint';
             helper.textContent = '';
+            helper.dataset.defaultCorrect = 'Looks good!';
+            helper.dataset.defaultIncorrect = 'Keep going…';
+            if (entry.extra && entry.extra.trim()) {
+              helper.dataset.extra = entry.extra.trim();
+            }
             field.appendChild(helper);
 
             const status = document.createElement('span');
@@ -8718,57 +8697,23 @@
 
               if (isCorrect) {
                 status.textContent = '✓';
-                helper.textContent = 'Looks good!';
+                helper.textContent = helper.dataset.defaultCorrect || '';
+                helper.classList.remove('has-extra');
               } else if (hasGuess) {
                 status.textContent = '…';
-                helper.textContent = 'Keep going…';
+                helper.textContent = helper.dataset.defaultIncorrect || '';
+                helper.classList.remove('has-extra');
               } else {
                 status.textContent = '';
                 helper.textContent = '';
+                helper.classList.remove('has-extra');
               }
 
               updateCompletion();
             });
 
             entriesWrap.appendChild(row);
-
-            if (entry.extra && entry.extra.trim()) {
-              extraEntries.push({
-                letter: entry.letter || '',
-                answer: entry.answer || '',
-                extra: entry.extra.trim()
-              });
-            }
           });
-
-          if (extraEntries.length) {
-            extraPanel = document.createElement('aside');
-            extraPanel.className = 'acronym-extra-panel';
-            extraPanel.setAttribute('aria-hidden', 'true');
-
-            const panelTitle = document.createElement('h5');
-            panelTitle.textContent = 'Extra context';
-            extraPanel.appendChild(panelTitle);
-
-            const list = document.createElement('ul');
-            list.className = 'acronym-extra-list';
-            extraEntries.forEach(info => {
-              const item = document.createElement('li');
-              item.className = 'acronym-extra-item';
-
-              const headingLine = document.createElement('strong');
-              headingLine.textContent = `${info.letter.toUpperCase()} — ${info.answer}`.trim();
-              item.appendChild(headingLine);
-
-              const body = document.createElement('span');
-              body.textContent = info.extra;
-              item.appendChild(body);
-
-              list.appendChild(item);
-            });
-            extraPanel.appendChild(list);
-            card.appendChild(extraPanel);
-          }
 
           quizContent.appendChild(card);
           updateCompletion();
