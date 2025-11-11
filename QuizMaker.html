@@ -1791,6 +1791,66 @@
     body.mobile:not(.quiz-active) #mobileStart { display: block; }
     body.mobile.quiz-active #header { cursor: pointer; }
     body.mobile #homeBtn { display: none !important; }
+    body.mobile-type-picker-open {
+      overflow: hidden;
+      touch-action: none;
+    }
+    #mobileTypePickerOverlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 10000;
+      padding: 16px;
+      transition: background 0.2s ease;
+    }
+    #mobileTypePickerOverlay.active { display: flex; }
+    #mobileTypePicker {
+      width: min(420px, 100%);
+      background: #ffffff;
+      border-radius: 18px 18px 12px 12px;
+      padding: 20px 20px 16px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
+    }
+    #mobileTypePicker h3 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .mobile-type-options {
+      display: grid;
+      gap: 10px;
+    }
+    .mobile-type-options button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f0f3f5;
+      color: #2c3e50;
+      font-weight: 600;
+      border: 1px solid rgba(44, 62, 80, 0.08);
+    }
+    .mobile-type-options button[data-type="fill"] { border-left: 4px solid #1abc9c; }
+    .mobile-type-options button[data-type="diagram"] { border-left: 4px solid #9b59b6; }
+    .mobile-type-options button[data-type="acronym"] { border-left: 4px solid #f39c12; }
+    .mobile-type-options button:active { transform: scale(0.97); }
+    #mobileTypePicker .mobile-type-cancel {
+      margin-top: 14px;
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: #ecf0f1;
+      color: #34495e;
+      font-weight: 600;
+    }
+    #mobileTypePicker .mobile-type-cancel:active { transform: scale(0.98); }
     /* Ensure quiz images scale to fit smaller screens (mobile only) */
     body.mobile #quizContent img {
       max-width: 100%;
@@ -1886,6 +1946,18 @@
     <button id="mobileRandomBtn">Random Quiz</button>
     <button id="resumeRandomBtn" style="display:none;">Resume</button>
     <button id="mobileRandomGo">Go</button>
+  </div>
+
+  <div id="mobileTypePickerOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="mobileTypePickerTitle">
+    <div id="mobileTypePicker">
+      <h3 id="mobileTypePickerTitle">Choose question type</h3>
+      <div class="mobile-type-options">
+        <button type="button" data-type="fill">✏️ Fill-In</button>
+        <button type="button" data-type="diagram">🖼️ Diagram</button>
+        <button type="button" data-type="acronym">🔠 Acronym</button>
+      </div>
+      <button type="button" class="mobile-type-cancel">Cancel</button>
+    </div>
   </div>
 
   <div id="sidebar">
@@ -3044,13 +3116,70 @@
         element.addEventListener('mouseleave', cancel);
       }
 
+      function chooseMobileQuestionType() {
+        if (!mobileTypePickerOverlay) return Promise.resolve('fill');
+        return new Promise(resolve => {
+          const overlay = mobileTypePickerOverlay;
+          const typeButtons = Array.from(overlay.querySelectorAll('[data-type]'));
+          const cancelBtn = overlay.querySelector('.mobile-type-cancel');
+
+          const cleanup = () => {
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('mobile-type-picker-open');
+            typeButtons.forEach(btn => btn.removeEventListener('click', onTypeClick));
+            if (cancelBtn) cancelBtn.removeEventListener('click', onCancel);
+            overlay.removeEventListener('click', onOverlayClick);
+            document.removeEventListener('keydown', onKeyDown);
+          };
+
+          const onTypeClick = event => {
+            event.stopPropagation();
+            const selected = event.currentTarget?.dataset?.type;
+            cleanup();
+            resolve(selected || 'fill');
+          };
+
+          const onCancel = event => {
+            if (event) event.stopPropagation();
+            cleanup();
+            resolve(null);
+          };
+
+          const onOverlayClick = event => {
+            if (event.target === overlay) {
+              onCancel(event);
+            }
+          };
+
+          const onKeyDown = event => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              onCancel(event);
+            }
+          };
+
+          overlay.classList.add('active');
+          overlay.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('mobile-type-picker-open');
+          requestAnimationFrame(() => {
+            const firstButton = typeButtons[0];
+            if (firstButton && typeof firstButton.focus === 'function') firstButton.focus();
+          });
+
+          typeButtons.forEach(btn => btn.addEventListener('click', onTypeClick));
+          if (cancelBtn) cancelBtn.addEventListener('click', onCancel);
+          overlay.addEventListener('click', onOverlayClick);
+          document.addEventListener('keydown', onKeyDown);
+        });
+      }
+
       async function addQuestionMobile(folderIdx) {
         currentFolder = folderIdx;
-        const type = prompt('Question type? (fill, diagram, acronym)', 'fill');
+        const type = await chooseMobileQuestionType();
         if (!type) return;
-        const t = type.toLowerCase();
-        if (t.startsWith('d')) await addLabelBtn.onclick();
-        else if (t.startsWith('a')) await addAcronymBtn.onclick();
+        if (type === 'diagram') await addLabelBtn.onclick();
+        else if (type === 'acronym') await addAcronymBtn.onclick();
         else await addFillBtn.onclick();
         mobileOpenFolders.add(folderIdx);
         buildMobileFolderList();
@@ -4033,7 +4162,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsToggleBtn = document.getElementById('ttsToggleBtn'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsToggleBtn = document.getElementById('ttsToggleBtn'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue'), mobileTypePickerOverlay = document.getElementById('mobileTypePickerOverlay');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
