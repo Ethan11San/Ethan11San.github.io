@@ -656,21 +656,6 @@
       font-size: 1.1rem;
       font-weight: bold;
     }
-    #sectionBadge {
-      display: none;
-      margin-right: 12px;
-      padding: 4px 12px;
-      border-radius: 999px;
-      border: 2px solid rgba(52, 152, 219, 0.65);
-      color: #1f2d3d;
-      font-size: 0.95rem;
-      font-weight: 600;
-      background: rgba(255,255,255,0.85);
-      max-width: 50%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
     #controls {
       display: flex;
       gap: 10px;
@@ -1439,10 +1424,6 @@
       }
     }
     @media (max-width: 560px) {
-      #sectionBadge {
-        max-width: 70%;
-        font-size: 0.85rem;
-      }
       .acronym-entry {
         flex-direction: row;
         align-items: center;
@@ -2145,7 +2126,7 @@
   </div>
 
   <div id="main">
-    <div id="header"><span id="folderBadge"></span><span id="sectionBadge"></span><span id="headerTitle">QuizMaker</span></div>
+    <div id="header"><span id="folderBadge"></span><span id="headerTitle">QuizMaker</span></div>
     <div id="controls">
       <button class="mode-btn" id="editModeBtn">✏️ Edit Mode</button>
       <button class="mode-btn" id="quizModeBtn">📝 Quiz Question</button>
@@ -3764,22 +3745,6 @@
         } else {
           folderBadge.style.display = 'none';
         }
-        if (sectionBadge) {
-          sectionBadge.style.display = 'none';
-          sectionBadge.textContent = '';
-          sectionBadge.removeAttribute('title');
-          if (!isQuizMode && currentFolder !== null && currentSection !== null) {
-            const sec = data.folders[currentFolder].sections[currentSection];
-            if (sec.type === 'acronym') {
-              const desc = (sec.description || '').trim();
-              if (desc) {
-                sectionBadge.textContent = desc;
-                sectionBadge.setAttribute('title', desc);
-                sectionBadge.style.display = 'inline-flex';
-              }
-            }
-          }
-        }
       }
       // ----- Load persistent data, with static fallback -----
       // Fallback hosted copy for environments where local JSON can't be fetched
@@ -4292,7 +4257,6 @@
       let pendingRevealSpan = null;
       let lastRange = null;
       const folderBadge = document.getElementById('folderBadge');
-      const sectionBadge = document.getElementById('sectionBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
