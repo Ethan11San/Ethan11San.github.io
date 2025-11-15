@@ -656,6 +656,21 @@
       font-size: 1.1rem;
       font-weight: bold;
     }
+    #sectionBadge {
+      display: none;
+      margin-right: 12px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 2px solid rgba(52, 152, 219, 0.65);
+      color: #1f2d3d;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.85);
+      max-width: 50%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     #controls {
       display: flex;
       gap: 10px;
@@ -1272,6 +1287,34 @@
       color: #6b7a89;
       font-size: 0.95rem;
     }
+    .acronym-editor-description-label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      color: #4b5c6b;
+      font-size: 0.9rem;
+    }
+    .acronym-editor-description {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #ccd6dd;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: #fff;
+      resize: vertical;
+      min-height: 60px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .acronym-editor-description:focus {
+      outline: none;
+      border-color: #2980b9;
+      box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.18);
+    }
+    .acronym-editor-description-hint {
+      font-size: 0.8rem;
+      color: #6b7a89;
+    }
     .acronym-editor-list {
       display: flex;
       flex-direction: column;
@@ -1285,6 +1328,23 @@
       border-radius: 12px;
       border: 1px solid rgba(44,62,80,0.12);
       background: rgba(236, 240, 241, 0.6);
+      position: relative;
+    }
+    .acronym-editor-toggle {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: #546a79;
+      cursor: pointer;
+      user-select: none;
+    }
+    .acronym-editor-toggle input {
+      width: 16px;
+      height: 16px;
     }
     .acronym-editor-letter {
       flex: 0 0 auto;
@@ -1328,6 +1388,17 @@
       border-color: #2980b9;
       box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.18);
     }
+    .acronym-editor-row.acronym-editor-row-disabled {
+      border-style: dashed;
+      opacity: 0.65;
+    }
+    .acronym-editor-row.acronym-editor-row-disabled .acronym-editor-fields {
+      display: none;
+    }
+    .acronym-editor-row.acronym-editor-row-disabled .acronym-editor-letter {
+      background: #bdc3c7;
+      color: #fff;
+    }
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -1347,6 +1418,17 @@
         gap: 12px;
         padding: 12px;
       }
+      .acronym-editor-row {
+        padding: 16px;
+      }
+      .acronym-editor-fields {
+        width: 100%;
+      }
+      .acronym-editor-answer,
+      .acronym-editor-extra,
+      .acronym-editor-description {
+        font-size: 1.05rem;
+      }
       .acronym-letter {
         width: 40px;
         height: 40px;
@@ -1357,11 +1439,18 @@
       }
     }
     @media (max-width: 560px) {
+      #sectionBadge {
+        max-width: 70%;
+        font-size: 0.85rem;
+      }
       .acronym-entry {
         flex-direction: row;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
+      }
+      .acronym-editor-row {
+        align-items: stretch;
       }
       .acronym-letter {
         margin-bottom: 0;
@@ -1369,6 +1458,13 @@
       .acronym-field {
         flex: 1 1 160px;
         min-width: 0;
+      }
+      .acronym-editor-toggle {
+        top: 8px;
+        right: 8px;
+      }
+      .acronym-editor-letter {
+        align-self: flex-start;
       }
       .acronym-status {
         width: auto;
@@ -2049,7 +2145,7 @@
   </div>
 
   <div id="main">
-    <div id="header"><span id="folderBadge"></span><span id="headerTitle">QuizMaker</span></div>
+    <div id="header"><span id="folderBadge"></span><span id="sectionBadge"></span><span id="headerTitle">QuizMaker</span></div>
     <div id="controls">
       <button class="mode-btn" id="editModeBtn">✏️ Edit Mode</button>
       <button class="mode-btn" id="quizModeBtn">📝 Quiz Question</button>
@@ -3668,6 +3764,22 @@
         } else {
           folderBadge.style.display = 'none';
         }
+        if (sectionBadge) {
+          sectionBadge.style.display = 'none';
+          sectionBadge.textContent = '';
+          sectionBadge.removeAttribute('title');
+          if (!isQuizMode && currentFolder !== null && currentSection !== null) {
+            const sec = data.folders[currentFolder].sections[currentSection];
+            if (sec.type === 'acronym') {
+              const desc = (sec.description || '').trim();
+              if (desc) {
+                sectionBadge.textContent = desc;
+                sectionBadge.setAttribute('title', desc);
+                sectionBadge.style.display = 'inline-flex';
+              }
+            }
+          }
+        }
       }
       // ----- Load persistent data, with static fallback -----
       // Fallback hosted copy for environments where local JSON can't be fetched
@@ -4180,6 +4292,7 @@
       let pendingRevealSpan = null;
       let lastRange = null;
       const folderBadge = document.getElementById('folderBadge');
+      const sectionBadge = document.getElementById('sectionBadge');
       const headerTitle = document.getElementById('headerTitle');
       const headerElem = document.getElementById('header');
       const nativeMobileExperience = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -6546,10 +6659,31 @@
           title.className = 'acronym-editor-title';
           title.textContent = sec.acronym;
           header.appendChild(title);
-          const sub = document.createElement('p');
-          sub.className = 'acronym-editor-sub';
-          sub.textContent = 'Update the words for each letter and optional extra context shown after the question is solved.';
-          header.appendChild(sub);
+          const descLabel = document.createElement('label');
+          descLabel.className = 'acronym-editor-description-label';
+          descLabel.textContent = 'Acronym description';
+          const descArea = document.createElement('textarea');
+          descArea.className = 'acronym-editor-description';
+          descArea.rows = 2;
+          descArea.placeholder = 'Add a short description for this acronym (optional)';
+          descArea.value = sec.description || '';
+          descLabel.appendChild(descArea);
+          const descHint = document.createElement('span');
+          descHint.className = 'acronym-editor-description-hint';
+          descHint.textContent = 'Shown near the title while editing and above the quiz card when available.';
+          descLabel.appendChild(descHint);
+          header.appendChild(descLabel);
+
+          descArea.addEventListener('input', evt => {
+            const value = evt.target.value;
+            if (value && value.trim()) {
+              sec.description = value;
+            } else {
+              delete sec.description;
+            }
+            saveData();
+            updateHeader();
+          });
           labelEditor.appendChild(header);
 
           const list = document.createElement('div');
@@ -6585,6 +6719,27 @@
             extraArea.value = entry.extra || '';
             fields.appendChild(extraArea);
 
+            const toggleLabel = document.createElement('label');
+            toggleLabel.className = 'acronym-editor-toggle';
+            toggleLabel.title = 'Include this letter in the acronym quiz';
+            const toggle = document.createElement('input');
+            toggle.type = 'checkbox';
+            const isEnabled = entry.enabled !== false;
+            toggle.checked = isEnabled;
+            toggleLabel.appendChild(toggle);
+            const toggleSr = document.createElement('span');
+            toggleSr.className = 'sr-only';
+            toggleSr.textContent = 'Toggle letter visibility';
+            toggleLabel.appendChild(toggleSr);
+            row.appendChild(toggleLabel);
+
+            const applyEnabledState = enabled => {
+              row.classList.toggle('acronym-editor-row-disabled', !enabled);
+              answerInput.disabled = !enabled;
+              extraArea.disabled = !enabled;
+            };
+            applyEnabledState(isEnabled);
+
             list.appendChild(row);
 
             answerInput.addEventListener('input', evt => {
@@ -6594,6 +6749,17 @@
             extraArea.addEventListener('input', evt => {
               sec.entries[i].extra = evt.target.value;
               saveData();
+            });
+            toggle.addEventListener('change', evt => {
+              const enabled = evt.target.checked;
+              if (enabled) {
+                delete sec.entries[i].enabled;
+              } else {
+                sec.entries[i].enabled = false;
+              }
+              applyEnabledState(enabled);
+              saveData();
+              updateHeader();
             });
           });
           return;
@@ -8716,7 +8882,8 @@
           headingTitle.textContent = sec.acronym || '';
           const headingSub = document.createElement('div');
           headingSub.className = 'acronym-heading-sub';
-          headingSub.textContent = 'Type what each letter stands for to unlock the details.';
+          const headingSubText = (sec.description && sec.description.trim()) || 'Type what each letter stands for to unlock the details.';
+          headingSub.textContent = headingSubText;
           heading.appendChild(headingTitle);
           heading.appendChild(headingSub);
           card.appendChild(heading);
@@ -8758,7 +8925,8 @@
             }
           };
 
-          (sec.entries || []).forEach((entry, idx) => {
+          const activeEntries = (sec.entries || []).filter(entry => entry && entry.enabled !== false);
+          activeEntries.forEach((entry, idx) => {
             const row = document.createElement('div');
             row.className = 'acronym-entry';
             row.dataset.letter = entry.letter || '';
