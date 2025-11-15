@@ -8859,34 +8859,37 @@
           const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const inputs = [];
 
+          const updateHelperState = inp => {
+            const helperEl = inp?.parentElement?.querySelector('.acronym-hint');
+            if (!helperEl) return;
+            const hasExtra = !!helperEl.dataset.extra;
+            if (inp.classList.contains('correct')) {
+              if (hasExtra) {
+                helperEl.textContent = helperEl.dataset.extra;
+                helperEl.classList.add('has-extra');
+              } else {
+                helperEl.textContent = helperEl.dataset.defaultCorrect || '';
+                helperEl.classList.remove('has-extra');
+              }
+            } else if (inp.value.trim()) {
+              helperEl.textContent = helperEl.dataset.defaultIncorrect || '';
+              helperEl.classList.remove('has-extra');
+            } else {
+              helperEl.textContent = '';
+              helperEl.classList.remove('has-extra');
+            }
+          };
+
           const updateCompletion = () => {
             if (!inputs.length) return;
             const allCorrect = inputs.every(inp => inp.classList.contains('correct'));
             if (allCorrect) {
               quizContent.style.borderColor = '#27ae60';
               markQuestionCompleted();
-              inputs.forEach(inp => {
-                const helperEl = inp.parentElement.querySelector('.acronym-hint');
-                if (helperEl && helperEl.dataset.extra) {
-                  helperEl.textContent = helperEl.dataset.extra;
-                  helperEl.classList.add('has-extra');
-                }
-              });
             } else {
               quizContent.style.borderColor = '';
-              inputs.forEach(inp => {
-                const helperEl = inp.parentElement.querySelector('.acronym-hint');
-                if (!helperEl) return;
-                helperEl.classList.remove('has-extra');
-                if (inp.classList.contains('correct')) {
-                  helperEl.textContent = helperEl.dataset.defaultCorrect || '';
-                } else if (inp.value.trim()) {
-                  helperEl.textContent = helperEl.dataset.defaultIncorrect || '';
-                } else {
-                  helperEl.textContent = '';
-                }
-              });
             }
+            inputs.forEach(updateHelperState);
           };
 
           const activeEntries = (sec.entries || []).filter(entry => entry && entry.enabled !== false);
@@ -8965,18 +8968,13 @@
 
               if (isCorrect) {
                 status.textContent = '✓';
-                helper.textContent = helper.dataset.defaultCorrect || '';
-                helper.classList.remove('has-extra');
               } else if (hasGuess) {
                 status.textContent = '…';
-                helper.textContent = helper.dataset.defaultIncorrect || '';
-                helper.classList.remove('has-extra');
               } else {
                 status.textContent = '';
-                helper.textContent = '';
-                helper.classList.remove('has-extra');
               }
 
+              updateHelperState(input);
               updateCompletion();
             });
 
