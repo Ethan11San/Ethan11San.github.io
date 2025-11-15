@@ -1131,6 +1131,11 @@
       font-family: Arial, sans-serif;
     }
     .blank-input { box-sizing: border-box; }
+    .blank-input.showing-hint,
+    .acronym-input.showing-hint {
+      background: #fff7c2;
+      border-color: #f1c40f;
+    }
     #quizContent .blank .reveal {
       margin-left: 6px;
       color: #555;
@@ -9626,15 +9631,12 @@
         if (target && target.dataset.answer) {
           const answers = JSON.parse(target.getAttribute('data-answer'));
           const correct = answers[0] || '';
+          const prevWidth = target.style.width;
           target.value = correct;
+          target.classList.add('showing-hint');
 
-          if (!target.dataset.label) {
-            // Regular blank – use normal correctness logic
-            target.dispatchEvent(new Event('input'));
-          } else {
-            // Picture‑label blank: show temporarily, don’t trigger permanent reveal
-            target.classList.add('correct');
-            // size to fit if user previously shrank
+          if (target.dataset.label) {
+            // Picture‑label blanks can shrink when empty; temporarily size to reveal hint fully
             target.style.width = correct.length + 1 + 'ch';
           }
 
@@ -9643,7 +9645,10 @@
             // Clear only if user hasn’t typed something else
             if (target.value.trim().toLowerCase() === correct.toLowerCase()) {
               target.value = '';
-              target.classList.remove('correct');
+            }
+            target.classList.remove('showing-hint');
+            if (target.dataset.label) {
+              target.style.width = prevWidth;
             }
           }, 1000);
         }
