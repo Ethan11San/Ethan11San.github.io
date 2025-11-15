@@ -1358,15 +1358,22 @@
     }
     @media (max-width: 560px) {
       .acronym-entry {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
       }
       .acronym-letter {
-        margin-bottom: 4px;
+        margin-bottom: 0;
+      }
+      .acronym-field {
+        flex: 1 1 160px;
+        min-width: 0;
       }
       .acronym-status {
         width: auto;
-        align-self: flex-end;
+        margin-left: auto;
+        align-self: center;
       }
       .acronym-editor-row {
         flex-direction: column;
