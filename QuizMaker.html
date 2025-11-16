@@ -1813,6 +1813,16 @@
       border-bottom: 1px solid #ccc;
       cursor: pointer;
     }
+    #mobileSearchResults li .mobile-search-title {
+      display: block;
+      font-weight: 600;
+    }
+    #mobileSearchResults li .mobile-search-description {
+      display: block;
+      font-size: 0.85rem;
+      color: rgba(0, 0, 0, 0.6);
+      margin-top: 2px;
+    }
     #mobileFolderList li ul { list-style: none; padding-left: 20px; }
     #mobileFolderList li ul li {
       padding: 8px 12px;
@@ -1822,6 +1832,21 @@
       position: relative;
       overflow: hidden;
       touch-action: pan-y;
+    }
+    #mobileFolderList li ul li .mobile-section-text {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    #mobileFolderList li ul li .mobile-section-title {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    #mobileFolderList li ul li .mobile-section-description {
+      display: block;
+      font-size: 0.85rem;
+      color: rgba(0, 0, 0, 0.6);
     }
 
     #mobileFolderList > li > .folder-header {
@@ -3446,10 +3471,25 @@
           secList.style.display = mobileOpenFolders.has(idx) ? 'block' : 'none';
           f.sections.forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
+            const description = (s.type === 'acronym' && s.description && s.description.trim())
+              ? s.description.trim()
+              : '';
             const sli = document.createElement('li');
             const sContent = document.createElement('div');
             sContent.className = 'swipe-content';
-            sContent.textContent = title;
+            const textWrap = document.createElement('div');
+            textWrap.className = 'mobile-section-text';
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'mobile-section-title';
+            titleSpan.textContent = title;
+            textWrap.appendChild(titleSpan);
+            if (description) {
+              const descSpan = document.createElement('span');
+              descSpan.className = 'mobile-section-description';
+              descSpan.textContent = `(${description})`;
+              textWrap.appendChild(descSpan);
+            }
+            sContent.appendChild(textWrap);
             sli.appendChild(sContent);
             const sDel = document.createElement('button');
             sDel.className = 'mobile-delete';
@@ -3620,9 +3660,21 @@
         data.folders.forEach((f, fi) => {
           f.sections.forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
+            const description = (s.type === 'acronym' && s.description && s.description.trim())
+              ? s.description.trim()
+              : '';
             if (title.toLowerCase().includes(q)) {
               const li = document.createElement('li');
-              li.textContent = `${f.name}: ${title}`;
+              const titleSpan = document.createElement('span');
+              titleSpan.className = 'mobile-search-title';
+              titleSpan.textContent = `${f.name}: ${title}`;
+              li.appendChild(titleSpan);
+              if (description) {
+                const descSpan = document.createElement('span');
+                descSpan.className = 'mobile-search-description';
+                descSpan.textContent = `(${description})`;
+                li.appendChild(descSpan);
+              }
               li.onclick = () => {
                 if (!isQuizMode) {
                   syncCurrentSection();

@@ -1231,6 +1231,7 @@
         },
         {
           "acronym": "ATOMATOFLAMES",
+          "description": "Required day VFR instruments checklist.",
           "alts": {},
           "entries": [
             {
@@ -1306,6 +1307,7 @@
         },
         {
           "acronym": "FLAPS",
+          "description": "Night VFR equipment requirements.",
           "alts": {},
           "entries": [
             {
