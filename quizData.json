@@ -43,8 +43,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeffWhat</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t\u25ca Pilot Certificate (61.3)</p><p>\t\u25ca Government Issued Photo ID (61.3)</p><p>\t\u25ca 18 Years old for commercial license (61.123)</p><p>\t\u25ca Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t\u25ca Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><h3>Why</h3>",
-          "rawText": "\ufeff\ufeffWhat\nRequired to be PIC\n\t\u25ca Pilot Certificate (61.3)\n\t\u25ca Government Issued Photo ID (61.3)\n\t\u25ca 18 Years old for commercial license (61.123)\n\t\u25ca Medical Certificate (2nd class for commercial privileges) (61.23)\n\t\u25ca Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\nHow\nWhy\n",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>﻿﻿What</h3><p><span class=\"popup-word\" data-img=\"images/007c974a08d0748d8e096b36c31ef0faae1b70d93a303ea68c322b774af2e562.jpg\">Required</span> to be PIC</p><p>\t◊ Pilot Certificate (61.3)</p><p>\t◊ Government Issued Photo ID (61.3)</p><p>\t◊ 18 Years old for commercial license (61.123)</p><p>\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)</p><p>\t◊ Flight Review (Or Checkride) within 24 Calendar Months</p><p>Be familiar with all info concerning your flight prior to it. -&gt; NWKRAFT (91.103)</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "﻿﻿What\nRequired to be PIC\n\t◊ Pilot Certificate (61.3)\n\t◊ Government Issued Photo ID (61.3)\n\t◊ 18 Years old for commercial license (61.123)\n\t◊ Medical Certificate (2nd class for commercial privileges) (61.23)\n\t◊ Flight Review (Or Checkride) within 24 Calendar Months\nBe familiar with all info concerning your flight prior to it. -> NWKRAFT (91.103)\nHow\nWhy\n",
           "title": "Requirements to Fly",
           "type": "fill"
         },
@@ -185,7 +185,7 @@
               "word": "reputation"
             }
           ],
-          "rawHtml": "<h3><span class=\"ql-cursor\">\ufeff</span>What</h3><p>Can fly for compensation or hire and can carry people or property for compensation or hire .</p><p>Need an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .</p><p><br></p><p>Can Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire</p><p>or you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. </p><p><br></p><p>Can't \"Hold Out\" - Advertise or build a reputation for flying the public.</p><h3>How</h3><h3>Why</h3>",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Can fly for compensation or hire and can carry people or property for compensation or hire .</p><p>Need an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .</p><p><br></p><p>Can Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire</p><p>or you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. </p><p><br></p><p>Can't \"Hold Out\" - Advertise or build a reputation for flying the public.</p><h3>How</h3><h3>Why</h3>",
           "rawText": "What\nCan fly for compensation or hire and can carry people or property for compensation or hire .\nNeed an Instrument Rating to fly people for compensation or hire on flight over 50 NM or at night .\n\nCan Fly for hire for a commercial operator if you do not have operational control or you can fly under 119.1E Exceptions for hire\nor you can fly under 91 for hire as long as the flying is incidental to the business and not the business itself. \n\nCan't \"Hold Out\" - Advertise or build a reputation for flying the public.\nHow\nWhy\n",
           "title": "Commercial Priveleges",
           "type": "fill"
@@ -298,8 +298,8 @@
               "word": "Permit"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Required Aircraft Documents - ARROW  (91.203)</p><p>\t\u2022 Airworthiness Certificate - Visible to Passengers </p><p>\t\u2022 Registration Certificate - Expires every 7 years or if sold</p><p>\t\u2022 Radio Station License - For international Use - 10 year duration</p><p>\t\u2022 Operating Limitations - Placards, Markings, POH/AFM</p><p>\t\u2022 Weight and Balance Info - POH/AFM</p><p><br></p><p>Bonus - CAP</p><p>        \u2022 Compass Deviation Card</p><p>        \u2022 Avionics Reference Guide</p><p>        \u2022 Permit - Ferry / Special Flight Permit</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRequired Aircraft Documents - ARROW  (91.203)\n\t\u2022 Airworthiness Certificate - Visible to Passengers \n\t\u2022 Registration Certificate - Expires every 7 years or if sold\n\t\u2022 Radio Station License - For international Use - 10 year duration\n\t\u2022 Operating Limitations - Placards, Markings, POH/AFM\n\t\u2022 Weight and Balance Info - POH/AFM\n\nBonus - CAP\n        \u2022 Compass Deviation Card\n        \u2022 Avionics Reference Guide\n        \u2022 Permit - Ferry / Special Flight Permit\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Required Aircraft Documents - ARROW  (91.203)</p><p>\t• Airworthiness Certificate - Visible to Passengers </p><p>\t• Registration Certificate - Expires every 7 years or if sold</p><p>\t• Radio Station License - For international Use - 10 year duration</p><p>\t• Operating Limitations - Placards, Markings, POH/AFM</p><p>\t• Weight and Balance Info - POH/AFM</p><p><br></p><p>Bonus - CAP</p><p>        • Compass Deviation Card</p><p>        • Avionics Reference Guide</p><p>        • Permit - Ferry / Special Flight Permit</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nRequired Aircraft Documents - ARROW  (91.203)\n\t• Airworthiness Certificate - Visible to Passengers \n\t• Registration Certificate - Expires every 7 years or if sold\n\t• Radio Station License - For international Use - 10 year duration\n\t• Operating Limitations - Placards, Markings, POH/AFM\n\t• Weight and Balance Info - POH/AFM\n\nBonus - CAP\n        • Compass Deviation Card\n        • Avionics Reference Guide\n        • Permit - Ferry / Special Flight Permit\n\nHow:\n\nWhy:\n",
           "title": "Required Aircraft Documents - (91.203)",
           "type": "fill"
         },
@@ -339,8 +339,8 @@
               "word": "Category"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Carrying Passengers (61.57)</p><p>\t\u25ca 3 Takeoff and Landings</p><p>\t\u25ca Same Category and Class and Type if Required</p><p>\t\u25ca Within 90 Days</p><p>*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. </p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCarrying Passengers (61.57)\n\t\u25ca 3 Takeoff and Landings\n\t\u25ca Same Category and Class and Type if Required\n\t\u25ca Within 90 Days\n*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. \n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Carrying Passengers (61.57)</p><p>\t◊ 3 Takeoff and Landings</p><p>\t◊ Same Category and Class and Type if Required</p><p>\t◊ Within 90 Days</p><p>*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. </p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCarrying Passengers (61.57)\n\t◊ 3 Takeoff and Landings\n\t◊ Same Category and Class and Type if Required\n\t◊ Within 90 Days\n*To fly at night with passengers the landings have to be done between 1 Hour after sunset to 1 hour before sunrise to a full stop. \n\nHow:\n\nWhy:\n",
           "title": "Requirements to Carry Passengers (61.57)",
           "type": "fill"
         },
@@ -406,8 +406,8 @@
               "y": 12
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Category | Class | Type",
           "type": "label"
         },
@@ -477,7 +477,7 @@
               ],
               "hideUntilSolved": true,
               "labelText": "60",
-              "rawText": "Statement of Demonstrated Ability (SODA) - Can be given if you have a condition that doesn\u2019t change over time but would normally disqualify you like an amputation or hearing impairment. Doesn't Expire.\n\nSpecial Issuance Medical - Can be given if you have a condition that could get worse over time or flair back up like diabetes or previous substance abuse. Typically requires periodic reevaluations. "
+              "rawText": "Statement of Demonstrated Ability (SODA) - Can be given if you have a condition that doesn’t change over time but would normally disqualify you like an amputation or hearing impairment. Doesn't Expire.\n\nSpecial Issuance Medical - Can be given if you have a condition that could get worse over time or flair back up like diabetes or previous substance abuse. Typically requires periodic reevaluations. "
             }
           ],
           "hidden": [],
@@ -564,8 +564,8 @@
               "y": 192
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Medical Certificates",
           "type": "label"
         },
@@ -706,8 +706,8 @@
               "word": "Incidental"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Commercial Regulations</p><p>\t\u25ca 119.1e - Exceptions like flight instructor - Don't need an AOC</p><p>\t\u25ca 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC</p><p>\t\u25ca 121 - Consistently Scheduled routes , Airlines </p><p>\t\u25ca 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. </p><p>\t\u25ca 135 - Unscheduled , Charters</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCommercial Regulations\n\t\u25ca 119.1e - Exceptions like flight instructor - Don't need an AOC\n\t\u25ca 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC\n\t\u25ca 121 - Consistently Scheduled routes , Airlines \n\t\u25ca 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. \n\t\u25ca 135 - Unscheduled , Charters\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Commercial Regulations</p><p>\t◊ 119.1e - Exceptions like flight instructor - Don't need an AOC</p><p>\t◊ 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC</p><p>\t◊ 121 - Consistently Scheduled routes , Airlines </p><p>\t◊ 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. </p><p>\t◊ 135 - Unscheduled , Charters</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCommercial Regulations\n\t◊ 119.1e - Exceptions like flight instructor - Don't need an AOC\n\t◊ 91k - Fractional Ownership , Private Pilot Privileges - Incidental to the business don't need an AOC\n\t◊ 121 - Consistently Scheduled routes , Airlines \n\t◊ 125 - Big Planes , applied for operations with maximum payload over 6000 pounds or seating configuration of 20 or more passengers. \n\t◊ 135 - Unscheduled , Charters\n\nHow:\n\nWhy:\n",
           "type": "fill",
           "title": "Commercial Regulations"
         },
@@ -735,8 +735,8 @@
               "word": "Control"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Rule of Three\n\t\u25ca Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t\u25ca PIC\n\t\u25ca Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRule of Three\n\t\u25ca Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t\u25ca PIC\n\t\u25ca Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Rule of Three\n\t◊ Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t◊ PIC\n\t◊ Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nRule of Three\n\t◊ Operational Control - Authority over initiating, conducting, or terminating a flight. \n\t◊ PIC\n\t◊ Making Money \nCan have two of these three without anybody having an air operator certificate as long as its incidental to the business like the owner being flown around himself by a pilot to meetings or something but he can't sell those flights to other people. The flight itself can't be the business, but you can pay somebody to fly the plane. \n\nHow:\n\nWhy:\n",
           "type": "fill",
           "title": "Rule of Three"
         },
@@ -792,8 +792,8 @@
               "word": "compensation"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Common Carriage</p><p>  \u25ca Holding out to transport people or property from place to place for compensation or hire. </p><p><br></p><p>Private Carriage</p><p>  \u25ca Transporting people or property from place to place for compensation or hire.</p><p>Doesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCommon Carriage\n  \u25ca Holding out to transport people or property from place to place for compensation or hire. \n\nPrivate Carriage\n  \u25ca Transporting people or property from place to place for compensation or hire.\nDoesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Common Carriage</p><p>  ◊ Holding out to transport people or property from place to place for compensation or hire. </p><p><br></p><p>Private Carriage</p><p>  ◊ Transporting people or property from place to place for compensation or hire.</p><p>Doesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCommon Carriage\n  ◊ Holding out to transport people or property from place to place for compensation or hire. \n\nPrivate Carriage\n  ◊ Transporting people or property from place to place for compensation or hire.\nDoesn't hold out and has only a few select long term customers - 3 or less, more than 18 is common and in between is gray area.\n\nHow:\n\nWhy:\n",
           "title": "Common Carriage / Private Carriage",
           "type": "fill"
         },
@@ -867,8 +867,8 @@
               "word": "Above"
             }
           ],
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeffTransponder Requirements (91.215)</p><p>\t\u25ca Class A | B | and C</p><p>\t\u25ca Above Class B and C</p><p>\t\u25ca Mode C Veil - 30 NM around Class B .</p><p>\t\u25ca All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p>",
-          "rawText": "\ufeffTransponder Requirements (91.215)\n\t\u25ca Class A | B | and C\n\t\u25ca Above Class B and C\n\t\u25ca Mode C Veil - 30 NM around Class B .\n\t\u25ca All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Transponder Requirements (91.215)</p><p>\t◊ Class A | B | and C</p><p>\t◊ Above Class B and C</p><p>\t◊ Mode C Veil - 30 NM around Class B .</p><p>\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. </p><p>*Since 2020 ADS-B Out is now required everywhere a Transponder is.</p>",
+          "rawText": "﻿Transponder Requirements (91.215)\n\t◊ Class A | B | and C\n\t◊ Above Class B and C\n\t◊ Mode C Veil - 30 NM around Class B .\n\t◊ All Airspace at or above 10000 MSL - unless it's also at or below 2500 AGL. \n*Since 2020 ADS-B Out is now required everywhere a Transponder is.\n",
           "type": "fill",
           "title": "Transponder Requirements"
         },
@@ -1028,8 +1028,8 @@
               "y": 524
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "VFR Weather Minimums",
           "type": "label"
         },
@@ -1337,8 +1337,8 @@
             }
           ],
           "hidden": [],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "type": "acronym"
         },
         {
@@ -1411,8 +1411,8 @@
               "word": "Dies"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>\u25ca Cancelled upon request</p><p>\u25ca Aircraft destroyed</p><p>\u25ca Ownership Transferred</p><p>\u25ca Owner loses citizenship</p><p>\u25ca Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n\u25ca Cancelled upon request\n\u25ca Aircraft destroyed\n\u25ca Ownership Transferred\n\u25ca Owner loses citizenship\n\u25ca Owner Dies\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
           "title": "Aircraft Registration",
           "type": "fill"
         },
@@ -1615,8 +1615,8 @@
         },
         {
           "title": "Required Inspections (AVVIATE)",
-          "rawText": "\ufeff\ufeff\ufeffRequired Inspections - AAVIATE\nAnnual\nAirworthiness Directives\nVOR Equipment\n100 Hour\nAltimeter and Static Systems \nTransponder \nELT\n",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeff\ufeffRequired Inspections - AAVIATE</p><p>Annual</p><p>Airworthiness Directives</p><p>VOR Equipment</p><p>100 Hour</p><p>Altimeter and Static Systems </p><p>Transponder </p><p>ELT</p>",
+          "rawText": "﻿﻿﻿Required Inspections - AAVIATE\nAnnual\nAirworthiness Directives\nVOR Equipment\n100 Hour\nAltimeter and Static Systems \nTransponder \nELT\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿Required Inspections - AAVIATE</p><p>Annual</p><p>Airworthiness Directives</p><p>VOR Equipment</p><p>100 Hour</p><p>Altimeter and Static Systems </p><p>Transponder </p><p>ELT</p>",
           "hidden": [],
           "type": "fill",
           "alts": {}
@@ -2033,7 +2033,7 @@
               "word": "descents"
             }
           ],
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>Four Left Turning Tendencies</p><p><strong>1:</strong> Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.</p><p>The action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.</p><p><strong>2:</strong> *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,</p><p>this then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,</p><p>It is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.</p>",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Four Left Turning Tendencies</p><p><strong>1:</strong> Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.</p><p>The action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.</p><p><strong>2:</strong> *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,</p><p>this then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,</p><p>It is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.</p>",
           "rawText": "Four Left Turning Tendencies\n1: Torque Effect - Newtons Third Law = Every action has an equal and opposite reaction.\nThe action of the propeller spinning clockwise makes the aircraft roll in the opposite direction to the left. Worse at high power settings but engine is offset to counteract this.\n2: *Gyroscopic Precession - When you pitch up force is applied to the bottom of the spinning propeller,\nthis then actually gets applied 90 degrees into the turn later which actually pushes the nose to the right,\nIt is only a left turning tendency in descents and actually counteracts some of the others, in tail draggers you pitch down to land so it add to them.\n",
           "title": "Left Turning Tendencies",
           "type": "fill"
@@ -3515,7 +3515,7 @@
               "word": "ATC."
             }
           ],
-          "rawHtml": "<h3><span class=\"ql-cursor\">\ufeff</span>What</h3><p>Regulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.</p><p>Non Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.</p><p>Four Types of Airspace - Controlled, Uncontrolled, Special Use, Other.</p><p>Controlled airspace Is that under the jurisdiction of ATC.</p><h3>How</h3><h3>Why</h3>",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Regulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.</p><p>Non Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.</p><p>Four Types of Airspace - Controlled, Uncontrolled, Special Use, Other.</p><p>Controlled airspace Is that under the jurisdiction of ATC.</p><h3>How</h3><h3>Why</h3>",
           "rawText": "What\nRegulatory Airspace - Governed by the FAA, A, B, C, D, E and restricted and prohibited areas.\nNon Regulatory Airspace - Operations that the FAA doesn't directly govern, MOAs, Warning and Alert Areas, CFAs, NWAs.\nFour Types of Airspace - Controlled, Uncontrolled, Special Use, Other.\nControlled airspace Is that under the jurisdiction of ATC.\nHow\nWhy\n",
           "title": "General Airspace",
           "type": "fill"
@@ -3749,8 +3749,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p><strong style=\"color: rgb(0, 71, 178);\">S</strong><strong>t</strong><strong style=\"color: rgb(0, 71, 178);\">a</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">da</strong><strong>r</strong><strong style=\"color: rgb(0, 71, 178);\">d </strong><strong style=\"color: rgb(0, 41, 102);\">D</strong><strong>i</strong><strong style=\"color: rgb(0, 71, 178);\">me</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">si</strong><strong>on</strong><strong style=\"color: rgb(0, 71, 178);\">s</strong></p><ul><li>4 NM Radius | 2500 AGL</li></ul><p><strong>Tower Closure</strong> \u2014</p><p>Airspace reverts to class E or G.</p><p><strong>Entry Requirements</strong> \u2014</p><ul><li>Two Way radios (Tail #)</li><li><em>Speed limit</em> for D and C within 2500 AGL and 4 NM is 200 KIAS.</li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nStandard Dimensions\n4 NM Radius | 2500 AGL\nTower Closure \u2014\nAirspace reverts to class E or G.\nEntry Requirements \u2014\nTwo Way radios (Tail #)\nSpeed limit for D and C within 2500 AGL and 4 NM is 200 KIAS.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p><strong style=\"color: rgb(0, 71, 178);\">S</strong><strong>t</strong><strong style=\"color: rgb(0, 71, 178);\">a</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">da</strong><strong>r</strong><strong style=\"color: rgb(0, 71, 178);\">d </strong><strong style=\"color: rgb(0, 41, 102);\">D</strong><strong>i</strong><strong style=\"color: rgb(0, 71, 178);\">me</strong><strong>n</strong><strong style=\"color: rgb(0, 71, 178);\">si</strong><strong>on</strong><strong style=\"color: rgb(0, 71, 178);\">s</strong></p><ul><li>4 NM Radius | 2500 AGL</li></ul><p><strong>Tower Closure</strong> —</p><p>Airspace reverts to class E or G.</p><p><strong>Entry Requirements</strong> —</p><ul><li>Two Way radios (Tail #)</li><li><em>Speed limit</em> for D and C within 2500 AGL and 4 NM is 200 KIAS.</li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nStandard Dimensions\n4 NM Radius | 2500 AGL\nTower Closure —\nAirspace reverts to class E or G.\nEntry Requirements —\nTwo Way radios (Tail #)\nSpeed limit for D and C within 2500 AGL and 4 NM is 200 KIAS.\n\nHow:\n\nWhy:\n",
           "title": "Class D Airspace",
           "type": "fill"
         },
@@ -4075,10 +4075,10 @@
         {
           "alts": {},
           "hidden": [],
-          "rawText": "\ufeffWhat:\nHow:\nWhy:\n",
+          "rawText": "﻿What:\nHow:\nWhy:\n",
           "title": "V Speeds",
           "type": "fill",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeffWhat:</p><p>How:</p><p>Why:</p>"
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿What:</p><p>How:</p><p>Why:</p>"
         },
         {
           "alts": {},
@@ -4219,8 +4219,8 @@
               "word": "orientation"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Gyroscopic Instruments</p><p>Power Sources/Principles</p><p>\t\u2022 Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator</p><p>\t\u2022 Precession / Electricity : Turn Coordinator (also rigidity in space)</p><p>Rigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.</p><p>Precession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nGyroscopic Instruments\nPower Sources/Principles\n\t\u2022 Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator\n\t\u2022 Precession / Electricity : Turn Coordinator (also rigidity in space)\nRigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.\nPrecession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Gyroscopic Instruments</p><p>Power Sources/Principles</p><p>\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator</p><p>\t• Precession / Electricity : Turn Coordinator (also rigidity in space)</p><p>Rigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.</p><p>Precession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nGyroscopic Instruments\nPower Sources/Principles\n\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator\n\t• Precession / Electricity : Turn Coordinator (also rigidity in space)\nRigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.\nPrecession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.\n\nHow:\n\nWhy:\n",
           "title": "",
           "type": "fill"
         },
@@ -4567,7 +4567,7 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3><span class=\"ql-cursor\">\ufeff</span>What</h3><p>Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.</p><p><br></p><p>Avoids precession errors by having pendulous vanes that swing and cover air holes.</p><h3>How</h3><h3>Why</h3>",
+          "rawHtml": "<h3><span class=\"ql-cursor\">﻿</span>What</h3><p>Uses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.</p><p><br></p><p>Avoids precession errors by having pendulous vanes that swing and cover air holes.</p><h3>How</h3><h3>Why</h3>",
           "rawText": "What\nUses a Gyro mounted horizontally that spins from a Vacuum Pump and maintains the Horizons attitude using the principle rigidity in space.\n\nAvoids precession errors by having pendulous vanes that swing and cover air holes.\nHow\nWhy\n",
           "title": "Attitude Indicator",
           "type": "fill"
@@ -6319,8 +6319,8 @@
               "word": "Steep"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Steep Turns</p><p>Altitude: +/- 100 ft</p><p>Entry Speed: 95 Knots +/- 10 Knots</p><p>Bank Angle: 50 \u00b0 +/- 5\u00b0</p><p>At 30 \u00b0 start to increase back pressure and add power</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nSteep Turns\nAltitude: +/- 100 ft\nEntry Speed: 95 Knots +/- 10 Knots\nBank Angle: 50 \u00b0 +/- 5\u00b0\nAt 30 \u00b0 start to increase back pressure and add power\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Steep Turns</p><p>Altitude: +/- 100 ft</p><p>Entry Speed: 95 Knots +/- 10 Knots</p><p>Bank Angle: 50 ° +/- 5°</p><p>At 30 ° start to increase back pressure and add power</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nSteep Turns\nAltitude: +/- 100 ft\nEntry Speed: 95 Knots +/- 10 Knots\nBank Angle: 50 ° +/- 5°\nAt 30 ° start to increase back pressure and add power\n\nHow:\n\nWhy:\n",
           "title": "Steep Turns",
           "type": "fill"
         },
@@ -6401,8 +6401,8 @@
               "word": "idle"
             }
           ],
-          "rawHtml": "<h3>What</h3><p> \t\u25ca Never go to full break </p><p>Why: Show the danger of adding too much bank on base to final and stall spins </p><p><br></p><p>Clean configuration</p><p>85 knots </p><p>No lower than 3000 ft AGL</p><p>No airspeed or heading requirements</p><p>Start</p><p>Power idle </p><p>Bank 45 degrees</p><p>Nose up/Hold Altitude to induce stall</p><p>At first indication - Acknowledge it</p><p>Go wings level and max power</p><p>Right rudder on recovery to the right  </p><p>Climb out Vx or Vy</p><p>Level to Cruise</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\n \t\u25ca Never go to full break \nWhy: Show the danger of adding too much bank on base to final and stall spins \n\nClean configuration\n85 knots \nNo lower than 3000 ft AGL\nNo airspeed or heading requirements\nStart\nPower idle \nBank 45 degrees\nNose up/Hold Altitude to induce stall\nAt first indication - Acknowledge it\nGo wings level and max power\nRight rudder on recovery to the right  \nClimb out Vx or Vy\nLevel to Cruise\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p> \t◊ Never go to full break </p><p>Why: Show the danger of adding too much bank on base to final and stall spins </p><p><br></p><p>Clean configuration</p><p>85 knots </p><p>No lower than 3000 ft AGL</p><p>No airspeed or heading requirements</p><p>Start</p><p>Power idle </p><p>Bank 45 degrees</p><p>Nose up/Hold Altitude to induce stall</p><p>At first indication - Acknowledge it</p><p>Go wings level and max power</p><p>Right rudder on recovery to the right  </p><p>Climb out Vx or Vy</p><p>Level to Cruise</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\n \t◊ Never go to full break \nWhy: Show the danger of adding too much bank on base to final and stall spins \n\nClean configuration\n85 knots \nNo lower than 3000 ft AGL\nNo airspeed or heading requirements\nStart\nPower idle \nBank 45 degrees\nNose up/Hold Altitude to induce stall\nAt first indication - Acknowledge it\nGo wings level and max power\nRight rudder on recovery to the right  \nClimb out Vx or Vy\nLevel to Cruise\n\nHow:\n\nWhy:\n",
           "title": "Accelerated Stall",
           "type": "fill"
         },
@@ -6523,8 +6523,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Eights on Pylons</p><p>Pivotal altitude: Ground speed squared divided by 11.3 + elevation </p><p>Clean configuration </p><p>Doesn\u2019t have the altitude restriction of 1500 AGL</p><p>Start at 2500 MSL</p><p>95 knots </p><p><br></p><p>Find two points </p><p>Get to pivotal altitude </p><p>Position for 45 degrees quartering tailwind </p><p>Bug heading. - entry heading is also exit heading </p><p>Fly until first point is abeam your shoulder</p><p>This has to be done with a crosswind from the points  </p><p>When ground speed goes down pitch goes down and vice versa</p><p>You fly about 5 seconds when you level out </p><p>If the point starts to get in front of your wing you push forward and if it moves back you pull back</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nEights on Pylons\nPivotal altitude: Ground speed squared divided by 11.3 + elevation \nClean configuration \nDoesn\u2019t have the altitude restriction of 1500 AGL\nStart at 2500 MSL\n95 knots \n\nFind two points \nGet to pivotal altitude \nPosition for 45 degrees quartering tailwind \nBug heading. - entry heading is also exit heading \nFly until first point is abeam your shoulder\nThis has to be done with a crosswind from the points  \nWhen ground speed goes down pitch goes down and vice versa\nYou fly about 5 seconds when you level out \nIf the point starts to get in front of your wing you push forward and if it moves back you pull back\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Eights on Pylons</p><p>Pivotal altitude: Ground speed squared divided by 11.3 + elevation </p><p>Clean configuration </p><p>Doesn’t have the altitude restriction of 1500 AGL</p><p>Start at 2500 MSL</p><p>95 knots </p><p><br></p><p>Find two points </p><p>Get to pivotal altitude </p><p>Position for 45 degrees quartering tailwind </p><p>Bug heading. - entry heading is also exit heading </p><p>Fly until first point is abeam your shoulder</p><p>This has to be done with a crosswind from the points  </p><p>When ground speed goes down pitch goes down and vice versa</p><p>You fly about 5 seconds when you level out </p><p>If the point starts to get in front of your wing you push forward and if it moves back you pull back</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nEights on Pylons\nPivotal altitude: Ground speed squared divided by 11.3 + elevation \nClean configuration \nDoesn’t have the altitude restriction of 1500 AGL\nStart at 2500 MSL\n95 knots \n\nFind two points \nGet to pivotal altitude \nPosition for 45 degrees quartering tailwind \nBug heading. - entry heading is also exit heading \nFly until first point is abeam your shoulder\nThis has to be done with a crosswind from the points  \nWhen ground speed goes down pitch goes down and vice versa\nYou fly about 5 seconds when you level out \nIf the point starts to get in front of your wing you push forward and if it moves back you pull back\n\nHow:\n\nWhy:\n",
           "title": "Eights on Pylons",
           "type": "fill"
         },
@@ -6560,8 +6560,8 @@
               "word": "70"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Pattern is the same until abeam the touchdown point then</p><p>Power idle </p><p>Continue downwind and turn base half the normal distance </p><p>When you level make sure you aren\u2019t low </p><p>You want to start final high</p><p><br></p><p>If you have less than 10 total knots of wind in any direction go flaps 10 at power idle </p><p>If more than 10 knots don\u2019t go flaps 10</p><p>Aim for 70 knots don\u2019t force it though let it happen and hold it</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nPattern is the same until abeam the touchdown point then\nPower idle \nContinue downwind and turn base half the normal distance \nWhen you level make sure you aren\u2019t low \nYou want to start final high\n\nIf you have less than 10 total knots of wind in any direction go flaps 10 at power idle \nIf more than 10 knots don\u2019t go flaps 10\nAim for 70 knots don\u2019t force it though let it happen and hold it\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>Pattern is the same until abeam the touchdown point then</p><p>Power idle </p><p>Continue downwind and turn base half the normal distance </p><p>When you level make sure you aren’t low </p><p>You want to start final high</p><p><br></p><p>If you have less than 10 total knots of wind in any direction go flaps 10 at power idle </p><p>If more than 10 knots don’t go flaps 10</p><p>Aim for 70 knots don’t force it though let it happen and hold it</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
+          "rawText": "What:\nPattern is the same until abeam the touchdown point then\nPower idle \nContinue downwind and turn base half the normal distance \nWhen you level make sure you aren’t low \nYou want to start final high\n\nIf you have less than 10 total knots of wind in any direction go flaps 10 at power idle \nIf more than 10 knots don’t go flaps 10\nAim for 70 knots don’t force it though let it happen and hold it\n\nHow:\n\nWhy:\n",
           "title": "Power Off 180",
           "type": "fill"
         },
@@ -6873,179 +6873,6 @@
           "rawText": "What:\n1:  All Lights Off \n2:  Perform a Sideslip bringing the wing on fire up to keep it away from fuel tanks\n3:  Land ASAP\n\nHow:\n\nWhy:\n",
           "title": "Wing Fire",
           "type": "fill"
-        },
-        {
-          "title": "Slow Flight",
-          "type": "fill",
-          "alts": {},
-          "hidden": [
-            {
-              "word": "1500",
-              "occ": 1
-            },
-            {
-              "word": "50",
-              "occ": 1
-            },
-            {
-              "word": "10",
-              "occ": 2
-            },
-            {
-              "word": "55",
-              "occ": 1
-            },
-            {
-              "word": "60",
-              "occ": 1
-            },
-            {
-              "word": "mph",
-              "occ": 3
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Slow Flight &ndash; maneuvering at minimum controllable airspeed with the stall horn active while keeping coordinated control of the 1974 C172M.</p><h3>Requirements</h3><p>Altitude: recover no lower than 1500 AGL; maintain altitude within &plusmn;50 ft and heading within &plusmn;10&deg;.</p><p>Airspeed: about 55&ndash;60 mph, just above stall, with flaps set as assigned.</p><p>Bank: shallow 10&ndash;15&deg; turns only, keeping the ball centered.</p><h3>How</h3><ol><li>Clearing turns, carb heat on, and reduce power to about 1500 RPM.</li><li>Hold altitude with increasing back-pressure; add flaps in increments if assigned.</li><li>Stabilize around 55&ndash;60 mph using power to hold altitude and pitch to hold airspeed; use rudder to stay coordinated.</li><li>Turn using shallow bank and coordinated rudder; avoid climbs or descents.</li><li>Recover with full power, carb heat cold, reduce excessive angle of attack, retract flaps to 20&deg; then 10&deg; then up as airspeed rises through 70 mph.</li></ol>",
-          "rawText": "What:\nSlow Flight \u2013 maneuvering at minimum controllable airspeed with the stall horn active while keeping coordinated control of the 1974 C172M.\n\nRequirements:\nAltitude: recover no lower than 1500 AGL; maintain altitude within \u00b150 ft and heading within \u00b110\u00b0.\nAirspeed: about 55\u201360 mph, just above stall, with flaps set as assigned.\nBank: shallow 10\u201315\u00b0 turns only, keeping the ball centered.\n\nHow:\n1. Clearing turns, carb heat on, and reduce power to about 1500 RPM.\n2. Hold altitude with increasing back-pressure; add flaps in increments if assigned.\n3. Stabilize around 55\u201360 mph using power to hold altitude and pitch to hold airspeed; use rudder to stay coordinated.\n4. Turn using shallow bank and coordinated rudder; avoid climbs or descents.\n5. Recover with full power, carb heat cold, reduce excessive angle of attack, retract flaps to 20\u00b0 then 10\u00b0 then up as airspeed rises through 70 mph.\n"
-        },
-        {
-          "title": "Normal & Crosswind Takeoff/Landing",
-          "type": "fill",
-          "alts": {},
-          "hidden": [
-            {
-              "word": "65",
-              "occ": 1
-            },
-            {
-              "word": "84",
-              "occ": 1
-            },
-            {
-              "word": "75",
-              "occ": 2
-            },
-            {
-              "word": "80",
-              "occ": 1
-            },
-            {
-              "word": "mph",
-              "occ": 4
-            },
-            {
-              "word": "15",
-              "occ": 1
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Normal and crosswind takeoffs and landings in the 1974 C172M using published speeds in miles per hour.</p><h3>Requirements</h3><p>Takeoff: rotate around 65 mph, climb at Vy 84 mph after liftoff, maintain centerline with appropriate aileron into the wind.</p><p>Landing: final approach 75&ndash;80 mph with flaps as needed; crosswind maximum demonstrated 15 knots (~17 mph); aim to touch down on centerline with longitudinal alignment.</p><h3>How</h3><ol><li>Before takeoff: set flaps 0&deg; (10&deg; if needed for short runway), hold slight aileron into the wind for crosswinds.</li><li>Apply full power smoothly, check engine instruments, and maintain directional control; rotate about 65 mph.</li><li>Climb at 84 mph, reducing crosswind aileron inputs as speed increases and turn into the wind for drift correction.</li><li>For landing, fly pattern at 90 mph on downwind, 80 mph on base, and 75&ndash;80 mph on final; add crosswind aileron into the wind and opposite rudder to keep the nose aligned.</li><li>Touch down mains first on centerline, lower the nose gently, and maintain crosswind correction through rollout.</li></ol>",
-          "rawText": "What:\nNormal and crosswind takeoffs and landings in the 1974 C172M using published speeds in miles per hour.\n\nRequirements:\nTakeoff: rotate around 65 mph, climb at Vy 84 mph after liftoff, maintain centerline with appropriate aileron into the wind.\nLanding: final approach 75\u201380 mph with flaps as needed; crosswind maximum demonstrated 15 knots (~17 mph); aim to touch down on centerline with longitudinal alignment.\n\nHow:\n1. Before takeoff: set flaps 0\u00b0 (10\u00b0 if needed for short runway), hold slight aileron into the wind for crosswinds.\n2. Apply full power smoothly, check engine instruments, and maintain directional control; rotate about 65 mph.\n3. Climb at 84 mph, reducing crosswind aileron inputs as speed increases and turn into the wind for drift correction.\n4. For landing, fly pattern at 90 mph on downwind, 80 mph on base, and 75\u201380 mph on final; add crosswind aileron into the wind and opposite rudder to keep the nose aligned.\n5. Touch down mains first on centerline, lower the nose gently, and maintain crosswind correction through rollout.\n"
-        },
-        {
-          "title": "Short-Field Takeoff/Landing",
-          "type": "fill",
-          "alts": {},
-          "hidden": [
-            {
-              "word": "10",
-              "occ": 1
-            },
-            {
-              "word": "63",
-              "occ": 1
-            },
-            {
-              "word": "68",
-              "occ": 1
-            },
-            {
-              "word": "84",
-              "occ": 1
-            },
-            {
-              "word": "70",
-              "occ": 1
-            },
-            {
-              "word": "mph",
-              "occ": 5
-            },
-            {
-              "word": "50",
-              "occ": 1
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Short-field takeoff and landing techniques for clearing obstacles in the 1974 C172M.</p><h3>Requirements</h3><p>Takeoff: flaps 10&deg;, hold brakes, full power before brake release, rotate about 63 mph, climb at Vx 68 mph until clear of 50 ft obstacle then Vy 84 mph.</p><p>Landing: final approach about 70 mph with full flaps, aim for short touchdown point and maximum braking after full-stall landing.</p><h3>How</h3><ol><li>Before takeoff: flaps 10&deg;, verify full power and engine instruments in the green before brake release.</li><li>Rotate about 63 mph, pitch for 68 mph to clear the obstacle, then accelerate to 84 mph while retracting flaps to 0&deg; once a positive climb is established.</li><li>For landing, fly a stabilized approach around 70 mph with full flaps; use a slightly higher aiming point to allow for the flare.</li><li>Cross the threshold near 50 ft at 70 mph, flare to a full-stall touchdown on the aiming point, retract flaps after landing, and apply maximum safe braking while maintaining directional control.</li></ol>",
-          "rawText": "What:\nShort-field takeoff and landing techniques for clearing obstacles in the 1974 C172M.\n\nRequirements:\nTakeoff: flaps 10\u00b0, hold brakes, full power before brake release, rotate about 63 mph, climb at Vx 68 mph until clear of 50 ft obstacle then Vy 84 mph.\nLanding: final approach about 70 mph with full flaps, aim for short touchdown point and maximum braking after full-stall landing.\n\nHow:\n1. Before takeoff: flaps 10\u00b0, verify full power and engine instruments in the green before brake release.\n2. Rotate about 63 mph, pitch for 68 mph to clear the obstacle, then accelerate to 84 mph while retracting flaps to 0\u00b0 once a positive climb is established.\n3. For landing, fly a stabilized approach around 70 mph with full flaps; use a slightly higher aiming point to allow for the flare.\n4. Cross the threshold near 50 ft at 70 mph, flare to a full-stall touchdown on the aiming point, retract flaps after landing, and apply maximum safe braking while maintaining directional control.\n"
-        },
-        {
-          "title": "Soft-Field Takeoff/Landing",
-          "type": "fill",
-          "alts": {},
-          "hidden": [
-            {
-              "word": "10",
-              "occ": 1
-            },
-            {
-              "word": "60",
-              "occ": 1
-            },
-            {
-              "word": "84",
-              "occ": 1
-            },
-            {
-              "word": "70",
-              "occ": 1
-            },
-            {
-              "word": "mph",
-              "occ": 4
-            },
-            {
-              "word": "drag",
-              "occ": 1
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Soft-field takeoff and landing techniques for turf or snow using 1974 C172M speeds in mph.</p><h3>Requirements</h3><p>Takeoff: flaps 10&deg;, keep the nosewheel light, lift off as soon as possible around 60 mph, stay in ground effect to accelerate, then climb at Vy 84 mph.</p><p>Landing: approach near 70 mph with some power carried into the flare to avoid dropping onto the surface; keep back pressure to unload the nosewheel.</p><h3>How</h3><ol><li>Before takeoff: flaps 10&deg;, continuous aft yoke, taxi onto runway without stopping to avoid digging in.</li><li>Apply full power smoothly, keep the nosewheel light, lift off around 60 mph, and remain in ground effect while accelerating to 80&ndash;84 mph before climbing away.</li><li>For landing, carry a little power through final (about 70 mph) to soften the touchdown; flare smoothly and hold the nose off as long as practical.</li><li>After touchdown, maintain aft yoke and minimal braking, using power as needed to keep rolling on the soft surface.</li></ol>",
-          "rawText": "What:\nSoft-field takeoff and landing techniques for turf or snow using 1974 C172M speeds in mph.\n\nRequirements:\nTakeoff: flaps 10\u00b0, keep the nosewheel light, lift off as soon as possible around 60 mph, stay in ground effect to accelerate, then climb at Vy 84 mph.\nLanding: approach near 70 mph with some power carried into the flare to avoid dropping onto the surface; keep back pressure to unload the nosewheel.\n\nHow:\n1. Before takeoff: flaps 10\u00b0, continuous aft yoke, taxi onto runway without stopping to avoid digging in.\n2. Apply full power smoothly, keep the nosewheel light, lift off around 60 mph, and remain in ground effect while accelerating to 80\u201384 mph before climbing away.\n3. For landing, carry a little power through final (about 70 mph) to soften the touchdown; flare smoothly and hold the nose off as long as practical.\n4. After touchdown, maintain aft yoke and minimal braking, using power as needed to keep rolling on the soft surface.\n"
-        },
-        {
-          "title": "Ground Reference Maneuvers",
-          "type": "fill",
-          "alts": {},
-          "hidden": [
-            {
-              "word": "600",
-              "occ": 1
-            },
-            {
-              "word": "1000",
-              "occ": 1
-            },
-            {
-              "word": "90",
-              "occ": 1
-            },
-            {
-              "word": "mph",
-              "occ": 3
-            },
-            {
-              "word": "Rectangular",
-              "occ": 1
-            },
-            {
-              "word": "S-Turns",
-              "occ": 1
-            },
-            {
-              "word": "Point",
-              "occ": 1
-            }
-          ],
-          "rawHtml": "<h3>What</h3><p>Ground reference maneuvers for the CFI ACS: rectangular course, S-turns across a road, and turns around a point.</p><h3>Requirements</h3><p>Altitude: typically 600&ndash;1000 AGL (wind-dependent) to remain clear of obstacles and traffic.</p><p>Airspeed: about 90 mph (cruise configuration) with flaps up for stable wind correction.</p><p>Wind correction: adjust bank and crab to maintain constant ground track, with steeper bank on downwind and shallower upwind.</p><h3>How</h3><ol><li>Rectangular Course: enter on downwind, pick a rectangular ground reference, and apply wind correction on each leg to maintain equal distances.</li><li>S-Turns Across a Road: enter on downwind, cross the road perpendicular, start with a steeper bank on the first turn, shallowing through the upwind cross, and complete two equal semicircles on each side.</li><li>Turns Around a Point: enter on downwind at 90 mph, pick a point, and vary bank (steeper downwind, shallow upwind) to keep a constant radius around the point.</li></ol>",
-          "rawText": "What:\nGround reference maneuvers for the CFI ACS: rectangular course, S-turns across a road, and turns around a point.\n\nRequirements:\nAltitude: typically 600\u20131000 AGL (wind-dependent) to remain clear of obstacles and traffic.\nAirspeed: about 90 mph (cruise configuration) with flaps up for stable wind correction.\nWind correction: adjust bank and crab to maintain constant ground track, with steeper bank on downwind and shallower upwind.\n\nHow:\n1. Rectangular Course: enter on downwind, pick a rectangular ground reference, and apply wind correction on each leg to maintain equal distances.\n2. S-Turns Across a Road: enter on downwind, cross the road perpendicular, start with a steeper bank on the first turn, shallowing through the upwind cross, and complete two equal semicircles on each side.\n3. Turns Around a Point: enter on downwind at 90 mph, pick a point, and vary bank (steeper downwind, shallow upwind) to keep a constant radius around the point.\n"
         }
       ],
       "color": "#942192"
@@ -7082,11 +6909,11 @@
               "letter": "S"
             }
           ],
-          "rawText": "\ufeff\ufeff\ufeff\ufeff\ufeff\ufeffReadiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. \ufeff\n",
+          "rawText": "﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
           "type": "acronym",
           "hidden": [],
           "alts": {},
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeff\ufeff\ufeff\ufeff\ufeffReadiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. \ufeff</p>"
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
         },
         {
           "type": "fill",
@@ -7103,7 +6930,7 @@
         {
           "type": "fill",
           "title": "Principles of Learning",
-          "rawText": "\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeffReadiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. \ufeff\n",
+          "rawText": "﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared\n\nExercise - Practice makes Perfect\n\nEffect - Positive feelings strengthen learning and negative ones weaken it.\n\nPrimacy - The first thing learned is often the strongest and hardest to unlearn.\n\nIntensity - Real, Exciting, Dramatic Learning experiences are retained best.\n\nRecency - The most recently learned info is best remembered. ﻿\n",
           "hidden": [
             {
               "word": "Readiness",
@@ -7130,37 +6957,37 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff\ufeffReadiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. \ufeff</p>",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>",
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Types of Motivation",
-          "rawText": "\ufeffTangible Motivation - Students want their efforts to be noticeably rewarded.\n\nWant to mostly avoid Negative Motivations as well.\n",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeffTangible Motivation - Students want their efforts to be noticeably rewarded.</p><p><br></p><p>Want to mostly avoid Negative Motivations as well.</p>",
+          "rawText": "﻿Tangible Motivation - Students want their efforts to be noticeably rewarded.\n\nWant to mostly avoid Negative Motivations as well.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Tangible Motivation - Students want their efforts to be noticeably rewarded.</p><p><br></p><p>Want to mostly avoid Negative Motivations as well.</p>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Perception",
-          "rawText": "\ufeffReceiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. \n\nLearning has been seen to occur more rapidly when info is received from more than one sense. \n",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeffReceiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. </p><p><br></p><p>Learning has been seen to occur more rapidly when info is received from more than one sense. </p>",
+          "rawText": "﻿Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. \n\nLearning has been seen to occur more rapidly when info is received from more than one sense. \n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿Receiving Stimuli from the five senses and then giving meaning to those sensations. These meanings are influenced by past experiences and many other factors. </p><p><br></p><p>Learning has been seen to occur more rapidly when info is received from more than one sense. </p>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Four Levels of Learning",
-          "rawText": "\ufeffRote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">\ufeff</span>\ufeff<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
+          "rawText": "﻿Rote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Three Domains of Learning",
-          "rawText": "\ufeff\ufeffCognitive Domain - Mental Skills, Reasoning, Memory, Understanding.\n\nAffective Domain - Emotions, values, attitudes. \n\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and Characterization.\n\nPsychomotor Domain - Coordination, Physical Movement, Muscle Memory. \n",
+          "rawText": "﻿﻿Cognitive Domain - Mental Skills, Reasoning, Memory, Understanding.\n\nAffective Domain - Emotions, values, attitudes. \n\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and Characterization.\n\nPsychomotor Domain - Coordination, Physical Movement, Muscle Memory. \n",
           "hidden": [
             {
               "word": "Affective",
@@ -7175,38 +7002,38 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<p>\ufeff<strong>\ufeffCognitive Domain</strong> - Mental Skills, Reasoning, Memory, Understanding.</p><p><br></p><p><strong>Affective Domain </strong>- Emotions, values, attitudes. </p><p>\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and <strong>Characterization</strong>.</p><p><br></p><p><strong>Psychomotor Domain</strong> - Coordination, Physical Movement, Muscle Memory. </p>",
+          "rawHtml": "<p>﻿<strong>﻿Cognitive Domain</strong> - Mental Skills, Reasoning, Memory, Understanding.</p><p><br></p><p><strong>Affective Domain </strong>- Emotions, values, attitudes. </p><p>\tHas Five educational objective levels in order, Receiving, Responding, Valuing, Organization, and <strong>Characterization</strong>.</p><p><br></p><p><strong>Psychomotor Domain</strong> - Coordination, Physical Movement, Muscle Memory. </p>",
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Theoring of Learning",
           "rawText": "Fading - A person forgets information not used for an extended period of time.\n",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>Fading - A person forgets information not used for an extended period of time.</p>",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>Fading - A person forgets information not used for an extended period of time.</p>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Transfer of Learning",
-          "rawText": "\ufeff\ufeff\ufeff\ufeffTwo Types\nPositive Transfer - When prior learning helps forward new learnings.\nNegative Transfer - When prior learning interferes or hinders new learnings. \n",
-          "rawHtml": "<p><span class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\"><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeff\ufeff</span><strong class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\">\ufeffTwo Types</strong></p><p><strong>Positive Transfer</strong> - When prior learning helps forward new learnings.</p><p><strong>Negative Transfer</strong> - When prior learning interferes or hinders new learnings. </p>",
+          "rawText": "﻿﻿﻿﻿Two Types\nPositive Transfer - When prior learning helps forward new learnings.\nNegative Transfer - When prior learning interferes or hinders new learnings. \n",
+          "rawHtml": "<p><span class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\"><span class=\"ql-cursor\">﻿</span>﻿﻿﻿</span><strong class=\"ql-size-20px\" style=\"color: rgb(0, 71, 178);\">﻿Two Types</strong></p><p><strong>Positive Transfer</strong> - When prior learning helps forward new learnings.</p><p><strong>Negative Transfer</strong> - When prior learning interferes or hinders new learnings. </p>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Maslows Hiearchy of Needs",
-          "rawText": "\ufeffPhysiological (Biological) - Food, Water, Sleep\n\nSafety - Security, Shelter\n\nLove / Belonging - Friendship, Family, Teams\n\nEsteem - Respect, Recognition\n\nSelf-Actualization - The need to reach your full potential and purpose.\n",
-          "rawHtml": "<ul><li><span class=\"ql-cursor\">\ufeff</span>\ufeff<strong>Physiological (Biological)</strong> - Food, Water, Sleep</li></ul><p><br></p><ul><li><strong>Safety </strong>- Security, Shelter</li></ul><p><br></p><ul><li><strong>Love / Belonging</strong> - Friendship, Family, Teams</li></ul><p><br></p><ul><li><strong>Esteem</strong> - Respect, Recognition</li></ul><p><br></p><ul><li><strong>Self-Actualization</strong> - The need to reach your full potential and purpose.</li></ul>",
+          "rawText": "﻿Physiological (Biological) - Food, Water, Sleep\n\nSafety - Security, Shelter\n\nLove / Belonging - Friendship, Family, Teams\n\nEsteem - Respect, Recognition\n\nSelf-Actualization - The need to reach your full potential and purpose.\n",
+          "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Physiological (Biological)</strong> - Food, Water, Sleep</li></ul><p><br></p><ul><li><strong>Safety </strong>- Security, Shelter</li></ul><p><br></p><ul><li><strong>Love / Belonging</strong> - Friendship, Family, Teams</li></ul><p><br></p><ul><li><strong>Esteem</strong> - Respect, Recognition</li></ul><p><br></p><ul><li><strong>Self-Actualization</strong> - The need to reach your full potential and purpose.</li></ul>",
           "hidden": [],
           "alts": {}
         },
         {
           "type": "fill",
           "title": "Defense Mechanisms",
-          "rawText": "\ufeff\ufeffAcronym - DR, DR, CPR FAST!\n\n\ufeff\ufeff\ufeff\ufeff\ufeff\ufeffDenial - Refusing to Accept Reality\n\nRepression - Unconscious blocking of memory or feelings.\n\nDisplacement - Shifting feelings or anger onto somebody else.\n\nRationalization - Making Excuses to justify Errors\n\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\n\nProjection - Blaming others for your own faults\n\nReaction Formation - Faking a belief opposite to your actual belief.\n\nFantasy - Student escapes into wishful thinking instead of facing the facts.\n",
-          "rawHtml": "<p><span class=\"ql-cursor\">\ufeff</span>\ufeff\ufeffAcronym - DR, DR, CPR FAST!</p><p><br></p><ul><li>\ufeff\ufeff\ufeff\ufeff\ufeff\ufeff<strong>Denial</strong> - Refusing to Accept Reality</li></ul><p><br></p><ul><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li></ul><p><br></p><ul><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li></ul><p><br></p><ul><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li></ul><p><br></p><ul><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li></ul><p><br></p><ul><li><strong>Projection </strong>- Blaming others for your own faults</li></ul><p><br></p><ul><li><strong>Reaction Formation </strong>- Faking a belief opposite to your actual belief.</li></ul><p><br></p><ul><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li></ul>",
+          "rawText": "﻿﻿Acronym - DR, DR, CPR FAST!\n\n﻿﻿﻿﻿﻿﻿Denial - Refusing to Accept Reality\n\nRepression - Unconscious blocking of memory or feelings.\n\nDisplacement - Shifting feelings or anger onto somebody else.\n\nRationalization - Making Excuses to justify Errors\n\nCompensation - Overemphasizing one skill to hide or downplay a weakness.\n\nProjection - Blaming others for your own faults\n\nReaction Formation - Faking a belief opposite to your actual belief.\n\nFantasy - Student escapes into wishful thinking instead of facing the facts.\n",
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿Acronym - DR, DR, CPR FAST!</p><p><br></p><ul><li>﻿﻿﻿﻿﻿﻿<strong>Denial</strong> - Refusing to Accept Reality</li></ul><p><br></p><ul><li><strong>Repression</strong> - Unconscious blocking of memory or feelings.</li></ul><p><br></p><ul><li><strong>Displacement</strong> - Shifting feelings or anger onto somebody else.</li></ul><p><br></p><ul><li><strong>Rationalization</strong> - Making Excuses to justify Errors</li></ul><p><br></p><ul><li><strong>Compensation </strong>- Overemphasizing one skill to hide or downplay a weakness.</li></ul><p><br></p><ul><li><strong>Projection </strong>- Blaming others for your own faults</li></ul><p><br></p><ul><li><strong>Reaction Formation </strong>- Faking a belief opposite to your actual belief.</li></ul><p><br></p><ul><li><strong>Fantasy</strong> - Student escapes into wishful thinking instead of facing the facts.</li></ul>",
           "hidden": [
             {
               "word": "Denial",
@@ -7267,7 +7094,7 @@
           "type": "fill",
           "title": "Stress",
           "rawText": "An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.\n",
-          "rawHtml": "<p>An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.<span class=\"ql-cursor\">\ufeff</span></p>",
+          "rawHtml": "<p>An abnormal reaction to stress can be over-cooperation, painstaking self-control, inappropriate laughing or rapid changes in emotion.<span class=\"ql-cursor\">﻿</span></p>",
           "hidden": [],
           "alts": {}
         }
