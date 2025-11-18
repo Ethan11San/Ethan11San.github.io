@@ -120,8 +120,8 @@
               "word": "High"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Required Endorsements (61.31)</p><ul><li>Complex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller</li><li>High Performance - More than 200 Horsepower</li><li>Tailwheel - No Ground Instruction Required.</li><li>Towing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.</li><li>High Altitude - aircraft with above 25000 service ceiling or max operating altitude</li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nRequired Endorsements (61.31)\nComplex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller\nHigh Performance - More than 200 Horsepower\nTailwheel - No Ground Instruction Required.\nTowing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.\nHigh Altitude - aircraft with above 25000 service ceiling or max operating altitude\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><ul><li>Complex Aircraft</li><li>High Performance </li><li>Tailwheel</li><li>High Altitude</li><li>Towing</li></ul><h3>How</h3><ul><li>Complex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller</li><li>High Performance - More than 200 Horsepower</li><li>Tailwheel - No Ground Instruction Required.</li><li>Towing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.</li><li>High Altitude - aircraft with above 25000 service ceiling or max operating altitude</li></ul><p><br></p><h3>Why</h3>",
+          "rawText": "What\nComplex Aircraft\nHigh Performance \nTailwheel\nHigh Altitude\nTowing\nHow\nComplex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller\nHigh Performance - More than 200 Horsepower\nTailwheel - No Ground Instruction Required.\nTowing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.\nHigh Altitude - aircraft with above 25000 service ceiling or max operating altitude\n\nWhy\n",
           "title": "Required Aircraft Endorsements (61.31)",
           "type": "fill"
         },
@@ -481,7 +481,7 @@
             }
           ],
           "hidden": [],
-          "image": "",
+          "image": "images/5f9dfdf262ca9e2298851154f3ab428487c7fc18f8f7250cf31859dd7540194b.png",
           "labels": [
             {
               "fontSize": 18,
@@ -5678,7 +5678,7 @@
           "alts": {},
           "hidden": [],
           "rawHtml": "<h3>What</h3><p>Carbon <span class=\"popup-word\" data-img=\"images/ee158a491bd59e1a2f03478306f6563f688fc5c490916fae156b3085d65286e5.jpg\">Monoxide</span> is odorless, tasteless, and colorless.</p><p>There is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.</p><p>If the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.</p><p>Carbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.</p><p>Symptoms can be headaches, blurred vision, drowsiness, loss of muscle power.</p><p>Mitigated by turning heaters off, opening vents and windows, supplemental oxygen.</p><p>Compared to other hypoxias this one you usually don't feel euphoric just crappy.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nCarbon Monoxide is odorless, tasteless, and colorless.\nThere is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.\nIf the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.\nCarbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.\nSymptoms can be headaches, blurred vision, drowsiness, loss of muscle power.\nMitigated by turning heaters off, opening vents and windows, supplemental oxygen.\nCompared to other hypoxias this one you usually don't feel euphoric just crappy.\n\nHow:\n\nWhy:\n",
+          "rawText": "Carbon Monoxide is odorless, tasteless, and colorless.\nThere is a heater shroud around the exhaust pipe to trap hot air around it and lead it to the cabin for heat.\nIf the exhaust pipe gets cracked carbon monoxide from the exhaust could leak into the cabin from the heating vents.\nCarbon Monoxide poisoning occurs because Carbon Monoxide attaches to hemoglobin 200 times easier than oxygen so it takes its spot in the blood.\nSymptoms can be headaches, blurred vision, drowsiness, loss of muscle power.\nMitigated by turning heaters off, opening vents and windows, supplemental oxygen.\nCompared to other hypoxias this one you usually don't feel euphoric just crappy.\n",
           "title": "Carbon Monoxide",
           "type": "fill"
         },
@@ -5955,10 +5955,6 @@
             },
             {
               "occ": 1,
-              "word": "Emotion"
-            },
-            {
-              "occ": 1,
               "word": "Environment"
             },
             {
@@ -5968,10 +5964,18 @@
             {
               "occ": 1,
               "word": "Pilot"
+            },
+            {
+              "occ": 1,
+              "word": "External"
+            },
+            {
+              "word": "Pressures",
+              "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p>PAVE</p><p>Pilot</p><p>Aircraft</p><p>Environment</p><p>Emotion</p><p><br></p><p>IMSAFE</p><p>Illness</p><p>Medication - Best way to verify if allowed is to contact your AME.</p><p>Stress - There is short term acute stress which is normal and then long term Chronic stress which is bad.</p><p>Alcohol - 8 hours, &lt; .04 %, or simply under the influence (Hungover). Alcohol effects are worse at altitude.</p><p>Fatigue</p><p>Eating / Drinking</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nPAVE\nPilot\nAircraft\nEnvironment\nEmotion\n\nIMSAFE\nIllness\nMedication - Best way to verify if allowed is to contact your AME.\nStress - There is short term acute stress which is normal and then long term Chronic stress which is bad.\nAlcohol - 8 hours, < .04 %, or simply under the influence (Hungover). Alcohol effects are worse at altitude.\nFatigue\nEating / Drinking\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p>PAVE</p><p>Pilot</p><p>Aircraft</p><p>Environment</p><p>External Pressures</p><p><br></p><p>IMSAFE</p><p>Illness</p><p>Medication - Best way to verify if allowed is to contact your AME.</p><p>Stress - There is short term acute stress which is normal and then long term Chronic stress which is bad.</p><p>Alcohol - 8 hours, &lt; .04 %, or simply under the influence (Hungover). Alcohol effects are worse at altitude.</p><p>Fatigue</p><p>Eating / Drinking</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nPAVE\nPilot\nAircraft\nEnvironment\nExternal Pressures\n\nIMSAFE\nIllness\nMedication - Best way to verify if allowed is to contact your AME.\nStress - There is short term acute stress which is normal and then long term Chronic stress which is bad.\nAlcohol - 8 hours, < .04 %, or simply under the influence (Hungover). Alcohol effects are worse at altitude.\nFatigue\nEating / Drinking\nHow\nWhy\n",
           "title": "PAVE / IMSAFE",
           "type": "fill"
         },
@@ -6098,8 +6102,8 @@
               "occ": 1
             }
           ],
-          "rawHtml": "<h3>What</h3><p><strong>Visual</strong> (Eyes) - Most helpful</p><p><em>Contains -</em></p><ul><li>Center Cones that work best with high light and provide color</li><li>Rim Rods responsible for peripheral vision and work best at night.</li></ul><p><strong>Vestibular</strong> (Inner Ear)</p><p>Contains </p><ul><li>Otolith Organs (Crystals)</li><li>Semicircular Canals (Fluid)</li></ul><p><strong>Kinesthetic</strong> (Muscles, Skin)</p><p>Uses receptors in muscle and skin to sense position.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nVisual (Eyes) - Most helpful\nContains -\nCenter Cones that work best with high light and provide color\nRim Rods responsible for peripheral vision and work best at night.\nVestibular (Inner Ear)\nContains \nOtolith Organs (Crystals)\nSemicircular Canals (Fluid)\nKinesthetic (Muscles, Skin)\nUses receptors in muscle and skin to sense position.\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p><strong>Visual</strong> (Eyes) - Most helpful</p><p><em>Contains -</em></p><ul><li>Center Cones that work best with high light and provide color</li><li>Rim Rods responsible for peripheral vision and work best at night.</li></ul><p><br></p><p><strong>Vestibular</strong> (Inner Ear)</p><p>Contains </p><ul><li>Otolith Organs (Crystals)</li><li>Semicircular Canals (Fluid)</li></ul><p><br></p><p><strong>Kinesthetic</strong> (Muscles, Skin)</p><p>Uses receptors in muscle and skin to sense position.</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nVisual (Eyes) - Most helpful\nContains -\nCenter Cones that work best with high light and provide color\nRim Rods responsible for peripheral vision and work best at night.\n\nVestibular (Inner Ear)\nContains \nOtolith Organs (Crystals)\nSemicircular Canals (Fluid)\n\nKinesthetic (Muscles, Skin)\nUses receptors in muscle and skin to sense position.\nHow\nWhy\n",
           "title": "The Three Sensory Systems",
           "type": "fill"
         }
@@ -6145,8 +6149,8 @@
               "word": "Horn"
             }
           ],
-          "rawHtml": "<h3>What</h3><p>Simulates Takeoff / Go-Around Configuration</p><p>Power 1500 RPM </p><p>Hold altitude until 60 - 65 kts - some do 55 but then stall happens almost instantly</p><p>Then go Full Power and Pitch for 25 degrees</p><p>Hold until Stall occurs - Call Out Stall Horn</p><p>Recover</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
-          "rawText": "What:\nSimulates Takeoff / Go-Around Configuration\nPower 1500 RPM \nHold altitude until 60 - 65 kts - some do 55 but then stall happens almost instantly\nThen go Full Power and Pitch for 25 degrees\nHold until Stall occurs - Call Out Stall Horn\nRecover\n\nHow:\n\nWhy:\n",
+          "rawHtml": "<h3>What</h3><p><span class=\"popup-word\" data-img=\"images/ee158a491bd59e1a2f03478306f6563f688fc5c490916fae156b3085d65286e5.jpg\">Simulates</span> Takeoff / Go-Around Configuration</p><p>Power 1500 RPM </p><p>Hold altitude until 60 - 65 kts - some do 55 but then stall happens almost instantly</p><p>Then go Full Power and Pitch for 25 degrees</p><p>Hold until Stall occurs - Call Out Stall Horn</p><p>Recover</p><h3>How</h3><h3>Why</h3>",
+          "rawText": "What\nSimulates Takeoff / Go-Around Configuration\nPower 1500 RPM \nHold altitude until 60 - 65 kts - some do 55 but then stall happens almost instantly\nThen go Full Power and Pitch for 25 degrees\nHold until Stall occurs - Call Out Stall Horn\nRecover\nHow\nWhy\n",
           "title": "Power On Stall",
           "type": "fill"
         },
@@ -6885,7 +6889,7 @@
           "entries": [
             {
               "answer": "Gas",
-              "extra": "Test",
+              "extra": "Fuel\n",
               "letter": "G"
             },
             {
@@ -6916,11 +6920,159 @@
           "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
         },
         {
-          "type": "fill",
-          "title": "Test",
-          "rawText": "What:\n\nHow:\n\nWhy:\n",
+          "type": "acronym",
           "hidden": [],
-          "alts": {}
+          "alts": {},
+          "acronym": "RUAC",
+          "entries": [
+            {
+              "letter": "R",
+              "answer": "Rote",
+              "extra": ""
+            },
+            {
+              "letter": "U",
+              "answer": "Understanding",
+              "extra": ""
+            },
+            {
+              "letter": "A",
+              "answer": "Application",
+              "extra": ""
+            },
+            {
+              "letter": "C",
+              "answer": "Correlation",
+              "extra": ""
+            }
+          ]
+        },
+        {
+          "type": "acronym",
+          "acronym": "DRDRCPRFAST",
+          "entries": [
+            {
+              "letter": "D",
+              "answer": "Denial",
+              "extra": ""
+            },
+            {
+              "letter": "R",
+              "answer": "Repression",
+              "extra": ""
+            },
+            {
+              "letter": "D",
+              "answer": "Displacement",
+              "extra": ""
+            },
+            {
+              "letter": "R",
+              "answer": "Rationalization",
+              "extra": ""
+            },
+            {
+              "letter": "C",
+              "answer": "Compensation",
+              "extra": ""
+            },
+            {
+              "letter": "P",
+              "answer": "Projection",
+              "extra": ""
+            },
+            {
+              "letter": "R",
+              "answer": "Reaction Formation",
+              "extra": ""
+            },
+            {
+              "letter": "F",
+              "answer": "Fantasy",
+              "extra": ""
+            },
+            {
+              "letter": "A",
+              "answer": "",
+              "extra": "",
+              "enabled": false
+            },
+            {
+              "letter": "S",
+              "answer": "",
+              "extra": "",
+              "enabled": false
+            },
+            {
+              "letter": "T",
+              "answer": "",
+              "extra": "",
+              "enabled": false
+            }
+          ],
+          "rawHtml": "<p><br></p>",
+          "rawText": "\n",
+          "description": "Defense Mechanisms",
+          "title": "DRDRCPRFast"
+        },
+        {
+          "type": "acronym",
+          "acronym": "REEPIR",
+          "entries": [
+            {
+              "letter": "R",
+              "answer": "Readiness",
+              "extra": "Being Physically, mentally, and emotionally ready to learn"
+            },
+            {
+              "letter": "E",
+              "answer": "Effect",
+              "extra": "Learning associated with pleasant experiences helps remember them"
+            },
+            {
+              "letter": "E",
+              "answer": "Exercise",
+              "extra": "Things repeated are best remembered "
+            },
+            {
+              "letter": "P",
+              "answer": "Primacy ",
+              "extra": "Things learned first create a strong difficult to change impression"
+            },
+            {
+              "letter": "I",
+              "answer": "Intensity",
+              "extra": "Dramatic or exciting learning experiences are better remembered "
+            },
+            {
+              "letter": "R",
+              "answer": "Recency",
+              "extra": "Most recently learned things are remembered best"
+            }
+          ],
+          "description": "Laws of Learning"
+        },
+        {
+          "type": "acronym",
+          "acronym": "MUA",
+          "entries": [
+            {
+              "letter": "M",
+              "answer": "Memorization",
+              "extra": "Memorizing Facts"
+            },
+            {
+              "letter": "U",
+              "answer": "Understanding",
+              "extra": "Organizing facts and making associations and similarities"
+            },
+            {
+              "letter": "A",
+              "answer": "Application",
+              "extra": "Using the knowledge to solve problems and make decisions "
+            }
+          ],
+          "description": "Phases of Knowledge Acquisition"
         }
       ]
     },
@@ -6981,7 +7133,24 @@
           "title": "Four Levels of Learning",
           "rawText": "﻿Rote - Memorization without deeper understanding \nUnderstanding (Comprehension) - Understanding the meaning of what you learned.\nApplication - Using what you know in real world situations.\nCorrelation - Highest level, Associating multiple concepts and applying them to completely new situations. \n",
           "rawHtml": "<ul><li><span class=\"ql-cursor\">﻿</span>﻿<strong>Rote</strong> - Memorization without deeper understanding </li><li><strong>Understanding </strong>(Comprehension) - Understanding the meaning of what you learned.</li><li><strong>Application</strong> - Using what you know in real world situations.</li><li><strong>Correlation</strong> - Highest level, Associating multiple concepts and applying them to completely new situations. </li></ul>",
-          "hidden": [],
+          "hidden": [
+            {
+              "word": "Rote",
+              "occ": 1
+            },
+            {
+              "word": "Understanding",
+              "occ": 1
+            },
+            {
+              "word": "Application",
+              "occ": 1
+            },
+            {
+              "word": "Correlation",
+              "occ": 1
+            }
+          ],
           "alts": {}
         },
         {
