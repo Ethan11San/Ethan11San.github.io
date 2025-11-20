@@ -947,6 +947,29 @@
       opacity: 1;
     }
 
+    .question-section-card.whw-merged {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+    .question-section-card.whw-merged::before,
+    .question-section-card.whw-merged::after {
+      display: none;
+    }
+    .question-section-card.whw-merged .question-section-body {
+      padding: 0;
+      gap: clamp(1rem, 2vw, 1.4rem);
+    }
+    .question-section-card.whw-merged .whw-merged-section {
+      padding: 0;
+    }
+    .question-section-card.whw-merged .whw-merged-section + .whw-merged-section {
+      border-top: 1px solid rgba(44,62,80,0.08);
+      padding-top: clamp(0.9rem, 1.8vw, 1.3rem);
+    }
+
     .question-section-header {
       display: flex;
       align-items: baseline;
@@ -1033,6 +1056,45 @@
         padding: 0.28rem 0.55rem;
         font-size: 0.7rem;
       }
+    }
+
+    body.mobile #editorArea .question-section-card.whw-section {
+      margin: 20px 0;
+      padding: 18px 18px 22px 24px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section:not(:last-child) {
+      margin-bottom: 24px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section .question-section-header {
+      margin-bottom: 14px;
+    }
+    body.mobile #editorArea .question-section-card.whw-section .question-section-body {
+      gap: 0.75rem;
+    }
+
+    #editorArea .question-section-card.whw-section .question-section-body.empty {
+      position: relative;
+      padding: 0.95rem 0 0.65rem;
+      min-height: 2.6rem;
+    }
+    #editorArea .question-section-card.whw-section .question-section-body.empty::before {
+      content: '';
+      display: block;
+      height: 1.2rem;
+      border-radius: 14px;
+      background: linear-gradient(90deg, rgba(26,188,156,0.18), rgba(52,152,219,0.18));
+      opacity: 0.65;
+    }
+    #editorArea .question-section-card.whw-section .question-section-body.empty::after {
+      content: '';
+      display: block;
+      height: 0.9rem;
+    }
+
+    #quizArea .question-section-heading.whw-heading {
+      font-size: clamp(1.22rem, 2.8vw, 1.45rem);
+      line-height: 1.3;
+      letter-spacing: 0.045em;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -3055,6 +3117,11 @@
         if (!document.body.classList.contains('mobile')) return;
         if (!answerBank || !toggleAnswersBtn || !card) return;
         if (!quizContent || !quizContent.contains(card)) return;
+        if (!card.classList.contains('whw-section')) {
+          if (quizContent.querySelector('.question-section-card.whw-section')) {
+            return;
+          }
+        }
         if (currentAnswerAnchorCard === card) return;
         ensureAnswerControlsHome();
         if (currentAnswerAnchorCard && currentAnswerAnchorCard.classList) {
@@ -4377,8 +4444,6 @@
       const SIDEBAR_MODE_STORAGE_KEY = 'quizmaker-sidebar-display';
       let sidebarDisplayMode = 'standard';
       let previousFolderCollapsed = false;
-      let folderHoverExpanded = false;
-      let folderHoverWasCollapsed = false;
 
       const isDesktopLayout = () => !document.body.classList.contains('mobile');
 
@@ -4559,9 +4624,6 @@
         syncFolderCollapseForEnvironment(true);
         folderToggle.addEventListener('click', () => {
           if (!isDesktopLayout()) return;
-          folderHoverExpanded = false;
-          folderHoverWasCollapsed = false;
-          folderSection.classList.remove('hover-expanding');
           const nextState = !folderSection.classList.contains('collapsed');
           setFolderCollapsed(nextState);
         });
@@ -4579,29 +4641,6 @@
       } else {
         buildMiniFolderRail();
         updateSidebarModeMenuState();
-      }
-
-      const canHoverExpandFolders = () => isDesktopLayout() && sidebar && !sidebar.classList.contains('mini');
-
-      if (folderSection) {
-        folderSection.addEventListener('mouseenter', () => {
-          if (!canHoverExpandFolders()) return;
-          const isCollapsed = folderSection.classList.contains('collapsed');
-          if (!isCollapsed) return;
-          folderHoverExpanded = true;
-          folderHoverWasCollapsed = true;
-          folderSection.classList.add('hover-expanding');
-          setFolderCollapsed(false, { persist: false, immediate: true });
-        });
-        folderSection.addEventListener('mouseleave', () => {
-          if (!folderHoverExpanded) return;
-          folderSection.classList.remove('hover-expanding');
-          if (folderHoverWasCollapsed) {
-            setFolderCollapsed(true, { persist: false, immediate: true });
-          }
-          folderHoverExpanded = false;
-          folderHoverWasCollapsed = false;
-        });
       }
 
       if (sidebarModeMenuBtn && sidebarModeMenu) {
@@ -8336,9 +8375,9 @@
               heading.setAttribute('data-tts-skip', 'true');
             }
           }
-
           if (['what', 'how', 'why'].includes(keyword)) {
-            header.remove();
+            card.classList.add('whw-section', `whw-${keyword}`);
+            heading.classList.add('whw-heading');
           }
 
           let sibling = card.nextSibling;
@@ -8393,6 +8432,68 @@
         });
 
         if (!createdCards.length) return;
+
+        const allWhw = createdCards.length > 0 && createdCards.every(card => card.classList.contains('whw-section'));
+        if (allWhw) {
+          const primary = createdCards[0];
+          const primaryBody = primary.querySelector('.question-section-body');
+          const primaryHeader = primary.querySelector('.question-section-header');
+          if (primaryHeader) primaryHeader.remove();
+
+          const wrapBodyIntoSection = body => {
+            if (!body) return null;
+            const existing = body.querySelector('.whw-merged-section');
+            if (existing) {
+              if (!nodeHasMeaningfulContent(existing)) {
+                existing.remove();
+                return null;
+              }
+              return existing;
+            }
+            if (!nodeHasMeaningfulContent(body)) return null;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'whw-merged-section';
+            while (body.firstChild) {
+              wrapper.appendChild(body.firstChild);
+            }
+            body.appendChild(wrapper);
+            return wrapper;
+          };
+
+          const primarySection = wrapBodyIntoSection(primaryBody);
+          if (primarySection) primaryBody.classList.remove('empty');
+
+          createdCards.slice(1).forEach(card => {
+            const body = card.querySelector('.question-section-body');
+            if (body && primaryBody) {
+              if (nodeHasMeaningfulContent(body)) {
+                const section = document.createElement('div');
+                section.className = 'whw-merged-section';
+                while (body.firstChild) {
+                  section.appendChild(body.firstChild);
+                }
+                if (nodeHasMeaningfulContent(section)) {
+                  primaryBody.appendChild(section);
+                }
+              }
+            }
+            card.remove();
+          });
+
+          Array.from(primaryBody.querySelectorAll('.whw-merged-section')).forEach(section => {
+            if (!nodeHasMeaningfulContent(section)) {
+              section.remove();
+            }
+          });
+
+          if (!primaryBody.querySelector('.whw-merged-section')) {
+            primaryBody.classList.add('empty');
+          }
+
+          primary.classList.add('whw-merged');
+          primary.classList.remove('whw-section', 'whw-what', 'whw-how', 'whw-why');
+          createdCards.splice(0, createdCards.length, primary);
+        }
 
         container.classList.add('has-section-cards');
         requestAnimationFrame(() => {
