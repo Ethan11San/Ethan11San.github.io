@@ -6706,6 +6706,31 @@
 
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
       // Quill will override this function below after Quill is initialized.
+      const legacyCategoryPattern = /^(what|how|why)(?:\s*[:\-–—]?)?$/i;
+      function stripLegacyCategoryHeadings(htmlString) {
+        if (!htmlString) return '';
+        const tmp = document.createElement('div');
+        tmp.innerHTML = htmlString;
+        const isCategoryHeading = node => legacyCategoryPattern.test(
+          (node.textContent || '').replace(/\s+/g, ' ').trim()
+        );
+        tmp.querySelectorAll('h3, p, div').forEach(node => {
+          if (isCategoryHeading(node)) {
+            node.remove();
+          }
+        });
+        return tmp.innerHTML;
+      }
+      function getCleanSectionHtml(sec, { persist = false } = {}) {
+        const sourceHtml = sec.rawHtml || (sec.rawText ? sec.rawText.split('\n').map(line => `<p>${line}</p>`).join('') : '');
+        const cleaned = stripLegacyCategoryHeadings(sourceHtml);
+        if (persist && sec.rawHtml && cleaned !== sec.rawHtml) {
+          sec.rawHtml = cleaned;
+          saveData();
+        }
+        return cleaned;
+      }
+
       function loadSection(){
         const sec = data.folders[currentFolder].sections[currentSection];
         const isMobile = document.body.classList.contains('mobile');
@@ -7495,7 +7520,7 @@
         }
         // Reset Quill history *before* loading new content
         quill.history.clear();
-        const html = sec.rawHtml || sec.rawText || '';
+        const html = getCleanSectionHtml(sec, { persist: true });
         // Load the HTML silently so it does not create an undo entry
         quill.clipboard.dangerouslyPasteHTML(html, 'silent');
         // Ensure new content starts with normal formatting
@@ -7686,10 +7711,8 @@
         const editorScrollTop = editorArea ? editorArea.scrollTop : 0;
         const pageScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
         const sec = data.folders[currentFolder].sections[currentSection];
-        // Use rawHtml if present, otherwise convert rawText to HTML with paragraphs
-        const text = sec.rawHtml
-          ? (new DOMParser().parseFromString(sec.rawHtml, 'text/html')).body.innerHTML
-          : (sec.rawText || '').split('\n').map(line => `<p>${line}</p>`).join('');
+        // Use sanitized HTML to remove legacy category headings
+        const text = getCleanSectionHtml(sec, { persist: true });
         // Now render the preview preserving <p> and <br> structure
         previewDiv.innerHTML = '';
         const tempDiv = document.createElement('div');
@@ -8223,13 +8246,21 @@
 
         const detectSectionKeyword = text => {
           if (!text) return '';
-          const normalized = text
+          const normalized = (text || '')
             .toLowerCase()
-            .replace(/^[^a-z]+/, '')
+            .replace(/\s+/g, ' ')
             .trim();
-          const match = normalized.match(/^(what|how|why)(?=$|[^a-z])/);
-          return match ? match[1] : '';
+          return legacyCategoryPattern.test(normalized) ? normalized.split(' ')[0] : '';
         };
+        const removeLegacyCategoryHeadings = () => {
+          Array.from(container.querySelectorAll('h3')).forEach(h => {
+            if (detectSectionKeyword(h.textContent || '')) {
+              while (h.firstChild) h.parentNode.insertBefore(h.firstChild, h);
+              h.remove();
+            }
+          });
+        };
+        removeLegacyCategoryHeadings();
         const promoteLegacyHeading = el => {
           if (!el || el === container) return;
           if (!(el.tagName === 'P' || el.tagName === 'DIV')) return;
@@ -8772,7 +8803,7 @@
           // Now append the fill content
           quizContent.innerHTML = '';
           quizContent.appendChild(titleElem);
-          quizContent.innerHTML += sec.rawHtml || sec.rawText || '';
+          quizContent.innerHTML += getCleanSectionHtml(sec, { persist: true });
           normalizeQuizParagraphSpacing(quizContent);
           const tokensArr = extractTokens(sec);
           const hiddenEntries = getHiddenEntries(sec, tokensArr);
