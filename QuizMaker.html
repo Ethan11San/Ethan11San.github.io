@@ -7495,7 +7495,31 @@
         }
         // Reset Quill history *before* loading new content
         quill.history.clear();
-        const html = sec.rawHtml || sec.rawText || '';
+        const stripLegacyCategories = html => {
+          if (!html) return '';
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = html;
+          const categoryKeywords = ['what', 'how', 'why'];
+          const normalize = text => (text || '')
+            .toLowerCase()
+            .replace(/[^a-z]+/g, '')
+            .trim();
+          const shouldRemove = text => categoryKeywords.includes(normalize(text));
+          wrapper.querySelectorAll('h1, h2, h3, h4, h5, h6, p, div').forEach(node => {
+            const text = (node.textContent || '').trim();
+            if (!text) return;
+            if (shouldRemove(text)) {
+              node.remove();
+            }
+          });
+          return wrapper.innerHTML;
+        };
+
+        const html = stripLegacyCategories(sec.rawHtml || sec.rawText || '');
+        if (html !== sec.rawHtml) {
+          sec.rawHtml = html;
+          saveData();
+        }
         // Load the HTML silently so it does not create an undo entry
         quill.clipboard.dangerouslyPasteHTML(html, 'silent');
         // Ensure new content starts with normal formatting
@@ -8221,14 +8245,16 @@
           });
         };
 
+        const categoryKeywords = ['what', 'how', 'why'];
+        const normalizeKeyword = text => text
+          .toLowerCase()
+          .replace(/[^a-z]+/g, '')
+          .trim();
+        const isLegacyCategoryLabel = text => categoryKeywords.includes(normalizeKeyword(text));
         const detectSectionKeyword = text => {
           if (!text) return '';
-          const normalized = text
-            .toLowerCase()
-            .replace(/^[^a-z]+/, '')
-            .trim();
-          const match = normalized.match(/^(what|how|why)(?=$|[^a-z])/);
-          return match ? match[1] : '';
+          const normalized = normalizeKeyword(text);
+          return categoryKeywords.includes(normalized) ? normalized : '';
         };
         const promoteLegacyHeading = el => {
           if (!el || el === container) return;
@@ -8236,7 +8262,10 @@
           if (el.closest('.question-section-card')) return;
           if (!el.parentNode) return;
           const rawText = (el.textContent || '').trim();
-          if (!rawText) return;
+          if (!rawText || isLegacyCategoryLabel(rawText)) {
+            if (isLegacyCategoryLabel(rawText)) el.remove();
+            return;
+          }
           const keyword = detectSectionKeyword(rawText);
           if (!keyword) return;
           const heading = document.createElement('h3');
@@ -8261,6 +8290,11 @@
         };
         Array.from(container.querySelectorAll('p, div')).forEach(promoteLegacyHeading);
 
+        // Remove legacy "What/How/Why" headings entirely so they do not create cards
+        Array.from(container.querySelectorAll('h3')).forEach(h3 => {
+          if (isLegacyCategoryLabel(h3.textContent || '')) h3.remove();
+        });
+
         const headings = Array.from(container.querySelectorAll('h3'));
         if (!headings.length) return;
 
@@ -8272,10 +8306,14 @@
           const originalParent = heading.parentNode;
           if (!originalParent) return;
 
-          processed += 1;
+          const headingText = (heading.textContent || '').trim();
+          if (isLegacyCategoryLabel(headingText)) {
+            heading.remove();
+            return;
+          }
+
           const card = document.createElement('div');
           card.className = 'question-section-card';
-          card.style.setProperty('--section-index', processed);
 
           const header = document.createElement('div');
           header.className = 'question-section-header';
@@ -8283,9 +8321,6 @@
           const badge = document.createElement('span');
           badge.className = 'question-section-badge';
           badge.setAttribute('data-tts-skip', 'true');
-          const badgeText = processed < 10 ? `0${processed}` : String(processed);
-          badge.textContent = badgeText;
-          badge.setAttribute('aria-label', `Section ${processed}`);
 
           const body = document.createElement('div');
           body.className = 'question-section-body';
@@ -8335,7 +8370,17 @@
           trimEdges(body);
 
           const hasContent = nodeHasMeaningfulContent(body);
-          if (!hasContent) body.classList.add('empty');
+          if (!hasContent) {
+            heading.remove();
+            card.remove();
+            return;
+          }
+
+          processed += 1;
+          card.style.setProperty('--section-index', processed);
+          const badgeText = processed < 10 ? `0${processed}` : String(processed);
+          badge.textContent = badgeText;
+          badge.setAttribute('aria-label', `Section ${processed}`);
 
           const cleanWhitespace = node => {
             Array.from(node.childNodes).forEach(child => {
