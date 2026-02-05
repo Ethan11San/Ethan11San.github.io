@@ -34,317 +34,6 @@
     #sectionsContainer::-webkit-scrollbar-thumb:hover {
       background-color: rgba(0,0,0,0.5);
     }
-    /* —— Pencil-first workspace —— */
-    body.pencil-mode-active {
-      background: #e6edf6;
-    }
-    .pencil-mode-banner {
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      background: linear-gradient(90deg, #dfe9f7, #f4f8ff);
-      border: 1px solid #c7d7f2;
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin: 10px 20px 0;
-      color: #1b2a4a;
-    }
-    .pencil-mode-banner.open {
-      display: flex;
-    }
-    .pencil-mode-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: #1abc9c1a;
-      color: #0d6d5a;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .pencil-mode-status {
-      font-size: 0.9rem;
-      color: #30455f;
-    }
-    .pencil-mode-status .dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      margin-right: 6px;
-      border-radius: 50%;
-      background: #c0392b;
-    }
-    .pencil-mode-status.active .dot { background: #1abc9c; }
-    .pencil-mode-banner .actions { display: flex; gap: 8px; }
-    .pencil-mode-banner button {
-      background: #1b2a4a;
-      color: #f4f8ff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .pencil-mode-banner button:hover { background: #24385d; }
-    .pencil-workspace {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      background: #f8fbff;
-      border: 1px solid #c9d7ec;
-      border-radius: 16px;
-      padding: 14px 16px 16px;
-      margin: 12px 20px;
-      box-shadow: 0 14px 40px rgba(17, 38, 85, 0.08);
-    }
-    .pencil-workspace.open { display: flex; }
-    .pencil-workspace .workspace-header {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .pencil-workspace .workspace-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #1b2a4a;
-    }
-    .pencil-workspace .workspace-subtitle {
-      color: #496182;
-      font-size: 0.92rem;
-      margin-top: 2px;
-    }
-    .pencil-workspace .workspace-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-    .pencil-workspace .workspace-controls label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.9rem;
-      color: #30455f;
-      background: #e9f0fb;
-      padding: 6px 10px;
-      border-radius: 10px;
-    }
-    .pencil-workspace .workspace-controls input[type="range"] {
-      accent-color: #1abc9c;
-    }
-    .pencil-workspace .workspace-controls button {
-      background: #1abc9c;
-      color: white;
-      border: none;
-      padding: 8px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform .15s ease, box-shadow .15s ease;
-    }
-    .pencil-workspace .workspace-controls button.secondary {
-      background: #30455f;
-    }
-    .pencil-workspace .workspace-controls button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    }
-    .pencil-workspace .workspace-body {
-      display: grid;
-      grid-template-columns: 3fr 1.1fr;
-      gap: 12px;
-      align-items: stretch;
-    }
-    .pencil-workspace canvas {
-      width: 100%;
-      min-height: 320px;
-      background: repeating-linear-gradient(
-        to bottom,
-        #fdfefe 0px,
-        #fdfefe 34px,
-        #e2ebf9 34px,
-        #e2ebf9 36px
-      );
-      border: 1px solid #c9d7ec;
-      border-radius: 12px;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-      touch-action: none;
-    }
-    .pencil-notes {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      background: #f4f7fd;
-      border: 1px solid #d8e3f6;
-      border-radius: 12px;
-      padding: 10px;
-    }
-    .pencil-notes label { font-weight: 600; color: #1b2a4a; }
-    .pencil-notes textarea {
-      width: 100%;
-      min-height: 160px;
-      border-radius: 10px;
-      border: 1px solid #c9d7ec;
-      padding: 8px;
-      font-size: 0.95rem;
-      background: white;
-    }
-    .pencil-notes .note-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .pencil-notes button {
-      background: #1b2a4a;
-      color: white;
-      border: none;
-      padding: 8px 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .pencil-notes button.light { background: #e2ebf9; color: #1b2a4a; }
-    .pencil-notes .pencil-signal {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
-      color: #30455f;
-    }
-    .pencil-notes .pencil-signal .pulse {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      background: #c0392b;
-      box-shadow: 0 0 0 0 rgba(26,188,156,0.4);
-      animation: pencilPulseOff 2s infinite;
-    }
-    body.pencil-detected .pencil-notes .pencil-signal .pulse {
-      background: #1abc9c;
-      animation: pencilPulse 1.6s infinite;
-    }
-    @keyframes pencilPulse {
-      0% { box-shadow: 0 0 0 0 rgba(26,188,156,0.5); }
-      70% { box-shadow: 0 0 0 14px rgba(26,188,156,0); }
-      100% { box-shadow: 0 0 0 0 rgba(26,188,156,0); }
-    }
-    @keyframes pencilPulseOff {
-      0% { box-shadow: 0 0 0 0 rgba(192,57,43,0.35); }
-      70% { box-shadow: 0 0 0 10px rgba(192,57,43,0); }
-      100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); }
-    }
-    .pencil-inline-figure {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 6px;
-      border: 1px dashed #c9d7ec;
-      border-radius: 10px;
-      background: #f8fbff;
-    }
-    .pencil-inline-figure img {
-      max-width: 100%;
-      border-radius: 8px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    }
-    body.pencil-focus #sidebar { display: none; }
-    body.pencil-focus #main { width: 100%; }
-    body.pencil-focus .pencil-workspace { margin-inline: 0; }
-    /* Pencil-first quiz layout */
-    .pencil-quiz-helper {
-      display: none;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin: 14px 20px 8px;
-      padding: 10px 12px;
-      background: linear-gradient(90deg, #eef3fb, #f8fbff);
-      border: 1px solid #c9d7ec;
-      border-radius: 12px;
-    }
-    .pencil-quiz-helper .meta {
-      display: grid;
-      gap: 4px;
-      color: #1b2a4a;
-      font-weight: 600;
-    }
-    .pencil-quiz-helper .meta small {
-      color: #496182;
-      font-weight: 500;
-    }
-    .pencil-quiz-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pencil-quiz-actions button {
-      border: none;
-      padding: 8px 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 700;
-    }
-    #pencilQuizToggle { background: #1b2a4a; color: #fefefe; }
-    #pencilQuizToggle[aria-pressed="true"] { background: #145274; }
-    #pencilQuizNextBlank { background: #1abc9c; color: #0d433b; }
-    .pencil-quiz-panel {
-      display: none;
-      margin: 0 20px 12px;
-      border: 1px solid #c9d7ec;
-      border-radius: 14px;
-      background: #f8fbff;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-      padding: 12px;
-      gap: 10px;
-    }
-    .pencil-quiz-list { display: grid; gap: 10px; }
-    .pencil-quiz-card {
-      background: #ffffff;
-      border: 1px solid #d7e4f7;
-      border-radius: 12px;
-      padding: 12px;
-      box-shadow: 0 8px 24px rgba(18, 51, 97, 0.06);
-      display: grid;
-      gap: 8px;
-    }
-    .pencil-quiz-card .card-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-    .pencil-quiz-card .card-title { font-weight: 700; color: #1b2a4a; }
-    .pencil-quiz-card .card-pill { background: #e6f5f1; color: #0f5f4c; padding: 4px 8px; border-radius: 999px; font-size: 0.85rem; }
-    .pencil-quiz-card .card-context { color: #496182; font-size: 0.95rem; }
-    .pencil-scribble {
-      width: 100%;
-      min-height: 88px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #c9d7ec;
-      background: repeating-linear-gradient(
-        to bottom,
-        #fff 0px,
-        #fff 30px,
-        #e0eaf8 30px,
-        #e0eaf8 32px
-      );
-      font-size: 1rem;
-      line-height: 1.4;
-      color: #1b2a4a;
-    }
-    .pencil-quiz-card .card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pencil-quiz-card .card-actions button {
-      border: none;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .pencil-quiz-card .card-actions .fill-btn { background: #1abc9c; color: #0d433b; }
-    .pencil-quiz-card .card-actions .focus-btn { background: #e9f0fb; color: #1b2a4a; }
-    body.pencil-quiz-enabled #quizContent { border-color: #b9cbed; }
-    @media (max-width: 768px) {
-      .pencil-quiz-helper { margin-inline: 12px; }
-      .pencil-quiz-panel { margin-inline: 12px; }
-    }
-    @media (max-width: 1024px) {
-      .pencil-workspace .workspace-body { grid-template-columns: 1fr; }
-    }
     /* —— Reset & Base —— */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -2497,50 +2186,6 @@
       <button class="mode-btn" id="editModeBtn">✏️ Edit Mode</button>
       <button class="mode-btn" id="quizModeBtn">📝 Quiz Question</button>
       <button class="mode-btn" id="quizAllBtn">🎲 Random Quiz</button>
-      <button class="mode-btn" id="pencilModeBtn" aria-pressed="false">✒️ Pencil Workspace</button>
-    </div>
-
-    <div id="pencilModeBanner" class="pencil-mode-banner">
-      <div>
-        <div class="pencil-mode-chip">✒️ iPad + Pencil mode</div>
-        <div class="pencil-mode-status" id="pencilStatusText"><span class="dot"></span>Waiting for Apple Pencil...</div>
-      </div>
-      <div class="actions">
-        <button type="button" id="pencilFocusBtn" class="secondary">Toggle Focus</button>
-        <button type="button" id="pencilCollapseBtn">Hide Pad</button>
-      </div>
-    </div>
-
-    <div id="pencilWorkspace" class="pencil-workspace" aria-live="polite">
-      <div class="workspace-header">
-        <div>
-          <div class="workspace-title">Handwriting-first practice</div>
-          <div class="workspace-subtitle">Sized for Apple Pencil with lined paper, quick undo, and one-tap insertion into your question.</div>
-        </div>
-        <div class="workspace-controls">
-          <label for="pencilStroke">Stroke width
-            <input id="pencilStroke" type="range" min="2" max="12" step="1" value="5">
-          </label>
-          <button type="button" id="pencilUndoBtn">Undo stroke</button>
-          <button type="button" id="pencilClearBtn" class="secondary">Clear pad</button>
-          <button type="button" id="pencilInsertImageBtn">Insert sketch</button>
-        </div>
-      </div>
-      <div class="workspace-body">
-        <canvas id="pencilCanvas" aria-label="Handwriting canvas"></canvas>
-        <div class="pencil-notes">
-          <label for="pencilNotes">Handwriting summary</label>
-          <textarea id="pencilNotes" placeholder="Summarize what you just wrote so it sticks."></textarea>
-          <div class="note-actions">
-            <button type="button" id="pencilInsertTextBtn">Send note to editor</button>
-            <button type="button" id="pencilSaveNoteBtn" class="light">Save note only</button>
-          </div>
-          <div class="pencil-signal" id="pencilSignal">
-            <span class="pulse"></span>
-            <span id="pencilSignalText">Pencil not detected yet. Try touching the canvas with Apple Pencil.</span>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="progressStatus" style="display:none; margin:8px 24px;">
@@ -2588,19 +2233,6 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
-      <div id="pencilQuizHelper" class="pencil-quiz-helper" aria-live="polite">
-        <div class="meta">
-          <span>✒️ Pencil Quiz layout</span>
-          <small id="pencilQuizMetaText">Builds lined prompts for each blank.</small>
-        </div>
-        <div class="pencil-quiz-actions">
-          <button type="button" id="pencilQuizToggle" aria-pressed="false">✒️ Pencil Quiz Layout</button>
-          <button type="button" id="pencilQuizNextBlank">Jump to next blank</button>
-        </div>
-      </div>
-      <div id="pencilQuizPanel" class="pencil-quiz-panel" aria-live="polite">
-        <div id="pencilQuizList" class="pencil-quiz-list"></div>
-      </div>
       <button id="ttsToggleBtn" type="button">🎤 Voice Options</button>
       <div id="ttsControls">
         <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
@@ -4714,33 +4346,11 @@
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
             quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsToggleBtn = document.getElementById('ttsToggleBtn'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue'), mobileTypePickerOverlay = document.getElementById('mobileTypePickerOverlay'), mobileLocalMenuToggle = document.getElementById('mobileLocalMenuToggle'), mobileLocalMenu = document.getElementById('mobileLocalMenu');
-      const pencilModeBtn = document.getElementById('pencilModeBtn');
-      const pencilModeBanner = document.getElementById('pencilModeBanner');
-      const pencilStatusText = document.getElementById('pencilStatusText');
-      const pencilWorkspace = document.getElementById('pencilWorkspace');
-      const pencilCanvas = document.getElementById('pencilCanvas');
-      const pencilStroke = document.getElementById('pencilStroke');
-      const pencilUndoBtn = document.getElementById('pencilUndoBtn');
-      const pencilClearBtn = document.getElementById('pencilClearBtn');
-      const pencilInsertImageBtn = document.getElementById('pencilInsertImageBtn');
-      const pencilNotes = document.getElementById('pencilNotes');
-      const pencilInsertTextBtn = document.getElementById('pencilInsertTextBtn');
-      const pencilSaveNoteBtn = document.getElementById('pencilSaveNoteBtn');
-      const pencilSignal = document.getElementById('pencilSignal');
-      const pencilSignalText = document.getElementById('pencilSignalText');
-      const pencilFocusBtn = document.getElementById('pencilFocusBtn');
-      const pencilCollapseBtn = document.getElementById('pencilCollapseBtn');
-      const pencilQuizHelper = document.getElementById('pencilQuizHelper');
-      const pencilQuizPanel = document.getElementById('pencilQuizPanel');
-      const pencilQuizList = document.getElementById('pencilQuizList');
-      const pencilQuizToggle = document.getElementById('pencilQuizToggle');
-      const pencilQuizNextBlank = document.getElementById('pencilQuizNextBlank');
-      const pencilQuizMetaText = document.getElementById('pencilQuizMetaText');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
-        copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
-        clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
-        resumeQuizBtn = document.getElementById('resumeQuizBtn');
-        const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
+      copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
+      clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
+      resumeQuizBtn = document.getElementById('resumeQuizBtn');
+      const toggleDeleteBtn = document.getElementById('toggleDeleteBtn');
       const clearSearchBtn = document.getElementById('clearSearchBtn');
       const editorDiv = document.getElementById('editor');
       let pendingRevealSpan = null;
@@ -6360,7 +5970,6 @@
         buildMobileFolderList();
         updateResumeQuizBtn();
         updateResumeButton();
-        updatePencilSectionContext('');
       };
 
       headerElem.onclick = () => {
@@ -6447,320 +6056,6 @@
       }
       adjustEditorHeight();           // initial sizing
       quill.on('text-change', adjustEditorHeight);
-      // —— Pencil-first workspace ——
-      const pencilState = {
-        strokes: [],
-        drawing: false,
-        currentStroke: null,
-        dpr: Math.max(1, window.devicePixelRatio || 1),
-        active: false
-      };
-
-      const pencilQuizState = {
-        enabled: false,
-        scribbles: new Map()
-      };
-
-      const pencilStorageKey = () => {
-        if (currentFolder === null || currentSection === null) return null;
-        return `pencil-pad-${currentFolder}-${currentSection}`;
-      };
-
-      const setPencilStatus = (message, detected = false) => {
-        if (pencilStatusText) {
-          let dot = pencilStatusText.querySelector('.dot');
-          if (!dot) {
-            dot = document.createElement('span');
-            dot.className = 'dot';
-          }
-          pencilStatusText.textContent = message;
-          pencilStatusText.prepend(dot);
-          pencilStatusText.classList.toggle('active', detected);
-        }
-        if (pencilSignalText) pencilSignalText.textContent = message;
-        document.body.classList.toggle('pencil-detected', detected);
-      };
-
-      const redrawPencilCanvas = () => {
-        if (!pencilCanvas) return;
-        const ctx = pencilCanvas.getContext('2d');
-        if (!ctx) return;
-        ctx.clearRect(0, 0, pencilCanvas.width, pencilCanvas.height);
-        ctx.setTransform(pencilState.dpr, 0, 0, pencilState.dpr, 0, 0);
-        ctx.lineCap = ctx.lineJoin = 'round';
-        pencilState.strokes.forEach(stroke => {
-          if (!stroke.points || stroke.points.length === 0) return;
-          ctx.strokeStyle = stroke.color;
-          ctx.lineWidth = stroke.size;
-          ctx.beginPath();
-          ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-          stroke.points.slice(1).forEach(pt => ctx.lineTo(pt.x, pt.y));
-          ctx.stroke();
-        });
-      };
-
-      const resizePencilCanvas = () => {
-        if (!pencilCanvas || !pencilWorkspace || !pencilWorkspace.classList.contains('open')) return;
-        const rect = pencilCanvas.getBoundingClientRect();
-        const dpr = Math.max(1, window.devicePixelRatio || 1);
-        pencilState.dpr = dpr;
-        pencilCanvas.width = Math.max(1, Math.round(rect.width * dpr));
-        pencilCanvas.height = Math.max(1, Math.round(rect.height * dpr));
-        redrawPencilCanvas();
-      };
-
-      const savePencilDraft = (opts = {}) => {
-        const key = pencilStorageKey();
-        if (!key) return;
-        const payload = {
-          strokes: pencilState.strokes,
-          notes: pencilNotes ? pencilNotes.value : '',
-        };
-        if (pencilCanvas && !opts.skipImage) {
-          try {
-            payload.preview = pencilCanvas.toDataURL('image/webp', 0.85);
-          } catch (err) { /* ignore */ }
-        }
-        try { localStorage.setItem(key, JSON.stringify(payload)); }
-        catch (err) { console.warn('Unable to save pencil draft', err); }
-      };
-
-      const clearPencilCanvas = ({ silent = false } = {}) => {
-        pencilState.strokes = [];
-        redrawPencilCanvas();
-        if (!silent) savePencilDraft();
-      };
-
-      const loadPencilDraft = () => {
-        if (!pencilCanvas) return;
-        const key = pencilStorageKey();
-        pencilState.strokes = [];
-        if (pencilNotes) pencilNotes.value = '';
-        if (!key) {
-          redrawPencilCanvas();
-          return;
-        }
-        try {
-          const raw = localStorage.getItem(key);
-          if (!raw) { redrawPencilCanvas(); return; }
-          const payload = JSON.parse(raw);
-          pencilState.strokes = Array.isArray(payload.strokes) ? payload.strokes : [];
-          if (pencilNotes) pencilNotes.value = payload.notes || '';
-          redrawPencilCanvas();
-          if (payload.preview && pencilState.strokes.length === 0) {
-            const img = new Image();
-            img.onload = () => {
-              const ctx = pencilCanvas.getContext('2d');
-              if (!ctx) return;
-              ctx.setTransform(pencilState.dpr, 0, 0, pencilState.dpr, 0, 0);
-              ctx.clearRect(0, 0, pencilCanvas.width, pencilCanvas.height);
-              ctx.drawImage(img, 0, 0, pencilCanvas.width / pencilState.dpr, pencilCanvas.height / pencilState.dpr);
-            };
-            img.src = payload.preview;
-          }
-        } catch (err) {
-          console.warn('Unable to restore pencil draft', err);
-          redrawPencilCanvas();
-        }
-      };
-
-      const hydratePencilImages = () => {
-        if (!quill || !applyImageRef) return;
-        quill.root.querySelectorAll('img.pencil-note-image[data-pencil-ref]').forEach(img => {
-          const ref = img.getAttribute('data-pencil-ref');
-          if (!ref) return;
-          applyImageRef(img, ref);
-        });
-      };
-
-      const ensurePencilWorkspaceVisible = active => {
-        pencilState.active = active;
-        if (pencilModeBtn) pencilModeBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
-        if (pencilWorkspace) pencilWorkspace.classList.toggle('open', active);
-        if (pencilModeBanner) pencilModeBanner.classList.toggle('open', active);
-        document.body.classList.toggle('pencil-mode-active', active);
-        if (active) {
-          setTimeout(resizePencilCanvas, 60);
-          loadPencilDraft();
-        }
-      };
-
-      const updatePencilSectionContext = title => {
-        const detected = document.body.classList.contains('pencil-detected');
-        if (title) {
-          setPencilStatus(`Linked to "${title}" — handwriting autosaves for this question.`, detected);
-        } else {
-          setPencilStatus('Handwriting pad ready. Select a question to bind notes.', detected);
-        }
-      };
-
-      const pencilPoint = evt => {
-        const rect = pencilCanvas.getBoundingClientRect();
-        return {
-          x: (evt.clientX - rect.left),
-          y: (evt.clientY - rect.top)
-        };
-      };
-
-      const finishStroke = () => {
-        pencilState.drawing = false;
-        pencilState.currentStroke = null;
-        savePencilDraft();
-      };
-
-      if (pencilCanvas) {
-        pencilCanvas.addEventListener('pointerdown', evt => {
-          if (evt.button !== 0 && evt.pointerType === 'mouse') return;
-          const point = pencilPoint(evt);
-          pencilState.drawing = true;
-          const strokeSize = Math.max(1.5, parseFloat(pencilStroke?.value || '5'));
-          const strokeColor = evt.pointerType === 'pen' ? '#0f172a' : '#34495e';
-          pencilState.currentStroke = { size: strokeSize, color: strokeColor, points: [point] };
-          pencilState.strokes.push(pencilState.currentStroke);
-          pencilCanvas.setPointerCapture?.(evt.pointerId);
-          if (!pencilState.active) ensurePencilWorkspaceVisible(true);
-          if (evt.pointerType === 'pen') setPencilStatus('Apple Pencil detected · lined pad active', true);
-          redrawPencilCanvas();
-        });
-
-        pencilCanvas.addEventListener('pointermove', evt => {
-          if (!pencilState.drawing || !pencilState.currentStroke) return;
-          const pt = pencilPoint(evt);
-          const last = pencilState.currentStroke.points[pencilState.currentStroke.points.length - 1];
-          const dist = Math.hypot(pt.x - last.x, pt.y - last.y);
-          if (dist < 0.5) return;
-          pencilState.currentStroke.points.push(pt);
-          const ctx = pencilCanvas.getContext('2d');
-          if (ctx) {
-            ctx.setTransform(pencilState.dpr, 0, 0, pencilState.dpr, 0, 0);
-            ctx.strokeStyle = pencilState.currentStroke.color;
-            ctx.lineWidth = pencilState.currentStroke.size;
-            ctx.lineCap = ctx.lineJoin = 'round';
-            ctx.beginPath();
-            ctx.moveTo(last.x, last.y);
-            ctx.lineTo(pt.x, pt.y);
-            ctx.stroke();
-          }
-        });
-
-        ['pointerup', 'pointercancel', 'pointerleave'].forEach(type => {
-          pencilCanvas.addEventListener(type, () => finishStroke());
-        });
-        window.addEventListener('resize', resizePencilCanvas);
-      }
-
-      if (pencilUndoBtn) {
-        pencilUndoBtn.addEventListener('click', () => {
-          if (pencilState.strokes.length === 0) return;
-          pencilState.strokes.pop();
-          redrawPencilCanvas();
-          savePencilDraft();
-        });
-      }
-
-      if (pencilClearBtn) {
-        pencilClearBtn.addEventListener('click', () => {
-          clearPencilCanvas();
-          setPencilStatus('Pad cleared. Start writing with your Pencil.', false);
-        });
-      }
-
-      const insertPencilSketch = async () => {
-        if (!pencilCanvas) return;
-        if (!ensureSelection()) return;
-        pencilCanvas.toBlob(async blob => {
-          if (!blob) { alert('Write something on the pad first.'); return; }
-          try {
-            const dataUrl = await blobToDataURL(blob);
-            let imageRef = null;
-            try {
-              const file = new File([blob], 'pencil-sketch.png', { type: blob.type || 'image/png' });
-              const { imageRef: ref } = await addLocalImage(file);
-              imageRef = ref;
-            } catch (err) {
-              console.warn('Local storage for sketch failed', err);
-            }
-            const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-            const html = `<div class="pencil-inline-figure"><img class="pencil-note-image" src="${dataUrl}" ${imageRef ? `data-pencil-ref="${imageRef}"` : ''} alt="Handwriting sketch"></div>`;
-            quill.clipboard.dangerouslyPasteHTML(range.index, html, 'user');
-            quill.setSelection(range.index + 1, 0, 'silent');
-            hydratePencilImages();
-            syncCurrentSection();
-          } catch (err) {
-            console.error('Failed to insert sketch', err);
-            alert('Unable to insert the sketch.');
-          }
-        }, 'image/png');
-      };
-
-      if (pencilInsertImageBtn) {
-        pencilInsertImageBtn.addEventListener('click', insertPencilSketch);
-      }
-
-      if (pencilInsertTextBtn) {
-        pencilInsertTextBtn.addEventListener('click', () => {
-          if (!ensureSelection()) return;
-          const text = (pencilNotes?.value || '').trim();
-          if (!text) { alert('Add a short summary note first.'); return; }
-          const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-          quill.insertText(range.index, text + '\n', 'user');
-          quill.setSelection(range.index + text.length + 1, 0, 'silent');
-          syncCurrentSection();
-          savePencilDraft({ skipImage: true });
-          setPencilStatus('Note added to question from Pencil pad.', true);
-        });
-      }
-
-      if (pencilSaveNoteBtn && pencilNotes) {
-        const handler = () => {
-          savePencilDraft({ skipImage: true });
-          setPencilStatus('Pencil notes saved for this question.', document.body.classList.contains('pencil-detected'));
-        };
-        pencilSaveNoteBtn.addEventListener('click', handler);
-        pencilNotes.addEventListener('input', handler);
-      }
-
-      if (pencilModeBtn) {
-        pencilModeBtn.addEventListener('click', () => {
-          const willOpen = !pencilState.active;
-          ensurePencilWorkspaceVisible(willOpen);
-          if (willOpen) {
-            setPencilStatus('Handwriting pad ready. Tap with Apple Pencil to start.', false);
-          }
-        });
-      }
-
-      if (pencilFocusBtn) {
-        pencilFocusBtn.addEventListener('click', () => {
-          const isFocus = document.body.classList.toggle('pencil-focus');
-          pencilFocusBtn.textContent = isFocus ? 'Exit Focus' : 'Toggle Focus';
-          setTimeout(resizePencilCanvas, 60);
-        });
-      }
-
-        if (pencilCollapseBtn) {
-          pencilCollapseBtn.addEventListener('click', () => ensurePencilWorkspaceVisible(false));
-        }
-
-        if (pencilQuizToggle) {
-          pencilQuizToggle.addEventListener('click', () => {
-            const enable = !pencilQuizState.enabled;
-            setPencilQuizEnabled(enable);
-            if (enable && !pencilState.active) ensurePencilWorkspaceVisible(true);
-          });
-        }
-
-        if (pencilQuizNextBlank) {
-          pencilQuizNextBlank.addEventListener('click', jumpToNextPencilBlank);
-        }
-
-        if (pencilModeBanner) {
-          pencilModeBanner.addEventListener('click', evt => {
-            const btn = evt.target.closest('button');
-            if (!btn && pencilModeBtn) pencilModeBtn.click();
-          });
-      }
-
       // Attach undo/redo handlers
       const toolbarModule = quill.getModule('toolbar');
       toolbarModule.addHandler('undo', () => quill.history.undo());
@@ -6867,12 +6162,6 @@
       }
       if (isMobileDevice()) {
         setupMobileUI();
-      }
-      const isLikelyIPad = (/iPad|Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1) || /iPad/i.test(navigator.platform || '');
-      if (isLikelyIPad && pencilModeBtn) {
-        ensurePencilWorkspaceVisible(true);
-        setPencilStatus('iPad detected — handwriting pad ready.', false);
-        setPencilQuizEnabled(true);
       }
       document.body.classList.remove('loading');
 
@@ -7434,11 +6723,6 @@
           titleText = sec.title && sec.title.trim() ? sec.title : defaultTitle;
         }
         updateHeader(titleText);
-        updatePencilSectionContext(titleText);
-        if (pencilState.active) {
-          loadPencilDraft();
-          resizePencilCanvas();
-        }
         // Hide all main editors
         if (editorDiv) editorDiv.style.display = previewDiv.style.display = labelEditor.style.display = 'none';
         altContainer.style.display = 'none';
@@ -8238,7 +7522,6 @@
         }
         // Load the HTML silently so it does not create an undo entry
         quill.clipboard.dangerouslyPasteHTML(html, 'silent');
-        hydratePencilImages();
         // Ensure new content starts with normal formatting
         quill.setSelection(0, 0, 'silent');
         ['bold', 'italic', 'underline'].forEach(f => quill.format(f, false, 'silent'));
@@ -9234,13 +8517,10 @@
             span.className = 'blank';
             span.dataset.word = word;
             span.dataset.occ = occ;
-            const blankId = `${word}_${occ}`;
-            span.dataset.blankId = blankId;
 
             const input = document.createElement('input');
             input.type = 'text';
             input.className = 'blank-input';
-            input.dataset.blankId = blankId;
             const answers = [word, ...(sec.alts[`${word}_${occ}`] || [])];
             input.setAttribute('data-answer', JSON.stringify(answers));
             input.addEventListener('focus', () => {
@@ -9357,11 +8637,11 @@
         }, { once: true });
       }
 
-        function applyAnswerToInput(input, value, { focus = true, clearOnWrong = false } = {}) {
-          if (!input || !input.isConnected) return;
-          lastHintTarget = input;
-          activeBlankInput = input;
-          cancelWrongAnswerTimer(input);
+      function applyAnswerToInput(input, value, { focus = true, clearOnWrong = false } = {}) {
+        if (!input || !input.isConnected) return;
+        lastHintTarget = input;
+        activeBlankInput = input;
+        cancelWrongAnswerTimer(input);
 
         if (focus) {
           try {
@@ -9400,140 +8680,14 @@
               }
             }, 1000);
             wrongAnswerTimers.set(input, timer);
-            }
           }
         }
+      }
 
-        const syncPencilScribbleValue = (blankId, value) => {
-          if (!blankId) return;
-          const pad = pencilQuizState.scribbles.get(blankId);
-          if (pad && pad.value !== value) {
-            pad.value = value;
-          }
-        };
-
-        function updatePencilQuizMeta(blankCount = 0) {
-          if (!pencilQuizMetaText) return;
-          if (!blankCount) {
-            pencilQuizMetaText.textContent = 'Builds lined prompts for each blank.';
-            return;
-          }
-          const noun = blankCount === 1 ? '1 blank' : `${blankCount} blanks`;
-          const padHint = pencilState.active
-            ? 'Write with Apple Pencil then drop into the question.'
-            : 'Open the Pencil pad to sketch, then tap Fill to drop it in.';
-          pencilQuizMetaText.textContent = `${noun} ready for handwriting. ${padHint}`;
-        }
-
-        function refreshPencilQuizPrompts() {
-          if (!pencilQuizHelper || !pencilQuizPanel || !pencilQuizList) return;
-          const blanks = Array.from(quizContent.querySelectorAll('input.blank-input'));
-          const hasBlanks = isQuizMode && blanks.length > 0;
-
-          pencilQuizHelper.style.display = hasBlanks ? 'flex' : 'none';
-          updatePencilQuizMeta(hasBlanks ? blanks.length : 0);
-
-          if (!pencilQuizState.enabled || !hasBlanks) {
-            pencilQuizPanel.style.display = 'none';
-            pencilQuizList.innerHTML = '';
-            pencilQuizState.scribbles.clear();
-            return;
-          }
-
-          pencilQuizPanel.style.display = 'grid';
-          pencilQuizList.innerHTML = '';
-          pencilQuizState.scribbles = new Map();
-
-          blanks.forEach((input, idx) => {
-            const blankId = input.dataset.blankId || `blank-${idx}-${input.dataset.word || ''}-${input.dataset.occ || ''}`;
-            input.dataset.blankId = blankId;
-
-            const answers = (() => {
-              try { return JSON.parse(input.getAttribute('data-answer') || '[]'); }
-              catch { return []; }
-            })();
-            const canonical = answers[0] || '';
-
-            const card = document.createElement('div');
-            card.className = 'pencil-quiz-card';
-
-            const head = document.createElement('div');
-            head.className = 'card-head';
-            const title = document.createElement('div');
-            title.className = 'card-title';
-            title.textContent = `Blank ${idx + 1}`;
-            const pill = document.createElement('span');
-            pill.className = 'card-pill';
-            pill.textContent = canonical ? `${canonical.length} letters` : 'Free length';
-            head.appendChild(title);
-            head.appendChild(pill);
-
-            const context = document.createElement('div');
-            context.className = 'card-context';
-            const heading = input.closest('.question-section-card')?.querySelector('.question-section-heading');
-            context.textContent = heading ? `Section: ${heading.textContent.trim()}` : 'Main prompt';
-
-            const scribble = document.createElement('textarea');
-            scribble.className = 'pencil-scribble';
-            scribble.placeholder = 'Scribble with Apple Pencil; text drops into this blank.';
-            scribble.value = input.value || '';
-            scribble.addEventListener('input', () => {
-              applyAnswerToInput(input, scribble.value, { focus: false, clearOnWrong: false });
-            });
-            pencilQuizState.scribbles.set(blankId, scribble);
-
-            if (!input.dataset.pencilSyncAttached) {
-              input.addEventListener('input', () => syncPencilScribbleValue(blankId, input.value || ''));
-              input.dataset.pencilSyncAttached = 'true';
-            } else {
-              syncPencilScribbleValue(blankId, input.value || '');
-            }
-
-            const actions = document.createElement('div');
-            actions.className = 'card-actions';
-            const fillBtn = document.createElement('button');
-            fillBtn.className = 'fill-btn';
-            fillBtn.textContent = 'Fill main blank';
-            fillBtn.addEventListener('click', () => {
-              applyAnswerToInput(input, scribble.value || input.value || '', { focus: true, clearOnWrong: true });
-            });
-            const focusBtn = document.createElement('button');
-            focusBtn.className = 'focus-btn';
-            focusBtn.textContent = 'Focus in question';
-            focusBtn.addEventListener('click', () => {
-              input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              try { input.focus({ preventScroll: true }); } catch { input.focus(); }
-              activeBlankInput = input;
-            });
-            actions.append(fillBtn, focusBtn);
-
-            card.append(head, context, scribble, actions);
-            pencilQuizList.appendChild(card);
-          });
-        }
-
-        function setPencilQuizEnabled(enabled) {
-          pencilQuizState.enabled = !!enabled;
-          document.body.classList.toggle('pencil-quiz-enabled', pencilQuizState.enabled);
-          if (pencilQuizToggle) {
-            pencilQuizToggle.setAttribute('aria-pressed', pencilQuizState.enabled ? 'true' : 'false');
-            pencilQuizToggle.textContent = pencilQuizState.enabled ? '✒️ Pencil Quiz On' : '✒️ Pencil Quiz Layout';
-          }
-          refreshPencilQuizPrompts();
-        }
-
-        function jumpToNextPencilBlank() {
-          const target = findPreferredBlankTarget();
-          if (!target) return;
-          try { target.focus({ preventScroll: true }); } catch { target.focus(); }
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          activeBlankInput = target;
-        }
-
-        function buildAnswerBank(sec) {
-          if (!answerBank) return;
-          const answers = [];
-          quizContent.querySelectorAll('.blank-input').forEach(input => {
+      function buildAnswerBank(sec) {
+        if (!answerBank) return;
+        const answers = [];
+        quizContent.querySelectorAll('.blank-input').forEach(input => {
           try {
             const arr = JSON.parse(input.getAttribute('data-answer') || '[]');
             if (arr.length) answers.push(arr[0]);
@@ -9590,7 +8744,6 @@
           answerBank.style.display = 'none';
           answerBank.innerHTML = '';
           toggleAnswersBtn.textContent = 'Show Answers';
-          refreshPencilQuizPrompts();
           return;
         }
         toggleAnswersBtn.style.display = 'inline-block';
@@ -9603,7 +8756,6 @@
           answerBank.innerHTML = '';
           toggleAnswersBtn.textContent = 'Show Answers';
         }
-        refreshPencilQuizPrompts();
       }
 
         function showQuiz() {
