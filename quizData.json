@@ -1303,7 +1303,8 @@
           "hidden": [],
           "rawHtml": "<h3>What</h3><p>Required Endorsements (61.31)</p><ul><li>Complex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller</li><li>High Performance - More than 200 Horsepower</li><li>Tailwheel - No Ground Instruction Required.</li><li>Towing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.</li><li>High Altitude - above 25000 service ceiling </li></ul><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nRequired Endorsements (61.31)\nComplex Aircraft - Retractable Landing Gear | Flaps | Controllable Propeller\nHigh Performance - More than 200 Horsepower\nTailwheel - No Ground Instruction Required.\nTowing - Also need at least 100 hours PIC in Cat and Class and 3 actual or simulated glider tows within last 24 months.\nHigh Altitude - above 25000 service ceiling \n\nHow:\n\nWhy:\n",
-          "type": "acronym"
+          "type": "acronym",
+          "title": "ATOMATOFLAMES"
         },
         {
           "acronym": "FLAPS",
@@ -1339,7 +1340,8 @@
           "hidden": [],
           "rawHtml": "<h3>What</h3><p>Can register a plane through FAA.gov or local FSDO</p><p>Without being fully registered and use having the application forms you can operate for 12 months and can only fly domestically</p><p>A Registration loses its validity if -</p><p>◊ Cancelled upon request</p><p>◊ Aircraft destroyed</p><p>◊ Ownership Transferred</p><p>◊ Owner loses citizenship</p><p>◊ Owner Dies</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nCan register a plane through FAA.gov or local FSDO\nWithout being fully registered and use having the application forms you can operate for 12 months and can only fly domestically\nA Registration loses its validity if -\n◊ Cancelled upon request\n◊ Aircraft destroyed\n◊ Ownership Transferred\n◊ Owner loses citizenship\n◊ Owner Dies\n\nHow:\n\nWhy:\n",
-          "type": "acronym"
+          "type": "acronym",
+          "title": "FLAPS"
         },
         {
           "alts": {},
@@ -2051,7 +2053,8 @@
           "hidden": [],
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Aircraft Stability",
-          "type": "fill"
+          "type": "fill",
+          "rawHtml": ""
         },
         {
           "alts": {},
@@ -3846,7 +3849,8 @@
           ],
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Class E Airspace",
-          "type": "label"
+          "type": "label",
+          "rawHtml": ""
         },
         {
           "alts": {},
@@ -3976,7 +3980,8 @@
           "hidden": [],
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Sectional Charts",
-          "type": "fill"
+          "type": "fill",
+          "rawHtml": ""
         },
         {
           "alts": {},
@@ -4159,7 +4164,8 @@
           "title": "Lost Comms",
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "hidden": [],
-          "alts": {}
+          "alts": {},
+          "rawHtml": ""
         }
       ],
       "color": "#53d5fd"
@@ -4221,7 +4227,7 @@
           ],
           "rawHtml": "<h3>What</h3><p>Gyroscopic Instruments</p><p>Power Sources/Principles</p><p>\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator</p><p>\t• Precession / Electricity : Turn Coordinator (also rigidity in space)</p><p>Rigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.</p><p>Precession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "What:\nGyroscopic Instruments\nPower Sources/Principles\n\t• Rigidity in Space / Vacuum: Attitude Indicator, Heading Indicator\n\t• Precession / Electricity : Turn Coordinator (also rigidity in space)\nRigidity in Space : A spinning disk (like a gyro) resists changes to and maintains its orientation in space.\nPrecession : Force applied to a spinning disk is deflected 90 degrees in the direction of rotation.\n\nHow:\n\nWhy:\n",
-          "title": "",
+          "title": "Untitled Question",
           "type": "fill"
         },
         {
@@ -4614,7 +4620,7 @@
           ],
           "rawHtml": "<h3>What</h3><p>Attitude Heading Reference System (AHRS)</p><p>Replaces the Gyroscopic System with micro-electronic Gyros that use vibrations, accelerometers that use gravitational force, and a magnetometer or flux valve that measures the Earth's magnetic field strength and direction. Rate and tilt sensors.</p><h3>How</h3><p></p><h3>Why</h3><p></p>",
           "rawText": "Attitude Heading Reference System (AHRS)\nReplaces the Gyroscopic System with micro-electronic Gyros that use vibrations, accelerometers that use gravitational force, and a magnetometer or flux valve that measures the Earth's magnetic field strength and direction. Rate and tilt sensors.\n",
-          "title": "",
+          "title": "Untitled Question",
           "type": "fill"
         },
         {
@@ -5031,7 +5037,8 @@
           "hidden": [],
           "rawText": "What:\n\nHow:\n\nWhy:\n",
           "title": "Antennas",
-          "type": "fill"
+          "type": "fill",
+          "rawHtml": ""
         },
         {
           "alts": {},
@@ -6917,7 +6924,8 @@
           "type": "acronym",
           "hidden": [],
           "alts": {},
-          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>"
+          "rawHtml": "<p><span class=\"ql-cursor\">﻿</span>﻿﻿﻿﻿﻿﻿Readiness - Student learns best being mentally and physically prepared</p><p><br></p><p>Exercise - Practice makes Perfect</p><p><br></p><p>Effect - Positive feelings strengthen learning and negative ones weaken it.</p><p><br></p><p>Primacy - The first thing learned is often the strongest and hardest to unlearn.</p><p><br></p><p>Intensity - Real, Exciting, Dramatic Learning experiences are retained best.</p><p><br></p><p>Recency - The most recently learned info is best remembered. ﻿</p>",
+          "title": "GUMPS"
         },
         {
           "type": "acronym",
@@ -6945,7 +6953,10 @@
               "answer": "Correlation",
               "extra": ""
             }
-          ]
+          ],
+          "title": "RUAC",
+          "rawText": "",
+          "rawHtml": ""
         },
         {
           "type": "acronym",
@@ -7013,7 +7024,9 @@
           "rawHtml": "<p><br></p>",
           "rawText": "\n",
           "description": "Defense Mechanisms",
-          "title": "DRDRCPRFast"
+          "title": "DRDRCPRFast",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "acronym",
@@ -7050,7 +7063,12 @@
               "extra": "Most recently learned things are remembered best"
             }
           ],
-          "description": "Laws of Learning"
+          "description": "Laws of Learning",
+          "title": "REEPIR",
+          "rawText": "",
+          "rawHtml": "",
+          "hidden": [],
+          "alts": {}
         },
         {
           "type": "acronym",
@@ -7072,7 +7090,12 @@
               "extra": "Using the knowledge to solve problems and make decisions "
             }
           ],
-          "description": "Phases of Knowledge Acquisition"
+          "description": "Phases of Knowledge Acquisition",
+          "title": "MUA",
+          "rawText": "",
+          "rawHtml": "",
+          "hidden": [],
+          "alts": {}
         }
       ]
     },
