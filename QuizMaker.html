@@ -4232,14 +4232,34 @@
 
       const normalizeSection = section => {
         if (!section || typeof section !== 'object') return;
-        if (!section.type) {
-          section.type = 'fill';
+        if (!section.type) section.type = 'fill';
+        if (!section.title || typeof section.title !== 'string') {
+          section.title = (section.acronym && String(section.acronym).trim()) || 'Untitled Question';
+        }
+        if (typeof section.rawText !== 'string') {
+          section.rawText = '';
+        }
+        if (typeof section.rawHtml !== 'string') {
+          section.rawHtml = '';
         }
         if (!Array.isArray(section.hidden)) {
           section.hidden = [];
         }
         if (!section.alts || typeof section.alts !== 'object') {
           section.alts = {};
+        }
+        if (section.type === 'acronym') {
+          if (!section.acronym || typeof section.acronym !== 'string') {
+            section.acronym = section.title || '';
+          }
+          if (!Array.isArray(section.entries) || section.entries.length === 0) {
+            const letters = (section.acronym || '').replace(/\s+/g, '').split('');
+            section.entries = letters.map(letter => ({
+              letter,
+              answer: '',
+              extra: ''
+            }));
+          }
         }
         if (Array.isArray(section.definitions)) {
           section.definitions.forEach(def => {
