@@ -2265,6 +2265,10 @@
     (async () => {
       try {
       // IndexedDB and persistent storage logic removed.
+
+      // Shared utility: normalize strings for comparison (lowercase, alphanumeric only)
+      const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
       // Function to position definitions container and add button absolutely below the image container
       function updateDefPosition() {
         const cont = document.getElementById('labelContainer');
@@ -2639,7 +2643,7 @@
           tempLine.setAttribute('x2', currX);
           tempLine.setAttribute('y2', currY);
         });
-        document.addEventListener('mouseup', evt => {
+        addSectionDocListener('mouseup', evt => {
           if (!drawing) return;
           drawing = false;
           const rect = img.getBoundingClientRect();
@@ -2887,7 +2891,7 @@
             }
             svg.setAttribute('viewBox', `0 0 ${baseW} ${baseH}`);
             scaleThis();
-            window.addEventListener('resize', scaleThis);
+            addQuizResizeListener(scaleThis);
           };
           ex.labels.forEach(lbl => {
             const inp = document.createElement('input');
@@ -4343,6 +4347,13 @@
           localStorage.removeItem('quizDataLocal');
         }
         updateLocalButtons();
+      }
+
+      // Debounced version of saveData for high-frequency calls (e.g. typing)
+      let _saveDataTimer = null;
+      function saveDataDebounced() {
+        if (_saveDataTimer) clearTimeout(_saveDataTimer);
+        _saveDataTimer = setTimeout(saveData, 300);
       }
 
       let resumeQuizBtn;
@@ -6143,18 +6154,13 @@
         const sec = data.folders[currentFolder].sections[currentSection];
         sec.rawHtml = quill.root.innerHTML;
         sec.rawText = quill.getText();
-        saveData();
+        saveDataDebounced();
       }
       quill.on('text-change', () => {
         if (isQuizMode) return;
         if (!ensureSelection()) return;
 
         syncCurrentSection();
-
-        const sec = data.folders[currentFolder].sections[currentSection];
-        sec.rawHtml = quill.root.innerHTML;
-        sec.rawText = quill.getText();
-        saveData();
 
         // Auto-update the Preview Words area
         previewSection();
@@ -6726,7 +6732,22 @@
 
       function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
       // Quill will override this function below after Quill is initialized.
+      // Track global listeners added during loadSection so they can be cleaned up
+      let _sectionDocListeners = [];
+      function addSectionDocListener(event, handler, target) {
+        const el = target || document;
+        el.addEventListener(event, handler);
+        _sectionDocListeners.push({ event, handler, target: el });
+      }
+      function cleanupSectionDocListeners() {
+        _sectionDocListeners.forEach(({ event, handler, target }) => {
+          target.removeEventListener(event, handler);
+        });
+        _sectionDocListeners = [];
+      }
+
       function loadSection(){
+        cleanupSectionDocListeners();
         const sec = data.folders[currentFolder].sections[currentSection];
         const isMobile = document.body.classList.contains('mobile');
         ensureSectionImages(currentFolder, sec);
@@ -7022,8 +7043,9 @@
             scaleLabels(container, baseWidth, baseHeight);
             updateDefPosition();
             positionExtraImages();
+            renderExtraImages(sec);
           };
-          window.addEventListener('resize', () => {
+          const _editResizeHandler = () => {
             if (!baseWidth) return;
             editScale = Math.min(1, (window.innerWidth - 20) / baseWidth);
             const dispW = baseWidth * editScale;
@@ -7035,7 +7057,8 @@
             scaleLabels(container, baseWidth, baseHeight);
             updateDefPosition();
             positionExtraImages();
-          });
+          };
+          addSectionDocListener('resize', _editResizeHandler, window);
           if (window.ResizeObserver) {
             new ResizeObserver(() => { updateDefPosition(); scaleLabels(container, baseWidth, baseHeight); positionExtraImages(); }).observe(container);
           }
@@ -7177,19 +7200,8 @@
             document.addEventListener('touchmove', onMove, { passive: false });
             document.addEventListener('touchend', onEnd);
           }, { passive: false });
-          img.onload = () => {
-            if (sec.imgWidth && sec.imgHeight) {
-              container.style.width = sec.imgWidth + 'px';
-              container.style.height = sec.imgHeight + 'px';
-              img.style.width = '100%';
-              img.style.height = 'auto';
-            } else {
-              container.style.width = img.naturalWidth + 'px';
-              container.style.height = img.naturalHeight + 'px';
-            }
-            updateDefPosition();
-            renderExtraImages(sec);
-          };
+          // Second img.onload merged into the first handler above (lines ~7010-7025)
+          // to avoid overwriting the scaling/positioning logic.
           if (!isMobile) overlay.ondblclick = evt => {
             if (evt.metaKey) return;
             const rect = img.getBoundingClientRect();
@@ -7495,7 +7507,7 @@
               tempLine.setAttribute('x2', currX);
               tempLine.setAttribute('y2', currY);
             });
-            document.addEventListener('mouseup', evt => {
+            addSectionDocListener('mouseup', evt => {
               if (!drawing) return;
               drawing = false;
               const rect = img.getBoundingClientRect();
@@ -7814,7 +7826,7 @@
         allTokens = allTokens.filter(t => t.length > 0);
         const hiddenEntries = getHiddenEntries(sec, allTokens);
         sec.hidden = hiddenEntries;
-        saveData();
+        saveDataDebounced();
         // We'll use a running count per word for the preview rendering
         let globalCounts = {};
 
@@ -8778,7 +8790,19 @@
         }
       }
 
+        // Track window resize listeners added during showQuiz so they can be cleaned up
+        let _quizResizeListeners = [];
+        function addQuizResizeListener(handler) {
+          window.addEventListener('resize', handler);
+          _quizResizeListeners.push(handler);
+        }
+        function cleanupQuizResizeListeners() {
+          _quizResizeListeners.forEach(h => window.removeEventListener('resize', h));
+          _quizResizeListeners = [];
+        }
+
         function showQuiz() {
+          cleanupQuizResizeListeners();
           justCompleted = false;
           activeBlankInput = null;
           stopSpeech();
@@ -8895,7 +8919,6 @@
               const altKey       = `${correctWord}_${occ}`;
               const alts         = section.alts[altKey] || [];
 
-              const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
               const enteredNorm = normalize(enteredRaw);
               const correctNorm = normalize(correctWord);
               const isCorrect   = enteredNorm === correctNorm ||
@@ -8975,7 +8998,6 @@
           entriesWrap.className = 'acronym-entries';
           card.appendChild(entriesWrap);
 
-          const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           const inputs = [];
 
           const updateHelperState = inp => {
@@ -9172,7 +9194,7 @@
             svgOverlay.setAttribute('viewBox', `0 0 ${baseWidth} ${baseHeight}`);
             updateDiagramScale();
           };
-          window.addEventListener('resize', updateDiagramScale);
+          addQuizResizeListener(updateDiagramScale);
 
           // Create SVG overlay for arrows
           const svgOverlay = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -9510,7 +9532,6 @@
                 document.body.removeChild(meas);
 
                 inp.oninput = () => {
-                  const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g,'');
                   const val = normalize(inp.value);
                   const ok = answers.some(a => normalize(a) === val);
                   inp.classList.toggle('correct', ok);
@@ -9648,7 +9669,6 @@
             });
             // Simplified input handler: just correctness, outline if all correct
             inp.oninput = () => {
-              const normalize = str => str.toLowerCase().replace(/[^a-z0-9]/g,'');
               const val = normalize(inp.value);
               const ok = answers.some(a => normalize(a) === val);
               inp.classList.toggle('correct', ok);
