@@ -2997,6 +2997,17 @@
       let deleteMode = false;     // controls red‑X visibility, must exist before render functions run
       let quizOrder = [], quizPos = 0;  // initialize quiz sequence and position early
       let lastSectionOrder = null;
+
+      // Track window resize listeners added during showQuiz so they can be cleaned up
+      let _quizResizeListeners = [];
+      function addQuizResizeListener(handler) {
+        window.addEventListener('resize', handler);
+        _quizResizeListeners.push(handler);
+      }
+      function cleanupQuizResizeListeners() {
+        _quizResizeListeners.forEach(h => window.removeEventListener('resize', h));
+        _quizResizeListeners = [];
+      }
       let currentFolder = null, currentSection = null;
       const mobileOpenFolders = new Set();
       // Track progress and random order per folder
@@ -8789,17 +8800,6 @@
           toggleAnswersBtn.textContent = 'Show Answers';
         }
       }
-
-        // Track window resize listeners added during showQuiz so they can be cleaned up
-        let _quizResizeListeners = [];
-        function addQuizResizeListener(handler) {
-          window.addEventListener('resize', handler);
-          _quizResizeListeners.push(handler);
-        }
-        function cleanupQuizResizeListeners() {
-          _quizResizeListeners.forEach(h => window.removeEventListener('resize', h));
-          _quizResizeListeners = [];
-        }
 
         function showQuiz() {
           cleanupQuizResizeListeners();
