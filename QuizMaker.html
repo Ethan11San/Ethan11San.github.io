@@ -2047,6 +2047,331 @@
       border-radius: 0 0 16px 16px;
       background: #ffffff;
     }
+
+    /* —— Toast Notifications —— */
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 99999;
+      pointer-events: none;
+      align-items: center;
+    }
+    .toast {
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+      pointer-events: auto;
+      animation: toastIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards;
+      max-width: 360px;
+      text-align: center;
+    }
+    .toast.toast-out {
+      animation: toastOut 0.3s ease forwards;
+    }
+    .toast-success { background: #27ae60; }
+    .toast-error   { background: #e74c3c; }
+    .toast-info    { background: #2980b9; }
+    .toast-warn    { background: #e67e22; }
+    @keyframes toastIn {
+      from { opacity:0; transform:translateY(16px) scale(0.92); }
+      to   { opacity:1; transform:translateY(0)    scale(1); }
+    }
+    @keyframes toastOut {
+      from { opacity:1; transform:translateY(0)   scale(1); }
+      to   { opacity:0; transform:translateY(10px) scale(0.94); }
+    }
+
+    /* —— Dark Mode —— */
+    body.dark-mode {
+      background: #1a1f2e;
+      color: #e0e6f0;
+    }
+    body.dark-mode #sidebar {
+      background: #1e2433;
+    }
+    body.dark-mode #sidebarMainContent {
+      background: #1e2433;
+    }
+    body.dark-mode #sidebar.mini #sidebarMainContent {
+      background: #1e2433;
+    }
+    body.dark-mode #main {
+      background: #1a1f2e;
+    }
+    body.dark-mode #header {
+      background: #1a6e5a;
+    }
+    body.dark-mode #controls {
+      background: #242b3d;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    body.dark-mode #editorArea,
+    body.dark-mode #quizArea {
+      background: #1a1f2e;
+    }
+    body.dark-mode #quizContent {
+      background: #242b3d;
+      color: #e0e6f0;
+    }
+    body.dark-mode #preview,
+    body.dark-mode #editor {
+      background: #242b3d;
+      border-color: #3a4561;
+      color: #e0e6f0;
+    }
+    body.dark-mode #altContainer {
+      background: #242b3d;
+      border-color: #3a4561;
+    }
+    body.dark-mode .word:hover {
+      background: #2e3a52;
+    }
+    body.dark-mode .question-section-card {
+      background: #2a3147;
+      border-color: #3a4561;
+    }
+    body.dark-mode .question-section-header {
+      background: #1e2744;
+    }
+    body.dark-mode input.blank-input {
+      background: #2e3a52;
+      color: #e0e6f0;
+      border-color: #4a5a7a;
+    }
+    body.dark-mode input.blank-input.correct {
+      background: #1a3d2a;
+      border-color: #27ae60;
+      color: #5dea8a;
+    }
+    body.dark-mode input.blank-input.incorrect {
+      background: #3d1a1a;
+      border-color: #e74c3c;
+    }
+    body.dark-mode .answer-label {
+      background: #2a3147;
+      border-color: #3a4561;
+      color: #c0cfe8;
+    }
+    body.dark-mode .answer-label:hover {
+      background: #344060;
+    }
+    body.dark-mode #answerBank {
+      background: transparent;
+    }
+    body.dark-mode #progressBarContainer {
+      background: #3a4561;
+    }
+    body.dark-mode #progressStatus {
+      color: #c0cfe8;
+    }
+    body.dark-mode #sessionStats {
+      background: #242b3d;
+      border-color: #3a4561;
+      color: #c0cfe8;
+    }
+    body.dark-mode #sessionStats .stat-item.streak-active {
+      color: #f1c40f;
+    }
+    body.dark-mode .acronym-entry {
+      border-color: #3a4561;
+    }
+    body.dark-mode .acronym-letter {
+      background: #2a3147;
+      color: #8ab4ff;
+    }
+    body.dark-mode input.acronym-input {
+      background: #2e3a52;
+      border-color: #4a5a7a;
+      color: #e0e6f0;
+    }
+    body.dark-mode input.acronym-input.correct {
+      background: #1a3d2a;
+      border-color: #27ae60;
+      color: #5dea8a;
+    }
+    body.dark-mode #darkModeBtn {
+      color: #f1c40f;
+    }
+    #darkModeBtn {
+      background: rgba(236,240,241,0.12);
+      border: 1px solid rgba(236,240,241,0.25);
+      border-radius: 12px;
+      color: #ecf0f1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      width: 100%;
+      padding: 0;
+      font-size: 1.2rem;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    #darkModeBtn:hover {
+      background: rgba(236,240,241,0.25);
+      border-color: rgba(236,240,241,0.45);
+    }
+    #darkModeBtn:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 3px;
+    }
+
+    /* —— Session Stats Bar —— */
+    #sessionStats {
+      display: none;
+      margin: 0 24px 6px;
+      padding: 6px 14px;
+      background: #fff;
+      border: 1px solid #e0e6ef;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: #555;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #sessionStats.visible {
+      display: flex;
+    }
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .stat-item strong {
+      color: #2c3e50;
+    }
+    body.dark-mode .stat-item strong {
+      color: #8ab4ff;
+    }
+    .stat-item.streak-active {
+      color: #e67e22;
+      font-weight: 600;
+    }
+    .stat-item.streak-active strong {
+      color: inherit;
+    }
+
+    /* —— Completion Overlay —— */
+    #completionOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 50000;
+      align-items: center;
+      justify-content: center;
+    }
+    #completionOverlay.visible {
+      display: flex;
+    }
+    #completionCard {
+      background: #fff;
+      border-radius: 18px;
+      padding: 36px 40px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+      animation: completionPop .45s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    body.dark-mode #completionCard {
+      background: #242b3d;
+      color: #e0e6f0;
+    }
+    @keyframes completionPop {
+      from { opacity:0; transform:scale(0.7); }
+      to   { opacity:1; transform:scale(1); }
+    }
+    #completionCard .completion-emoji {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+    #completionCard h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      color: #2c3e50;
+    }
+    body.dark-mode #completionCard h2 {
+      color: #e0e6f0;
+    }
+    #completionCard .completion-subtitle {
+      color: #7f8c8d;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+    body.dark-mode #completionCard .completion-subtitle {
+      color: #8090a8;
+    }
+    #completionStats {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .completion-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .completion-stat .c-val {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1abc9c;
+    }
+    .completion-stat .c-lbl {
+      font-size: 0.75rem;
+      color: #7f8c8d;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    body.dark-mode .completion-stat .c-lbl {
+      color: #8090a8;
+    }
+    #completionContinueBtn {
+      padding: 12px 32px;
+      background: #1abc9c;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s ease, transform .15s ease;
+    }
+    #completionContinueBtn:hover {
+      background: #16a085;
+      transform: translateY(-1px);
+    }
+    #completionContinueBtn:focus-visible {
+      outline: 2px solid #f1c40f;
+      outline-offset: 3px;
+    }
+    /* Confetti particles */
+    .confetti-piece {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 50001;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-10px) rotate(0deg); opacity:1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
+    }
   </style>
   <style id="linkingStyles"></style>
 </head>
@@ -2064,6 +2389,20 @@
     });
   </script>
   <div id="loadingScreen">Loading...</div>
+
+  <!-- Toast notification container -->
+  <div id="toastContainer" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- Completion overlay -->
+  <div id="completionOverlay" role="dialog" aria-modal="true" aria-labelledby="completionHeading">
+    <div id="completionCard">
+      <div class="completion-emoji">🎉</div>
+      <h2 id="completionHeading">Well Done!</h2>
+      <p class="completion-subtitle" id="completionSubtitle">Section complete!</p>
+      <div id="completionStats"></div>
+      <button id="completionContinueBtn">Continue</button>
+    </div>
+  </div>
 
   <div id="mobileToggleContainer">
     <button id="mobileViewToggleBtn" type="button" aria-pressed="false">📱 Mobile View</button>
@@ -2158,13 +2497,14 @@
       <div id="sectionsContainer" style="flex:1; overflow-y:auto; padding-right:12px;">
         <ul id="sections" class="nav"></ul>
       </div>
-      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: center;">
+      <div id="questionControls" style="position: sticky; bottom: 0; background: #2c3e50; padding: 8px 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: center;">
         <button type="button" id="questionAddMainBtn" class="sidebar-icon-action" aria-haspopup="true" aria-expanded="false" data-icon="＋" title="Add question">
           <span class="sr-only">Add question</span>
         </button>
         <button type="button" id="toggleDeleteBtn" class="sidebar-icon-action" data-icon="🗑" title="Toggle delete mode" aria-pressed="false">
           <span class="sr-only">Toggle delete mode</span>
         </button>
+        <button type="button" id="darkModeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
         <div id="hiddenQuestionAdders">
           <button type="button" id="addFillBtn" style="padding: 2px 10px;">+ Fill-In</button>
           <button type="button" id="addLabelBtn" style="padding: 2px 10px;">+ Diagram</button>
@@ -2193,6 +2533,18 @@
       <div id="progressBarContainer" style="height:8px; background:#ccc; border-radius:4px; margin-top:4px;">
         <div id="progressBar" style="height:100%; width:0; background:#1abc9c; border-radius:4px;"></div>
       </div>
+    </div>
+
+    <div id="sessionStats">
+      <span class="stat-item" id="statAccuracy">
+        <span>🎯</span> <strong id="statAccuracyVal">—</strong> <span>accuracy</span>
+      </span>
+      <span class="stat-item" id="statHints">
+        <span>💡</span> <strong id="statHintsVal">0</strong> <span>hints</span>
+      </span>
+      <span class="stat-item" id="statStreak">
+        <span>🔥</span> <strong id="statStreakVal">0</strong> <span>streak</span>
+      </span>
     </div>
 
     <div id="editorArea">
@@ -2265,6 +2617,182 @@
     (async () => {
       try {
       // IndexedDB and persistent storage logic removed.
+
+      // ============================================================
+      // TOAST NOTIFICATION SYSTEM
+      // ============================================================
+      function showToast(message, type = 'info', duration = 3000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) { return; }
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        const remove = () => {
+          toast.classList.add('toast-out');
+          toast.addEventListener('animationend', () => toast.remove(), { once: true });
+        };
+        const timer = setTimeout(remove, duration);
+        toast.addEventListener('click', () => { clearTimeout(timer); remove(); });
+      }
+
+      // ============================================================
+      // DARK MODE
+      // ============================================================
+      const darkModeBtn = document.getElementById('darkModeBtn');
+      const DARK_MODE_KEY = 'quizDarkMode';
+      function applyDarkMode(enabled) {
+        document.body.classList.toggle('dark-mode', enabled);
+        if (darkModeBtn) darkModeBtn.textContent = enabled ? '☀️' : '🌙';
+        try { localStorage.setItem(DARK_MODE_KEY, enabled ? '1' : '0'); } catch(e) {}
+      }
+      // Load saved preference
+      try {
+        const saved = localStorage.getItem(DARK_MODE_KEY);
+        if (saved === '1') applyDarkMode(true);
+      } catch(e) {}
+      if (darkModeBtn) {
+        darkModeBtn.addEventListener('click', () => {
+          applyDarkMode(!document.body.classList.contains('dark-mode'));
+        });
+      }
+
+      // ============================================================
+      // SESSION STATS (accuracy, hints, streak)
+      // ============================================================
+      const sessionStats = document.getElementById('sessionStats');
+      const statAccuracyVal = document.getElementById('statAccuracyVal');
+      const statHintsVal    = document.getElementById('statHintsVal');
+      const statStreakVal   = document.getElementById('statStreakVal');
+      const statStreakItem  = document.getElementById('statStreak');
+
+      let sessionCorrect  = 0;  // questions answered first-try (no hint used)
+      let sessionAttempts = 0;  // total questions shown
+      let sessionHintsUsed = 0; // total hints used this session
+      let currentStreak   = 0;  // consecutive correct without hints
+      let hintUsedThisQuestion = false;
+
+      function resetSessionStats() {
+        sessionCorrect = 0;
+        sessionAttempts = 0;
+        sessionHintsUsed = 0;
+        currentStreak = 0;
+        hintUsedThisQuestion = false;
+        updateSessionStats();
+        if (sessionStats) sessionStats.classList.remove('visible');
+      }
+
+      function updateSessionStats() {
+        if (!statAccuracyVal || !statHintsVal || !statStreakVal) return;
+        const accuracy = sessionAttempts > 0
+          ? Math.round((sessionCorrect / sessionAttempts) * 100) + '%'
+          : '—';
+        statAccuracyVal.textContent = accuracy;
+        statHintsVal.textContent = sessionHintsUsed;
+        statStreakVal.textContent = currentStreak;
+        if (statStreakItem) {
+          statStreakItem.classList.toggle('streak-active', currentStreak >= 3);
+        }
+      }
+
+      function recordQuestionResult(usedHint) {
+        sessionAttempts++;
+        if (!usedHint) {
+          sessionCorrect++;
+          currentStreak++;
+        } else {
+          currentStreak = 0;
+        }
+        hintUsedThisQuestion = false;
+        if (sessionStats) sessionStats.classList.add('visible');
+        updateSessionStats();
+        if (currentStreak > 0 && currentStreak % 5 === 0) {
+          showToast(`🔥 ${currentStreak} in a row!`, 'success', 2500);
+        }
+      }
+
+      // ============================================================
+      // COMPLETION OVERLAY
+      // ============================================================
+      const completionOverlay    = document.getElementById('completionOverlay');
+      const completionHeading    = document.getElementById('completionHeading');
+      const completionSubtitle   = document.getElementById('completionSubtitle');
+      const completionStatsEl    = document.getElementById('completionStats');
+      const completionContinueBtn = document.getElementById('completionContinueBtn');
+      let completionCallback = null;
+
+      function spawnConfetti() {
+        const colors = ['#1abc9c','#3498db','#e67e22','#e74c3c','#9b59b6','#f1c40f'];
+        for (let i = 0; i < 55; i++) {
+          const piece = document.createElement('div');
+          piece.className = 'confetti-piece';
+          piece.style.left = Math.random() * 100 + 'vw';
+          piece.style.top  = '-12px';
+          piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.width  = (6 + Math.random() * 6) + 'px';
+          piece.style.height = (6 + Math.random() * 6) + 'px';
+          piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+          piece.style.animationDelay    = (Math.random() * 0.6) + 's';
+          document.body.appendChild(piece);
+          piece.addEventListener('animationend', () => piece.remove());
+        }
+      }
+
+      function showCompletionOverlay({ title = 'Well Done!', subtitle = 'Section complete!', onContinue = null } = {}) {
+        if (!completionOverlay) return;
+        if (completionHeading)  completionHeading.textContent  = title;
+        if (completionSubtitle) completionSubtitle.textContent = subtitle;
+
+        // Build stats
+        if (completionStatsEl) {
+          const accuracy = sessionAttempts > 0
+            ? Math.round((sessionCorrect / sessionAttempts) * 100)
+            : null;
+          completionStatsEl.innerHTML = '';
+          const items = [
+            { val: sessionAttempts, lbl: 'questions' },
+            { val: accuracy !== null ? accuracy + '%' : '—', lbl: 'accuracy' },
+            { val: sessionHintsUsed, lbl: 'hints used' },
+          ];
+          items.forEach(({ val, lbl }) => {
+            const el = document.createElement('div');
+            el.className = 'completion-stat';
+            el.innerHTML = `<span class="c-val">${val}</span><span class="c-lbl">${lbl}</span>`;
+            completionStatsEl.appendChild(el);
+          });
+        }
+
+        completionCallback = onContinue;
+        completionOverlay.classList.add('visible');
+        spawnConfetti();
+        if (completionContinueBtn) {
+          setTimeout(() => completionContinueBtn.focus(), 50);
+        }
+      }
+
+      if (completionContinueBtn) {
+        completionContinueBtn.addEventListener('click', () => {
+          completionOverlay.classList.remove('visible');
+          if (typeof completionCallback === 'function') completionCallback();
+          completionCallback = null;
+        });
+      }
+      if (completionOverlay) {
+        completionOverlay.addEventListener('click', e => {
+          if (e.target === completionOverlay) {
+            completionOverlay.classList.remove('visible');
+            if (typeof completionCallback === 'function') completionCallback();
+            completionCallback = null;
+          }
+        });
+        completionOverlay.addEventListener('keydown', e => {
+          if (e.key === 'Escape') {
+            completionOverlay.classList.remove('visible');
+            if (typeof completionCallback === 'function') completionCallback();
+            completionCallback = null;
+          }
+        });
+      }
 
       // Shared utility: normalize strings for comparison (lowercase, alphanumeric only)
       const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -3492,7 +4020,7 @@
             if (newName === null) return;
             const trimmed = newName.trim();
             if (!trimmed) {
-              alert('Folder name cannot be empty');
+              showToast('Folder name cannot be empty', 'warn');
               return;
             }
             if (trimmed === f.name) return;
@@ -3759,6 +4287,7 @@
         multiFolderMode = true;
         resetAnswerBank();
         isQuizMode = true;
+        resetSessionStats();
         const combined = [];
         folders.forEach(f => {
           data.folders[f].sections.forEach((_, i) => combined.push({ folder: f, section: i }));
@@ -3787,6 +4316,9 @@
       }
 
       function markQuestionCompleted() {
+        // Record stats for this question
+        recordQuestionResult(hintUsedThisQuestion);
+
         if (multiFolderMode) {
           if (!multiProgress.completed.has(quizPos)) {
             multiProgress.completed.add(quizPos);
@@ -3796,10 +4328,15 @@
             folders.forEach(f => incrementCompletionCount(f));
             localStorage.removeItem('lastRandomQuiz');
             updateResumeButton();
-            alert('🎉 Quiz complete!');
             justCompleted = true;
+            showCompletionOverlay({
+              title: '🎉 Quiz Complete!',
+              subtitle: 'You finished the entire quiz!',
+              onContinue: () => { enterEdit(); }
+            });
           } else {
             saveRandomQuizState();
+            showToast('✓ Question complete!', 'success', 1500);
           }
         } else {
           let prog = quizProgress[currentFolder];
@@ -3814,15 +4351,20 @@
             prog.completed.add(currentSection);
           }
           if (prog.completed.size === prog.total && before !== prog.total) {
-            alert('🎉 Section complete!');
             incrementCompletionCount(currentFolder);
             prog.completed.clear();
             prog.order = null;
             prog.pos = 0;
             saveProgress();
             justCompleted = true;
+            showCompletionOverlay({
+              title: '🎉 Section Complete!',
+              subtitle: `You finished "${data.folders[currentFolder]?.name || 'this section'}"!`,
+              onContinue: () => { enterEdit(); resetSessionStats(); }
+            });
           } else {
             saveProgress();
+            showToast('✓ Question complete!', 'success', 1500);
           }
         }
         if (document.body.classList.contains('mobile')) {
@@ -4009,7 +4551,7 @@
         if (fallbackBlob) {
           console.warn('Falling back to inline image storage', lastErr);
           if (!inlineImageFallbackNotified) {
-            alert('Local image storage is full or unavailable. This image will be stored directly with the question instead.');
+            showToast('Local image storage is full or unavailable. Image stored directly with the question.', 'warn', 5000);
             inlineImageFallbackNotified = true;
           }
           const dataUrl = await blobToDataURL(fallbackBlob);
@@ -5522,7 +6064,7 @@
         }
         const text = speechData.text;
         if (!text) {
-          alert('No readable text found. Try selecting the text you want to hear first.');
+          showToast('No readable text found. Try selecting the text you want to hear first.', 'warn', 4000);
           return;
         }
         window.speechSynthesis.cancel();
@@ -5901,7 +6443,7 @@
         let diff = computeDiff(originalData, data);
         if (diff) diff = stripImageData(diff);
         if (!diff || !Object.keys(diff).length) {
-          alert('No local changes to sync.');
+          showToast('No local changes to sync.', 'info');
           return;
         }
 
@@ -5933,20 +6475,20 @@
           const serialized = JSON.stringify(diff);
           navigator.clipboard.writeText(serialized)
             .then(() => {
-              alert('Local changes copied to clipboard.');
+              showToast('Local changes copied to clipboard.', 'success');
             })
             .catch(err => {
               console.error('Clipboard error:', err);
-              alert('Failed to copy: ' + err.message);
+              showToast('Failed to copy: ' + err.message, 'error');
             });
           return;
         }
         try {
           await syncImagesAndData(token);
-          alert('Sync complete.');
+          showToast('Sync complete.', 'success');
         } catch (err) {
           console.error('Sync error:', err);
-          alert('Sync failed: ' + err.message);
+          showToast('Sync failed: ' + err.message, 'error', 5000);
         }
       });
 
@@ -6107,7 +6649,7 @@
         if (!ensureSelection()) return;
         const range = quill.getSelection(true);
         if (!range || range.length === 0) {
-          alert('Select text first');
+          showToast('Select text first', 'warn');
           return;
         }
         const insert = async file => {
@@ -6119,7 +6661,7 @@
             syncCurrentSection();
           } catch (err) {
             console.error('Failed to attach popup image', err);
-            alert('Unable to add that image. Please try a different file.');
+            showToast('Unable to add that image. Please try a different file.', 'error');
           }
         };
         const openFilePicker = () => {
@@ -6209,7 +6751,7 @@
       // }
       // if (editorTA) editorTA.addEventListener('input', adjustEditorHeight);
       addAcronymBtn.onclick = () => {
-        if (currentFolder === null) return alert('Select a folder first');
+        if (currentFolder === null) { showToast('Select a folder first', 'warn'); return; }
         const acr = prompt('Enter acronym (e.g. AAVIATE):');
         if (!acr) return;
         const entries = acr.split('').map(letter => ({
@@ -6607,7 +7149,7 @@
 
       addFolderBtn.onclick = async () => {
         let name = newFolderName.value.trim();
-        if (!name) return alert('Folder name cannot be empty');
+        if (!name) { showToast('Folder name cannot be empty', 'warn'); return; }
         data.folders.push({ name, color: '#1abc9c', sections: [] });
         newFolderName.value = '';
         await saveData();
@@ -6615,7 +7157,7 @@
         updateHeader(headerTitle.textContent);
       };
       addFillBtn.onclick=async()=>{
-        if(currentFolder===null)return alert('Select a folder first');
+        if(currentFolder===null){ showToast('Select a folder first', 'warn'); return; }
         const fillTitle = prompt('Enter question title:');
         if (fillTitle === null) return;
         let sec={ type:'fill', title: fillTitle.trim(), rawText:'', hidden:[], alts:{} };
@@ -6628,7 +7170,7 @@
       };
 
       addLabelBtn.onclick = async () => {
-        if (currentFolder === null) return alert('Select a folder first');
+        if (currentFolder === null) { showToast('Select a folder first', 'warn'); return; }
         const labelTitle = prompt('Enter question title:');
         if (labelTitle === null) return;
         // Create placeholder label question immediately
@@ -6643,7 +7185,7 @@
         // Now prompt user for image input
         if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
           waitingForImagePaste = { target: 'main' };
-          alert('Now paste the image from your clipboard.');
+          showToast('Now paste the image from your clipboard.', 'info', 4000);
         } else {
           labelImageInput.dataset.extraIndex = '';
           labelImageInput.click();
@@ -6672,12 +7214,12 @@
       };
 
       addPictureBtn.onclick = () => {
-        if (currentFolder === null || currentSection === null) return alert('Select a question first');
+        if (currentFolder === null || currentSection === null) { showToast('Select a question first', 'warn'); return; }
         const sec = data.folders[currentFolder].sections[currentSection];
         const idx = (sec.extraImages ? sec.extraImages.length : 0);
         if (confirm('Press OK to paste an image from clipboard, or Cancel to select a file from your computer.')) {
           waitingForImagePaste = { target: 'extra', index: idx };
-          alert('Now paste the image from your clipboard.');
+          showToast('Now paste the image from your clipboard.', 'info', 4000);
         } else {
           labelImageInput.dataset.extraIndex = idx;
           labelImageInput.click();
@@ -6741,7 +7283,7 @@
         }
       });
 
-      function ensureSelection(){ if(currentFolder===null||currentSection===null){ alert('Select a folder and a section first'); return false;} return true; }
+      function ensureSelection(){ if(currentFolder===null||currentSection===null){ showToast('Select a folder and a section first', 'warn'); return false;} return true; }
       // Quill will override this function below after Quill is initialized.
       // Track global listeners added during loadSection so they can be cleaned up
       let _sectionDocListeners = [];
@@ -8156,6 +8698,7 @@
         if (currentFolder !== null && currentSection === null) {
           showEmptyFolderState();
         }
+        if (sessionStats) sessionStats.classList.remove('visible');
         updateProgressIndicator();
         updateResumeQuizBtn();
       }
@@ -8165,9 +8708,10 @@
         multiFolderMode = false;
         resetAnswerBank();
         if (currentFolder === null) {
-          alert('Select a folder first');
+          showToast('Select a folder first', 'warn');
           return;
         }
+        resetSessionStats();
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
         startQuiz();
@@ -8182,9 +8726,10 @@
         resetAnswerBank();
         isQuizMode = true;
         if (currentFolder === null) {
-          alert('Select a folder first');
+          showToast('Select a folder first', 'warn');
           return;
         }
+        resetSessionStats();
         editorArea.style.display = 'none';
         quizArea.style.display = 'block';
         const total = data.folders[currentFolder].sections.length;
@@ -8205,7 +8750,7 @@
             .filter(i => !done.has(i))
             .sort(() => Math.random() - 0.5);
           if (order.length === 0) {
-            alert('All questions in this section already complete!');
+            showToast('🎉 All questions in this section already complete!', 'success', 3000);
             updateProgressIndicator();
             return;
           }
@@ -8805,6 +9350,7 @@
           cleanupQuizResizeListeners();
           justCompleted = false;
           activeBlankInput = null;
+          hintUsedThisQuestion = false;
           stopSpeech();
           clearTtsStartElement();
           // Advance to the correct section and folder
@@ -9713,8 +10259,12 @@
           renderSections();
           enterQuizQuestion();
         } else if (!multiFolderMode) {
-          alert('🎉 All done!');
-          enterEdit();
+          showCompletionOverlay({
+            title: '🎉 All Done!',
+            subtitle: 'You completed this folder!',
+            onContinue: () => { enterEdit(); resetSessionStats(); }
+          });
+          justCompleted = true;
         }
         updateProgressIndicator();
         updateHeader();
@@ -9755,32 +10305,37 @@
           if (active && active.dataset && active.dataset.answer) {
             target = active;
           } else {
-            const blankInputs = Array.from(document.querySelectorAll('#quizContent input.blank-input'));
-            const acronymInputs = Array.from(document.querySelectorAll('#quizContent input.acronym-input'));
-            target = blankInputs.find(i => i.dataset.answer && !i.classList.contains('correct')) ||
-                     acronymInputs.find(i => i.dataset.answer && !i.classList.contains('correct')) ||
+            const blankInputs = Array.from(document.querySelectorAll(‘#quizContent input.blank-input’));
+            const acronymInputs = Array.from(document.querySelectorAll(‘#quizContent input.acronym-input’));
+            target = blankInputs.find(i => i.dataset.answer && !i.classList.contains(‘correct’)) ||
+                     acronymInputs.find(i => i.dataset.answer && !i.classList.contains(‘correct’)) ||
                      null;
           }
         }
         if (target && target.dataset.answer) {
-          const answers = JSON.parse(target.getAttribute('data-answer'));
-          const correct = answers[0] || '';
+          // Track hint usage for stats
+          hintUsedThisQuestion = true;
+          sessionHintsUsed++;
+          updateSessionStats();
+
+          const answers = JSON.parse(target.getAttribute(‘data-answer’));
+          const correct = answers[0] || ‘’;
           const prevWidth = target.style.width;
           target.value = correct;
-          target.classList.add('showing-hint');
+          target.classList.add(‘showing-hint’);
 
           if (target.dataset.label) {
             // Picture‑label blanks can shrink when empty; temporarily size to reveal hint fully
-            target.style.width = correct.length + 1 + 'ch';
+            target.style.width = correct.length + 1 + ‘ch’;
           }
 
           target.focus();
           setTimeout(() => {
             // Clear only if user hasn’t typed something else
             if (target.value.trim().toLowerCase() === correct.toLowerCase()) {
-              target.value = '';
+              target.value = ‘’;
             }
-            target.classList.remove('showing-hint');
+            target.classList.remove(‘showing-hint’);
             if (target.dataset.label) {
               target.style.width = prevWidth;
             }
@@ -10093,7 +10648,15 @@
 
     } catch (err) {
       console.error(err);
-      alert('Unhandled error: ' + err.message);
+      const msg = err && err.message ? err.message : String(err);
+      const container = document.getElementById('toastContainer');
+      if (container) {
+        const t = document.createElement('div');
+        t.className = 'toast toast-error';
+        t.textContent = 'Error: ' + msg;
+        container.appendChild(t);
+        setTimeout(() => t.remove(), 7000);
+      }
     }
   })();
   </script>
