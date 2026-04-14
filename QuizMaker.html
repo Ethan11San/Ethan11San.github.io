@@ -1895,26 +1895,54 @@
     }
     #mobileRandomBtn {
       margin-top: 12px;
-      padding: 10px;
+      padding: 12px;
       width: 100%;
       border: none;
-      border-radius: 4px;
+      border-radius: 12px;
       background: #3498db;
       color: #fff;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
     }
+    #mobileRandomBtn:active { transform: scale(0.98); }
     #resumeRandomBtn,
     #mobileRandomGo {
       margin-top: 12px;
-      padding: 10px;
+      padding: 12px;
       width: 100%;
       border: none;
-      border-radius: 4px;
+      border-radius: 12px;
       background: #27ae60;
       color: #fff;
-      font-weight: 500;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
       display: none;
     }
+    #resumeRandomBtn:active,
+    #mobileRandomGo:active { transform: scale(0.98); }
+    /* Mobile search input polish */
+    body.mobile #mobileSearch {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #ddd;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    body.mobile #mobileSearch:focus { border-color: #8e44ad; }
+    /* Edit button in quiz mode on mobile */
+    body.mobile #editQuestionBtn {
+      margin-top: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    body.mobile #editQuestionBtn:active { transform: scale(0.97); }
     body.mobile.quiz-active #mobileStart { display: none; }
     body.mobile.quiz-active #main { display: flex; }
     body.mobile:not(.quiz-active) #main { display: none; }
@@ -2451,26 +2479,13 @@
     #quizContent.slide-forward { animation: slideInFromRight 0.22s ease-out forwards; }
     #quizContent.slide-back    { animation: slideInFromLeft  0.22s ease-out forwards; }
 
-    /* —— Mobile: Section Type Badges —— */
-    .section-type-badge {
-      display: inline-block;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 8px;
-      margin-left: 8px;
-      vertical-align: middle;
-      color: #fff;
-      flex-shrink: 0;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    .section-type-badge.type-fill    { background: #2980b9; }
-    .section-type-badge.type-acronym { background: #8e44ad; }
-    .section-type-badge.type-label   { background: #27ae60; }
-    body.dark-mode .section-type-badge.type-fill    { background: #3498db; }
-    body.dark-mode .section-type-badge.type-acronym { background: #9b59b6; }
-    body.dark-mode .section-type-badge.type-label   { background: #2ecc71; }
+    /* —— Mobile: Section Type Background Tints —— */
+    #mobileFolderList li ul li.type-fill    { background: rgba(41, 128, 185, 0.07); }
+    #mobileFolderList li ul li.type-acronym { background: rgba(142, 68, 173, 0.07); }
+    #mobileFolderList li ul li.type-label   { background: rgba(39, 174, 96, 0.07); }
+    body.dark-mode #mobileFolderList li ul li.type-fill    { background: rgba(52, 152, 219, 0.12); }
+    body.dark-mode #mobileFolderList li ul li.type-acronym { background: rgba(155, 89, 182, 0.12); }
+    body.dark-mode #mobileFolderList li ul li.type-label   { background: rgba(46, 204, 113, 0.12); }
   </style>
   <style id="linkingStyles"></style>
 </head>
@@ -2909,8 +2924,12 @@
       }
 
       // Swipe-to-navigate on #quizArea (left = next, right = back)
+      // Uses a non-passive touchmove to lock out vertical scroll once
+      // horizontal intent is confirmed, preventing the screen-jitter issue.
       let _swipeTouchStartX = 0;
       let _swipeTouchStartY = 0;
+      let _swipeTracking = false;
+      let _swipeLockedHorizontal = false;
       (function attachQuizSwipe() {
         const area = document.getElementById('quizArea');
         if (!area) return;
@@ -2919,23 +2938,43 @@
           const t = e.touches[0];
           _swipeTouchStartX = t.clientX;
           _swipeTouchStartY = t.clientY;
+          _swipeTracking = true;
+          _swipeLockedHorizontal = false;
         }, { passive: true });
-        area.addEventListener('touchend', e => {
+        // Non-passive so we can preventDefault to stop vertical scroll
+        area.addEventListener('touchmove', e => {
+          if (!_swipeTracking) return;
           if (!document.body.classList.contains('mobile')) return;
-          const t = e.changedTouches[0];
+          const t = e.touches[0];
           const dx = t.clientX - _swipeTouchStartX;
           const dy = t.clientY - _swipeTouchStartY;
-          // Only horizontal swipes with clear direction (dx > 55px, dy < 50% of dx)
-          if (Math.abs(dx) < 55 || Math.abs(dy) > Math.abs(dx) * 0.55) return;
-          // Don't trigger if swiping inside a scrollable child or an input
-          const target = e.target;
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+          if (!_swipeLockedHorizontal) {
+            if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+              // Clearly horizontal — prevent all further vertical scrolling
+              _swipeLockedHorizontal = true;
+            } else if (Math.abs(dy) > 8) {
+              // Clearly vertical — abandon swipe tracking
+              _swipeTracking = false;
+              return;
+            }
+          }
+          if (_swipeLockedHorizontal) e.preventDefault();
+        }, { passive: false });
+        area.addEventListener('touchend', e => {
+          if (!_swipeTracking || !_swipeLockedHorizontal) {
+            _swipeTracking = false;
+            return;
+          }
+          _swipeTracking = false;
+          const t = e.changedTouches[0];
+          const dx = t.clientX - _swipeTouchStartX;
+          if (Math.abs(dx) < 45) return;
+          // Ignore swipes starting on inputs
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
           if (dx < 0) {
-            // Swipe left → next
             const nb = document.getElementById('nextBtn');
             if (nb) nb.click();
           } else {
-            // Swipe right → back
             const bb = document.getElementById('backBtn');
             if (bb) bb.click();
           }
@@ -4215,17 +4254,12 @@
             sContent.className = 'swipe-content';
             const textWrap = document.createElement('div');
             textWrap.className = 'mobile-section-text';
+            const typeKey = s.type === 'acronym' ? 'acronym' : s.type === 'label' ? 'label' : 'fill';
+            sli.classList.add('type-' + typeKey);
             const titleSpan = document.createElement('span');
             titleSpan.className = 'mobile-section-title';
             titleSpan.textContent = title;
             textWrap.appendChild(titleSpan);
-            // Type badge
-            const typeBadge = document.createElement('span');
-            const typeKey = s.type === 'acronym' ? 'acronym' : s.type === 'label' ? 'label' : 'fill';
-            const typeLabel = typeKey === 'acronym' ? 'ABC' : typeKey === 'label' ? 'IMG' : 'Fill';
-            typeBadge.className = `section-type-badge type-${typeKey}`;
-            typeBadge.textContent = typeLabel;
-            textWrap.appendChild(typeBadge);
             if (description) {
               const descSpan = document.createElement('span');
               descSpan.className = 'mobile-section-description';
@@ -9556,6 +9590,9 @@
           .join(' ');
         quizContent.innerHTML = '';
         quizContent.style.borderColor = '';
+        // Scroll quiz area back to top so new question is visible
+        const _quizAreaEl = document.getElementById('quizArea');
+        if (_quizAreaEl) _quizAreaEl.scrollTop = 0;
         // Apply slide transition on mobile
         if (document.body.classList.contains('mobile')) {
           quizContent.classList.remove('slide-forward', 'slide-back');
