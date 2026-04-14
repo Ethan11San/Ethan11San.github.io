@@ -2372,6 +2372,105 @@
       0%   { transform: translateY(-10px) rotate(0deg); opacity:1; }
       100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
     }
+
+    /* —— Mobile: Fixed Bottom Nav Bar —— */
+    #quizNavBar {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    body.mobile #quizNavBar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
+      padding: 10px 12px;
+      padding-bottom: max(10px, env(safe-area-inset-bottom));
+      background: #fff;
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.12);
+      z-index: 1000;
+      display: flex;
+      gap: 0;
+      justify-content: stretch;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    body.mobile.dark-mode #quizNavBar {
+      background: #1e2433;
+      border-top-color: rgba(255,255,255,0.1);
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.35);
+    }
+    body.mobile #quizNavBar #backBtn,
+    body.mobile #quizNavBar #nextBtn,
+    body.mobile #quizNavBar #hintBtn {
+      flex: 1;
+      margin: 0;
+      padding: 14px 6px;
+      font-size: 1rem;
+      border-radius: 0;
+      min-height: 50px;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+    body.mobile #quizNavBar #backBtn  { border-radius: 10px 0 0 10px; }
+    body.mobile #quizNavBar #nextBtn  { border-radius: 0 10px 10px 0; }
+    body.mobile #quizNavBar #hintBtn  {
+      border-left:  1px solid rgba(255,255,255,0.25);
+      border-right: 1px solid rgba(255,255,255,0.25);
+    }
+    /* Push quiz content up so it clears the fixed nav bar */
+    body.mobile #quizArea {
+      padding-bottom: 84px !important;
+    }
+    /* Lift toasts above the nav bar on mobile */
+    body.mobile #toastContainer {
+      bottom: 80px;
+    }
+
+    /* —— Mobile: Larger Blank Inputs —— */
+    @media (max-width: 600px) {
+      #quizContent .blank input,
+      .blank input {
+        min-height: 40px;
+        padding: 6px 10px;
+        border-radius: 8px;
+      }
+    }
+
+    /* —— Mobile: Question Slide Transition —— */
+    @keyframes slideInFromRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInFromLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    #quizContent.slide-forward { animation: slideInFromRight 0.22s ease-out forwards; }
+    #quizContent.slide-back    { animation: slideInFromLeft  0.22s ease-out forwards; }
+
+    /* —— Mobile: Section Type Badges —— */
+    .section-type-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      color: #fff;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .section-type-badge.type-fill    { background: #2980b9; }
+    .section-type-badge.type-acronym { background: #8e44ad; }
+    .section-type-badge.type-label   { background: #27ae60; }
+    body.dark-mode .section-type-badge.type-fill    { background: #3498db; }
+    body.dark-mode .section-type-badge.type-acronym { background: #9b59b6; }
+    body.dark-mode .section-type-badge.type-label   { background: #2ecc71; }
   </style>
   <style id="linkingStyles"></style>
 </head>
@@ -2604,9 +2703,11 @@
       </div>
       <div id="answerBank"></div>
       <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
-      <button id="backBtn">⬅️ Back</button>
-      <button id="nextBtn">Next Section ➡️</button>
-      <button id="hintBtn">Hint</button>
+      <div id="quizNavBar">
+        <button id="backBtn">⬅️ Back</button>
+        <button id="hintBtn">Hint</button>
+        <button id="nextBtn">Next Section ➡️</button>
+      </div>
       <button id="editQuestionBtn" style="display:none;">Edit</button>
       <button id="homeBtn" style="display:none;">Home</button>
     </div>
@@ -2793,6 +2894,56 @@
           }
         });
       }
+
+      // ============================================================
+      // MOBILE HELPERS: HAPTIC FEEDBACK + SWIPE GESTURES
+      // ============================================================
+
+      // haptic(type) — wraps navigator.vibrate with sensible patterns
+      function haptic(type) {
+        if (!navigator.vibrate) return;
+        if (type === 'success') navigator.vibrate([30, 10, 60]);
+        else if (type === 'error') navigator.vibrate(60);
+        else if (type === 'light') navigator.vibrate(18);
+        else if (type === 'heavy') navigator.vibrate(80);
+      }
+
+      // Swipe-to-navigate on #quizArea (left = next, right = back)
+      let _swipeTouchStartX = 0;
+      let _swipeTouchStartY = 0;
+      (function attachQuizSwipe() {
+        const area = document.getElementById('quizArea');
+        if (!area) return;
+        area.addEventListener('touchstart', e => {
+          if (!document.body.classList.contains('mobile')) return;
+          const t = e.touches[0];
+          _swipeTouchStartX = t.clientX;
+          _swipeTouchStartY = t.clientY;
+        }, { passive: true });
+        area.addEventListener('touchend', e => {
+          if (!document.body.classList.contains('mobile')) return;
+          const t = e.changedTouches[0];
+          const dx = t.clientX - _swipeTouchStartX;
+          const dy = t.clientY - _swipeTouchStartY;
+          // Only horizontal swipes with clear direction (dx > 55px, dy < 50% of dx)
+          if (Math.abs(dx) < 55 || Math.abs(dy) > Math.abs(dx) * 0.55) return;
+          // Don't trigger if swiping inside a scrollable child or an input
+          const target = e.target;
+          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+          if (dx < 0) {
+            // Swipe left → next
+            const nb = document.getElementById('nextBtn');
+            if (nb) nb.click();
+          } else {
+            // Swipe right → back
+            const bb = document.getElementById('backBtn');
+            if (bb) bb.click();
+          }
+        }, { passive: true });
+      })();
+
+      // Slide direction tracking for question transitions
+      let _quizSlideDir = 'forward'; // 'forward' | 'back'
 
       // Shared utility: normalize strings for comparison (lowercase, alphanumeric only)
       const normalize = str => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -4068,6 +4219,13 @@
             titleSpan.className = 'mobile-section-title';
             titleSpan.textContent = title;
             textWrap.appendChild(titleSpan);
+            // Type badge
+            const typeBadge = document.createElement('span');
+            const typeKey = s.type === 'acronym' ? 'acronym' : s.type === 'label' ? 'label' : 'fill';
+            const typeLabel = typeKey === 'acronym' ? 'ABC' : typeKey === 'label' ? 'IMG' : 'Fill';
+            typeBadge.className = `section-type-badge type-${typeKey}`;
+            typeBadge.textContent = typeLabel;
+            textWrap.appendChild(typeBadge);
             if (description) {
               const descSpan = document.createElement('span');
               descSpan.className = 'mobile-section-description';
@@ -4318,6 +4476,13 @@
       function markQuestionCompleted() {
         // Record stats for this question
         recordQuestionResult(hintUsedThisQuestion);
+        // Haptic success pulse + auto-dismiss keyboard on mobile
+        if (document.body.classList.contains('mobile')) {
+          haptic('success');
+          if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+          }
+        }
 
         if (multiFolderMode) {
           if (!multiProgress.completed.has(quizPos)) {
@@ -9391,8 +9556,15 @@
           .join(' ');
         quizContent.innerHTML = '';
         quizContent.style.borderColor = '';
+        // Apply slide transition on mobile
+        if (document.body.classList.contains('mobile')) {
+          quizContent.classList.remove('slide-forward', 'slide-back');
+          void quizContent.offsetWidth; // trigger reflow
+          quizContent.classList.add(_quizSlideDir === 'back' ? 'slide-back' : 'slide-forward');
+          setTimeout(() => quizContent.classList.remove('slide-forward', 'slide-back'), 280);
+        }
         quizContent.appendChild(titleElem);
-        
+
         // Highlight current section in left panel
         renderSections(lastSectionOrder);
 
@@ -9476,6 +9648,7 @@
                 revealTargets.forEach(s => s.style.display = 'none');
                 cancelWrongAnswerTimer(input);
               } else if (isCorrect) {
+                if (!input.classList.contains('correct')) haptic('light');
                 input.classList.add('correct');
                 input.classList.remove('incorrect');
                 revealTargets.forEach(s => s.style.display = 'inline');
@@ -10238,6 +10411,7 @@
       }
         nextBtn.onclick = () => {
           if (justCompleted) return;
+          _quizSlideDir = 'forward';
           const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
           const total = multiFolderMode ? null : secs.length;
           if (questionCompleted() && !justCompleted) {
@@ -10270,6 +10444,7 @@
         updateHeader();
       };
       backBtn.onclick = () => {
+        _quizSlideDir = 'back';
         const secs = multiFolderMode ? null : data.folders[currentFolder].sections;
           if (isQuizMode && quizOrder.length > 1 && quizPos > 0) {
             quizPos--;
