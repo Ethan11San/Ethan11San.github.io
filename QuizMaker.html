@@ -1481,7 +1481,7 @@
       cursor: pointer; transition: background .2s;
     }
     #nextBtn:hover, #backBtn:hover { background: #71368a; }
-    #hintBtn, #editQuestionBtn {
+    #hintBtn {
       margin-top: 20px;
       padding: 6px 18px;
       border: none;
@@ -1491,131 +1491,41 @@
       cursor: pointer;
       transition: background .2s;
     }
-    #hintBtn:hover, #editQuestionBtn:hover {
+    #hintBtn:hover {
       background: #71368a;
     }
-    #ttsToggleBtn {
-      margin-top: 20px;
-      padding: 6px 18px;
-      border: none;
-      border-radius: 4px;
-      background: #8e44ad;
-      color: #fff;
-      cursor: pointer;
-      transition: background .2s;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    #ttsToggleBtn:hover {
-      background: #71368a;
-    }
-    #toggleAnswersBtn {
-      margin-top: 20px;
-      padding: 6px 18px;
-      border: none;
-      border-radius: 4px;
-      background: #8e44ad;
-      color: #fff;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    #toggleAnswersBtn:hover {
-      background: #71368a;
-    }
-
-    #ttsControls {
-      display: none;
-      margin-top: 20px;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    #ttsControls button {
-      padding: 6px 18px;
-      border: none;
-      border-radius: 4px;
-      background: #8e44ad;
-      color: #fff;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    #ttsControls button:hover:not(:disabled) {
-      background: #71368a;
-    }
-    #ttsControls button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    #ttsControls select,
-    #ttsControls input[type="range"] {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid rgba(44, 62, 80, 0.25);
-      background: #fff;
-      color: #2c3e50;
-      font-size: 0.9rem;
-    }
-    #ttsControls label {
+    #quizSecondaryBtns {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: #2c3e50;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
     }
-    #ttsRateValue {
-      font-variant-numeric: tabular-nums;
-      min-width: 3.5ch;
-      text-align: right;
+    #toggleAnswersBtn,
+    #editQuestionBtn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #6c5ce7;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+      min-width: 120px;
     }
-    #ttsHint {
-      font-size: 0.85rem;
-      color: #2c3e50;
-      flex-basis: 100%;
+    #toggleAnswersBtn:hover,
+    #editQuestionBtn:hover { background: #5b4ad6; }
+    #toggleAnswersBtn:active,
+    #editQuestionBtn:active { transform: scale(0.97); }
+    body.mobile #quizSecondaryBtns {
+      margin-top: 12px;
+      margin-bottom: 4px;
     }
-    .tts-start-marker {
-      outline: 2px dashed #8e44ad;
-      outline-offset: 6px;
-      position: relative;
-    }
-    .tts-start-marker::after {
-      content: '🔊';
-      position: absolute;
-      top: -0.9rem;
-      right: -0.9rem;
-      background: #fff;
-      border-radius: 50%;
-      padding: 2px 4px;
-      font-size: 0.85rem;
-      color: #8e44ad;
-      box-shadow: 0 0 0 2px #fff;
-    }
+    body.dark-mode #toggleAnswersBtn,
+    body.dark-mode #editQuestionBtn { background: #7d6ef0; }
     #quizContent {
       position: relative;
-    }
-    #ttsHighlightLayer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      pointer-events: none;
-      z-index: 5;
-    }
-    .tts-highlight-box {
-      position: absolute;
-      background: rgba(52, 152, 219, 0.28);
-      border-radius: 4px;
-    }
-    .quiz-tts-outline {
-      outline: 2px solid rgba(52, 152, 219, 0.4);
-      outline-offset: 4px;
-      transition: outline 0.15s ease;
-    }
-
-    #answerBank {
-      display: none;
-      margin-top: 12px;
     }
     body.mobile #quizContent .mobile-floating-answer-bank {
       width: 100%;
@@ -1816,6 +1726,18 @@
       display: grid;
       gap: 8px;
       grid-template-columns: 1fr;
+    }
+    #mobileLocalMenu button#mobileAddFolderBtn {
+      background: #8e44ad;
+      color: #fff;
+      border: none;
+      padding: 11px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #mobileLocalMenu button#mobileAddFolderBtn:active {
+      transform: scale(0.97);
     }
     #mobileLocalMenu button.copy-local-btn {
       background: #6c5ce7;
@@ -2531,10 +2453,10 @@
     <button id="mobileRandomGo">Go</button>
     <button type="button" id="mobileLocalMenuToggle" class="mobile-local-menu-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="mobileLocalMenu" title="Local changes menu">⋯</button>
     <div id="mobileLocalMenu" role="dialog" aria-label="Local changes menu">
-      <h4>Local changes & sync</h4>
-      <p>Uses your saved GitHub token automatically when available.</p>
+      <h4>Local changes &amp; sync</h4>
       <div class="mobile-local-buttons">
-        <button type="button" class="copy-local-btn">Copy & Sync</button>
+        <button type="button" id="mobileAddFolderBtn">+ Add Folder</button>
+        <button type="button" class="copy-local-btn">Copy &amp; Sync</button>
         <button type="button" class="clear-local-btn">Clear Local Storage</button>
       </div>
     </div>
@@ -2699,23 +2621,7 @@
 
     <div id="quizArea" style="display:none;">
       <div id="quizContent"></div>
-      <button id="ttsToggleBtn" type="button">🎤 Voice Options</button>
-      <div id="ttsControls">
-        <button id="ttsSpeakBtn" type="button">🔊 Listen</button>
-        <button id="ttsPauseBtn" type="button" disabled>⏸️ Pause</button>
-        <button id="ttsStopBtn" type="button" disabled>⏹️ Stop</button>
-        <button id="ttsRefreshBtn" type="button">🔄 Refresh Voices</button>
-        <label id="ttsVoiceLabel" style="display:none;">
-          Voice
-          <select id="ttsVoiceSelect"></select>
-        </label>
-        <label id="ttsRateLabel" style="display:none;">
-          Speed
-          <input id="ttsRateSlider" type="range" min="0.7" max="1.3" step="0.05" value="1">
-          <span id="ttsRateValue">1.0×</span>
-        </label>
-        <span id="ttsHint"></span>
-      </div>
+
       <div id="answerBank"></div>
       <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
       <div id="quizNavBar">
@@ -4080,6 +3986,27 @@
           const closeOnAction = btn => btn.addEventListener('click', closeMenu);
           copyLocalBtns.forEach(closeOnAction);
           clearLocalBtns.forEach(closeOnAction);
+        }
+        // Mobile Add Folder
+        const mobileAddFolderBtn = document.getElementById('mobileAddFolderBtn');
+        if (mobileAddFolderBtn) {
+          mobileAddFolderBtn.addEventListener('click', () => {
+            // Close the menu
+            if (mobileLocalMenu) mobileLocalMenu.classList.remove('open');
+            if (mobileLocalMenuToggle) {
+              mobileLocalMenuToggle.classList.remove('open');
+              mobileLocalMenuToggle.setAttribute('aria-expanded', 'false');
+            }
+            // Prompt for folder name
+            const name = prompt('New folder name:');
+            if (!name || !name.trim()) return;
+            data.folders.push({ name: name.trim(), color: '#1abc9c', sections: [] });
+            saveData();
+            renderFolders();
+            buildMobileFolderList();
+            updateHeader(headerTitle ? headerTitle.textContent : '');
+            showToast('Folder added', 'success', 1800);
+          });
         }
       }
 
