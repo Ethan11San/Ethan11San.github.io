@@ -4188,7 +4188,7 @@
           });
           const secList = document.createElement('ul');
           secList.style.display = mobileOpenFolders.has(idx) ? 'block' : 'none';
-          f.sections.forEach((s, si) => {
+          (f.sections || []).forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
             const description = (s.type === 'acronym' && s.description && s.description.trim())
               ? s.description.trim()
@@ -4379,7 +4379,7 @@
         folderList.style.display = 'none';
         results.style.display = 'block';
         data.folders.forEach((f, fi) => {
-          f.sections.forEach((s, si) => {
+          (f.sections || []).forEach((s, si) => {
             const title = s.title || s.acronym || (s.rawText && s.rawText.split('\n')[0]) || '';
             const description = (s.type === 'acronym' && s.description && s.description.trim())
               ? s.description.trim()
@@ -4975,7 +4975,7 @@
       };
 
       (data.folders || []).forEach(folder => {
-        if (!folder.sections) return;
+        if (!Array.isArray(folder.sections)) { folder.sections = []; return; }
         folder.sections.forEach(normalizeSection);
       });
 
