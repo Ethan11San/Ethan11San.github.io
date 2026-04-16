@@ -1537,16 +1537,39 @@
       box-sizing: border-box;
       margin-top: 12px;
     }
+    #answerBank {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px;
+      background: rgba(108, 92, 231, 0.06);
+      border-radius: 10px;
+      border: 1px solid rgba(108, 92, 231, 0.15);
+    }
     #answerBank .answer-label {
-      display: inline-block;
-      margin: 4px;
-      padding: 6px 8px;
-      background: #ecf0f1;
-      border: 1px solid #bdc3c7;
-      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 14px;
+      background: #fff;
+      border: 1.5px solid #8e44ad;
+      border-radius: 20px;
       cursor: grab;
       touch-action: manipulation;
       user-select: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #2c3e50;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    #answerBank .answer-label:hover {
+      background: #f3e5ff;
+      transform: translateY(-1px);
+    }
+    #answerBank .answer-label:active {
+      transform: scale(0.96);
+      cursor: grabbing;
     }
     .drag-ghost {
       padding: 6px 8px;
@@ -1856,15 +1879,6 @@
       transition: border-color 0.2s;
     }
     body.mobile #mobileSearch:focus { border-color: #8e44ad; }
-    /* Edit button in quiz mode on mobile */
-    body.mobile #editQuestionBtn {
-      margin-top: 8px;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      cursor: pointer;
-    }
-    body.mobile #editQuestionBtn:active { transform: scale(0.97); }
     body.mobile.quiz-active #mobileStart { display: none; }
     body.mobile.quiz-active #main { display: flex; }
     body.mobile:not(.quiz-active) #main { display: none; }
@@ -2106,15 +2120,16 @@
       border-color: #e74c3c;
     }
     body.dark-mode .answer-label {
-      background: #2a3147;
-      border-color: #3a4561;
-      color: #c0cfe8;
+      background: #2a2d3e;
+      border-color: #9b59b6;
+      color: #e0e6f0;
     }
     body.dark-mode .answer-label:hover {
       background: #344060;
     }
     body.dark-mode #answerBank {
-      background: transparent;
+      background: rgba(108, 92, 231, 0.1);
+      border-color: rgba(108, 92, 231, 0.2);
     }
     body.dark-mode #progressBarContainer {
       background: #3a4561;
@@ -2623,13 +2638,15 @@
       <div id="quizContent"></div>
 
       <div id="answerBank"></div>
-      <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
+      <div id="quizSecondaryBtns">
+        <button id="toggleAnswersBtn" style="display:none;">Show Answers</button>
+        <button id="editQuestionBtn" style="display:none;">Edit Question</button>
+      </div>
       <div id="quizNavBar">
         <button id="backBtn">⬅️ Back</button>
         <button id="hintBtn">Hint</button>
         <button id="nextBtn">Next Section ➡️</button>
       </div>
-      <button id="editQuestionBtn" style="display:none;">Edit</button>
       <button id="homeBtn" style="display:none;">Home</button>
     </div>
   </div>
@@ -5055,7 +5072,7 @@
             editorArea = document.getElementById('editorArea'),
             quizArea = document.getElementById('quizArea'),
             previewDiv = document.getElementById('preview'), addPictureBtn = document.getElementById('addPictureBtn'), altContainer = document.getElementById('altContainer'),
-            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), ttsControls = document.getElementById('ttsControls'), ttsToggleBtn = document.getElementById('ttsToggleBtn'), ttsSpeakBtn = document.getElementById('ttsSpeakBtn'), ttsPauseBtn = document.getElementById('ttsPauseBtn'), ttsStopBtn = document.getElementById('ttsStopBtn'), ttsRefreshBtn = document.getElementById('ttsRefreshBtn'), ttsHint = document.getElementById('ttsHint'), ttsVoiceLabel = document.getElementById('ttsVoiceLabel'), ttsVoiceSelect = document.getElementById('ttsVoiceSelect'), ttsRateLabel = document.getElementById('ttsRateLabel'), ttsRateSlider = document.getElementById('ttsRateSlider'), ttsRateValue = document.getElementById('ttsRateValue'), mobileTypePickerOverlay = document.getElementById('mobileTypePickerOverlay'), mobileLocalMenuToggle = document.getElementById('mobileLocalMenuToggle'), mobileLocalMenu = document.getElementById('mobileLocalMenu');
+            quizContent = document.getElementById('quizContent'), answerBank = document.getElementById('answerBank'), toggleAnswersBtn = document.getElementById('toggleAnswersBtn'), backBtn = document.getElementById('backBtn'), nextBtn = document.getElementById('nextBtn'), hintBtn = document.getElementById('hintBtn'), editQuestionBtn = document.getElementById('editQuestionBtn'), homeBtn = document.getElementById('homeBtn'), mobileRandomBtn = document.getElementById('mobileRandomBtn'), mobileRandomGo = document.getElementById('mobileRandomGo'), mobileViewToggleBtn = document.getElementById('mobileViewToggleBtn'), mobileToggleContainer = document.getElementById('mobileToggleContainer'), mobileTypePickerOverlay = document.getElementById('mobileTypePickerOverlay'), mobileLocalMenuToggle = document.getElementById('mobileLocalMenuToggle'), mobileLocalMenu = document.getElementById('mobileLocalMenu');
       resumeRandomBtn = document.getElementById('resumeRandomBtn');
       copyLocalBtns = Array.from(document.querySelectorAll('.copy-local-btn'));
       clearLocalBtns = Array.from(document.querySelectorAll('.clear-local-btn'));
@@ -5491,917 +5508,11 @@
         }
       });
 
-      const supportsSpeechSynthesis = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
-      const TTS_VOICE_STORAGE_KEY = 'quizmaker-tts-voice';
-      const TTS_RATE_STORAGE_KEY = 'quizmaker-tts-rate';
-      let ttsUtterance = null;
-      let ttsStartElement = null;
-      let ttsSpeechState = null;
-      let ttsHighlightLayer = null;
-      let ttsHighlightElements = [];
-      let availableTtsVoices = [];
-      let ttsSelectedVoiceKey = null;
-      let ttsRate = 1;
-      let ttsControlsVisible = false;
-      let ttsControlsDisplayMode = supportsSpeechSynthesis ? 'flex' : 'block';
-      const ttsToggleShowText = ttsToggleBtn && ttsToggleBtn.textContent
-        ? ttsToggleBtn.textContent.trim()
-        : '🎤 Voice Options';
-      const ttsToggleHideText = (ttsToggleBtn && ttsToggleBtn.getAttribute('data-hide-label'))
-        || '🙈 Hide Voice Options';
-
-      const buildVoiceKey = (...parts) => parts
-        .filter(part => typeof part === 'string' && part !== '')
-        .join(':::');
-
-      const getVoiceKeyVariants = voice => {
-        if (!voice) return [''];
-        const voiceURI = typeof voice.voiceURI === 'string' ? voice.voiceURI : '';
-        const name = typeof voice.name === 'string' ? voice.name : '';
-        const lang = typeof voice.lang === 'string' ? voice.lang : '';
-        const variants = [];
-        const compositeKey = buildVoiceKey(voiceURI, name, lang);
-        if (compositeKey) variants.push(compositeKey);
-        const voiceUriAndName = buildVoiceKey(voiceURI, name);
-        if (voiceUriAndName) variants.push(voiceUriAndName);
-        if (voiceURI) variants.push(voiceURI);
-        const nameAndLang = buildVoiceKey(name, lang);
-        if (nameAndLang) variants.push(nameAndLang);
-        if (!variants.length) variants.push('');
-        return [...new Set(variants)];
-      };
-
-      const getVoiceKey = voice => getVoiceKeyVariants(voice)[0] || '';
-
-      const voiceMatchesKey = (voice, key) => {
-        if (!voice || !key) return false;
-        return getVoiceKeyVariants(voice).includes(key);
-      };
-
-      function nodeMarkedForSpeechSkip(node) {
-        while (node && node !== quizContent) {
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.hasAttribute('data-tts-skip')) return true;
-            const ariaHidden = node.getAttribute && node.getAttribute('aria-hidden');
-            if (ariaHidden && ariaHidden !== 'false') return true;
-          }
-          node = node.parentNode;
-        }
-        return false;
-      }
-
-      function updateTtsHint() {
-        if (!ttsHint) return;
-        if (!supportsSpeechSynthesis) {
-          ttsHint.textContent = 'Text-to-speech is not supported in this browser.';
-          return;
-        }
-        const refreshTip = supportsSpeechSynthesis && ttsRefreshBtn
-          ? ' Installed new system voices? Click “Refresh Voices” to reload the menu.'
-          : '';
-        if (ttsStartElement) {
-          ttsHint.textContent = 'Listening will begin at the highlighted paragraph. Alt+Click it again to reset.' + refreshTip;
-        } else {
-          ttsHint.textContent = 'Tip: Select text (or Alt+Click a paragraph) before pressing Listen to start there.' + refreshTip;
-        }
-      }
-
-      function clearTtsStartElement() {
-        if (ttsStartElement) {
-          ttsStartElement.classList.remove('tts-start-marker');
-          ttsStartElement = null;
-        }
-        updateTtsHint();
-      }
-
-      function setTtsStartElement(el) {
-        if (!supportsSpeechSynthesis) return;
-        if (el === null) {
-          clearTtsStartElement();
-          return;
-        }
-        if (!quizContent || !quizContent.contains(el)) {
-          clearTtsStartElement();
-          return;
-        }
-        if (ttsStartElement === el) {
-          clearTtsStartElement();
-          return;
-        }
-        if (ttsStartElement) {
-          ttsStartElement.classList.remove('tts-start-marker');
-        }
-        ttsStartElement = el;
-        ttsStartElement.classList.add('tts-start-marker');
-        updateTtsHint();
-      }
-
-      function updateTtsButtons() {
-        if (!supportsSpeechSynthesis) return;
-        if (!ttsSpeakBtn || !ttsPauseBtn || !ttsStopBtn) return;
-        const speaking = window.speechSynthesis.speaking;
-        const paused = window.speechSynthesis.paused;
-        const hasUtterance = !!ttsUtterance && (speaking || paused);
-        ttsPauseBtn.disabled = !hasUtterance;
-        ttsPauseBtn.textContent = paused ? '▶️ Resume' : '⏸️ Pause';
-        ttsStopBtn.disabled = !hasUtterance;
-      }
-
       function stopSpeech({ clearStart = false } = {}) {
-        if (!supportsSpeechSynthesis) return;
-        if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-          window.speechSynthesis.cancel();
-        }
-        ttsUtterance = null;
-        ttsSpeechState = null;
-        clearSpeechHighlight();
-        if (clearStart) {
-          clearTtsStartElement();
-        } else {
-          updateTtsHint();
-        }
-        updateTtsButtons();
+        // TTS removed
       }
-
-      function elementIsHidden(el) {
-        while (el && el !== quizContent) {
-          if (el.classList && el.classList.contains('hidden-reveal')) return true;
-          if (el.hasAttribute('aria-hidden') && el.getAttribute('aria-hidden') !== 'false') return true;
-          if (el.hidden) return true;
-          el = el.parentElement;
-        }
-        return false;
-      }
-
-      function createSpeechBuilder() {
-        const rawEntries = [];
-        return {
-          appendText(text, node, startOffset = 0) {
-            if (!text) return;
-            if (nodeMarkedForSpeechSkip(node)) return;
-            for (let i = 0; i < text.length; i++) {
-              const rawChar = text[i];
-              const normalizedChar = /\s/.test(rawChar) ? ' ' : rawChar;
-              rawEntries.push({
-                char: normalizedChar,
-                rawChar,
-                node,
-                offset: startOffset + i,
-                type: 'text'
-              });
-            }
-          },
-          appendBlank(input) {
-            if (nodeMarkedForSpeechSkip(input)) return;
-            const filler = ' blank ';
-            for (let i = 0; i < filler.length; i++) {
-              const ch = filler[i];
-              rawEntries.push({
-                char: ch === ' ' ? ' ' : ch,
-                rawChar: ch,
-                node: input,
-                offset: null,
-                type: 'element'
-              });
-            }
-          },
-          appendSpace(node) {
-            if (nodeMarkedForSpeechSkip(node)) return;
-            rawEntries.push({
-              char: ' ',
-              rawChar: ' ',
-              node,
-              offset: null,
-              type: 'space'
-            });
-          },
-          finalize() {
-            if (!rawEntries.length) {
-              return { text: '', charMap: [] };
-            }
-            const collapsed = [];
-            let prevWasSpace = false;
-            rawEntries.forEach(entry => {
-              const char = entry.char;
-              if (char === ' ') {
-                if (!prevWasSpace) {
-                  collapsed.push({ ...entry, char: ' ' });
-                  prevWasSpace = true;
-                }
-              } else {
-                collapsed.push({ ...entry, char });
-                prevWasSpace = false;
-              }
-            });
-            const sanitized = [];
-            const punctuationPattern = /[.,!?;:()\[\]{}]/;
-            const dashPattern = /[-–—]/;
-            const quotePattern = /["“”]/;
-            const isDigitChar = value => typeof value === 'string' && /\d/.test(value);
-            const addSpaceEntry = sourceEntry => {
-              if (!sanitized.length || sanitized[sanitized.length - 1].char !== ' ') {
-                sanitized.push({ ...sourceEntry, char: ' ', rawChar: ' ' });
-              }
-            };
-            collapsed.forEach((entry, index) => {
-              const char = entry.char;
-              const prevChar = index > 0 ? collapsed[index - 1].char : '';
-              const nextChar = index < collapsed.length - 1 ? collapsed[index + 1].char : '';
-              if (quotePattern.test(char)) {
-                return;
-              }
-              if (punctuationPattern.test(char)) {
-                const surroundsDigits = char === '.' && isDigitChar(prevChar) && isDigitChar(nextChar);
-                if (surroundsDigits) {
-                  sanitized.push({ ...entry, char, rawChar: char });
-                } else {
-                  addSpaceEntry(entry);
-                }
-                return;
-              }
-              if (dashPattern.test(char)) {
-                addSpaceEntry(entry);
-                return;
-              }
-              if (char === ' ') {
-                addSpaceEntry(entry);
-                return;
-              }
-              sanitized.push({ ...entry, char, rawChar: char });
-            });
-            while (sanitized.length && sanitized[0].char === ' ') {
-              sanitized.shift();
-            }
-            while (sanitized.length && sanitized[sanitized.length - 1].char === ' ') {
-              sanitized.pop();
-            }
-            const text = sanitized.map(entry => entry.char).join('');
-            return { text, charMap: sanitized };
-          }
-        };
-      }
-
-      function rangeIntersects(range, node) {
-        if (!range || !node) return false;
-        if (typeof range.intersectsNode === 'function') {
-          try {
-            return range.intersectsNode(node);
-          } catch (err) {
-            // fall back to manual calculation
-          }
-        }
-        const testRange = document.createRange();
-        try {
-          if (node.nodeType === Node.TEXT_NODE) {
-            testRange.selectNodeContents(node);
-          } else {
-            testRange.selectNode(node);
-          }
-        } catch (err) {
-          if (typeof testRange.detach === 'function') testRange.detach();
-          return false;
-        }
-        const endBeforeOrTouchingStart = range.compareBoundaryPoints(Range.END_TO_START, testRange) <= 0;
-        const startAfterOrTouchingEnd = range.compareBoundaryPoints(Range.START_TO_END, testRange) >= 0;
-        const intersects = !(endBeforeOrTouchingStart || startAfterOrTouchingEnd);
-        if (typeof testRange.detach === 'function') testRange.detach();
-        return intersects;
-      }
-
-      function collectSpeechFromNode(node, builder) {
-        if (!node) return;
-        if (node.nodeType === Node.TEXT_NODE) {
-          if (nodeMarkedForSpeechSkip(node.parentElement)) return;
-          if (elementIsHidden(node.parentElement)) return;
-          builder.appendText(node.nodeValue, node, 0);
-          return;
-        }
-        if (node.nodeType !== Node.ELEMENT_NODE) return;
-        const el = node;
-        if (nodeMarkedForSpeechSkip(el)) return;
-        if (elementIsHidden(el)) return;
-        if (el.matches('script, style')) return;
-        if (el.matches('br')) {
-          builder.appendSpace(el);
-          return;
-        }
-        if (el.matches('input.blank-input')) {
-          builder.appendBlank(el);
-          return;
-        }
-        let child = el.firstChild;
-        while (child) {
-          collectSpeechFromNode(child, builder);
-          child = child.nextSibling;
-        }
-      }
-
-      function collectSpeechFromStartElement(startEl, builder) {
-        if (!quizContent) return;
-        if (startEl && quizContent.contains(startEl)) {
-          collectSpeechFromNode(startEl, builder);
-          let sibling = startEl.nextSibling;
-          while (sibling) {
-            collectSpeechFromNode(sibling, builder);
-            sibling = sibling.nextSibling;
-          }
-        } else {
-          let child = quizContent.firstChild;
-          while (child) {
-            collectSpeechFromNode(child, builder);
-            child = child.nextSibling;
-          }
-        }
-      }
-
-      function collectSpeechFromRange(range, builder) {
-        if (!range || !quizContent) return;
-        const whatToShow = NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT;
-        const walker = document.createTreeWalker(range.commonAncestorContainer, whatToShow, {
-          acceptNode(node) {
-            if (!quizContent.contains(node)) return NodeFilter.FILTER_REJECT;
-            if (node.nodeType === Node.TEXT_NODE) {
-              if (nodeMarkedForSpeechSkip(node.parentElement)) return NodeFilter.FILTER_REJECT;
-              if (!rangeIntersects(range, node)) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              if (elementIsHidden(node.parentElement)) return NodeFilter.FILTER_REJECT;
-              return NodeFilter.FILTER_ACCEPT;
-            }
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              if (nodeMarkedForSpeechSkip(node)) return NodeFilter.FILTER_REJECT;
-              if (elementIsHidden(node)) return NodeFilter.FILTER_REJECT;
-              if (!rangeIntersects(range, node)) {
-                return NodeFilter.FILTER_SKIP;
-              }
-              if (node.matches('input.blank-input') || node.matches('br')) {
-                return NodeFilter.FILTER_ACCEPT;
-              }
-              if (node.matches('script, style')) {
-                return NodeFilter.FILTER_REJECT;
-              }
-              return NodeFilter.FILTER_SKIP;
-            }
-            return NodeFilter.FILTER_SKIP;
-          }
-        });
-        while (walker.nextNode()) {
-          const current = walker.currentNode;
-          if (current.nodeType === Node.TEXT_NODE) {
-            const node = current;
-            const startOffset = node === range.startContainer ? range.startOffset : 0;
-            const endOffset = node === range.endContainer ? range.endOffset : node.nodeValue.length;
-            if (endOffset <= startOffset) continue;
-            builder.appendText(node.nodeValue.slice(startOffset, endOffset), node, startOffset);
-          } else if (current.nodeType === Node.ELEMENT_NODE) {
-            const el = current;
-            if (el.matches('input.blank-input')) {
-              builder.appendBlank(el);
-            } else if (el.matches('br')) {
-              builder.appendSpace(el);
-            }
-          }
-        }
-      }
-
-      function buildQuizSpeechData({ startEl = null, range = null } = {}) {
-        const builder = createSpeechBuilder();
-        if (range) {
-          collectSpeechFromRange(range, builder);
-        } else {
-          collectSpeechFromStartElement(startEl, builder);
-        }
-        return builder.finalize();
-      }
-
-      function getSelectedQuizRange() {
-        if (!quizContent) return null;
-        const selection = window.getSelection();
-        if (!selection || !selection.rangeCount) return null;
-        const range = selection.getRangeAt(0);
-        if (!quizContent.contains(range.commonAncestorContainer)) return null;
-        const selectedText = selection.toString().trim();
-        if (!selectedText) return null;
-        return range.cloneRange();
-      }
-
-      function ensureHighlightLayer() {
-        if (ttsHighlightLayer && document.body.contains(ttsHighlightLayer)) {
-          return ttsHighlightLayer;
-        }
-        if (!quizContent) return null;
-        ttsHighlightLayer = document.getElementById('ttsHighlightLayer');
-        if (!ttsHighlightLayer) {
-          ttsHighlightLayer = document.createElement('div');
-          ttsHighlightLayer.id = 'ttsHighlightLayer';
-          ttsHighlightLayer.setAttribute('data-tts-skip', 'true');
-          ttsHighlightLayer.setAttribute('aria-hidden', 'true');
-          quizContent.appendChild(ttsHighlightLayer);
-        }
-        return ttsHighlightLayer;
-      }
-
-      function clearSpeechHighlight() {
-        if (ttsHighlightLayer && ttsHighlightLayer.parentNode) {
-          ttsHighlightLayer.innerHTML = '';
-        }
-        if (ttsHighlightElements.length) {
-          ttsHighlightElements.forEach(el => el.classList.remove('quiz-tts-outline'));
-          ttsHighlightElements = [];
-        }
-      }
-
-      function highlightSpeechAt(charIndex, charLength = 0) {
-        if (!ttsSpeechState || !ttsSpeechState.charMap || !ttsSpeechState.charMap.length) return;
-        if (typeof charIndex !== 'number' || charIndex < 0) return;
-        const map = ttsSpeechState.charMap;
-        if (charIndex >= map.length) return;
-        let start = charIndex;
-        let end = charLength ? charIndex + charLength : charIndex;
-        if (!charLength) {
-          while (end < map.length && map[end].char !== ' ') {
-            end++;
-          }
-        } else {
-          end = Math.min(end, map.length);
-        }
-        while (start < map.length && map[start].char === ' ') start++;
-        while (end < map.length && map[end].char === ' ') end++;
-        if (end <= start) {
-          end = start;
-          while (end < map.length && map[end].char !== ' ') end++;
-        }
-        if (start >= map.length) return;
-        const slice = map.slice(start, Math.min(end, map.length));
-        if (!slice.length) return;
-        const wordPattern = /[A-Za-z0-9]/;
-        if (!slice.some(entry => wordPattern.test(entry.char))) {
-          return;
-        }
-        clearSpeechHighlight();
-        const textEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.TEXT_NODE);
-        const elementEntries = slice.filter(entry => entry.node && entry.node.nodeType === Node.ELEMENT_NODE);
-        if (textEntries.length) {
-          const range = document.createRange();
-          const first = textEntries[0];
-          const last = textEntries[textEntries.length - 1];
-          const endOffset = Math.min(last.node.nodeValue.length, last.offset + 1);
-          range.setStart(first.node, first.offset);
-          range.setEnd(last.node, endOffset);
-          const layer = ensureHighlightLayer();
-          if (layer) {
-            layer.innerHTML = '';
-            const rects = Array.from(range.getClientRects());
-            const containerRect = quizContent.getBoundingClientRect();
-            rects.forEach(rect => {
-              const box = document.createElement('div');
-              box.className = 'tts-highlight-box';
-              box.style.top = `${rect.top - containerRect.top}px`;
-              box.style.left = `${rect.left - containerRect.left}px`;
-              box.style.width = `${rect.width}px`;
-              box.style.height = `${rect.height}px`;
-              layer.appendChild(box);
-            });
-          }
-          if (typeof range.detach === 'function') range.detach();
-        }
-        elementEntries.forEach(entry => {
-          const el = entry.node;
-          if (el && el.classList) {
-            el.classList.add('quiz-tts-outline');
-            ttsHighlightElements.push(el);
-          }
-        });
-      }
-
-      function updateVoiceControlsVisibility(show) {
-        const displayValue = show ? 'flex' : 'none';
-        if (ttsVoiceLabel) {
-          ttsVoiceLabel.style.display = displayValue;
-        }
-        if (ttsRateLabel) {
-          ttsRateLabel.style.display = displayValue;
-        }
-      }
-
-      function setTtsControlsVisibility(visible) {
-        if (!ttsControls) return;
-        ttsControlsVisible = !!visible;
-        const targetDisplay = ttsControlsVisible ? ttsControlsDisplayMode : 'none';
-        ttsControls.style.display = targetDisplay;
-        if (ttsToggleBtn) {
-          ttsToggleBtn.setAttribute('aria-expanded', ttsControlsVisible ? 'true' : 'false');
-          ttsToggleBtn.textContent = ttsControlsVisible ? ttsToggleHideText : ttsToggleShowText;
-        }
-      }
-
-      function updateRateValueDisplay() {
-        if (!ttsRateValue) return;
-        const formatted = `${ttsRate.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}×`;
-        ttsRateValue.textContent = formatted;
-      }
-
-      function initializeTtsRate() {
-        if (!ttsRateSlider) return;
-        const sliderMin = parseFloat(ttsRateSlider.min || '0.7');
-        const sliderMax = parseFloat(ttsRateSlider.max || '1.3');
-        let stored = null;
-        try {
-          stored = localStorage.getItem(TTS_RATE_STORAGE_KEY);
-        } catch (err) {
-          stored = null;
-        }
-        let rateValue = stored !== null ? parseFloat(stored) : NaN;
-        if (Number.isNaN(rateValue)) {
-          rateValue = parseFloat(ttsRateSlider.value || '1') || 1;
-        }
-        rateValue = Math.min(Math.max(rateValue, sliderMin), sliderMax);
-        ttsRate = rateValue;
-        ttsRateSlider.value = String(rateValue);
-        updateRateValueDisplay();
-      }
-
-      function populateVoiceOptions() {
-        if (!supportsSpeechSynthesis || !ttsVoiceSelect) return;
-        const voices = window.speechSynthesis.getVoices();
-        if (!voices || !voices.length) {
-          availableTtsVoices = [];
-          ttsSelectedVoiceKey = null;
-          ttsVoiceSelect.innerHTML = '';
-          updateVoiceControlsVisibility(false);
-          updateTtsHint();
-          return;
-        }
-        const seenKeys = new Set();
-        const uniqueVoices = [];
-        voices.forEach(voice => {
-          const key = getVoiceKey(voice);
-          if (!seenKeys.has(key)) {
-            seenKeys.add(key);
-            uniqueVoices.push(voice);
-          }
-        });
-        const englishVoices = uniqueVoices.filter(voice => /^en/i.test(voice.lang || ''));
-        const filteredVoices = englishVoices.length ? englishVoices : uniqueVoices;
-        const qualityPatterns = [
-          /neural/i,
-          /natural/i,
-          /studio/i,
-          /wavenet/i,
-          /premium/i,
-          /expressive/i
-        ];
-        const favoredNamePatterns = [
-          /aria/i,
-          /jenny/i,
-          /guy/i,
-          /davis/i,
-          /amber/i,
-          /ashley/i,
-          /michelle/i,
-          /brandon/i,
-          /emma/i,
-          /sara/i
-        ];
-        const scoreVoice = voice => {
-          let score = 0;
-          const name = voice.name || '';
-          const lang = (voice.lang || '').toLowerCase();
-          if (/^en([-_])?us\b/.test(lang)) {
-            score -= 220;
-          } else if (/^en\b/.test(lang)) {
-            score -= 120;
-          } else {
-            score += 80;
-          }
-          if (voice.default) score -= 40;
-          qualityPatterns.forEach((pattern, index) => {
-            if (pattern.test(name)) {
-              score -= (90 - index * 8);
-            }
-          });
-          favoredNamePatterns.forEach((pattern, index) => {
-            if (pattern.test(name)) {
-              score -= (45 - index * 4);
-            }
-          });
-          if (/online/i.test(name) && !qualityPatterns.some(pattern => pattern.test(name))) {
-            score += 12;
-          }
-          if (/preview/i.test(name)) {
-            score += 30;
-          }
-          return score;
-        };
-        const sortVoices = list => [...list].sort((a, b) => {
-          const diff = scoreVoice(a) - scoreVoice(b);
-          if (diff !== 0) return diff;
-          return (a.name || '').localeCompare(b.name || '');
-        });
-        const isUsEnglishVoice = voice => {
-          const lang = (voice.lang || '').toLowerCase();
-          return /^en([-_])?us\b/.test(lang);
-        };
-        const isEnglishVoice = voice => /^en/i.test(voice.lang || '');
-        availableTtsVoices = sortVoices(filteredVoices);
-        if (!availableTtsVoices.length) {
-          updateVoiceControlsVisibility(false);
-          updateTtsHint();
-          return;
-        }
-        let storedVoiceKey = null;
-        try {
-          storedVoiceKey = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
-        } catch (err) {
-          storedVoiceKey = null;
-        }
-        const currentVoiceKey = ttsSelectedVoiceKey;
-        const preferredKeys = [currentVoiceKey, storedVoiceKey].filter(Boolean);
-        let preferredVoice = null;
-        let preferredVoiceKey = null;
-        for (const key of preferredKeys) {
-          preferredVoice = availableTtsVoices.find(voice => voiceMatchesKey(voice, key)) || null;
-          if (preferredVoice) {
-            preferredVoiceKey = getVoiceKey(preferredVoice);
-            break;
-          }
-        }
-        if (!preferredVoice) {
-          const usPreferred = availableTtsVoices.filter(isUsEnglishVoice);
-          const englishPreferred = availableTtsVoices.filter(isEnglishVoice);
-          preferredVoice = usPreferred.find(voice => /neural|natural|studio|wavenet|premium/i.test(voice.name))
-            || usPreferred.find(voice => voice.default)
-            || usPreferred[0]
-            || englishPreferred.find(voice => /neural|natural|studio|wavenet|premium/i.test(voice.name))
-            || englishPreferred.find(voice => voice.default)
-            || englishPreferred[0]
-            || availableTtsVoices.find(voice => voice.default)
-            || availableTtsVoices[0]
-            || null;
-          preferredVoiceKey = preferredVoice ? getVoiceKey(preferredVoice) : null;
-        }
-        ttsVoiceSelect.innerHTML = '';
-        const recommendedVoiceKeys = new Set(
-          availableTtsVoices.slice(0, Math.min(5, availableTtsVoices.length)).map(getVoiceKey)
-        );
-        availableTtsVoices.forEach(voice => {
-          const option = document.createElement('option');
-          const voiceKey = getVoiceKey(voice);
-          option.value = voiceKey;
-          const badge = voice.default ? ' ⭐' : '';
-          const recommended = recommendedVoiceKeys.has(voiceKey) ? ' 🎧' : '';
-          option.textContent = `${voice.name} (${voice.lang})${badge}${recommended}`;
-          ttsVoiceSelect.appendChild(option);
-        });
-        let finalVoiceKey = preferredVoiceKey;
-        if (finalVoiceKey && !availableTtsVoices.some(voice => voiceMatchesKey(voice, finalVoiceKey))) {
-          finalVoiceKey = null;
-        }
-        if (!finalVoiceKey && availableTtsVoices.length) {
-          finalVoiceKey = getVoiceKey(availableTtsVoices[0]);
-        }
-        if (finalVoiceKey) {
-          ttsVoiceSelect.value = finalVoiceKey;
-          ttsSelectedVoiceKey = finalVoiceKey;
-        } else {
-          ttsVoiceSelect.selectedIndex = -1;
-          ttsSelectedVoiceKey = null;
-        }
-        try {
-          if (ttsSelectedVoiceKey) {
-            localStorage.setItem(TTS_VOICE_STORAGE_KEY, ttsSelectedVoiceKey);
-          } else {
-            localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
-          }
-        } catch (err) {
-          // ignore storage errors
-        }
-        updateVoiceControlsVisibility(true);
-      }
-
-      function speakQuizText() {
-        if (!supportsSpeechSynthesis) return;
-        const selectionRange = getSelectedQuizRange();
-        const speechData = selectionRange
-          ? buildQuizSpeechData({ range: selectionRange })
-          : buildQuizSpeechData({ startEl: ttsStartElement });
-        if (selectionRange && typeof selectionRange.detach === 'function') {
-          selectionRange.detach();
-        }
-        const text = speechData.text;
-        if (!text) {
-          showToast('No readable text found. Try selecting the text you want to hear first.', 'warn', 4000);
-          return;
-        }
-        window.speechSynthesis.cancel();
-        clearSpeechHighlight();
-        ttsSpeechState = speechData;
-        ttsUtterance = new SpeechSynthesisUtterance(text);
-        const currentVoices = window.speechSynthesis.getVoices();
-        const resolveVoiceByKey = key => {
-          if (!key) return null;
-          return currentVoices.find(v => voiceMatchesKey(v, key))
-            || availableTtsVoices.find(v => voiceMatchesKey(v, key))
-            || null;
-        };
-        let voice = resolveVoiceByKey(ttsSelectedVoiceKey);
-        if (!voice) {
-          const fallback = availableTtsVoices.find(v => v.default) || availableTtsVoices[0] || null;
-          if (fallback) {
-            const fallbackKey = getVoiceKey(fallback);
-            voice = resolveVoiceByKey(fallbackKey) || fallback;
-            if (voice) {
-              ttsSelectedVoiceKey = fallbackKey;
-              if (ttsVoiceSelect) {
-                ttsVoiceSelect.value = fallbackKey;
-              }
-              try {
-                localStorage.setItem(TTS_VOICE_STORAGE_KEY, fallbackKey);
-              } catch (err) {
-                // ignore storage errors
-              }
-            }
-          }
-        }
-        if (voice) {
-          ttsUtterance.voice = voice;
-          ttsUtterance.lang = voice.lang || 'en-US';
-        } else {
-          ttsUtterance.lang = 'en-US';
-        }
-        ttsUtterance.rate = ttsRate || 1;
-        ttsUtterance.onboundary = event => {
-          if (!event) return;
-          if (event.name && event.name !== 'word') return;
-          highlightSpeechAt(typeof event.charIndex === 'number' ? event.charIndex : 0, event.charLength || 0);
-        };
-        ttsUtterance.onpause = () => {
-          updateTtsButtons();
-        };
-        ttsUtterance.onresume = () => {
-          updateTtsButtons();
-        };
-        ttsUtterance.onstart = () => {
-          updateTtsButtons();
-        };
-        ttsUtterance.onend = () => {
-          ttsUtterance = null;
-          ttsSpeechState = null;
-          clearSpeechHighlight();
-          updateTtsButtons();
-        };
-        ttsUtterance.onerror = () => {
-          ttsUtterance = null;
-          ttsSpeechState = null;
-          clearSpeechHighlight();
-          updateTtsButtons();
-        };
-        window.speechSynthesis.speak(ttsUtterance);
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-        highlightSpeechAt(0, 0);
-        updateTtsButtons();
-      }
-
-      if (ttsControls) {
-        ttsControlsDisplayMode = supportsSpeechSynthesis ? 'flex' : 'block';
-        if (ttsToggleBtn) {
-          ttsToggleBtn.style.display = 'inline-flex';
-          ttsToggleBtn.setAttribute('aria-controls', 'ttsControls');
-        }
-        setTtsControlsVisibility(false);
-        if (ttsToggleBtn) {
-          ttsToggleBtn.addEventListener('click', () => {
-            setTtsControlsVisibility(!ttsControlsVisible);
-            if (ttsControlsVisible && supportsSpeechSynthesis) {
-              updateTtsButtons();
-            }
-          });
-        }
-        if (supportsSpeechSynthesis) {
-          updateVoiceControlsVisibility(false);
-          initializeTtsRate();
-          populateVoiceOptions();
-          if (typeof window.speechSynthesis.getVoices === 'function' && !window.speechSynthesis.getVoices().length) {
-            setTimeout(populateVoiceOptions, 750);
-          }
-          if (typeof window.speechSynthesis.addEventListener === 'function') {
-            window.speechSynthesis.addEventListener('voiceschanged', populateVoiceOptions);
-            window.speechSynthesis.addEventListener('pause', updateTtsButtons);
-            window.speechSynthesis.addEventListener('resume', updateTtsButtons);
-            window.speechSynthesis.addEventListener('end', updateTtsButtons);
-          } else {
-            window.speechSynthesis.onvoiceschanged = populateVoiceOptions;
-            window.speechSynthesis.onpause = updateTtsButtons;
-            window.speechSynthesis.onresume = updateTtsButtons;
-            window.speechSynthesis.onend = updateTtsButtons;
-          }
-          if (ttsRefreshBtn) {
-            ttsRefreshBtn.style.display = '';
-            ttsRefreshBtn.disabled = false;
-            ttsRefreshBtn.addEventListener('click', () => {
-              if (!supportsSpeechSynthesis) return;
-              ttsRefreshBtn.disabled = true;
-              try {
-                populateVoiceOptions();
-              } finally {
-                setTimeout(() => {
-                  ttsRefreshBtn.disabled = false;
-                }, 250);
-              }
-            });
-          }
-          updateTtsHint();
-          updateTtsButtons();
-        } else {
-          if (ttsSpeakBtn) ttsSpeakBtn.style.display = 'none';
-          if (ttsPauseBtn) ttsPauseBtn.style.display = 'none';
-          if (ttsStopBtn) ttsStopBtn.style.display = 'none';
-          if (ttsRefreshBtn) ttsRefreshBtn.style.display = 'none';
-          updateVoiceControlsVisibility(false);
-          updateTtsHint();
-        }
-      }
-
-      if (supportsSpeechSynthesis) {
-        if (ttsSpeakBtn) {
-          ttsSpeakBtn.addEventListener('click', speakQuizText);
-        }
-        if (ttsPauseBtn) {
-          ttsPauseBtn.addEventListener('click', () => {
-            if (window.speechSynthesis.paused) {
-              window.speechSynthesis.resume();
-            } else if (window.speechSynthesis.speaking) {
-              window.speechSynthesis.pause();
-            }
-            updateTtsButtons();
-            setTimeout(updateTtsButtons, 120);
-          });
-        }
-        if (ttsStopBtn) {
-          ttsStopBtn.addEventListener('click', () => stopSpeech());
-        }
-        if (ttsVoiceSelect) {
-          ttsVoiceSelect.addEventListener('change', () => {
-            const selectedKey = ttsVoiceSelect.value || '';
-            const chosen = availableTtsVoices.find(voice => voiceMatchesKey(voice, selectedKey)) || null;
-            const canonicalKey = chosen ? getVoiceKey(chosen) : (selectedKey || null);
-            if (canonicalKey && canonicalKey !== ttsVoiceSelect.value) {
-              ttsVoiceSelect.value = canonicalKey;
-            }
-            ttsSelectedVoiceKey = canonicalKey || null;
-            try {
-              if (ttsSelectedVoiceKey) {
-                localStorage.setItem(TTS_VOICE_STORAGE_KEY, ttsSelectedVoiceKey);
-              } else {
-                localStorage.removeItem(TTS_VOICE_STORAGE_KEY);
-              }
-            } catch (err) {
-              // ignore storage errors
-            }
-          });
-        }
-        if (ttsRateSlider) {
-          ttsRateSlider.addEventListener('input', () => {
-            const sliderMin = parseFloat(ttsRateSlider.min || '0.7');
-            const sliderMax = parseFloat(ttsRateSlider.max || '1.3');
-            const value = parseFloat(ttsRateSlider.value);
-            if (Number.isNaN(value)) return;
-            ttsRate = Math.min(Math.max(value, sliderMin), sliderMax);
-            updateRateValueDisplay();
-            try {
-              localStorage.setItem(TTS_RATE_STORAGE_KEY, String(ttsRate));
-            } catch (err) {
-              // ignore storage errors
-            }
-            if (ttsUtterance) {
-              ttsUtterance.rate = ttsRate;
-            }
-          });
-        }
-        if (quizContent) {
-          quizContent.addEventListener('click', event => {
-            if (!event.altKey) return;
-            const target = event.target;
-            if (!target) return;
-            let el = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
-            while (el && el !== quizContent) {
-              if (el.matches('p, li, h1, h2, h3, h4, h5, h6, .question-section-card, .question-section-body, .question-section-header, .quiz-question-title')) {
-                break;
-              }
-              el = el.parentElement;
-            }
-            event.preventDefault();
-            event.stopPropagation();
-            if (!el || el === quizContent) {
-              clearTtsStartElement();
-              return;
-            }
-            setTtsStartElement(el);
-          });
-        }
-      }
+      function clearTtsStartElement() {}
+      function setTtsStartElement() {}
 
       function updateMobileToggleButton() {
         if (!mobileViewToggleBtn) return;
@@ -9460,15 +8571,16 @@
           toggleAnswersBtn.textContent = 'Show Answers';
           return;
         }
+        const _bankCount = quizContent.querySelectorAll('input.blank-input:not(.correct)').length;
         toggleAnswersBtn.style.display = 'inline-block';
         if (answersVisible) {
           buildAnswerBank(sec);
-          answerBank.style.display = 'block';
+          answerBank.style.display = 'flex';
           toggleAnswersBtn.textContent = 'Hide Answers';
         } else {
           answerBank.style.display = 'none';
           answerBank.innerHTML = '';
-          toggleAnswersBtn.textContent = 'Show Answers';
+          toggleAnswersBtn.textContent = _bankCount > 0 ? `Show Answers (${_bankCount})` : 'Show Answers';
         }
       }
 
