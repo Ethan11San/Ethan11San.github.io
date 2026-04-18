@@ -7927,6 +7927,9 @@
 
       function enterEdit(){
         stopSpeech({ clearStart: true });
+        if (document.body.classList.contains('mobile')) {
+          document.body.classList.add('quiz-active');
+        }
         editorArea.style.display = 'block';
         quizArea.style.display = 'none';
         altContainer.style.display = 'none';
